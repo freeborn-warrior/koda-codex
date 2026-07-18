@@ -4,7 +4,7 @@
 - **Model variant / effort:** Not applicable; this is a deterministic CLI lifecycle proof.
 - **Project:** Disposable one-phase Koda project, preserved below without its temporary `.git` directory.
 - **Git proof:** A local bare remote proves the required commit/push boundary without relying on network state.
-- **Pushed close commit:** `feb18dfda2913e7378000f227ddef7da4b16de82`
+- **Pushed close commit:** `8ba9b4ac1f374e68d19385362ca5af8552b5861e`
 - **Verdict:** PASS if the final commands report both `SESSION CLOSED` and a derived closed status.
 
 Commands are displayed as `koda`; the harness executed this repository's `src/cli.ts` through Node.
@@ -72,7 +72,7 @@ Then run this command; it will ask you to quote that line:
   koda 'approve' 'brief' '--approver' 'Owner'
 [exit 2]
 
-$ koda "approve" "brief" "RECEIPT: Review read — e15ec960-6820-4de3-8943-ae8b03765f3f" "--approver" "Dogfood Owner"
+$ koda "approve" "brief" "RECEIPT: Review read — f9ece375-a33e-49ab-ac62-fb5c80ca4f87" "--approver" "Dogfood Owner"
 ✓ Receipt recorded in docs/sessions/2026-07-18-01/approvals.md
 The verdict permits advancement. Run:
   koda 'advance'
@@ -104,8 +104,8 @@ $ git add 'docs/sessions/2026-07-18-01'
 [exit 0]
 
 $ git commit -m 'close session 2026-07-18-01'
-[main (root-commit) feb18df] close session 2026-07-18-01
- 6 files changed, 73 insertions(+)
+[main (root-commit) 8ba9b4a] close session 2026-07-18-01
+ 6 files changed, 74 insertions(+)
  create mode 100644 docs/sessions/2026-07-18-01/approvals.md
  create mode 100644 docs/sessions/2026-07-18-01/close.md
  create mode 100644 docs/sessions/2026-07-18-01/phases/01-brief.md
@@ -136,7 +136,7 @@ SESSION CLOSED
 [exit 0]
 
 $ git "rev-parse" "HEAD"
-feb18dfda2913e7378000f227ddef7da4b16de82
+8ba9b4ac1f374e68d19385362ca5af8552b5861e
 [exit 0]
 
 ```

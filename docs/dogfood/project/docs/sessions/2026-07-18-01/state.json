@@ -1,7 +1,7 @@
 {
   "version": 1,
   "id": "2026-07-18-01",
-  "createdAt": "2026-07-18T13:30:16.323Z",
+  "createdAt": "2026-07-18T14:02:31.836Z",
   "phases": [
     {
       "name": "brief",
@@ -12,9 +12,9 @@
   "advances": [
     {
       "phase": "brief",
-      "receipt": "RECEIPT: Review read — e15ec960-6820-4de3-8943-ae8b03765f3f",
-      "reviewId": "e15ec960-6820-4de3-8943-ae8b03765f3f",
-      "advancedAt": "2026-07-18T13:30:16.727Z"
+      "receipt": "RECEIPT: Review read — f9ece375-a33e-49ab-ac62-fb5c80ca4f87",
+      "reviewId": "f9ece375-a33e-49ab-ac62-fb5c80ca4f87",
+      "advancedAt": "2026-07-18T14:02:32.277Z"
     }
   ]
 }

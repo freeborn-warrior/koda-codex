@@ -3,7 +3,7 @@ import { writeFile } from "node:fs/promises";
 import test from "node:test";
 
 import { artifactPath } from "../src/project.ts";
-import { createFreshReview, recordApproval } from "../src/receipt.ts";
+import { createFreshReview, recordApproval, reviewSha256 } from "../src/receipt.ts";
 import { readyGate } from "./helpers.ts";
 
 test("a current review cannot be replaced before its receipt is recorded", async (t) => {
@@ -35,6 +35,7 @@ test("DISCUSS requires the owner's ruling before a fresh definitive review", asy
     version: 1,
     phase: ruled.phase.name,
     reviewId: ruled.review.metadata.id,
+    reviewSha256: await reviewSha256(ruled.session.directory, ruled.phase, 0),
     verdict: "DISCUSS",
     receipt: ruled.review.metadata.receipt,
     approver: "Kristian",

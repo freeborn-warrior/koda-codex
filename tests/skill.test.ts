@@ -13,7 +13,7 @@ const skillNames = [
 
 test("every Koda-C skill has valid relay sections and four-line Codex metadata", async () => {
   for (const name of skillNames) {
-    const directory = path.join("skills", name);
+    const directory = path.join(".agents", "skills", name);
     const [skill, metadata] = await Promise.all([
       readFile(path.join(directory, "SKILL.md"), "utf8"),
       readFile(path.join(directory, "agents", "openai.yaml"), "utf8"),
@@ -28,9 +28,32 @@ test("every Koda-C skill has valid relay sections and four-line Codex metadata",
   }
 });
 
+test("skill index metadata stays concise, front-loaded, and trigger-specific", async () => {
+  let totalDescriptionCharacters = 0;
+  for (const name of skillNames) {
+    const directory = path.join(".agents", "skills", name);
+    const [skill, metadata] = await Promise.all([
+      readFile(path.join(directory, "SKILL.md"), "utf8"),
+      readFile(path.join(directory, "agents", "openai.yaml"), "utf8"),
+    ]);
+    const description = /^description: (.+)$/m.exec(skill)?.[1];
+    assert(description, `${name} needs a one-line trigger description`);
+    assert(description.length <= 220, `${name} description is too long for progressive disclosure`);
+    assert.match(description, /^(Turn|Close|Exercise|Inspect|Convert|Create|Review|Open|Write)\b/, name);
+    assert.match(description, /\bUse\b/, `${name} must state when it applies`);
+    totalDescriptionCharacters += description.length;
+
+    const short = /^  short_description: "(.+)"$/m.exec(metadata)?.[1];
+    assert(short, `${name} needs UI discovery metadata`);
+    assert(short.length <= 64, `${name} short description is too long`);
+    assert.doesNotMatch(skill, /allowed-tools/i, `${name} must not imply unsupported tool restriction`);
+  }
+  assert(totalDescriptionCharacters <= 2000, "Koda-C must leave room in Codex's bounded skill index");
+});
+
 test("producer phase skills hand only to the one shared reviewer", async () => {
   for (const phase of producerPhases) {
-    const skill = await readFile(`skills/koda-c-${phase}/SKILL.md`, "utf8");
+    const skill = await readFile(`.agents/skills/koda-c-${phase}/SKILL.md`, "utf8");
     assert.match(skill, /Immediate receiver: `koda-c-review`/, phase);
     assert.match(skill, /currentPhaseIndex.*unchanged/s, phase);
     assert.match(skill, /Do not .*review|Do not create .*review/is, phase);
@@ -39,7 +62,7 @@ test("producer phase skills hand only to the one shared reviewer", async () => {
 });
 
 test("the shared reviewer keeps all phase criteria in one place", async () => {
-  const review = await readFile("skills/koda-c-review/SKILL.md", "utf8");
+  const review = await readFile(".agents/skills/koda-c-review/SKILL.md", "utf8");
   for (const phase of ["Brief", "Orient", "Plan", "Produce", "Live", "Summary", "Custom phases"]) {
     assert.match(review, new RegExp(`#### ${phase}`));
   }
@@ -47,18 +70,44 @@ test("the shared reviewer keeps all phase criteria in one place", async () => {
   assert.match(review, /Do not quote the receipt in chat/);
 
   for (const phase of producerPhases) {
-    const producer = await readFile(`skills/koda-c-${phase}/SKILL.md`, "utf8");
+    const producer = await readFile(`.agents/skills/koda-c-${phase}/SKILL.md`, "utf8");
     assert.doesNotMatch(producer, /Phase-specific criteria/);
+  }
+});
+
+test("in-phase consultation is disk-backed and cannot impersonate formal review", async () => {
+  const [protocol, review] = await Promise.all([
+    readFile("docs/IN-PHASE-CONSULTATION.md", "utf8"),
+    readFile(".agents/skills/koda-c-review/SKILL.md", "utf8"),
+  ]);
+  assert.match(protocol, /consultations\/<NN>-<phase>\/<CC>-request\.md/);
+  assert.match(protocol, /OWNER DECISION REQUIRED/);
+  assert.match(protocol, /producer never addresses or notifies the owner directly/i);
+  assert.match(protocol, /persistent reviewer task/i);
+  assert.match(protocol, /No chat-only handback/);
+  assert.match(review, /In-phase consultation mode/);
+  assert.match(review, /Do not choose a verdict/);
+  assert.match(review, /owner never needs to enter the producer interface/i);
+  assert.match(review, /Independence means the reviewer did not write the producer artifact/i);
+
+  for (const phase of producerPhases) {
+    const producer = await readFile(`.agents/skills/koda-c-${phase}/SKILL.md`, "utf8");
+    assert.match(producer, /IN-PHASE-CONSULTATION\.md/, phase);
+    assert.match(producer, /reviewer.*(?:evidence|technical|reviewability)|(?:evidence|technical|reviewability).*reviewer/is, phase);
+    assert.match(producer, /owner.*product|product.*owner|product\/risk.*owner/is, phase);
+    assert.match(producer, /Never address the owner directly/, phase);
   }
 });
 
 test("session open and close remain ceremonies outside producer phase routing", async () => {
   const [session, close] = await Promise.all([
-    readFile("skills/koda-c-session/SKILL.md", "utf8"),
-    readFile("skills/koda-c-close/SKILL.md", "utf8"),
+    readFile(".agents/skills/koda-c-session/SKILL.md", "utf8"),
+    readFile(".agents/skills/koda-c-close/SKILL.md", "utf8"),
   ]);
   assert.match(session, /currentPhaseIndex: 0/);
   assert.match(session, /first phase.*state\.json/i);
+  assert.match(session, /owner-facing guide\/session-prompter/i);
+  assert.match(session, /Never interview, notify, or address the owner/i);
   assert.match(close, /Git must occur between close preparation and close verification/);
   assert.match(close, /immutable/i);
   assert.match(close, /`close\.md`/);

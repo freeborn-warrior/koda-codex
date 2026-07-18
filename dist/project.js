@@ -1,0 +1,209 @@
+import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
+import path from "node:path";
+
+                                                                           
+import { pathExists } from "./config.js";
+
+const SESSION_PATTERN = /^(\d{4}-\d{2}-\d{2})-(\d{2})$/;
+
+export function now()       {
+  const override = process.env.KODA_NOW;
+  if (!override) return new Date();
+
+  const parsed = new Date(override);
+  if (Number.isNaN(parsed.valueOf())) {
+    throw new Error("KODA_NOW must be an ISO-8601 date when set.");
+  }
+  return parsed;
+}
+
+export function nowIso()         {
+  return now().toISOString();
+}
+
+export function localDateStamp(date = now())         {
+  const year = String(date.getFullYear());
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function phasePrefix(index        )         {
+  return String(index + 1).padStart(2, "0");
+}
+
+export function sessionRoot(root        , config               , id        )         {
+  return path.join(root, config.sessionsDir, id);
+}
+
+export function statePath(sessionDir        )         {
+  return path.join(sessionDir, "state.json");
+}
+
+export function ledgerPath(sessionDir        )         {
+  return path.join(sessionDir, "approvals.md");
+}
+
+export function artifactPath(sessionDir        , phase             , index        )         {
+  return path.join(sessionDir, "phases", `${phasePrefix(index)}-${phase.name}.md`);
+}
+
+export function reviewPath(sessionDir        , phase             , index        )         {
+  return path.join(sessionDir, "reviews", `${phasePrefix(index)}-${phase.name}-review.md`);
+}
+
+export async function writeTextAtomic(filePath        , content        )                {
+  const temporary = `${filePath}.tmp-${process.pid}-${Math.random().toString(16).slice(2)}`;
+  await writeFile(temporary, content, { encoding: "utf8", flag: "wx" });
+  await rename(temporary, filePath);
+}
+
+export async function writeJsonAtomic(filePath        , value         )                {
+  await writeTextAtomic(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+export async function listSessionIds(root        , config               )                    {
+  const sessionsPath = path.join(root, config.sessionsDir);
+  if (!(await pathExists(sessionsPath))) return [];
+
+  const entries = await readdir(sessionsPath, { withFileTypes: true });
+  return entries
+    .filter((entry) => entry.isDirectory() && SESSION_PATTERN.test(entry.name))
+    .map((entry) => entry.name)
+    .sort();
+}
+
+export async function latestSessionId(root        , config               )                         {
+  const sessions = await listSessionIds(root, config);
+  return sessions.at(-1) ?? null;
+}
+
+export async function nextSessionId(root        , config               )                  {
+  const date = localDateStamp();
+  const sessions = await listSessionIds(root, config);
+  const sequence = sessions
+    .map((id) => SESSION_PATTERN.exec(id))
+    .filter((match)                           => match !== null && match[1] === date)
+    .reduce((highest, match) => Math.max(highest, Number(match[2])), 0) + 1;
+
+  if (sequence > 99) {
+    throw new Error(`No session numbers remain for ${date}.`);
+  }
+  return `${date}-${String(sequence).padStart(2, "0")}`;
+}
+
+export async function createSession(
+  root        ,
+  config               ,
+  prompt        ,
+)                                                                  {
+  if (prompt.trim() === "") {
+    throw new Error("The session prompt must exist and be non-empty.");
+  }
+
+  const id = await nextSessionId(root, config);
+  const directory = sessionRoot(root, config, id);
+  await mkdir(path.join(directory, "phases"), { recursive: true });
+  await mkdir(path.join(directory, "reviews", "history"), { recursive: true });
+
+  const state               = {
+    version: 1,
+    id,
+    createdAt: nowIso(),
+    phases: config.phases.map((phase) => ({ ...phase })),
+    currentPhaseIndex: 0,
+    advances: [],
+  };
+
+  await writeTextAtomic(path.join(directory, "session-prompt.md"), prompt.endsWith("\n") ? prompt : `${prompt}\n`);
+  await writeTextAtomic(
+    ledgerPath(directory),
+    `# Approval ledger — ${id}\n\nEntries are appended by Koda after the approver quotes a review receipt.\n`,
+  );
+  await writeJsonAtomic(statePath(directory), state);
+
+  return { id, directory, state };
+}
+
+export function validateSessionState(value         , expectedId         )               {
+  if (!value || typeof value !== "object") {
+    throw new Error("state.json must contain a JSON object.");
+  }
+  const state = value                         ;
+  if (state.version !== 1 || typeof state.id !== "string" || (expectedId && state.id !== expectedId)) {
+    throw new Error("state.json has invalid session identity or version.");
+  }
+  if (!Array.isArray(state.phases) || state.phases.length === 0) {
+    throw new Error("state.json has no phase chain.");
+  }
+  if (!Number.isInteger(state.currentPhaseIndex) || state.currentPhaseIndex  < 0 || state.currentPhaseIndex  > state.phases.length) {
+    throw new Error("state.json has an invalid currentPhaseIndex.");
+  }
+  if (!Array.isArray(state.advances)) {
+    throw new Error("state.json has no advancement history.");
+  }
+  if (state.advances.length !== state.currentPhaseIndex) {
+    throw new Error("state.json advancement history does not match the current phase.");
+  }
+  for (let index = 0; index < state.advances.length; index += 1) {
+    const advance = state.advances[index];
+    if (
+      !advance ||
+      advance.phase !== state.phases[index]?.name ||
+      typeof advance.receipt !== "string" ||
+      typeof advance.reviewId !== "string" ||
+      typeof advance.advancedAt !== "string"
+    ) {
+      throw new Error(`state.json has an invalid advancement record at index ${index}.`);
+    }
+  }
+  return state                ;
+}
+
+export async function loadSessionState(directory        , expectedId         )                        {
+  let parsed         ;
+  try {
+    parsed = JSON.parse(await readFile(statePath(directory), "utf8"));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error("state.json is not valid JSON.");
+    }
+    throw error;
+  }
+  return validateSessionState(parsed, expectedId);
+}
+
+export async function saveSessionState(directory        , state              )                {
+  await writeJsonAtomic(statePath(directory), state);
+}
+
+export async function loadLatestSession(
+  root        ,
+  config               ,
+)                                                                  {
+  const id = await latestSessionId(root, config);
+  if (!id) {
+    throw new Error("No session exists. Start one with `koda session new <prompt-file>`." );
+  }
+  const directory = sessionRoot(root, config, id);
+  return { id, directory, state: await loadSessionState(directory, id) };
+}
+
+export function currentPhase(state              )                                               {
+  if (state.currentPhaseIndex >= state.phases.length) return null;
+  return { phase: state.phases[state.currentPhaseIndex], index: state.currentPhaseIndex };
+}
+
+export function displayPath(root        , filePath        )         {
+  const relative = path.relative(root, filePath);
+  return relative === "" ? "." : relative;
+}
+
+export async function readNonEmpty(filePath        )                         {
+  if (!(await pathExists(filePath))) return null;
+  const content = await readFile(filePath, "utf8");
+  return content.trim() === "" ? null : content;
+}
+
+
+//# sourceURL=/Users/freeborn/Dev/koda-codex/src/project.ts

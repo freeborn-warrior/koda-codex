@@ -5,7 +5,7 @@ import { mkdtemp, writeFile } from "node:fs/promises";
 
 import { DEFAULT_CONFIG } from "../src/config.ts";
 import { artifactPath, createSession, writeJsonAtomic } from "../src/project.ts";
-import { createFreshReview, recordApproval } from "../src/receipt.ts";
+import { createFreshReview, recordApproval, reviewSha256 } from "../src/receipt.ts";
 import type { ProjectConfig, Verdict } from "../src/types.ts";
 
 interface CleanupTest {
@@ -53,6 +53,7 @@ export async function readyGate(
       version: 1,
       phase: phase.name,
       reviewId: review.metadata.id,
+      reviewSha256: await reviewSha256(harness.session.directory, phase, 0),
       verdict: options.verdict ?? "APPROVE",
       receipt: review.metadata.receipt,
       approver: options.approver ?? "Kristian",

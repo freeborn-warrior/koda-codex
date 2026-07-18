@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "id": "planted-hard-number",
+  "kind": "planted-defect",
+  "expectedVerdicts": ["REVISE"],
+  "expectedFinding": "The brief promises every export will complete within five seconds, but neither cited file sets or supports a latency target."
+}

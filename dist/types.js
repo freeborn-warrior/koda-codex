@@ -1,0 +1,94 @@
+export const VERDICTS = [
+  "APPROVE",
+  "APPROVE WITH COMMENTS",
+  "REVISE",
+  "REJECT",
+  "DISCUSS",
+]         ;
+
+                                                
+
+                              
+               
+                      
+ 
+
+                                
+             
+                      
+                        
+ 
+
+                                
+                
+                  
+                   
+                     
+ 
+
+                               
+             
+             
+                    
+                        
+                            
+                            
+ 
+
+                                
+             
+             
+                    
+                        
+                     
+                        
+                       
+                     
+ 
+
+                                 
+             
+             
+                
+                         
+                  
+                    
+ 
+
+                               
+                          
+                             
+                         
+                                  
+ 
+
+                                
+             
+                
+                   
+                       
+                   
+                  
+                   
+                          
+                        
+                     
+ 
+
+                            
+               
+                  
+ 
+
+                             
+                
+                     
+                       
+                     
+                      
+                              
+                                 
+ 
+
+
+//# sourceURL=/Users/freeborn/Dev/koda-codex/src/types.ts

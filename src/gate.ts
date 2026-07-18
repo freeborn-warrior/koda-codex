@@ -4,7 +4,7 @@ import { pathExists } from "./config.ts";
 import { artifactPath, ledgerPath, reviewPath } from "./project.ts";
 import {
   parseReview,
-  readApprovalEntries,
+  readApprovalLedger,
   receiptOccurrenceCount,
   sha256,
 } from "./receipt.ts";
@@ -32,10 +32,12 @@ export async function evaluateGate(
   }
 
   let review = null;
+  let reviewContent: string | null = null;
   if (!(await pathExists(phaseReview))) {
     issues.push(issue("review_missing", "The peer-review file does not exist."));
   } else {
-    review = parseReview(await readFile(phaseReview, "utf8"));
+    reviewContent = await readFile(phaseReview, "utf8");
+    review = parseReview(reviewContent);
     if (!review.verdictText) {
       issues.push(issue("verdict_missing", "The review must open with a VERDICT line."));
     } else if (!review.verdict) {
@@ -47,6 +49,12 @@ export async function evaluateGate(
     if (!review.metadata) {
       issues.push(issue("review_metadata_missing", "The generated review metadata is missing or invalid."));
     }
+    if (
+      reviewContent.includes("Verify the artifact against the files it cites. Replace this guidance with findings.") ||
+      reviewContent.includes("- Record what the files prove.")
+    ) {
+      issues.push(issue("review_incomplete", "The review still contains untouched template guidance."));
+    }
   }
 
   if (review?.metadata) {
@@ -54,7 +62,7 @@ export async function evaluateGate(
       issues.push(issue("review_phase_mismatch", "The review was generated for a different phase."));
     }
     if (artifact !== null && artifact.trim() !== "" && review.metadata.artifactSha256 !== sha256(artifact)) {
-      issues.push(issue("artifact_changed", "The artifact changed after this review was generated."));
+      issues.push(issue("artifact_changed", "The review is stale; the artifact changed after review. Re-review the current artifact."));
     }
     if (review.receipt && review.metadata.receipt !== review.receipt) {
       issues.push(issue("receipt_mismatch", "The final receipt does not match this review's generated receipt."));
@@ -68,7 +76,11 @@ export async function evaluateGate(
   if (!(await pathExists(ledgerPath(sessionDir)))) {
     issues.push(issue("ledger_missing", "The approval ledger does not exist."));
   } else if (review?.metadata && review.receipt) {
-    const approvals = await readApprovalEntries(sessionDir);
+    const ledger = await readApprovalLedger(sessionDir);
+    if (ledger.invalidMarkers > 0) {
+      issues.push(issue("ledger_corrupt", "The approval ledger contains malformed KODA_APPROVAL metadata."));
+    }
+    const approvals = ledger.entries;
     approval = approvals.findLast((entry) =>
       entry.phase === phase.name &&
       entry.reviewId === review!.metadata!.id &&
@@ -79,6 +91,9 @@ export async function evaluateGate(
     } else {
       if (approval.receipt.trim() !== review.receipt.trim()) {
         issues.push(issue("approval_receipt_mismatch", "The ledger receipt is not an exact match."));
+      }
+      if (reviewContent !== null && approval.reviewSha256 !== sha256(reviewContent)) {
+        issues.push(issue("approval_review_changed", "The review changed after its receipt was acknowledged. Create a fresh review and receipt."));
       }
       if (review.verdict && approval.verdict !== review.verdict) {
         issues.push(issue("approval_verdict_mismatch", "The ledger entry records a different verdict."));

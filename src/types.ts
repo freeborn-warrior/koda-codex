@@ -66,6 +66,7 @@ export interface ApprovalEntry {
   version: 1;
   phase: string;
   reviewId: string;
+  reviewSha256: string;
   verdict: Verdict;
   receipt: string;
   approver: string;

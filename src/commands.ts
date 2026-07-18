@@ -178,6 +178,9 @@ function gateNextStep(root: string, result: GateResult): string[] {
     codes.has("receipt_not_unique") ||
     codes.has("review_metadata_missing") ||
     codes.has("review_phase_mismatch") ||
+    codes.has("review_incomplete") ||
+    codes.has("approval_review_changed") ||
+    codes.has("ledger_corrupt") ||
     codes.has("verdict_revise") ||
     codes.has("verdict_reject") ||
     codes.has("verdict_discuss")
@@ -275,7 +278,8 @@ async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<v
   if (!(await pathExists(phaseReviewPath))) throw new Error(`Review missing: ${displayPath(root, phaseReviewPath)}`);
   if (!(await pathExists(phaseArtifactPath))) throw new Error(`Artifact missing: ${displayPath(root, phaseArtifactPath)}`);
 
-  const parsed = parseReview(await readFile(phaseReviewPath, "utf8"));
+  const reviewContent = await readFile(phaseReviewPath, "utf8");
+  const parsed = parseReview(reviewContent);
   if (!parsed.verdict || !parsed.receipt || !parsed.metadata) {
     throw new Error("The review's verdict, generated metadata, or final receipt is invalid.");
   }
@@ -288,6 +292,12 @@ async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<v
   }
   if (await receiptOccurrenceCount(session.directory, parsed.receipt) !== 1) {
     throw new Error("The review receipt is not unique. Create a fresh review.");
+  }
+  if (
+    reviewContent.includes("Verify the artifact against the files it cites. Replace this guidance with findings.") ||
+    reviewContent.includes("- Record what the files prove.")
+  ) {
+    throw new Error("The review still contains untouched template guidance. Complete the review first.");
   }
 
   const quoted = (args[1] ?? await io.prompt("Paste the exact RECEIPT line: ")).trim();
@@ -305,6 +315,7 @@ async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<v
     version: 1,
     phase: active.phase.name,
     reviewId: parsed.metadata.id,
+    reviewSha256: sha256(reviewContent),
     verdict: parsed.verdict,
     receipt: parsed.receipt,
     approver: approver.trim(),

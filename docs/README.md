@@ -1,0 +1,124 @@
+# Koda-C
+
+> “I design workflows. I don't write code. I gave my development discipline to Codex in one document. It built a toolkit where nothing advances without written proof the review was read.”
+
+Koda-C is a small, headless phase gate over plain files. It refuses to advance work until the current artifact exists, an independent review exists, the verdict permits advancement, and the owner quotes that review's unique closing receipt into the approval ledger.
+
+No UI, daemon, database, or hidden conversational state. The files are the truth.
+
+## Why it exists
+
+Kristian developed this phase method while building products in C++, Swift, and Rust as a designer rather than a programmer: session prompt, brief, orient, plan, produce, live, summary, then push. The sequence grew from observing what stopped repeated rework. When he added an independent LLM reviewer, each phase became a manual relay between separate chats—better judgment, but an absurd amount of copy-paste.
+
+Koda-C asks whether that practiced producer/reviewer relay can become mechanical while preserving the parts that create depth. Kristian directs software he cannot personally read. The expensive failures in his AI collaborations shared one shape: work advanced on confident prose. A summary claimed more than the files proved. Status came from conversational memory. Most sharply, a written review was delivered and then approved without being read.
+
+That last incident created the receipt. Every review ends with a generated, unique `RECEIPT:` line. The approver must read the review and quote that line exactly before the gate can open. Delivery and reading become separate steps the files can distinguish.
+
+This is evidence of engagement, not mind-reading. Someone can still copy a final line without understanding the review. But not-reading stops being a passive omission and becomes deliberate fraud: the approver must open the review to take its unique phrase. Koda-C creates an inspectable decision ritual and raises the floor against casual or accidental skipping; it does not claim to prove cognition.
+
+## The mechanism
+
+A session snapshots a configurable phase chain. The native chain is:
+
+`brief → orient → plan → produce → live → summary`
+
+For each phase:
+
+1. A producer skill passes its entry check and writes the phase artifact.
+2. The one shared `koda-c-review` skill verifies the artifact from a separate context and writes a verdict plus generated receipt.
+3. The owner reads the review and quotes the exact receipt through `approve`.
+4. `advance` re-reads disk and routes:
+   - APPROVE / APPROVE WITH COMMENTS → activate the next phase from config;
+   - REVISE / REJECT → remain in the same producer phase;
+   - DISCUSS → remain in phase for an owner ruling and fresh review.
+
+Advancement revalidates all earlier gates too. Deleting or changing old evidence makes later work refuse even when `state.json` names a current phase.
+
+After the final phase advances, the first `session close` creates immutable `close.md`, bound to all durable session files and the final review receipt. Git commit and push happen next. A second `session close` writes nothing; it reports closed only if the bound files are unchanged, committed, clean, and present on the pushed upstream. Another session cannot open before that proof exists.
+
+## Try the refusal in about one minute
+
+Requirements: Git and Node.js 22.18 or newer. The source is TypeScript; `prepack` emits dependency-free plain JavaScript under `dist/` so the installed CLI does not ask Node to type-strip code inside `node_modules`.
+
+From a fresh checkout:
+
+```bash
+npx --yes . --help
+```
+
+Then follow the [one-minute fixture](DEMO.md#one-minute-mechanical-proof). Its money moment is:
+
+```text
+GATE CLOSED — BRIEF
+✗ The current review receipt has not been quoted into the approval ledger.
+Nothing advanced.
+```
+
+After the exact receipt is recorded, the same command reports `GATE OPEN — BRIEF`.
+
+## CLI
+
+```text
+koda init [directory] [--demo]
+koda session new <prompt-file>
+koda status
+koda review new <phase>
+koda approve <phase> [quoted-receipt] [--approver <name>]
+koda advance
+koda session close
+```
+
+The CLI generates artifact hashes, review IDs, receipts, structured approval entries, advancement history, and immutable close metadata. All remain readable Markdown or JSON.
+
+## Skills: the relay above the CLI
+
+All skills live inside this repository under Codex's discoverable `.agents/skills/` path:
+
+- `koda-c-session` opens from an owner contract and prior pushed summary.
+- `koda-c-brief`, `koda-c-orient`, `koda-c-plan`, `koda-c-produce`, `koda-c-live`, and `koda-c-summary` are producer relay legs.
+- `koda-c-review` is the only formal reviewer skill; its per-phase criteria never drift into copies.
+- `koda-c-close` performs the prepare → Git → verify ceremony outside the phase chain.
+
+Every producer skill has three hard sections: ENTRY CHECK, ITS OWN JOB, and HANDOVER OBLIGATION. It refuses when required disk evidence is absent, writes only its own artifact, then hands to the shared reviewer without self-reviewing or advancing.
+
+A phase may pause for a disk-backed [in-phase consultation](IN-PHASE-CONSULTATION.md). The producer suggests reviewer authority for evidence/technical ambiguity or owner authority for product judgment, but every request goes to the reviewer. The reviewer answers or asks Kristian in its own owner-facing window, then relays the recorded response to the producer. After Kristian's one deliberate session-start invocation, the producer never solicits him directly. Consultation creates no verdict or receipt; the persistent reviewer may later formally review because it did not author the artifact, and it discloses its prior advice.
+
+Every reviewer → producer handback is an artifact before it is actionable: a consultation response, relayed owner ruling, or formal review. Conversation and notifications may draw attention to the file, but the producer never continues from chat text or memory.
+
+The real collaboration uses two persistent Codex tasks sharing one Koda session: one producer task explicitly invokes the current phase skill; one owner-facing reviewer task carries consultations, explanations, rulings, and formal handoffs through the one `koda-c-review` skill. Kristian speaks only in the reviewer task during the session. See the [two-task walkthrough](DEMO.md#two-codex-task-collaboration).
+
+That separation is a tested operating protocol, not a permission claim. `SKILL.md` cannot prove a task had no hidden context or restrict which files/tools it could access. Koda-C mechanically enforces the evidence on disk; fresh-task fixtures test reviewer independence and temperament in practice.
+
+## Tests and evidence
+
+```bash
+npm test
+npm run test:coverage
+npm run dogfood
+```
+
+The suite deliberately breaks every gate condition and proves refusal: missing/empty artifacts, missing or malformed reviews, bad verdicts, missing/mismatched/reused receipts, altered artifacts, broken ledger proof, missing approver/comments, and every blocking verdict. It also executes recovery commands from the states that printed them.
+
+The committed [dogfood transcript](dogfood/TRANSCRIPT.md) preserves a complete tiny session: receipt refusal, approval, gate success, immutable close preparation, refusal after local commit, Git push, and derived `SESSION CLOSED`. Its session snapshot is also committed and re-hashed by the test suite.
+
+Every run—including defects and corrected test assertions—is recorded in [TESTING.md](TESTING.md), with dated [per-test transcripts](test-results/) that name every individual result. The blind model-assisted protocol and honest control are documented in [REVIEWER-FIXTURES.md](REVIEWER-FIXTURES.md). Current Codex skill-platform implications are captured in a [dated design note](design-notes/2026-07-18-codex-skill-platform.md). Current build direction and status live in [PROJECT.md](PROJECT.md) and [BACKLOG.md](BACKLOG.md).
+
+## How this was built
+
+Kristian supplied the lived failure, product doctrine, phase vocabulary, owner rulings, relay model, skill boundaries, immutable close ceremony, two-task collaboration model, and the requirement that all work remain visible in repository files.
+
+GPT-5.6 Codex translated that direction into the TypeScript CLI, disk schemas, artifact and session hashing, exact receipt matching, Git-derived closure, skill packages, mutation suite, fixture, dogfood evidence, and documentation. It also surfaced implementation defects through tests: macOS path aliases initially broke Git containment, and the first close hint printed the wrong first-push command.
+
+Kristian explicitly chose to let Codex build in its own engineering order rather than phase-gating the construction. That choice is recorded honestly: the discipline lives in the tool, not in the process that made it. An initial gated-build attempt and its unused REVISE review remain recoverable in pushed Git history, but were removed from `docs/sessions/` so abandoned build evidence cannot masquerade as live Koda state.
+
+No external model or benchmark was used. Deterministic tests are marked model-not-applicable; unrun GPT-5.6 variant/effort combinations are recorded as skipped rather than silently implied.
+
+## Project boundary and roadmap
+
+Koda-C stays a clean plain-file engine. Guide, explore, architect, and triage remain roadmap role lenses implemented as future skills, not new CLI machinery. A dashboard, editor extension, or bot can later consume the same files and a future machine-readable status mode without owning the process.
+
+The mature runtime is one owner-facing guide/reviewer and one non-interactive producer: Kristian approves a written session prompt in the guide interface, a supervisor launches the session, and every later producer input arrives through reviewer-authored files. The current release documents and tests the manual two-task relay; it does not yet claim automatic process launch or unattended orchestration. See the [dated runtime design](design-notes/2026-07-18-owner-facing-session-runtime.md).
+
+The current build record and deliberate extensions from the starting document are tracked in [PROJECT.md](PROJECT.md#drift-watch-against-the-starting-document).
+
+The conservative current policy requires Kristian's acknowledgement at every gate. A later config setting may separate **gate acknowledgement** from **owner attention**: every review would still receive attributable receipt proof, while a `decisions_only` mode could stop Kristian only for `DISCUSS` or an explicit owner-attention marker. That policy remains a documented owner decision, not behavior this release quietly assumes.

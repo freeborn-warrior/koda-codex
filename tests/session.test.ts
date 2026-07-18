@@ -8,7 +8,7 @@ import test from "node:test";
 
 import { evaluateSessionClosure, prepareCloseArtifact } from "../src/close.ts";
 import { artifactPath, createSession, saveSessionState, writeJsonAtomic } from "../src/project.ts";
-import { createFreshReview, recordApproval } from "../src/receipt.ts";
+import { createFreshReview, recordApproval, reviewSha256 } from "../src/receipt.ts";
 import { DEFAULT_CONFIG } from "../src/config.ts";
 import { projectHarness } from "./helpers.ts";
 
@@ -40,6 +40,7 @@ test("a completed session is closed only after its state is committed and pushed
     version: 1,
     phase: phase.name,
     reviewId: review.metadata.id,
+    reviewSha256: await reviewSha256(session.directory, phase, 0),
     verdict: "APPROVE",
     receipt: review.metadata.receipt,
     approver: "Kristian",

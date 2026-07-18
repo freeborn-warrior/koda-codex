@@ -166,17 +166,36 @@ export async function receiptOccurrenceCount(sessionDir: string, receipt: string
   return count;
 }
 
+export async function reviewSha256(sessionDir: string, phase: PhaseConfig, index: number): Promise<string> {
+  return sha256(await readFile(reviewPath(sessionDir, phase, index), "utf8"));
+}
+
 export function parseApprovalEntries(content: string): ApprovalEntry[] {
+  return parseApprovalLedger(content).entries;
+}
+
+export interface ParsedApprovalLedger {
+  entries: ApprovalEntry[];
+  invalidMarkers: number;
+}
+
+export function parseApprovalLedger(content: string): ParsedApprovalLedger {
   const entries: ApprovalEntry[] = [];
+  let invalidMarkers = 0;
   const prefix = `<!-- ${APPROVAL_MARKER} `;
   for (const line of content.replace(/\r\n/g, "\n").split("\n")) {
-    if (!line.startsWith(prefix) || !line.endsWith(" -->")) continue;
+    if (!line.startsWith(`<!-- ${APPROVAL_MARKER}`)) continue;
+    if (!line.startsWith(prefix) || !line.endsWith(" -->")) {
+      invalidMarkers += 1;
+      continue;
+    }
     try {
       const candidate = JSON.parse(line.slice(prefix.length, -" -->".length)) as Partial<ApprovalEntry>;
       if (
         candidate.version === 1 &&
         typeof candidate.phase === "string" &&
         typeof candidate.reviewId === "string" &&
+        typeof candidate.reviewSha256 === "string" &&
         typeof candidate.receipt === "string" &&
         typeof candidate.approver === "string" &&
         typeof candidate.recordedAt === "string" &&
@@ -184,18 +203,24 @@ export function parseApprovalEntries(content: string): ApprovalEntry[] {
         (VERDICTS as readonly string[]).includes(candidate.verdict)
       ) {
         entries.push(candidate as ApprovalEntry);
+      } else {
+        invalidMarkers += 1;
       }
     } catch {
-      // A malformed human-edited entry is not proof and is ignored fail-closed.
+      invalidMarkers += 1;
     }
   }
-  return entries;
+  return { entries, invalidMarkers };
 }
 
 export async function readApprovalEntries(sessionDir: string): Promise<ApprovalEntry[]> {
+  return (await readApprovalLedger(sessionDir)).entries;
+}
+
+export async function readApprovalLedger(sessionDir: string): Promise<ParsedApprovalLedger> {
   const file = ledgerPath(sessionDir);
-  if (!(await pathExists(file))) return [];
-  return parseApprovalEntries(await readFile(file, "utf8"));
+  if (!(await pathExists(file))) return { entries: [], invalidMarkers: 0 };
+  return parseApprovalLedger(await readFile(file, "utf8"));
 }
 
 function humanLine(value: string | null): string {
@@ -206,7 +231,11 @@ export async function recordApproval(sessionDir: string, entry: ApprovalEntry): 
   const file = ledgerPath(sessionDir);
   const ledger = await readFile(file, "utf8");
   const existing = parseApprovalEntries(ledger);
-  if (existing.some((item) => item.reviewId === entry.reviewId && item.receipt === entry.receipt)) {
+  const duplicate = existing.find((item) => item.reviewId === entry.reviewId && item.receipt === entry.receipt);
+  if (duplicate && duplicate.reviewSha256 !== entry.reviewSha256) {
+    throw new Error("The review changed after this receipt was recorded. Create a fresh review and receipt.");
+  }
+  if (duplicate) {
     return;
   }
 
@@ -217,6 +246,7 @@ export async function recordApproval(sessionDir: string, entry: ApprovalEntry): 
     `- Verdict: ${entry.verdict}`,
     `- Approver: ${humanLine(entry.approver)}`,
     `- Receipt: ${entry.receipt}`,
+    `- Review SHA-256: ${entry.reviewSha256}`,
     `- Comments: ${humanLine(entry.comments)}`,
     `- Owner ruling: ${humanLine(entry.ruling)}`,
     "",
