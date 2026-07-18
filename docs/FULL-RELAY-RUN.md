@@ -59,7 +59,7 @@ Read the complete review through its final receipt: <path>
 Paste the exact RECEIPT line:
 ```
 
-Open the named file in the adjacent Ghostty pane or editor, read it through the final line, and paste the exact line into Koda. The harness never reads the receipt on Kristian's behalf and does not copy it into `TRANSCRIPT.md`. The receipt remains where it belongs: the review and Koda approval ledger.
+In the adjacent Ghostty pane, run `npm run relay:review`. The owner helper derives the one waiting run, current session, phase, and review from disk; opens the complete review; and, after the reader closes, copies the unchanged final receipt to the macOS clipboard without printing it. Paste it into Koda in Window A. The harness never enters the receipt on Kristian's behalf and does not copy it into `TRANSCRIPT.md`. The receipt remains where it belongs: the review and Koda approval ledger.
 
 If execution is interrupted or a model turn fails, `RUN.json` keeps the last action, role thread IDs, and named pause status. Rerun the same `relay:execute` command; the supervisor re-derives current work from disk and resumes the existing role context. Initial and resumed model turns both receive the same explicit `workspace-write` sandbox so a continuation cannot silently fall back to Codex's read-only non-interactive default. `COMPLETE` runs refuse re-execution.
 

@@ -68,7 +68,8 @@ owner contract
 - A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda session.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.
 - Five sealed reviewer fixtures: the original hard-number capability check and honest control, plus an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap.
-- A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its code is not yet an executed end-to-end result.
+- A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its first genuine run is active and remains explicitly incomplete until all six phases and pushed close are verified.
+- The interim owner reader reduces Window B to `npm run relay:review`: it derives the only waiting session and current review from disk, opens the full file, detects concurrent review changes, and copies the exact receipt without printing or submitting it. This is a bridge, not the mature conversational reviewer interface.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
 - The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.
 

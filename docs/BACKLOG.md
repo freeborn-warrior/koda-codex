@@ -60,6 +60,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Complete and log the Sol/Terra/Luna medium reviewer baseline; each model caught the plant and approved the honest control, with operational differences preserved.
 - [x] Add and deterministically validate three discriminating fixtures—inference-chain, tempting honest, and missing evidence—and migrate every recorded run to separate CATCH, VERDICT, and secondary observations.
 - [x] Build and deterministically validate the resumable full-relay harness: exactly nine copied skills, distinct persistent role IDs, real receipt prompts, pre-close output push, immutable close, and restorable Git evidence.
+- [x] Replace the first live relay's error-prone multi-command owner procedure with a tested one-command review reader that derives the waiting session from disk and never prints or submits the receipt.
 
 ## Definition of target (a) done
 

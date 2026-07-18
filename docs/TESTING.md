@@ -389,3 +389,30 @@ Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effor
 - **How:** Added the per-invocation Codex configuration override `sandbox_mode="workspace-write"` to the argument list shared by both branches, required the resume branch to consume that shared list, documented the recovery invariant, and ran `npm run test:record -- 2026-07-18-relay-resume-sandbox-final`. Every named result is preserved in [the per-test transcript](test-results/2026-07-18-relay-resume-sandbox-final.md).
 - **What happened:** All 77 checks passed. The saved run remains paused and unchanged apart from its already-recorded evidence; rerunning its exact execute command will resume the same producer thread from current disk state.
 - **Verdict:** PASS. The concrete first-run failure now has a tested correction, without broadening the model sandbox to `danger-full-access` or weakening any gate or mutation test.
+
+## 2026-07-18 — First live owner acknowledgement UX finding
+
+- **Variant:** Live Sol/medium producer and Terra/medium reviewer relay; operator interaction by Kristian.
+- **Effort:** Medium for both model contexts.
+- **What:** Kristian's first Brief review acknowledgement using the documented multi-command Window B procedure.
+- **How:** Kristian found and opened the complete review, read its APPROVE verdict and findings, then manually pasted the exact receipt into Window A. The gate accepted it and automatically activated Orient.
+- **What happened:** The gate and two-context relay behaved correctly, but the five-command owner procedure did not. Ambiguous instructions caused Kristian to expose the receipt once in the separate build-support chat while asking what to paste. That chat did not enter the producer context, reviewer context, run transcript, or approval ledger; Kristian still entered the receipt himself after reading. The incident nevertheless violates the intended operator boundary and is preserved as a usability failure.
+- **Verdict:** OWNER INTERFACE REVISE; GATE PASS. Replace review discovery, opening, unchanged-file verification, and clipboard copying with one owner-facing command. Keep manual paste into Koda and never claim that a machine proved comprehension.
+
+## 2026-07-18 — One-command owner review, guarded validation attempts
+
+- **Variant:** Not applicable; deterministic Node.js test runner and a temporary prepared relay. No model was called.
+- **Effort:** Not applicable.
+- **What:** `npm run relay:review`, which finds the single waiting run, derives its active session/phase from disk, opens the complete review, detects changes during reading, and copies—but never prints—the exact receipt.
+- **How:** The temporary execution test opened a planted review through a noninteractive test pager, required the exact receipt in a test clipboard, and required stdout not to contain `RECEIPT:`. The first unrecorded `npm test` run passed 76/77 because the rewritten guide had softened the exact “Never paste” prohibition. After restoring it, `npm run test:record -- 2026-07-18-one-command-owner-review-final` again passed 76/77 because the shorter guide had omitted the exact “Do not run `relay:prepare` again” recovery prohibition. Every named result from the recorded failure remains in [the failed per-test transcript](test-results/2026-07-18-one-command-owner-review-final.md).
+- **What happened:** Both failures were safety-copy regressions caught by the existing test, not gate failures. Neither assertion was removed or weakened; both exact prohibitions were restored.
+- **Verdict:** DOCUMENTATION REVISE. Retain the simpler interaction while preserving every prior safety boundary verbatim.
+
+## 2026-07-18 — One-command owner review, corrected validation
+
+- **Variant:** Not applicable; deterministic Node.js test runner and a temporary prepared relay. No model was called.
+- **Effort:** Not applicable.
+- **What:** The corrected one-command owner reader, single-session identity documentation, and explicit current-versus-future two-window boundary.
+- **How:** Ran `npm run test:record -- 2026-07-18-one-command-owner-review-corrected`; every named result is preserved in [the corrected per-test transcript](test-results/2026-07-18-one-command-owner-review-corrected.md).
+- **What happened:** All 77 checks passed. The executable helper finds exactly one `AWAITING_OWNER_RECEIPT` run, derives its current review from `RUN.json` and `state.json`, refuses zero or multiple waiters, verifies the review hash is unchanged after reading, copies the receipt without printing it, and leaves the actual Koda acknowledgement manual. The complete mutation, adversarial-receipt, status-truth, stale-review, package, and close suites remain intact.
+- **Verdict:** PASS. Window B now requires one stable command for every phase while the guide states honestly that the mature owner-facing reviewer conversation is still future work.

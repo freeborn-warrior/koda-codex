@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -67,15 +67,57 @@ test("FULL RELAY RUNNER: preparation creates a clean pushed project with local s
     });
     assert.equal(ahead.status, 0, ahead.stderr);
     assert.equal(ahead.stdout.trim(), "0");
+
+    const sessionId = "2026-07-18-01";
+    const session = path.join(project, "docs", "sessions", sessionId);
+    await mkdir(path.join(session, "reviews"), { recursive: true });
+    await writeFile(path.join(session, "state.json"), `${JSON.stringify({
+      currentPhaseIndex: 0,
+      phases: [{ name: "brief" }],
+    }, null, 2)}\n`, "utf8");
+    const receipt = "RECEIPT: Review read — sealed-test-id";
+    await writeFile(path.join(session, "reviews", "01-brief-review.md"), [
+      "VERDICT: APPROVE",
+      "",
+      "# Peer review — brief",
+      "",
+      "## Findings",
+      "",
+      "- The bounded artifact is supported by its cited evidence.",
+      "",
+      receipt,
+      "",
+    ].join("\n"), "utf8");
+    await writeFile(path.join(runRoot, "RUN.json"), `${JSON.stringify({
+      ...run,
+      status: "AWAITING_OWNER_RECEIPT",
+      sessionId,
+    }, null, 2)}\n`, "utf8");
+    const clipboard = path.join(temporary, "clipboard.txt");
+    const reviewed = spawnSync(process.execPath, ["scripts/read-relay-review.ts"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        KODA_RELAY_RUNS_ROOT: temporary,
+        KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
+        KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
+      },
+    });
+    assert.equal(reviewed.status, 0, reviewed.stderr);
+    assert.doesNotMatch(reviewed.stdout, /RECEIPT:/);
+    assert.match(reviewed.stdout, /Receipt copied/);
+    assert.equal(await readFile(clipboard, "utf8"), receipt);
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }
 });
 
 test("FULL RELAY RUNNER: execution preserves two contexts and never automates owner receipt proof", async () => {
-  const [prepare, execute, protocol, ghostty, packageJson] = await Promise.all([
+  const [prepare, execute, reviewHelper, protocol, ghostty, packageJson] = await Promise.all([
     readFile("scripts/prepare-relay-run.ts", "utf8"),
     readFile("scripts/execute-relay-run.ts", "utf8"),
+    readFile("scripts/read-relay-review.ts", "utf8"),
     readFile("docs/FULL-RELAY-RUN.md", "utf8"),
     readFile("docs/GHOSTTY-TEST-GUIDE.md", "utf8"),
     readFile("package.json", "utf8"),
@@ -96,6 +138,11 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(execute, /git\(\["add", "-A"\]\)/);
   assert.match(execute, /"bundle", "create"/);
   assert.match(execute, /path\.join\(project, "\.git"\)/);
+  assert.match(reviewHelper, /run\.status !== "AWAITING_OWNER_RECEIPT"/);
+  assert.match(reviewHelper, /candidates\.length > 1/);
+  assert.match(reviewHelper, /after\.hash !== before\.hash/);
+  assert.match(reviewHelper, /spawnSync\("pbcopy"/);
+  assert.doesNotMatch(reviewHelper, /console\.log\(after\.receipt/);
   assert.match(protocol, /persistent producer/);
   assert.match(protocol, /persistent reviewer/);
   assert.match(protocol, /does \*\*not\*\* yet provide the mature interactive reviewer conversation/);
@@ -104,11 +151,9 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(ghostty, /Do not run `relay:prepare` again/);
   assert.match(ghostty, /RELAY COMPLETE/);
   assert.match(ghostty, /RESULT\.md/);
-  assert.match(ghostty, /export KODA_RELAY_DIR=/);
-  assert.match(ghostty, /export KODA_REVIEW_FILE=/);
-  assert.match(ghostty, /less "\$KODA_REVIEW_FILE"/);
-  assert.match(ghostty, /awk .*"\$KODA_REVIEW_FILE" \| pbcopy/);
-  assert.match(ghostty, /No other Bash commands are required for the test/);
+  assert.match(ghostty, /npm run relay:review\n/);
+  assert.match(ghostty, /one Window B command/);
   assert.match(packageJson, /"relay:prepare"/);
   assert.match(packageJson, /"relay:execute"/);
+  assert.match(packageJson, /"relay:review"/);
 });
