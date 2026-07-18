@@ -16,7 +16,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Build the disk-recoverable Guide around the owner-approved separate `koda-c-session-prompt` skill: explicit drafting mode, owner-confirmed hashed prompt, single-session launch request, separate producer/reviewer contexts, and pushed Summary/close return.
-- [ ] Finish the ruled side-by-side runtime beyond the first job relay: always-available owner/reviewer discussion and a consistently structured turn-end artifact/handover summary. Never claim hidden chain-of-thought, leak receipts, or let rendered status outrank disk truth.
+- [ ] Finish the ruled side-by-side runtime beyond the first job relay with always-available owner/reviewer discussion. Preserve the shipped disk-derived turn summaries; never claim hidden chain-of-thought, leak receipts, or let rendered status outrank disk truth.
 - [ ] Add abort/recovery semantics before claiming the producer can run unattended; Ctrl-C must leave named recoverable state.
 
 ## Later, only after target (a) is secure
@@ -34,6 +34,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 - [x] Let Kristian discuss an active formal review in the same reviewer context; ordinary explanation changes no file, while new direction pauses without an explicit owner send (`f68f5d7`, evidence at `9610429`).
 - [x] Add the general owner-direction handback: explicit send, verbatim owner statement, reviewer relay, artifact/review/hash binding, mandatory receipt, producer citation, stale-review refusal, and fresh-review route. Deterministic two-process proof covers the full path through pushed close.
+- [x] Add consistent disk-derived role handovers: producer artifact path/size/hash/control, consultation pause/response, reviewer verdict binding, acknowledgement outcome, and explicit next owner of control. These summarize exposed facts, never hidden chain-of-thought.
 - [x] Build and deterministically prove the first real two-window runtime slice: streamed non-interactive producer, automatic disk jobs, one persistent Window B reviewer, same-window exact owner receipt, in-phase owner ruling, separate-process rendezvous, and pushed close (`84a31fb`, evidence at `ece10c5`).
 
 - [x] Record the original one-document contract and owner ruling (`c205ebd`).

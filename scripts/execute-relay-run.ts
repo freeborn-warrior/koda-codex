@@ -454,6 +454,13 @@ async function producePhase(phaseName: string, revision: boolean): Promise<void>
   ].join(" "));
 }
 
+function printProducerHandover(phaseName: string, artifactFile: string, content: string, next: string): void {
+  console.log(`\nPRODUCER HANDOVER — ${phaseName.toUpperCase()}`);
+  console.log(`Artifact: ${path.relative(project, artifactFile)}`);
+  console.log(`Observed: non-empty regular artifact, ${Buffer.byteLength(content, "utf8")} bytes, SHA-256 ${sha256(content).slice(0, 12)}…`);
+  console.log(`Control: ${next}`);
+}
+
 async function applyOwnerDirection(phaseName: string, artifactFile: string, handbacks: OwnerHandback[]): Promise<void> {
   const before = await readFile(artifactFile, "utf8");
   const relativeHandbacks = handbacks.map((handback) => path.relative(project, handback.path));
@@ -472,6 +479,12 @@ async function applyOwnerDirection(phaseName: string, artifactFile: string, hand
   for (const relative of relativeHandbacks) {
     if (!revised.includes(relative)) throw new Error(`The revised artifact does not cite owner handback ${relative}.`);
   }
+  printProducerHandover(
+    phaseName,
+    artifactFile,
+    revised,
+    "returned to Window B for a fresh independent review; the handback did not advance the phase.",
+  );
 }
 
 async function reviewPhase(phaseName: string, mode: "formal" | "repair" | "fresh"): Promise<void> {
@@ -758,6 +771,18 @@ async function main(): Promise<void> {
       const after = await readNonEmpty(artifactFile);
       const pending = await outstandingConsultation(session.directory, active.phase.name, active.index);
       if (!after && !pending) throw new Error(`Producer wrote neither ${artifactFile} nor a consultation request.`);
+      if (after) {
+        printProducerHandover(
+          active.phase.name,
+          artifactFile,
+          after,
+          "passed to Window B for independent formal review; the phase remains unadvanced.",
+        );
+      } else if (pending) {
+        console.log(`\nPRODUCER PAUSED — ${active.phase.name.toUpperCase()}`);
+        console.log(`Consultation request: ${path.relative(project, pending.request)}`);
+        console.log("Control: passed to Window B; producer work remains blocked until a disk response exists.");
+      }
       continue;
     }
 

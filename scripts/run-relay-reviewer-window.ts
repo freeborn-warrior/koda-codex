@@ -273,6 +273,9 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
 
   console.log(`\nREVIEW READY — ${job.phase.toUpperCase()} — ${parsed.verdict}`);
   console.log("This is your decision point in Window B. The producer is waiting in Window A.");
+  console.log(`Review: ${path.relative(project, review)}`);
+  console.log(`Binding: artifact SHA-256 ${parsed.metadata.artifactSha256.slice(0, 12)}…; review ID ${parsed.metadata.id}`);
+  console.log("Control: Kristian may read, discuss, reread, pause, or acknowledge. Nothing has advanced.");
   await openReview();
 
   const configuredTestQuestion = testMode ? process.env.KODA_RELAY_TEST_DISCUSSION_QUESTION?.trim() : undefined;
@@ -351,6 +354,9 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   if (approved.status !== 0) throw new Error(`Owner acknowledgement exited ${approved.status ?? -1}.`);
   job.completion = job.handbackPath ? "OWNER_HANDBACK" : "ACKNOWLEDGED";
   console.log("ACKNOWLEDGED — Window A will now derive the route from disk.");
+  console.log(`REVIEWER HANDOVER — ${job.phase.toUpperCase()} — ${job.completion}`);
+  console.log(`Disk evidence: ${job.handbackPath ?? path.relative(project, review)}`);
+  console.log("Control: returned to Window A; the gate, not this message, determines the next action.");
 }
 
 async function completeConsultation(job: ReviewerJob, response: string): Promise<void> {
@@ -391,6 +397,9 @@ async function processJob(job: ReviewerJob): Promise<void> {
   if (job.kind === "consultation") {
     await completeConsultation(job, output);
     job.completion = "CONSULTATION_ANSWERED";
+    console.log(`\nREVIEWER HANDOVER — ${job.phase.toUpperCase()} — CONSULTATION ANSWERED`);
+    console.log(`Disk response: ${path.relative(project, output)}`);
+    console.log("Control: returned to Window A; producer may use only the recorded response.");
   } else {
     await ownerAcknowledge(job, output);
   }

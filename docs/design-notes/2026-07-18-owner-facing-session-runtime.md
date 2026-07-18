@@ -41,13 +41,13 @@ Visibility means the progress information the platform legitimately exposes. Kod
 
 ## Visible role stream and turn summaries
 
-The two-window relay now renders agent messages, completed checks, file changes, context identity, and turn completion from the real JSONL event stream while preserving the full raw events. Receipt and protected review-metadata lines are removed from the readable progress rendering. The next presentation step is to make phase entry, artifact handover, unresolved items, and role-authored turn summaries consistently explicit rather than depending on each model's natural message quality.
+The two-window relay now renders agent messages, completed checks, file changes, context identity, and turn completion from the real JSONL event stream while preserving the full raw events. Receipt and protected review-metadata lines are removed from the readable progress rendering. It also prints supervisor-derived handover summaries from current disk: producer artifact path, byte count, short hash and next control; consultation request/response; review path, verdict binding, acknowledgement outcome and next control. These facts no longer depend on each model's natural closing-message quality.
 
 The producer pane should show the current phase, entry-check outcome, exposed reasoning summaries, tool and file activity, verification commands, artifact path, and whether it handed over or paused for consultation. Its closing message should say what artifact was produced, what was actually checked, what remains unresolved, and that control passed to the reviewer. It must not invite owner input.
 
 The reviewer pane should show the current review or consultation mode, evidence being inspected, exposed reasoning summaries, verification activity, definitive verdict, review/response path, required-revision count or owner question, and resulting gate state. Its closing message should explain the actionable outcome to Kristian without printing the receipt; the receipt remains inside the complete review opened through the owner-reading flow.
 
-These are visibility and comprehension features, not new authority. Rendered status must come from the event stream and current disk state, never from a separate optimistic UI cache. A polished summary cannot substitute for the artifact, formal review, receipt, or gate check.
+These are visibility and comprehension features, not new authority. Rendered status and turn handovers come from the event stream and current disk state, never from a separate optimistic UI cache. A polished summary cannot substitute for the artifact, formal review, receipt, or gate check. Hidden private chain-of-thought remains outside the product claim.
 
 ## Current bridge and gap
 

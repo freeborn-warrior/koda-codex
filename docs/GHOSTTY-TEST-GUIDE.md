@@ -24,6 +24,8 @@ npm run relay:producer
 
 Leave this running. It discovers the one prepared run, starts or resumes the non-interactive producer, and streams the role's emitted updates, completed checks, file changes, and turn endings. When an artifact is ready, Window A writes one reviewer job to disk and waits. It does not run the reviewer itself in this mode.
 
+At each producer stop, Window A prints a `PRODUCER HANDOVER` or `PRODUCER PAUSED` block derived from disk. It names the artifact or consultation, observed byte count and short hash when applicable, and which window now has control. This is a factual summary, not hidden model thinking.
+
 ## Window B — reviewer and owner
 
 ```bash
@@ -53,6 +55,8 @@ For a formal review, Window B shows the reviewer progress and then says `REVIEW 
 9. If Koda asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
 
 The reviewer console never prints the receipt into its readable progress stream, and Kristian's acknowledgement input is never sent as a model message. The raw reviewer event evidence may contain the generated receipt because the reviewer creates and validates the review that contains it; the receipt is not treated as a secret. A changed review or wrong quote refuses, writes no approval, and leaves a named failed job on disk. After a valid acknowledgement, Window A re-reads the gate and automatically advances, revises, or requests a fresh review according to the verdict.
+
+Window B prints a disk-derived `REVIEWER HANDOVER` after a consultation answer or acknowledgement. It names the response/review/owner-handback path and says that Window A regains control; the gate still decides the route.
 
 The reviewer can explain findings, evidence, implications, and `DISCUSS` options without changing the review. A confirmed new direction is written under the active session's `owner-handbacks/<NN>-<phase>/` directory. It binds Kristian's verbatim statement, the reviewer relay, current artifact hash, active review ID, and review hash. The receipt remains mandatory. Window A consumes the handback before an otherwise open gate, requires the producer to revise and cite it, then routes the stale artifact to a fresh formal review and fresh receipt. See the [owner-direction handback protocol](OWNER-DIRECTION-HANDBACK.md).
 

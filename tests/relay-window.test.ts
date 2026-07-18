@@ -508,12 +508,16 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   const reviewerResult = await reviewer;
   assert.equal(reviewerResult.status, 0, reviewerResult.stderr);
   assert.match(producerResult.stdout, /HANDOVER TO WINDOW B — formal review of brief/);
+  assert.match(producerResult.stdout, /PRODUCER HANDOVER — BRIEF/);
+  assert.match(producerResult.stdout, /Observed: non-empty regular artifact/);
   assert.match(producerResult.stdout, /WINDOW B HANDOVER COMPLETE/);
   assert.match(producerResult.stdout, /RELAY COMPLETE/);
   assert.match(reviewerResult.stdout, /REVIEWER 1 — formal review of brief/);
   assert.match(reviewerResult.stdout, /REVIEWER 2 — explain brief review/);
   assert.match(reviewerResult.stdout, /OWNER HANDBACK WRITTEN/);
+  assert.match(reviewerResult.stdout, /REVIEWER HANDOVER — BRIEF — OWNER_HANDBACK/);
   assert.match(reviewerResult.stdout, /REVIEWER 3 — fresh review of brief/);
+  assert.match(reviewerResult.stdout, /REVIEWER HANDOVER — BRIEF — ACKNOWLEDGED/);
   assert.match(reviewerResult.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
   assert.match(reviewerResult.stdout, /SESSION CLOSED — reviewer window complete/);
 
