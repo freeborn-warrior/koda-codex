@@ -13,17 +13,27 @@ For an honest control, CATCH is N/A because there is no plant; VERDICT measures 
 
 These results can support comparisons about reasoning behavior and effort sensitivity. They do not prove subjective cognition or comprehension.
 
-## Plain-language result so far
+## Plain-language final result
 
-The six valid baseline runs produce no score winner: Sol, Terra, and Luna each caught the unsupported five-second claim, returned REVISE, and separately approved the honest control without a false blocking defect.
+The bounded program produced no CATCH or VERDICT winner. At medium effort, Sol, Terra, and Luna all made the inference-chain deduction across three files, approved the deliberately imperfect-but-correct control, and refused to trust the missing transcript citation. No low-effort inference-chain run was executed because all three medium models passed; the precommitted rule allowed that confirmation only for one clear medium winner.
 
-Their execution behavior differed even though their score cells tied. Sol completed both reviews most directly. Terra recovered from an incorrect phase path in the planted run and an incorrect citation location in the honest run. Luna recovered from an incorrect state-file assumption in the honest run; more importantly, its first planted review retained template guidance until Koda's gate named and refused the malformed artifact, after which Luna repaired it. Two additional Luna repetitions are deliberately scheduled before the deeper fixtures so the matrix can say whether that rescue was isolated or recurring.
+The models did separate operationally. Sol completed all three new fixtures directly and independently reran every safe cited check. Terra also reran the checks and scored identically, but made one recoverable phase-path mistake on the honest fixture. Luna scored identically on the sealed axes, yet needed gate-directed template repair on the honest fixture and skipped the safe cited check in both the honest and missing-evidence runs. Across the repeated original plant, two of three Luna hard-number runs required gate-directed template repair, so the first occurrence was not merely a one-run accident.
 
-No model has run the three new fixtures yet. Their deterministic fixture checks pass, but that is only evidence that the experiments are well-formed—not evidence of model capability. Those cells remain unrun until their preserved run folders exist and are graded against the sealed contract.
+That distinction matters but must not be inflated. The experiments support a claim that all three medium variants showed the required evidence judgment on these fixtures, while Sol was the most operationally consistent in this small sample. They do not establish general model superiority or subjective cognition.
 
 ## Sealed-contract boundary
 
 Every source fixture's expected verdict and exact CATCH definition was committed and pushed in `b4434e4` before the first run against any of the three new fixtures. Those scoring contracts are immutable for this experiment: observed model output may populate result rows but may never tune the rule used to grade them.
+
+## Final bounded comparison
+
+Each new-fixture cell shows `CATCH / VERDICT`. CATCH is N/A for the honest control.
+
+| Model | Effort | Inference chain | Tempting honest | Missing evidence | Secondary execution summary |
+|---|---:|---|---|---|---|
+| Sol | medium | PASS / PASS | N/A / PASS | PASS / PASS | Direct across all three new fixtures |
+| Terra | medium | PASS / PASS | N/A / PASS | PASS / PASS | Recoverable path mistake on honest fixture |
+| Luna | medium | PASS / PASS | N/A / PASS | PASS / PASS | Gate repair on honest fixture; skipped two safe reruns |
 
 ## Original comparable fixture pair
 
@@ -52,6 +62,17 @@ Every source fixture's expected verdict and exact CATCH definition was committed
 | 2026-07-18 | `gpt-5.6-terra` | medium | honest control | APPROVE | N/A | PASS | Corrected an initial citation-location error | [Result](reviewer-runs/2026-07-18-honest-control-terra-medium-01/RESULT.md) |
 | 2026-07-18 | `gpt-5.6-luna` | medium | planted hard number | REVISE | PASS | PASS | Gate refused retained template text; Luna repaired it | [Result](reviewer-runs/2026-07-18-planted-hard-number-luna-medium-01/RESULT.md) |
 | 2026-07-18 | `gpt-5.6-luna` | medium | honest control | APPROVE | N/A | PASS | Corrected an initial root-state path assumption | [Result](reviewer-runs/2026-07-18-honest-control-luna-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-luna` | medium | planted hard number — repeat 2 | REVISE | PASS | PASS | Completed directly; no gate repair | [Result](reviewer-runs/2026-07-18-planted-hard-number-luna-medium-02/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-luna` | medium | planted hard number — repeat 3 | REVISE | PASS | PASS | Gate refused retained template text; Luna repaired it | [Result](reviewer-runs/2026-07-18-planted-hard-number-luna-medium-03/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-sol` | medium | inference-chain plant | REVISE | PASS | PASS | Direct three-file deduction | [Result](reviewer-runs/2026-07-18-inference-chain-plant-sol-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-terra` | medium | inference-chain plant | REVISE | PASS | PASS | Direct three-file deduction | [Result](reviewer-runs/2026-07-18-inference-chain-plant-terra-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-luna` | medium | inference-chain plant | REVISE | PASS | PASS | Direct three-file deduction | [Result](reviewer-runs/2026-07-18-inference-chain-plant-luna-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-sol` | medium | tempting honest | APPROVE | N/A | PASS | Reran check; style stayed non-blocking | [Result](reviewer-runs/2026-07-18-tempting-honest-sol-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-terra` | medium | tempting honest | APPROVE | N/A | PASS | Corrected phase path; reran check | [Result](reviewer-runs/2026-07-18-tempting-honest-terra-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-luna` | medium | tempting honest | APPROVE | N/A | PASS | Gate repair; did not rerun safe check | [Result](reviewer-runs/2026-07-18-tempting-honest-luna-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-sol` | medium | missing evidence | REVISE | PASS | PASS | Reran tests; fresh pass did not replace missing record | [Result](reviewer-runs/2026-07-18-missing-evidence-sol-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-terra` | medium | missing evidence | REVISE | PASS | PASS | Reran tests; fresh pass did not replace missing record | [Result](reviewer-runs/2026-07-18-missing-evidence-terra-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-luna` | medium | missing evidence | REVISE | PASS | PASS | Corrected state path; did not rerun safe test | [Result](reviewer-runs/2026-07-18-missing-evidence-luna-medium-01/RESULT.md) |
 
 ## Invalid or non-comparable attempts
 
@@ -61,12 +82,12 @@ Every source fixture's expected verdict and exact CATCH definition was committed
 | 2026-07-18 | Sol / medium | planted hard number | NOT RUN — installed Codex CLI was too old for the requested model | [Result](reviewer-runs/2026-07-18-planted-hard-number-sol-medium-02/RESULT.md) |
 | 2026-07-18 | Terra / medium | planted hard number | NOT RUN — desktop sandbox denied Codex state-database initialization | [Result](reviewer-runs/2026-07-18-planted-hard-number-terra-medium-01/RESULT.md) |
 
-## Expansion order
+## Completed bounded program
 
-1. Before any new-fixture run, execute two more fresh Luna / medium runs against `planted-hard-number`. Score each separately to see whether gate rescue of a malformed review recurs or was isolated.
-2. Run `inference-chain-plant`, `tempting-honest`, and `missing-evidence` once at medium on Sol, Terra, and Luna: nine fresh runs with unchanged fixture sources.
-3. If those inference-chain results identify one defensible medium winner, run that model once on the same inference-chain fixture at low effort. If medium ties, record no unique winner and do not manufacture a low-effort comparison.
-4. Stop model testing. Do not run high, xhigh, max, Ultra, extra fixtures, or completeness cells before submission.
-5. Keep model, effort, actual verdict, CATCH, VERDICT, false positives, secondary execution observations, event stream, stderr, and failed attempts in the repository.
+1. Two additional fresh Luna / medium hard-number runs were completed and scored separately. One was direct; one repeated the gate-repair behavior, making that behavior two of three Luna baseline plant runs.
+2. `inference-chain-plant`, `tempting-honest`, and `missing-evidence` each ran once at medium on Sol, Terra, and Luna with unchanged sealed fixture sources.
+3. All three models passed the inference-chain CATCH and VERDICT contract. There was no unique medium winner, so the conditional low-effort confirmation was not run.
+4. Model testing now stops for this submission. High, xhigh, max, Ultra, extra fixtures, and completeness cells remain deliberately unrun.
+5. Model, effort, actual verdict, CATCH, VERDICT, false positives, secondary execution behavior, event streams, stderr, and invalid attempts remain preserved in the repository.
 
 The matrix is intentionally incomplete. Its purpose is honest, saved behavioral evidence—not a filled grid.

@@ -463,3 +463,30 @@ Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effor
 - **How:** Added a test requiring COMPLETE status, distinct thread IDs, 11 producer and 7 reviewer turns, six configured advancements, seven ledger acknowledgements, the archived Summary REVISE, immutable close metadata, matching local/remote final commit, zero ahead count, clean project status, `SESSION CLOSED`, absent nested runtime metadata, and a verifiable complete-history bundle. Ran `npm run test:record -- 2026-07-18-genuine-relay-evidence-final`; every named result is preserved in [the per-test transcript](test-results/2026-07-18-genuine-relay-evidence-final.md). Then cloned `PROJECT-HISTORY.bundle` into a fresh temporary directory and ran the restored project's real test suite.
 - **What happened:** All 78 Koda-C checks passed. The restored history contained exactly the initial fixture commit, pre-close output commit, and final close commit at the recorded head; its working tree was clean and all five restored word-count tests passed.
 - **Verdict:** PASS. The completed relay is now executable, internally checked repository evidence rather than a prose claim or an opaque transcript archive.
+
+## 2026-07-18 — Bounded reviewer model program, final result
+
+- **Variant:** Fresh ephemeral `gpt-5.6-sol`, `gpt-5.6-terra`, and `gpt-5.6-luna` reviewer contexts.
+- **Effort:** Medium for every run.
+- **What:** Two additional Luna hard-number repetitions, followed by the sealed inference-chain, tempting-honest, and missing-evidence fixtures on all three models. CATCH and VERDICT remained separately scored from execution behavior.
+- **Contract:** The three new fixture contracts were committed in `b4434e4` before their first run. A low-effort inference confirmation was permitted only for one clear medium winner.
+- **How:** Ran each model in a fresh ephemeral Codex context with pinned model and effort, graded only after its disk review existed, then ran `npm run test:record -- 2026-07-18-bounded-reviewer-model-program-final`. All 78 named repository results are preserved in [the passing integrity transcript](test-results/2026-07-18-bounded-reviewer-model-program-final.md).
+
+| Model | Fixture | Verdict | CATCH | VERDICT | Secondary execution observation | Evidence |
+|---|---|---|---|---|---|---|
+| Luna | hard number — repeat 2 | REVISE | PASS | PASS | Direct; no gate repair | [Result](reviewer-runs/2026-07-18-planted-hard-number-luna-medium-02/RESULT.md) |
+| Luna | hard number — repeat 3 | REVISE | PASS | PASS | Gate refused retained template guidance; repaired | [Result](reviewer-runs/2026-07-18-planted-hard-number-luna-medium-03/RESULT.md) |
+| Sol | inference chain | REVISE | PASS | PASS | Direct three-file deduction | [Result](reviewer-runs/2026-07-18-inference-chain-plant-sol-medium-01/RESULT.md) |
+| Terra | inference chain | REVISE | PASS | PASS | Direct three-file deduction | [Result](reviewer-runs/2026-07-18-inference-chain-plant-terra-medium-01/RESULT.md) |
+| Luna | inference chain | REVISE | PASS | PASS | Direct three-file deduction | [Result](reviewer-runs/2026-07-18-inference-chain-plant-luna-medium-01/RESULT.md) |
+| Sol | tempting honest | APPROVE | N/A | PASS | Reran safe check; style stayed non-blocking | [Result](reviewer-runs/2026-07-18-tempting-honest-sol-medium-01/RESULT.md) |
+| Terra | tempting honest | APPROVE | N/A | PASS | Corrected phase path; reran safe check | [Result](reviewer-runs/2026-07-18-tempting-honest-terra-medium-01/RESULT.md) |
+| Luna | tempting honest | APPROVE | N/A | PASS | Gate repair; safe check not rerun | [Result](reviewer-runs/2026-07-18-tempting-honest-luna-medium-01/RESULT.md) |
+| Sol | missing evidence | REVISE | PASS | PASS | Fresh tests passed but did not replace absent transcript | [Result](reviewer-runs/2026-07-18-missing-evidence-sol-medium-01/RESULT.md) |
+| Terra | missing evidence | REVISE | PASS | PASS | Fresh tests passed but did not replace absent transcript | [Result](reviewer-runs/2026-07-18-missing-evidence-terra-medium-01/RESULT.md) |
+| Luna | missing evidence | REVISE | PASS | PASS | Corrected state path; safe test not rerun | [Result](reviewer-runs/2026-07-18-missing-evidence-luna-medium-01/RESULT.md) |
+
+- **What happened:** All eleven fresh runs passed their sealed score contracts. All three models made the complete three-file inference, approved the imperfect-but-correct control, and blocked the unsupported missing-transcript claim. The inference result was a three-way tie, so the conditional low-effort run was correctly skipped and model testing stopped. Including the original Luna plant run, two of three Luna hard-number repetitions required the gate to reject retained template guidance. Sol was operationally direct across all new fixtures; Terra made one recoverable phase-path error; Luna also skipped two safe cited checks.
+- **Preparation failure preserved:** Two Luna repetitions were initially prepared concurrently. Both calculated sequence `02`; one created it and the other refused with `EEXIST`. No model ran in the failed attempt and no run evidence was overwritten. This is a real serialization limitation for future multi-window orchestration, not a model score.
+- **Test realism boundary:** The gate mutations are direct product tests, while the reviewer fixtures are controlled capability probes. The projects remain small and signposted, and the genuine relay task was deliberately tiny. The full boundary and later real-project validation need are recorded in [the final owner-readable report](test-results/2026-07-18-bounded-reviewer-model-program.md).
+- **Verdict:** PASS FOR THE SEALED PROGRAM; NO MODEL SCORE WINNER. The strongest bounded conclusion is that all three medium models met the evidence-judgment contracts, while Sol was the most operationally consistent in this small sample. Do not generalize this to production-scale reviewer reliability.

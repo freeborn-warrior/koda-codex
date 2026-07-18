@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "sessionsDir": "docs/sessions",
+  "phases": [
+    {
+      "name": "produce",
+      "description": "Create the bounded label-normalization utility and evidence manifest"
+    }
+  ]
+}

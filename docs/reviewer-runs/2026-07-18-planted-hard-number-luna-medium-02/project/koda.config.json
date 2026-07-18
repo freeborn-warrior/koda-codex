@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "sessionsDir": "docs/sessions",
+  "phases": [
+    {
+      "name": "brief",
+      "description": "What we are doing, why, and the limits"
+    }
+  ]
+}

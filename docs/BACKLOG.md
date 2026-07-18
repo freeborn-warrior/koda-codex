@@ -6,13 +6,12 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Finish submission-critical proof and polish: fresh skill discovery, fresh one-line package path, capped reviewer matrix, video script, and submission checklist.
+- [ ] Finish submission-critical proof and polish: fresh skill discovery, fresh one-line package path, video script, and submission checklist.
 
 ## Next
 
 - [ ] Verify root `AGENTS.md` and all nine `.agents/skills/` packages are discovered in a genuinely fresh Codex task; the current task now lists all nine automatically, but durable startup evidence still needs recording.
 - [ ] Verify the one-line local `npx` path from a fresh checkout/package.
-- [ ] Execute the sealed final model program: two Luna/medium hard-number repeats; all three new fixtures on Sol/Terra/Luna at medium; then one low-effort inference-chain confirmation only for a clear medium winner. Stop model testing afterward.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Design the long-lived, disk-recoverable guide/session-prompter from real use; decide whether it is one guide skill or a distinct prompt skill before creating either.
@@ -63,6 +62,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Build and deterministically validate the resumable full-relay harness: exactly nine copied skills, distinct persistent role IDs, real receipt prompts, pre-close output push, immutable close, and restorable Git evidence.
 - [x] Replace the first live relay's error-prone multi-command owner procedure with a tested one-command review reader that derives the waiting session from disk and never prints or submits the receipt.
 - [x] Execute and preserve the first genuine owner-acknowledged relay through all six phases: persistent Sol producer, persistent Terra reviewer, an unplanned Summary REVISE loop, seven owner acknowledgements, supervised Git recovery, verified bundle, and pushed immutable close.
+- [x] Complete and stop the sealed reviewer program: two Luna baseline repeats plus nine new medium cells. All three models passed the inference, temperament, and missing-evidence score contracts; no unique inference winner existed, so the conditional low-effort run was correctly skipped.
 
 ## Definition of target (a) done
 

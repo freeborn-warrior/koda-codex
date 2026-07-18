@@ -28,7 +28,7 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - The current target keeps owner receipt acknowledgement at every gate. Exception-only owner attention is a distinct open policy decision and must not be introduced silently.
 - The competition entry is licensed under GPLv3 only, with `Copyright (C) 2026 Kristian Bengtsson` as the sole project copyright line.
 - The product name remains **Koda-C**. The CLI command is `koda`; `koda-codex` is the lowercase repository and package slug for this Codex-built competition implementation.
-- New reviewer fixtures are scored only by contracts committed before their first model run. The final model program is capped at two Luna baseline repeats, nine medium runs across the three new fixtures and models, and—only for a clear inference-chain winner—one low-effort confirmation.
+- New reviewer fixtures are scored only by contracts committed before their first model run. The final model program stopped at its declared cap: two Luna baseline repeats and nine medium runs across the three new fixtures and models. All inference-chain cells passed, so no unique winner existed and the conditional low-effort confirmation was not run.
 
 ## Lifecycle
 
@@ -70,6 +70,7 @@ owner contract
 - A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda session.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.
 - Five sealed reviewer fixtures: the original hard-number capability check and honest control, plus an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap.
+- A completed seventeen-run model ledger: six original comparable runs, two Luna baseline repetitions, and nine new-fixture medium runs. All sealed score cells passed; Sol was operationally most consistent, while Terra recovered from path errors and Luna more often needed gate repair or skipped safe checks.
 - A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its first genuine run completed all six phases with distinct persistent contexts, an unplanned Summary REVISE recovery, seven owner acknowledgements, and a pushed immutable close.
 - In supervised close, the persistent producer prepares and later verifies immutable `close.md`, while the trusted relay supervisor performs the exact intervening session commit and push. This keeps `.git` protected from model sandboxes without moving closure authority out of Koda's disk checks.
 - The interim owner reader reduces Window B to `npm run relay:review`: it derives the only waiting session and current review from disk, opens the full file, detects concurrent review changes, and copies the exact receipt without printing or submitting it. This is a bridge, not the mature conversational reviewer interface.
@@ -87,6 +88,8 @@ owner contract
 - [Owner-facing session runtime](design-notes/2026-07-18-owner-facing-session-runtime.md)
 - [Long-lived guide context research](design-notes/2026-07-18-long-lived-guide-context.md)
 - [Completed genuine six-phase relay](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
+- [Completed reviewer model and effort matrix](MODEL-TEST-MATRIX.md)
+- [Owner-readable bounded reviewer program report](test-results/2026-07-18-bounded-reviewer-model-program.md)
 - Git history on `main` contains honest pushed milestones.
 
 ## Drift watch against the starting document

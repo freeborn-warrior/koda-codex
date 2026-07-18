@@ -158,30 +158,69 @@ test("REVIEWER FIXTURES: Ghostty runs pin model and effort and preserve ephemera
   assert.match(protocol, /Secondary execution observations/);
 });
 
-test("REVIEWER FIXTURES: the medium model matrix is backed by six graded run folders", async () => {
+test("REVIEWER FIXTURES: the bounded model matrix is backed by seventeen graded run folders", async () => {
   const matrix = await readFile("docs/MODEL-TEST-MATRIX.md", "utf8");
   const runs = [
-    ["sol", "planted-hard-number-sol-medium-03", "REVISE"],
-    ["sol", "honest-control-sol-medium-01", "APPROVE"],
-    ["terra", "planted-hard-number-terra-medium-02", "REVISE"],
-    ["terra", "honest-control-terra-medium-01", "APPROVE"],
-    ["luna", "planted-hard-number-luna-medium-01", "REVISE"],
-    ["luna", "honest-control-luna-medium-01", "APPROVE"],
+    ["sol", "planted-hard-number-sol-medium-03", "REVISE", "PASS"],
+    ["sol", "honest-control-sol-medium-01", "APPROVE", "N/A"],
+    ["terra", "planted-hard-number-terra-medium-02", "REVISE", "PASS"],
+    ["terra", "honest-control-terra-medium-01", "APPROVE", "N/A"],
+    ["luna", "planted-hard-number-luna-medium-01", "REVISE", "PASS"],
+    ["luna", "honest-control-luna-medium-01", "APPROVE", "N/A"],
+    ["luna", "planted-hard-number-luna-medium-02", "REVISE", "PASS"],
+    ["luna", "planted-hard-number-luna-medium-03", "REVISE", "PASS"],
+    ["sol", "inference-chain-plant-sol-medium-01", "REVISE", "PASS"],
+    ["terra", "inference-chain-plant-terra-medium-01", "REVISE", "PASS"],
+    ["luna", "inference-chain-plant-luna-medium-01", "REVISE", "PASS"],
+    ["sol", "tempting-honest-sol-medium-01", "APPROVE", "N/A"],
+    ["terra", "tempting-honest-terra-medium-01", "APPROVE", "N/A"],
+    ["luna", "tempting-honest-luna-medium-01", "APPROVE", "N/A"],
+    ["sol", "missing-evidence-sol-medium-01", "REVISE", "PASS"],
+    ["terra", "missing-evidence-terra-medium-01", "REVISE", "PASS"],
+    ["luna", "missing-evidence-luna-medium-01", "REVISE", "PASS"],
   ] as const;
 
-  for (const [model, suffix, verdict] of runs) {
-    const result = await readFile(path.join("docs/reviewer-runs", `2026-07-18-${suffix}`, "RESULT.md"), "utf8");
+  for (const [model, suffix, verdict, catchScore] of runs) {
+    const runRoot = path.join("docs/reviewer-runs", `2026-07-18-${suffix}`);
+    const result = await readFile(path.join(runRoot, "RESULT.md"), "utf8");
+    const run = JSON.parse(await readFile(path.join(runRoot, "RUN.json"), "utf8")) as {
+      status: string;
+      exitCode: number;
+    };
     assert.match(result, /- Status: PASS/);
     assert.match(result, new RegExp(`- Model variant: gpt-5\\.6-${model}`));
     assert.match(result, /- Effort: medium/);
     assert.match(result, new RegExp(`- Verdict: ${verdict}`));
-    assert.match(result, /- CATCH score: (PASS|N\/A)/);
+    assert.match(result, new RegExp(`- CATCH score: ${catchScore.replace("/", "\\/")}`));
     assert.match(result, /- VERDICT score: PASS/);
+    assert.equal(run.status, "EVALUATED_PASS");
+    assert.equal(run.exitCode, 0);
+
+    const project = path.join(runRoot, "project");
+    const config = await readProjectConfig(project);
+    const directory = sessionRoot(project, config, "2026-07-18-01");
+    const state = await loadSessionState(directory, "2026-07-18-01");
+    const review = await readFile(reviewPath(directory, state.phases[0], 0), "utf8");
+    assert.match(review, new RegExp(`^VERDICT: ${verdict}`));
+    assert.doesNotMatch(review, /Replace this guidance|Record what the files prove|Required only when the verdict is DISCUSS/);
+    assert.match(review.trimEnd().split("\n").at(-1) ?? "", /^RECEIPT: Review read — /);
+
+    const events = (await readFile(path.join(runRoot, "CODEX-EVENTS.jsonl"), "utf8"))
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line)) as Array<{ type: string; item?: { type?: string; text?: string } }>;
+    for (const event of events) {
+      if (event.type === "item.completed" && event.item?.type === "agent_message") {
+        assert.doesNotMatch(event.item.text ?? "", /RECEIPT:/, `${suffix} exposed a receipt in model chat`);
+      }
+    }
   }
 
-  for (const model of ["Sol", "Terra", "Luna"]) {
-    assert.match(matrix, new RegExp(`\\| ${model} \\| medium \\| PASS \\| PASS \\| N/A \\| PASS \\|`));
-  }
+  assert.match(matrix, /\| Sol \| medium \| PASS \/ PASS \| N\/A \/ PASS \| PASS \/ PASS \| Direct across all three new fixtures \|/);
+  assert.match(matrix, /\| Terra \| medium \| PASS \/ PASS \| N\/A \/ PASS \| PASS \/ PASS \| Recoverable path mistake on honest fixture \|/);
+  assert.match(matrix, /\| Luna \| medium \| PASS \/ PASS \| N\/A \/ PASS \| PASS \/ PASS \| Gate repair on honest fixture; skipped two safe reruns \|/);
+  assert.match(matrix, /No low-effort inference-chain run was executed because all three medium models passed/);
+  assert.match(matrix, /two of three Luna hard-number runs required gate-directed template repair/i);
   assert.match(matrix, /\| Verdict \| CATCH score \| VERDICT score \| Secondary execution observations \|/);
   assert.match(matrix, /Terra \/ medium \| planted hard number \| NOT RUN — desktop sandbox denied/);
 });

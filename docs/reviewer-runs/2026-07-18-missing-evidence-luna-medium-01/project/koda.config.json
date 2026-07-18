@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "sessionsDir": "docs/sessions",
+  "phases": [
+    {
+      "name": "produce",
+      "description": "Create the title formatter and its claimed verification evidence"
+    }
+  ]
+}
