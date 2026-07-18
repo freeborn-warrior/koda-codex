@@ -104,15 +104,65 @@ export async function removeReviewerJob(runRoot: string): Promise<void> {
   await rm(path.join(runRoot, REVIEWER_JOB_FILE), { force: true });
 }
 
-export async function acquireReviewerWindow(runRoot: string): Promise<() => Promise<void>> {
+type ReviewerLockOwner = { version: 1; pid: number; startedAt: string };
+
+async function reviewerLockOwner(lock: string): Promise<ReviewerLockOwner> {
+  const file = path.join(lock, "OWNER.json");
+  if (!(await lstat(file)).isFile()) throw new Error(`Reviewer lock owner must be a regular file: ${file}`);
+  const owner = JSON.parse(await readFile(file, "utf8")) as Partial<ReviewerLockOwner>;
+  if (owner.version !== 1 || !Number.isInteger(owner.pid) || owner.pid! < 1 || typeof owner.startedAt !== "string") {
+    throw new Error(`Reviewer lock owner is invalid: ${file}`);
+  }
+  return owner as ReviewerLockOwner;
+}
+
+export function processIsAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === "EPERM";
+  }
+}
+
+export async function reviewerWindowLockStatus(
+  runRoot: string,
+): Promise<{ pid: number; startedAt: string; alive: boolean } | null> {
+  const lock = path.join(runRoot, REVIEWER_LOCK_DIR);
+  if (!(await pathExists(lock))) return null;
+  if (!(await lstat(lock)).isDirectory()) throw new Error(`Reviewer lock must be a directory: ${lock}`);
+  const owner = await reviewerLockOwner(lock);
+  return { pid: owner.pid, startedAt: owner.startedAt, alive: processIsAlive(owner.pid) };
+}
+
+export async function acquireReviewerWindow(
+  runRoot: string,
+  options: { recoverStale?: boolean } = {},
+): Promise<() => Promise<void>> {
   const lock = path.join(runRoot, REVIEWER_LOCK_DIR);
   try {
     await mkdir(lock, { recursive: false });
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "EEXIST") {
-      throw new Error(`A reviewer window already owns this run. Lock: ${lock}`);
+      const owner = await reviewerLockOwner(lock);
+      if (processIsAlive(owner.pid)) {
+        throw new Error(`A reviewer window already owns this run as process ${owner.pid}. Lock: ${lock}`);
+      }
+      if (!options.recoverStale) {
+        throw new Error(`The reviewer-window lock belongs to stopped process ${owner.pid}. Recover explicitly with: npm run relay:reviewer -- --recover-stale-lock`);
+      }
+      await rm(lock, { recursive: true, force: true });
+      try {
+        await mkdir(lock, { recursive: false });
+      } catch (recoveryError) {
+        if ((recoveryError as NodeJS.ErrnoException).code === "EEXIST") {
+          throw new Error(`Another reviewer window claimed the run during stale-lock recovery. Lock: ${lock}`);
+        }
+        throw recoveryError;
+      }
+    } else {
+      throw error;
     }
-    throw error;
   }
   await writeJsonAtomic(path.join(lock, "OWNER.json"), {
     version: 1,

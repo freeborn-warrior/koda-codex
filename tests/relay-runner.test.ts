@@ -183,6 +183,7 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(packageJson, /"relay:execute"/);
   assert.match(packageJson, /"relay:producer"/);
   assert.match(packageJson, /"relay:reviewer"/);
+  assert.match(packageJson, /"relay:status"/);
   assert.match(packageJson, /"relay:review"/);
 });
 

@@ -70,6 +70,21 @@ npm run relay:reviewer
 
 Do not prepare another run merely because one window paused. Do not delete `REVIEWER-JOB.json`; it is the recovery evidence.
 
+At any time, a third terminal—or either window after it stops—can show the truth without changing it:
+
+```bash
+cd /Users/freeborn/Dev/koda-codex
+npm run relay:status
+```
+
+It reports the run, session, phase, both context IDs and turn counts, reviewer-console process, disk job, last error, and the next safe command. It refuses ambiguous or corrupt run state rather than choosing one. If the computer killed Window B without letting it clean up, status names the stopped process and prints the explicit recovery command:
+
+```bash
+npm run relay:reviewer -- --recover-stale-lock
+```
+
+That command removes a lock only after the recorded process is no longer alive. It refuses to displace a running reviewer window.
+
 ## Successful ending
 
 Success exists only when Window A prints `RELAY COMPLETE` and Window B prints `SESSION CLOSED`. The run's `RESULT.md` must say `Status: COMPLETE`, show distinct context IDs, record every phase advancement and owner acknowledgement, and name the pushed close commit.

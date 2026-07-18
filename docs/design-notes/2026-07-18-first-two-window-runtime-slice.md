@@ -32,6 +32,8 @@ non-interactive persistent producer           persistent owner-facing reviewer
 - Formal review, repair, fresh-review, consultation, and owner-only acknowledgement are distinct job kinds.
 - Window B persists reviewer context ID and turn count separately so it never races Window A's supervisor record.
 - If Window A stops after Window B has completed but before cleanup, resume consumes the completed job idempotently and re-derives the owner acknowledgement count from the ledger instead of incrementing cached state.
+- A read-only `relay:status` command reconstructs the current run, phase, contexts, lock process, job, error, and next safe action directly from disk. It refuses corrupt or multiple unfinished runs.
+- A stale reviewer lock is never removed merely because a second window asks. Explicit `--recover-stale-lock` succeeds only when the recorded process is no longer alive; a live process still refuses.
 - Both panes render model-emitted messages, completed checks, file changes, context IDs, and turn completion from raw Codex events. The complete JSONL remains evidence.
 - Protected review metadata and receipt lines are removed from the readable event rendering.
 - Window B snapshots the complete review before opening it and refuses if it changes while being read.

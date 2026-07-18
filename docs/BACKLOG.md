@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Build the first real two-window runtime slice: Window A streams the non-interactive persistent producer and automatically posts review/consultation jobs; Window B keeps the persistent reviewer, receives those jobs without a copied command, and owns the explicit receipt acknowledgement flow.
+- [ ] Run one genuine full-session live-model test of the new two-window runtime with Kristian present for the receipt actions; deterministic separate-process simulation is complete.
 - [ ] Replace the current test-harness-only owner experience with one simple, recoverable start procedure and named pause/abort states. Preserve the disk gate as the only authority.
 
 ## Next
@@ -31,6 +31,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Build and deterministically prove the first real two-window runtime slice: streamed non-interactive producer, automatic disk jobs, one persistent Window B reviewer, same-window exact owner receipt, in-phase owner ruling, separate-process rendezvous, and pushed close (`84a31fb`, evidence at `ece10c5`).
 
 - [x] Record the original one-document contract and owner ruling (`c205ebd`).
 - [x] Implement the first working receipt-gated CLI refusal and success (`6e4f1f8`).

@@ -35,7 +35,8 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const runsRoot = await realpath(process.env.KODA_RELAY_RUNS_ROOT
   ? path.resolve(process.env.KODA_RELAY_RUNS_ROOT)
   : path.join(root, "docs", "relay-runs"));
-const requested = process.argv[2];
+const recoverStaleLock = process.argv.includes("--recover-stale-lock");
+const requested = process.argv.slice(2).find((argument) => argument !== "--recover-stale-lock");
 let stopping = false;
 process.once("SIGINT", () => { stopping = true; });
 process.once("SIGTERM", () => { stopping = true; });
@@ -90,7 +91,8 @@ const expectedCli = await realpath(path.join(root, "src", "cli.ts"));
 const cli = await realpath(initialRun.cli);
 if (cli !== expectedCli) refuse("RUN.json does not name this checkout's trusted Koda CLI.");
 
-const releaseLock = await acquireReviewerWindow(runRoot).catch((error) => refuse(error instanceof Error ? error.message : String(error)));
+const releaseLock = await acquireReviewerWindow(runRoot, { recoverStale: recoverStaleLock })
+  .catch((error) => refuse(error instanceof Error ? error.message : String(error)));
 let state = await readReviewerWindowState(runRoot) ?? reviewerWindowState({
   status: "READY",
   model: initialRun.reviewer.model,

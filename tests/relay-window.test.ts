@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
-import { chmod, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -12,6 +12,7 @@ import {
   acquireReviewerWindow,
   newReviewerJob,
   REVIEWER_JOB_FILE,
+  REVIEWER_LOCK_DIR,
   readReviewerJob,
   readReviewerWindowState,
   redactRelayOutput,
@@ -101,6 +102,17 @@ test("TWO-WINDOW PROTOCOL: reviewer jobs are bounded and duplicate reviewer wind
   const release = await acquireReviewerWindow(temporary);
   await assert.rejects(acquireReviewerWindow(temporary), /already owns this run/);
   await release();
+
+  const staleLock = path.join(temporary, REVIEWER_LOCK_DIR);
+  await mkdir(staleLock);
+  await writeJsonAtomic(path.join(staleLock, "OWNER.json"), {
+    version: 1,
+    pid: 2_147_483_647,
+    startedAt: new Date(0).toISOString(),
+  });
+  await assert.rejects(acquireReviewerWindow(temporary), /stopped process.*recover-stale-lock/);
+  const releaseRecovered = await acquireReviewerWindow(temporary, { recoverStale: true });
+  await releaseRecovered();
 });
 
 test("TWO-WINDOW VISIBILITY: progress is readable without exposing review receipts", () => {
