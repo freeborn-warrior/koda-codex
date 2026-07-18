@@ -6,12 +6,14 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Verify root `AGENTS.md` and all nine `.agents/skills/` packages are discovered in a genuinely fresh Codex task.
-- [ ] Verify the one-line local `npx` path from a fresh checkout/package.
+- [ ] Prepare the real persistent producer/reviewer relay across a complete session without replacing the deterministic scenario proof.
 
 ## Next
 
+- [ ] Verify root `AGENTS.md` and all nine `.agents/skills/` packages are discovered in a genuinely fresh Codex task; the current task now lists all nine automatically, but durable startup evidence still needs recording.
+- [ ] Verify the one-line local `npx` path from a fresh checkout/package.
 - [ ] Run the medium-effort Terra and Luna fixture pairs only if submission time remains; preserve every run or skip honestly.
+- [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Design the long-lived, disk-recoverable guide/session-prompter from real use; decide whether it is one guide skill or a distinct prompt skill before creating either.
 - [ ] After the manual two-task relay is proved, design a supervisor that launches a non-interactive producer and owner-facing reviewer after an owner-approved prompt; keep all authority in the existing disk gate.
@@ -27,6 +29,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Add safe mutation serialization if real two-window use shows simultaneous write races.
 - [ ] Consider a clean-boundary Koda-C self-hosting session only as later validation; do not let it displace the producer/reviewer relay work.
 - [ ] Package Koda-C as an installable plugin only after repo-local skill discovery and the core relay are proved; evaluate trusted hooks without making the CLI depend on them.
+- [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 - [ ] Prepare the under-three-minute video script and submission checklist.
 
 ## Completed and pushed
@@ -41,7 +44,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Bind immutable `close.md` to every durable session file and the final review receipt.
 - [x] Prove close is not official before commit/push and `session new` refuses both uncommitted and local-only closes.
 - [x] Revalidate every prior advanced gate from disk before allowing work in the current phase.
-- [x] Run and preserve a complete tiny session through receipt refusal, advancement, immutable close, local-commit refusal, push, and verified closure under `docs/dogfood/`.
+- [x] Run and preserve the original tiny session through receipt refusal and pushed close, then supersede its snapshot with the full six-phase native-chain proof under `docs/dogfood/`.
 - [x] Write the judge-facing README plus one-minute and two-task demo instructions.
 - [x] Add two bounded reviewer fixtures: one planted unsupported number and one honest control.
 - [x] Add root `AGENTS.md` and correct repository skill packaging from top-level `skills/` to Codex's discoverable `.agents/skills/` path.
@@ -52,6 +55,9 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Define disk-backed in-phase consultation, producer stop classification, reviewer-to-owner escalation, and fresh formal-review independence.
 - [x] Make the reviewer Kristian's only in-session interface and require every reviewer-to-producer handback to exist as an artifact before use.
 - [x] Forward-test the shared reviewer in two separate fresh Sol/medium tasks: it caught the planted unsupported number and approved the honest control; preserve both runner failures and both valid results.
+- [x] Create a living Sol/Terra/Luna and effort-level overview that distinguishes passes, failures, invalid attempts, and unrun cells.
+- [x] Prove three complete native chains through pushed close: clean approval, REVISE recovery in plan, and DISCUSS/owner-ruling recovery in live.
+- [x] Preserve an inspectable full six-phase dogfood transcript with six artifacts, six reviews, six receipts, immutable close, commit, and push.
 
 ## Definition of target (a) done
 

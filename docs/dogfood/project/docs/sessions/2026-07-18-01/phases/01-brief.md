@@ -1,12 +1,17 @@
 # Brief
 
-## Source contract
+## Evidence basis
 - [Session prompt](../session-prompt.md)
 
 ## Outcome
-Choose one welcoming seed-library name and explain it in one sentence.
+Create one welcoming seed-library name and explain it in one sentence.
+
+## Limits
+One plain-text deliverable; no branding system, website, or implementation.
+
+## Success evidence
+Inspect the saved line and confirm it contains one name plus one explanatory sentence.
 
 ## Review handover
 - Immediate receiver: `koda-c-review`
-- Evidence to inspect: this brief and `../session-prompt.md`
 - Unresolved items: none

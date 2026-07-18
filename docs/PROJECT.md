@@ -10,6 +10,8 @@ The discipline is domain-general: the produced thing may be code, prose, researc
 
 The product originates in Kristian's repeated real workflow across C++, Swift, and Rust projects: session prompt → brief → orient → plan → produce → live → summary → push, with every phase handed to a separate reviewer chat. Koda-C automates and hardens that relay so phase depth survives without manual copy-paste.
 
+Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every project. Its disk gate, verdict routing, receipt proof, session state, and close ceremony are stable infrastructure. A project using it should carry its own purpose-adapted `AGENTS.md`, phase skills, artifact shapes, review criteria, evidence sources, and verification commands. Writing and software projects share the relay discipline while requiring materially different producer and reviewer behavior.
+
 ## Owner decisions currently in force
 
 - The build itself uses Codex's normal engineering workflow; the phase discipline lives in the product, not the process that made it.
@@ -60,8 +62,9 @@ owner contract
 - Immutable close-artifact hashing plus Git-derived commit/push verification.
 - Repository-local Koda-C skills: seven producer relay legs, one shared reviewer, and one close ceremony.
 - A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda session.
-- A preserved tiny end-to-end session and normalized transcript under `docs/dogfood/`.
+- A preserved full native-chain session and normalized transcript under `docs/dogfood/`.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
+- The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.
 
 ## Build evidence
 
@@ -97,6 +100,8 @@ Any future contradiction—not merely an extension—requires Kristian's explici
 Guide, explore, architect, and triage remain named role lenses for later skills. They do not expand the core CLI and are not part of the current target until the gate, skill relay, closure, dogfood run, and judge demo are complete.
 
 Self-hosting Koda-C development remains an optional later validation, not the current goal. The current goal is to make the two-context producer/reviewer/owner relay strong across every phase and prove that relay in genuinely fresh tasks.
+
+The later adoption layer must turn an owner's project purpose into project-local operating material without weakening the invariant gate. Likely starting profiles are writing and software, but a profile is only a starting point: the resulting `AGENTS.md`, producer artifacts, live checks, and shared-reviewer criteria must be adapted to the actual project and remain in that project's repository. The exact bootstrap command and authoring ceremony are not yet settled.
 
 Between sessions, the leading owner-facing role is a guide/session-prompter with a long-lived project conversation. Its continuity is reconstructed from project state, prior pushed close, summary, backlog, and design notes rather than trusted to chat memory alone. It writes the next session prompt with Kristian; Kristian then invokes the existing `koda-c-session` ceremony in the producer window with that prompt. The ceremony validates and consumes the artifact without interviewing him. Whether guide and session-prompter become one skill is intentionally still open.
 

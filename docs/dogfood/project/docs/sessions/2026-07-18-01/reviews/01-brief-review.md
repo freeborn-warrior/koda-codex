@@ -1,13 +1,13 @@
 VERDICT: APPROVE
 
-<!-- KODA_REVIEW {"version":1,"id":"f9ece375-a33e-49ab-ac62-fb5c80ca4f87","phase":"brief","artifactSha256":"885f52d56760a5b92479a298e2ebed6e182103231e7e643baab60f80ca2b1786","receipt":"RECEIPT: Review read — f9ece375-a33e-49ab-ac62-fb5c80ca4f87","createdAt":"2026-07-18T14:02:32.012Z"} -->
+<!-- KODA_REVIEW {"version":1,"id":"93c98583-dc68-4761-8581-6af6d732271e","phase":"brief","artifactSha256":"a76fd7b7b6052d2db30e5f23dd37201b0cecb7756a0a0059a4a0eb8b5b4660c5","receipt":"RECEIPT: Review read — 93c98583-dc68-4761-8581-6af6d732271e","createdAt":"2026-07-18T14:56:55.937Z"} -->
 
 # Peer review — brief
 
 ## Evidence checked
-- `phases/01-brief.md` against `session-prompt.md`.
+- `phases/01-brief.md` and every file it cites.
 
 ## Findings
-- The brief preserves the requested one-sentence scope and supplies a clear review handover.
+- The brief artifact stays within the session prompt, distinguishes current evidence from future ceremony, and provides a checkable handover.
 
-RECEIPT: Review read — f9ece375-a33e-49ab-ac62-fb5c80ca4f87
+RECEIPT: Review read — 93c98583-dc68-4761-8581-6af6d732271e

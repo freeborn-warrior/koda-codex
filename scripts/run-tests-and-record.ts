@@ -25,7 +25,11 @@ const result = spawnSync(process.execPath, commandArgs, {
   encoding: "utf8",
   env: process.env,
 });
-const output = `${result.stdout ?? ""}${result.stderr ?? ""}`.trimEnd();
+const output = `${result.stdout ?? ""}${result.stderr ?? ""}`
+  .trimEnd()
+  .split(/\r?\n/)
+  .map((line) => line.trimEnd())
+  .join("\n");
 const git = spawnSync("git", ["rev-parse", "--short", "HEAD"], { cwd: root, encoding: "utf8" });
 const baseCommit = git.status === 0 ? git.stdout.trim() : "unavailable";
 const status = result.status === 0 ? "PASS" : "FAIL";

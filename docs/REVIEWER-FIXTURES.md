@@ -59,6 +59,8 @@ The preparation command accepts `low`, `medium`, `high`, or `xhigh` effort. Begi
 
 Only expand effort levels after those six runs, preferably where results differ or a model fails. Max and Ultra are excluded from the first comparable matrix: current OpenAI guidance describes Ultra as automatic subagent delegation, which changes the experimental unit from one reviewer model to an orchestrated group.
 
+The current cross-run overview lives in [`MODEL-TEST-MATRIX.md`](MODEL-TEST-MATRIX.md). Update it from preserved `RESULT.md` evidence after grading every run; never update a matrix cell from expected fixture metadata alone.
+
 ## Expansion rule
 
 Do not add more fixtures until target (a) is secure. Later candidates are one unsupported file claim and one comment that misdescribes adjacent code. The Sol/Terra/Luna and effort comparison uses these same fixtures so capability and temperament are measured against stable controls.

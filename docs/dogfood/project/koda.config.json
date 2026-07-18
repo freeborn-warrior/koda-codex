@@ -4,7 +4,27 @@
   "phases": [
     {
       "name": "brief",
-      "description": "Define one tiny checkable outcome"
+      "description": "What we are doing, why, and the limits"
+    },
+    {
+      "name": "orient",
+      "description": "Read and record the actual ground before planning"
+    },
+    {
+      "name": "plan",
+      "description": "Set out the work in checkable steps"
+    },
+    {
+      "name": "produce",
+      "description": "Create the session's real output"
+    },
+    {
+      "name": "live",
+      "description": "Exercise the real output and record what happened"
+    },
+    {
+      "name": "summary",
+      "description": "Verify and record what was completed"
     }
   ]
 }

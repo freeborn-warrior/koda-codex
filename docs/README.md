@@ -6,6 +6,8 @@ Koda-C is a small, headless phase gate over plain files. It refuses to advance w
 
 No UI, daemon, database, or hidden conversational state. The files are the truth.
 
+This repository is the competition entry and the meta-harness, not a universal ready-made project persona. Koda-C keeps the proof mechanism stable; each project is expected to keep purpose-specific `AGENTS.md`, producer skills, shared-reviewer criteria, evidence shapes, and verification commands in its own repository. A novel-writing project and a Rust project can use the same gate without pretending their work or review standards are interchangeable.
+
 ## Why it exists
 
 Kristian developed this phase method while building products in C++, Swift, and Rust as a designer rather than a programmer: session prompt, brief, orient, plan, produce, live, summary, then push. The sequence grew from observing what stopped repeated rework. When he added an independent LLM reviewer, each phase became a manual relay between separate chats—better judgment, but an absurd amount of copy-paste.
@@ -99,9 +101,11 @@ npm run dogfood
 
 The suite deliberately breaks every gate condition and proves refusal: missing/empty artifacts, missing or malformed reviews, bad verdicts, missing/mismatched/reused receipts, altered artifacts, broken ledger proof, missing approver/comments, and every blocking verdict. It also executes recovery commands from the states that printed them.
 
-The committed [dogfood transcript](dogfood/TRANSCRIPT.md) preserves a complete tiny session: receipt refusal, approval, gate success, immutable close preparation, refusal after local commit, Git push, and derived `SESSION CLOSED`. Its session snapshot is also committed and re-hashed by the test suite.
+The committed [dogfood transcript](dogfood/TRANSCRIPT.md) preserves the complete six-phase native chain: review refusal, receipt refusal, and gate success at every phase, followed by immutable close preparation, refusal after local commit, Git push, and derived `SESSION CLOSED`. Its session snapshot is also committed and re-hashed by the test suite.
 
 Every run—including defects and corrected test assertions—is recorded in [TESTING.md](TESTING.md), with dated [per-test transcripts](test-results/) that name every individual result. The blind model-assisted protocol and honest control are documented in [REVIEWER-FIXTURES.md](REVIEWER-FIXTURES.md). Current Codex skill-platform implications are captured in a [dated design note](design-notes/2026-07-18-codex-skill-platform.md). Current build direction and status live in [PROJECT.md](PROJECT.md) and [BACKLOG.md](BACKLOG.md).
+
+The [reviewer model and effort matrix](MODEL-TEST-MATRIX.md) summarizes only runs that actually exist, keeps Terra/Luna and untested effort levels visibly unrun, and separates comparative behavioral evidence from claims about cognition.
 
 ## How this was built
 
@@ -116,6 +120,8 @@ No external model or benchmark was used. Deterministic tests are marked model-no
 ## Project boundary and roadmap
 
 Koda-C stays a clean plain-file engine. Guide, explore, architect, and triage remain roadmap role lenses implemented as future skills, not new CLI machinery. A dashboard, editor extension, or bot can later consume the same files and a future machine-readable status mode without owning the process.
+
+The next adoption layer is project adaptation. It should help create project-local guidance and relay skills from the owner's actual purpose, with writing and software as initial profiles, while preserving any existing project instructions and keeping all generated material inside that project. That bootstrap layer is not implemented in the current entry and must not be confused with the already working gate.
 
 The mature runtime is one owner-facing guide/reviewer and one non-interactive producer: Kristian approves a written session prompt in the guide interface, a supervisor launches the session, and every later producer input arrives through reviewer-authored files. The current release documents and tests the manual two-task relay; it does not yet claim automatic process launch or unattended orchestration. See the [dated runtime design](design-notes/2026-07-18-owner-facing-session-runtime.md).
 

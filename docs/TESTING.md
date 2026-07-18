@@ -250,3 +250,30 @@ Both successful tasks emitted repeated local model-cache parse warnings about `s
 - **How:** Ran `npm run test:record -- 2026-07-18-reviewer-runner-final`; every named result is preserved in [the per-test result](test-results/2026-07-18-reviewer-runner-final.md).
 - **What happened:** All 66 checks passed. Regression checks require `--ask-for-approval never` before the `exec` subcommand, forbid the broken post-subcommand shorthand, and require the prepared result lines to be joined with newlines.
 - **Verdict:** PASS. The failed attempts remain recorded; their tests were not weakened or erased.
+
+## 2026-07-18 — Full native lifecycle scenarios, first run
+
+- **Variant:** Not applicable; deterministic Node.js and local Git scenarios.
+- **Effort:** Not applicable.
+- **What:** Three complete native chains: clean approval, REVISE recovery in plan, and DISCUSS with an owner ruling plus fresh live review. Every scenario traverses brief → orient → plan → produce → live → summary and reaches a pushed immutable close.
+- **How:** Added three independent temporary-project tests and strengthened the committed dogfood test to require all six native phases, then ran `npm test` before replacing the old snapshot.
+- **What happened:** All three new full-lifecycle scenarios passed. The complete suite reported 68 of 69 passing because the committed dogfood snapshot still honestly contained only its prior one-phase brief session.
+- **Verdict:** EXPECTED EVIDENCE MIGRATION FAILURE. Regenerate the dogfood through the full native chain; do not weaken the six-phase assertion or call the old snapshot sufficient.
+
+## 2026-07-18 — Full native lifecycle scenarios, corrected run
+
+- **Variant:** Not applicable; deterministic Node.js and local Git scenarios.
+- **Effort:** Not applicable.
+- **What:** The complete repository after regenerating dogfood through all six native phases and retaining the clean, REVISE, and DISCUSS scenario tests.
+- **How:** Ran `npm run dogfood`, inspected the resulting six artifacts, six reviews, six advancement records, close metadata, and transcript, then ran `npm run test:record -- 2026-07-18-full-native-lifecycle-final`. Every named test is preserved in [the per-test result](test-results/2026-07-18-full-native-lifecycle-final.md).
+- **What happened:** All 69 checks passed. Each of the three full-session scenarios reached an immutable close committed and pushed to its own temporary Git remote. The preserved clean dogfood separately refused twice per phase—first without review, then without receipt—before every gate opened and summary handed to pushed close.
+- **Verdict:** PASS. Mechanical support for the full native lifecycle is now proved across multiple routes; actual model-driven producer/reviewer operation across that lifecycle remains a separate next proof.
+
+## 2026-07-18 — Full native lifecycle coverage
+
+- **Variant:** Not applicable; Node.js coverage runner plus local Git scenario repositories.
+- **Effort:** Not applicable.
+- **What:** Coverage after adding three six-phase pushed-close scenarios and the full native dogfood snapshot.
+- **How:** Ran `npm run test:record -- 2026-07-18-full-native-lifecycle-coverage --coverage`; every result and the complete coverage table are preserved in [the per-test result](test-results/2026-07-18-full-native-lifecycle-coverage.md).
+- **What happened:** All 69 checks passed. Overall coverage increased to 88.24% lines, 72.46% branches, and 91.75% functions. `gate.ts` remains 100% for lines, branches, and functions.
+- **Verdict:** PASS. Adding lifecycle scenarios did not reduce mutation coverage or weaken any refusal test.

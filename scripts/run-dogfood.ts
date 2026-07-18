@@ -71,16 +71,19 @@ try {
   koda(["init", "."]);
   const configPath = path.join(project, "koda.config.json");
   const config = JSON.parse(await readFile(configPath, "utf8"));
-  config.phases = [{ name: "brief", description: "Define one tiny checkable outcome" }];
-  await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
-  note("Configured one phase (`brief`) to keep the proof tiny while exercising the complete session lifecycle.");
+  const phaseNames = config.phases.map((phase: { name: string }) => phase.name);
+  if (phaseNames.join(",") !== "brief,orient,plan,produce,live,summary") {
+    throw new Error(`Unexpected native phase chain: ${phaseNames.join(",")}`);
+  }
+  note("Kept the complete native chain: brief → orient → plan → produce → live → summary.");
 
   const promptPath = path.join(project, "owner-prompt.md");
   await writeFile(promptPath, [
     "# Session prompt",
     "",
-    "Create a one-sentence brief for a neighborhood seed-library name.",
-    "Keep the proof small enough to inspect in under a minute.",
+    "Create and verify a one-line concept for a neighborhood seed library.",
+    "The deliverable must contain one welcoming name and one sentence explaining it.",
+    "Keep the complete session small enough for every phase artifact to remain inspectable.",
     "",
   ].join("\n"), "utf8");
   note("Wrote the owner's opening contract to owner-prompt.md.");
@@ -89,52 +92,157 @@ try {
   const sessionsDir = path.join(project, "docs", "sessions");
   const sessionId = (await readdir(sessionsDir)).sort().at(-1)!;
   const sessionDir = path.join(sessionsDir, sessionId);
-  const artifactPath = path.join(sessionDir, "phases", "01-brief.md");
-  await writeFile(artifactPath, [
-    "# Brief",
-    "",
-    "## Source contract",
-    "- [Session prompt](../session-prompt.md)",
-    "",
-    "## Outcome",
-    "Choose one welcoming seed-library name and explain it in one sentence.",
-    "",
-    "## Review handover",
-    "- Immediate receiver: `koda-c-review`",
-    "- Evidence to inspect: this brief and `../session-prompt.md`",
-    "- Unresolved items: none",
-    "",
-  ].join("\n"), "utf8");
-  note("The producer wrote the brief artifact and stopped without creating its review.");
+  const deliverablePath = path.join(project, "deliverable", "seed-library-concept.txt");
+  const artifacts: Record<string, string[]> = {
+    brief: [
+      "# Brief",
+      "",
+      "## Evidence basis",
+      "- [Session prompt](../session-prompt.md)",
+      "",
+      "## Outcome",
+      "Create one welcoming seed-library name and explain it in one sentence.",
+      "",
+      "## Limits",
+      "One plain-text deliverable; no branding system, website, or implementation.",
+      "",
+      "## Success evidence",
+      "Inspect the saved line and confirm it contains one name plus one explanatory sentence.",
+      "",
+      "## Review handover",
+      "- Immediate receiver: `koda-c-review`",
+      "- Unresolved items: none",
+      "",
+    ],
+    orient: [
+      "# Orient",
+      "",
+      "## Evidence inspected",
+      "- [Session prompt](../session-prompt.md)",
+      "- [Approved brief](01-brief.md)",
+      "",
+      "## Ground",
+      "The requested output is a single local text line containing a welcoming name and explanation.",
+      "",
+      "## Constraints and unknowns",
+      "No visual identity, implementation, audience research, or publishing is requested. No blocking unknown remains.",
+      "",
+      "## Review handover",
+      "- Immediate receiver: `koda-c-review`",
+      "",
+    ],
+    plan: [
+      "# Plan",
+      "",
+      "## Approved inputs",
+      "- [Brief](01-brief.md)",
+      "- [Orientation](02-orient.md)",
+      "",
+      "## Ordered work",
+      "1. Choose one welcoming name.",
+      "2. Write one sentence explaining its neighborhood seed-sharing purpose.",
+      "3. Save exactly one non-empty line.",
+      "4. Inspect the saved file and reject extra lines or unrelated scope.",
+      "",
+      "## Review handover",
+      "- Immediate receiver: `koda-c-review`",
+      "",
+    ],
+    produce: [
+      "# Produce",
+      "",
+      "## Approved inputs",
+      "- [Plan](03-plan.md)",
+      "",
+      "## Produced file",
+      "- [`deliverable/seed-library-concept.txt`](../../../../deliverable/seed-library-concept.txt)",
+      "",
+      "## Requirement mapping",
+      "The file contains one welcoming name followed by one explanatory sentence on the same line.",
+      "",
+      "## Review handover",
+      "- Immediate receiver: `koda-c-review`",
+      "",
+    ],
+    live: [
+      "# Live",
+      "",
+      "## Real output exercised",
+      "Read `deliverable/seed-library-concept.txt` from disk after production.",
+      "",
+      "## Observed result",
+      "The file was non-empty and contained exactly one line: “Common Ground Seeds — A neighborhood library where shared seeds grow shared abundance.”",
+      "",
+      "## Review handover",
+      "- Immediate receiver: `koda-c-review`",
+      "",
+    ],
+    summary: [
+      "# Summary",
+      "",
+      "## Evidence checked",
+      "- [Brief](01-brief.md)",
+      "- [Orient](02-orient.md)",
+      "- [Plan](03-plan.md)",
+      "- [Produce](04-produce.md)",
+      "- [Live](05-live.md)",
+      "",
+      "## Completed",
+      "One local text deliverable was produced and inspected against the bounded session prompt.",
+      "",
+      "## Carry-forward",
+      "None.",
+      "",
+      "## Closure state",
+      "Session closure remains pending until the separate immutable close, commit, and push ceremony succeeds.",
+      "",
+      "## Review handover",
+      "- Immediate receiver: `koda-c-review`",
+      "",
+    ],
+  };
 
-  koda(["advance"], 2);
-  koda(["review", "new", "brief"]);
+  for (const [index, phase] of phaseNames.entries()) {
+    if (phase === "produce") {
+      await mkdir(path.dirname(deliverablePath), { recursive: true });
+      await writeFile(deliverablePath, "Common Ground Seeds — A neighborhood library where shared seeds grow shared abundance.\n", "utf8");
+      note("The produce leg wrote the declared real output before writing its evidence manifest.");
+    }
 
-  const reviewPath = path.join(sessionDir, "reviews", "01-brief-review.md");
-  const generatedReview = await readFile(reviewPath, "utf8");
-  const metadata = generatedReview.split("\n").find((line) => line.startsWith("<!-- KODA_REVIEW "))!;
-  const receipt = generatedReview.trimEnd().split("\n").at(-1)!;
-  await writeFile(reviewPath, [
-    "VERDICT: APPROVE",
-    "",
-    metadata,
-    "",
-    "# Peer review — brief",
-    "",
-    "## Evidence checked",
-    "- `phases/01-brief.md` against `session-prompt.md`.",
-    "",
-    "## Findings",
-    "- The brief preserves the requested one-sentence scope and supplies a clear review handover.",
-    "",
-    receipt,
-    "",
-  ].join("\n"), "utf8");
-  note("A separate reviewer step wrote an APPROVE review while preserving generated metadata and receipt. No model was invoked in this deterministic proof.");
+    const prefix = String(index + 1).padStart(2, "0");
+    const artifactPath = path.join(sessionDir, "phases", `${prefix}-${phase}.md`);
+    await writeFile(artifactPath, artifacts[phase].join("\n"), "utf8");
+    note(`The ${phase} producer leg wrote ${prefix}-${phase}.md and stopped without creating its review.`);
 
-  koda(["advance"], 2);
-  koda(["approve", "brief", receipt, "--approver", "Dogfood Owner"]);
-  koda(["advance"]);
+    koda(["advance"], 2);
+    koda(["review", "new", phase]);
+
+    const reviewPath = path.join(sessionDir, "reviews", `${prefix}-${phase}-review.md`);
+    const generatedReview = await readFile(reviewPath, "utf8");
+    const metadata = generatedReview.split("\n").find((line) => line.startsWith("<!-- KODA_REVIEW "))!;
+    const receipt = generatedReview.trimEnd().split("\n").at(-1)!;
+    await writeFile(reviewPath, [
+      "VERDICT: APPROVE",
+      "",
+      metadata,
+      "",
+      `# Peer review — ${phase}`,
+      "",
+      "## Evidence checked",
+      `- \`phases/${prefix}-${phase}.md\` and every file it cites.`,
+      "",
+      "## Findings",
+      `- The ${phase} artifact stays within the session prompt, distinguishes current evidence from future ceremony, and provides a checkable handover.`,
+      "",
+      receipt,
+      "",
+    ].join("\n"), "utf8");
+    note(`A separate deterministic reviewer step wrote APPROVE for ${phase}, preserving protected metadata and receipt. No model was invoked.`);
+
+    koda(["advance"], 2);
+    koda(["approve", phase, receipt, "--approver", "Dogfood Owner"]);
+    koda(["advance"]);
+  }
   const closePrepared = koda(["session", "close"], 2);
   const printedGit = String(closePrepared.stdout).split("\n")
     .map((line) => line.trim())
@@ -160,14 +268,15 @@ try {
     filter: (source) => path.basename(source) !== ".git",
   });
   const document = [
-    "# Tiny end-to-end dogfood transcript",
+    "# Full native-chain deterministic dogfood transcript",
     "",
     "- **Date:** 2026-07-18",
     "- **Model variant / effort:** Not applicable; this is a deterministic CLI lifecycle proof.",
-    "- **Project:** Disposable one-phase Koda project, preserved below without its temporary `.git` directory.",
+    "- **Project:** Disposable six-phase Koda project, preserved below without its temporary `.git` directory.",
     "- **Git proof:** A local bare remote proves the required commit/push boundary without relying on network state.",
     `- **Pushed close commit:** \`${commit}\``,
-    "- **Verdict:** PASS if the final commands report both `SESSION CLOSED` and a derived closed status.",
+    "- **Scenario:** Clean approval through brief → orient → plan → produce → live → summary.",
+    "- **Verdict:** PASS if every phase first refuses without review and receipt, every gate later opens, and the final commands report both `SESSION CLOSED` and a derived closed status.",
     "",
     "Commands are displayed as `koda`; the harness executed this repository's `src/cli.ts` through Node.",
     "",

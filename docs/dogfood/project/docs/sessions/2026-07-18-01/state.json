@@ -1,20 +1,70 @@
 {
   "version": 1,
   "id": "2026-07-18-01",
-  "createdAt": "2026-07-18T14:02:31.836Z",
+  "createdAt": "2026-07-18T14:56:55.760Z",
   "phases": [
     {
       "name": "brief",
-      "description": "Define one tiny checkable outcome"
+      "description": "What we are doing, why, and the limits"
+    },
+    {
+      "name": "orient",
+      "description": "Read and record the actual ground before planning"
+    },
+    {
+      "name": "plan",
+      "description": "Set out the work in checkable steps"
+    },
+    {
+      "name": "produce",
+      "description": "Create the session's real output"
+    },
+    {
+      "name": "live",
+      "description": "Exercise the real output and record what happened"
+    },
+    {
+      "name": "summary",
+      "description": "Verify and record what was completed"
     }
   ],
-  "currentPhaseIndex": 1,
+  "currentPhaseIndex": 6,
   "advances": [
     {
       "phase": "brief",
-      "receipt": "RECEIPT: Review read — f9ece375-a33e-49ab-ac62-fb5c80ca4f87",
-      "reviewId": "f9ece375-a33e-49ab-ac62-fb5c80ca4f87",
-      "advancedAt": "2026-07-18T14:02:32.277Z"
+      "receipt": "RECEIPT: Review read — 93c98583-dc68-4761-8581-6af6d732271e",
+      "reviewId": "93c98583-dc68-4761-8581-6af6d732271e",
+      "advancedAt": "2026-07-18T14:56:56.211Z"
+    },
+    {
+      "phase": "orient",
+      "receipt": "RECEIPT: Review read — 3c03e869-55b6-42a7-9777-03b937fa4119",
+      "reviewId": "3c03e869-55b6-42a7-9777-03b937fa4119",
+      "advancedAt": "2026-07-18T14:56:56.674Z"
+    },
+    {
+      "phase": "plan",
+      "receipt": "RECEIPT: Review read — 51be65ad-b1eb-4472-b668-0112d878fbfa",
+      "reviewId": "51be65ad-b1eb-4472-b668-0112d878fbfa",
+      "advancedAt": "2026-07-18T14:56:57.111Z"
+    },
+    {
+      "phase": "produce",
+      "receipt": "RECEIPT: Review read — 661387d0-7942-441a-b211-f73cc4cd4364",
+      "reviewId": "661387d0-7942-441a-b211-f73cc4cd4364",
+      "advancedAt": "2026-07-18T14:56:57.563Z"
+    },
+    {
+      "phase": "live",
+      "receipt": "RECEIPT: Review read — 654e930f-8ca8-4aa8-aff2-8f9287971cc5",
+      "reviewId": "654e930f-8ca8-4aa8-aff2-8f9287971cc5",
+      "advancedAt": "2026-07-18T14:56:58.004Z"
+    },
+    {
+      "phase": "summary",
+      "receipt": "RECEIPT: Review read — 7bbd5174-a950-4ce2-95b6-0aa29880522f",
+      "reviewId": "7bbd5174-a950-4ce2-95b6-0aa29880522f",
+      "advancedAt": "2026-07-18T14:56:58.472Z"
     }
   ]
 }
