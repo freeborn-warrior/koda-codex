@@ -15,7 +15,7 @@ This repository is the competition entry and the meta-harness, not a universal r
 1. **Run without rebuilding:** `node dist/cli.js --help`.
 2. **See the refusal:** follow the [one-minute fixture](DEMO.md#one-minute-mechanical-proof).
 3. **Inspect the real relay:** the [genuine six-phase result](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md) records distinct persistent producer/reviewer contexts, an unplanned Summary REVISE, seven owner acknowledgements, and pushed close.
-4. **Check the claims:** the [106-check transcript](test-results/2026-07-18-relay-status-recovery-final.md), [model matrix](MODEL-TEST-MATRIX.md), [fresh skill-discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md), and [safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md) are all committed evidence.
+4. **Check the claims:** the [107-check transcript](test-results/2026-07-18-owner-review-discussion-final.md), [model matrix](MODEL-TEST-MATRIX.md), [fresh skill-discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md), and [safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md) are all committed evidence.
 
 Tested here on macOS 26.5.1 arm64 with Node.js 26.0.0 and Apple Git 2.50.1. The core requires Node.js 22.18+ and Git; other platforms are not claimed as tested. The current reviewer window uses macOS `less` and `pbcopy` for the owner-reading ceremony.
 

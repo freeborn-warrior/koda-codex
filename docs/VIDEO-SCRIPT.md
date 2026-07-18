@@ -142,7 +142,7 @@ Narration:
 
 > I brought the product discipline and made the calls about roles, gates, owner
 > attention, and honest limits. GPT-5.6 Codex implemented the CLI, nine skills,
-> relay, security fixes, and one hundred and six checks. We kept every failed attempt and
+> relay, security fixes, and one hundred and seven checks. We kept every failed attempt and
 > correction in dated Git history. The discipline lives in the tool; I chose to
 > let Codex build it in its own engineering order.
 
