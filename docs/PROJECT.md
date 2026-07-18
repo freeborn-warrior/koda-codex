@@ -24,6 +24,7 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - A producer hands its artifact to the reviewer. Only an allowed verdict, owner receipt, and `advance` activate the next phase from config.
 - Session closure is an immutable artifact with Git between preparation and verification. A new session cannot open until that close is pushed.
 - The current target keeps owner receipt acknowledgement at every gate. Exception-only owner attention is a distinct open policy decision and must not be introduced silently.
+- The competition entry is licensed under GPLv3 only, with `Copyright (C) 2026 Kristian Bengtsson` as the sole project copyright line.
 
 ## Lifecycle
 

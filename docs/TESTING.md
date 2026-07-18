@@ -277,3 +277,12 @@ Both successful tasks emitted repeated local model-cache parse warnings about `s
 - **How:** Ran `npm run test:record -- 2026-07-18-full-native-lifecycle-coverage --coverage`; every result and the complete coverage table are preserved in [the per-test result](test-results/2026-07-18-full-native-lifecycle-coverage.md).
 - **What happened:** All 69 checks passed. Overall coverage increased to 88.24% lines, 72.46% branches, and 91.75% functions. `gate.ts` remains 100% for lines, branches, and functions.
 - **Verdict:** PASS. Adding lifecycle scenarios did not reduce mutation coverage or weaken any refusal test.
+
+## 2026-07-18 — GPLv3 ownership and package metadata
+
+- **Variant:** Not applicable; deterministic file and package validation.
+- **Effort:** Not applicable.
+- **What:** Owner-directed replacement of MIT with GPLv3 only and the sole project copyright line `Copyright (C) 2026 Kristian Bengtsson`.
+- **How:** Retrieved the canonical GPLv3 text from GNU, added the project copyright header, set package metadata to `GPL-3.0-only`, added the README license section, and compared the license body after the header byte-for-byte with GNU's source. Both SHA-256 values were `3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986`. Then ran `npm run test:record -- 2026-07-18-gplv3-license-final`; every named result is preserved in [the per-test result](test-results/2026-07-18-gplv3-license-final.md).
+- **What happened:** All 70 checks passed, including the real packaged executable. The license test requires the exact owner line, GPLv3 title, standard sections 0 and 17, end marker, full-text size, package SPDX identifier, and README notice.
+- **Verdict:** PASS. The complete standard GPLv3 body is intact and package/readme metadata agree.

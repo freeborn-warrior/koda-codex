@@ -32,7 +32,7 @@
   "engines": {
     "node": ">=22.18"
   },
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "keywords": [
     "codex",
     "workflow",

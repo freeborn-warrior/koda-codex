@@ -128,3 +128,9 @@ The mature runtime is one owner-facing guide/reviewer and one non-interactive pr
 The current build record and deliberate extensions from the starting document are tracked in [PROJECT.md](PROJECT.md#drift-watch-against-the-starting-document).
 
 The conservative current policy requires Kristian's acknowledgement at every gate. A later config setting may separate **gate acknowledgement** from **owner attention**: every review would still receive attributable receipt proof, while a `decisions_only` mode could stop Kristian only for `DISCUSS` or an explicit owner-attention marker. That policy remains a documented owner decision, not behavior this release quietly assumes.
+
+## License
+
+Koda-C is licensed under the [GNU General Public License version 3](../LICENSE) (`GPL-3.0-only`).
+
+Copyright (C) 2026 Kristian Bengtsson
