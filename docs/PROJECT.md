@@ -96,6 +96,8 @@ owner contract
 - [Fresh public-checkout local npx proof](package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md)
 - [Safety and threat boundaries](SECURITY.md)
 - [Dated local safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md)
+- [Under-three-minute recording script](VIDEO-SCRIPT.md)
+- [Live-rules submission checklist](SUBMISSION-CHECKLIST.md)
 - Git history on `main` contains honest pushed milestones.
 
 ## Drift watch against the starting document

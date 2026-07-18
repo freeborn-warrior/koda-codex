@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Finish submission-critical proof and polish: judge journey, video script, and submission checklist.
+- [ ] Finish submission-critical proof and polish: final hygiene, owner recording, and external submission.
 
 ## Next
 
@@ -27,7 +27,6 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Consider a clean-boundary Koda-C self-hosting session only as later validation; do not let it displace the producer/reviewer relay work.
 - [ ] Package Koda-C as an installable plugin only after repo-local skill discovery and the core relay are proved; evaluate trusted hooks without making the CLI depend on them.
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
-- [ ] Prepare the under-three-minute video script and submission checklist.
 
 ## Completed and pushed
 
@@ -64,6 +63,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Prove root `AGENTS.md` and all nine `.agents/skills/` packages are injected into a fresh ephemeral Codex task without tool calls or repository reads; preserve raw events and bind the result into the permanent suite.
 - [x] Run the README's exact one-line local `npx` path from a fresh public checkout, preserve the first executable-mode failure, correct it in the build and Git, and prove the pushed checkout remains clean afterward.
 - [x] Audit package and runtime safety; close ignored-file and linked-evidence gaps, constrain relay paths, scan tracked content, and document the honest threat and concurrency boundaries.
+- [x] Verify the live Build Week rules and produce the judge path, under-three-minute Ghostty script, text-description draft, and owner-ready submission checklist.
 
 ## Definition of target (a) done
 

@@ -10,6 +10,15 @@ No UI, daemon, database, or hidden conversational state. The files are the truth
 
 This repository is the competition entry and the meta-harness, not a universal ready-made project persona. Koda-C keeps the proof mechanism stable; each project is expected to keep purpose-specific `AGENTS.md`, producer skills, shared-reviewer criteria, evidence shapes, and verification commands in its own repository. A novel-writing project and a Rust project can use the same gate without pretending their work or review standards are interchangeable.
 
+## Judge path
+
+1. **Run without rebuilding:** `node dist/cli.js --help`.
+2. **See the refusal:** follow the [one-minute fixture](DEMO.md#one-minute-mechanical-proof).
+3. **Inspect the real relay:** the [genuine six-phase result](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md) records distinct persistent producer/reviewer contexts, an unplanned Summary REVISE, seven owner acknowledgements, and pushed close.
+4. **Check the claims:** the [96-check transcript](test-results/2026-07-18-judge-journey-corrected.md), [model matrix](MODEL-TEST-MATRIX.md), [fresh skill-discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md), and [safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md) are all committed evidence.
+
+Tested here on macOS 26.5.1 arm64 with Node.js 26.0.0 and Apple Git 2.50.1. The core requires Node.js 22.18+ and Git; other platforms are not claimed as tested. The optional one-command owner reader currently uses macOS `less` and `pbcopy`.
+
 ## Why it exists
 
 Kristian developed this phase method while building products in C++, Swift, and Rust as a designer rather than a programmer: session prompt, brief, orient, plan, produce, live, summary, then push. The sequence grew from observing what stopped repeated rework. When he added an independent LLM reviewer, each phase became a manual relay between separate chats—better judgment, but an absurd amount of copy-paste.
@@ -117,6 +126,8 @@ The suite deliberately breaks every gate condition and proves refusal: missing/e
 The committed [dogfood transcript](dogfood/TRANSCRIPT.md) preserves the complete six-phase native chain: review refusal, receipt refusal, and gate success at every phase, followed by immutable close preparation, refusal after local commit, Git push, and derived `SESSION CLOSED`. Its session snapshot is also committed and re-hashed by the test suite.
 
 Every run—including defects and corrected test assertions—is recorded in [TESTING.md](TESTING.md), with dated [per-test transcripts](test-results/) that name every individual result. The blind model-assisted protocol covers five sealed fixtures: the original hard-number plant and pristine honest control, an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap. Its [fixture protocol](REVIEWER-FIXTURES.md) scores the specific CATCH separately from the chosen VERDICT so a vague block cannot masquerade as reasoning success. Current Codex skill-platform implications are captured in a [dated design note](design-notes/2026-07-18-codex-skill-platform.md). Current build direction and status live in [PROJECT.md](PROJECT.md) and [BACKLOG.md](BACKLOG.md).
+
+The owner-ready [video script](VIDEO-SCRIPT.md) and live-rules [submission checklist](SUBMISSION-CHECKLIST.md) keep the remaining external work explicit instead of treating an implemented repository as a submitted entry.
 
 The [reviewer model and effort matrix](MODEL-TEST-MATRIX.md) summarizes only runs that actually exist and leaves untested effort levels visibly unrun; the [dated final report](test-results/2026-07-18-bounded-reviewer-model-program.md) explains the result and its real-world limits in plain language. Sol, Terra, and Luna all passed the sealed medium-effort inference, temperament, and missing-evidence contracts, so no low-effort winner confirmation was run. Their score cells tied, but their execution did not: Sol was consistently direct, Terra recovered from path mistakes, and Luna more often relied on gate repair or skipped safe cited checks. Those are bounded behavioral observations, not claims about cognition or universal model rank.
 
