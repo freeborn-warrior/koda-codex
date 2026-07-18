@@ -13,7 +13,7 @@ Make the session's real output—code, prose, design, research, or another decla
 2. Require the current phase name to equal `produce`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its non-empty artifact, definitive review, exact ledger receipt, and matching advancement record.
 4. Read only the approved artifacts and cited files needed to produce the declared output. Refuse if the intended deliverable, boundaries, or proof are not checkable.
-5. Preserve existing output unless the user explicitly authorizes creation or revision. Permit revision after a blocking review only after that review's receipt is recorded.
+5. Preserve existing output unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
 
 ## ITS OWN JOB
 

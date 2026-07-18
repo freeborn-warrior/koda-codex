@@ -39,7 +39,7 @@ Explain the active review at the owner's altitude. Answer the exact question, di
 
 If the owner is clarifying a `DISCUSS` question or states a ruling, explain that the final ruling must be entered only through Koda's owner prompt after the review is acknowledged. Do not record or relay it from this explanation turn.
 
-If the owner introduces a new product direction that the active review does not already route, begin the final answer exactly `OWNER DIRECTION — DISK HANDOFF REQUIRED`. State the direction plainly and explain that it has not reached the producer. Never turn actionable owner chat into producer input without a named handback artifact.
+If the owner introduces a new product direction that the active review does not already route, begin the final answer exactly `OWNER DIRECTION — DISK HANDOFF REQUIRED`. State the direction plainly and explain that it has not reached the producer. Never turn actionable owner chat into producer input without a named handback artifact. The reviewer runtime—not this skill turn—must ask the owner whether to send it, serialize the exact owner statement and this reviewer relay, and keep the receipt ceremony mandatory.
 
 ### Verdict rules
 
@@ -87,6 +87,6 @@ For consultation mode, keep the owner-facing conversation in this reviewer task,
 
 For formal-review mode, write the complete review to disk before reporting anything in chat. Use concise Markdown with evidence checked, required revisions or owner questions, and optional comments. Omit empty sections except owner questions for DISCUSS.
 
-For owner-explanation mode, alter no file and return control to the owner-facing reviewer window. The preserved reviewer event is owner conversation, not a producer handback. If the answer begins `OWNER DIRECTION — DISK HANDOFF REQUIRED`, the owner acknowledgement must remain paused until a later disk-backed routing mechanism records that direction. A `DISCUSS` ruling remains safe because Koda records it in the approval ledger before the producer can resume.
+For owner-explanation mode, alter no file and return control to the owner-facing reviewer window. The preserved reviewer event is owner conversation, not a producer handback. If the answer begins `OWNER DIRECTION — DISK HANDOFF REQUIRED`, acknowledgement remains paused until the owner explicitly sends or discards it. A sent direction must exist under `owner-handbacks/<NN>-<phase>/` and bind the exact owner statement, current artifact, and active review before the receipt is recorded and the producer resumes. A `DISCUSS` ruling remains safe because Koda records it in the approval ledger before the producer can resume.
 
 Do not quote the receipt in chat. In any mode, do not approve evidence, run `koda advance`, modify the producer artifact, or begin another phase. In formal-review mode, the complete formal review is the handback artifact; report only its path and verdict so the owner must read the file. Leave routing to the receipt gate.

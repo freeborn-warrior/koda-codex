@@ -13,7 +13,7 @@ Translate the owner's session contract into a precise brief. Hand the completed 
 2. Require `state.json.phases[currentPhaseIndex].name` to equal `brief`. Refuse and name the actual current phase otherwise.
 3. Require a non-empty `session-prompt.md`. Read it as the owner contract; do not substitute chat memory.
 4. When `currentPhaseIndex > 0`, derive the prior phase from `state.json`, then verify its non-empty artifact, active review, exact receipt entry in `approvals.md`, and matching `advances` record. Refuse on the first missing proof.
-5. If the brief artifact already exists, preserve it unless the user explicitly asks to resume or revise it. Permit revision after a blocking review only when that review's receipt has been recorded.
+5. If the brief artifact already exists, preserve it unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
 
 ## ITS OWN JOB
 

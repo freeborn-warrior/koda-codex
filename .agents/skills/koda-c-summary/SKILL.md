@@ -13,7 +13,7 @@ Summarize what the session files prove. Hand the summary to the shared reviewer.
 2. Require the current phase name to equal `summary`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its artifact, definitive review, exact ledger receipt, and advancement record.
 4. Read the session prompt, advanced phase artifacts, their active reviews, approval entries, and cited live evidence from disk. Refuse stale conversational summaries.
-5. Preserve an existing summary unless explicitly asked to resume or revise it. Permit revision after a blocking review only after that review's receipt is recorded.
+5. Preserve an existing summary unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
 
 ## ITS OWN JOB
 

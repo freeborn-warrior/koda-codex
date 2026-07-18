@@ -13,7 +13,7 @@ Run or exercise the real produced thing and record what actually happens. Hand t
 2. Require the current phase name to equal `live`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its artifact, definitive review, exact ledger receipt, and advancement record.
 4. Require the produced output and the approved evidence manifest to exist at their cited paths. Refuse rather than substitute a mock unless the approved scope explicitly calls for one.
-5. Preserve an existing live artifact unless explicitly asked to resume or revise it. Permit revision after a blocking review only after that review's receipt is recorded.
+5. Preserve an existing live artifact unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
 
 ## ITS OWN JOB
 

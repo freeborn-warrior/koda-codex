@@ -13,7 +13,7 @@ Define how the declared outcome will be made and verified. Hand the plan to the 
 2. Require the current phase name to equal `plan`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its artifact, definitive review, exact ledger receipt, and advancement record on disk.
 4. Read the session prompt plus only the approved artifacts and cited evidence needed to plan. Do not rely on conversation summaries.
-5. If a plan artifact exists, preserve it unless explicitly asked to resume or revise. Permit revision after a blocking review only after its receipt is recorded.
+5. If a plan artifact exists, preserve it unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
 
 ## ITS OWN JOB
 

@@ -21,6 +21,7 @@ import {
   writeTextAtomic,
 } from "../src/project.ts";
 import { readApprovalEntries, sha256 } from "../src/receipt.ts";
+import { pendingOwnerHandbacks, type OwnerHandback } from "./owner-handback.ts";
 import {
   newReviewerJob,
   readReviewerJob,
@@ -412,9 +413,11 @@ async function dispatchReviewerWindowJob(
       await saveRun();
       await note(`Window B completed ${purpose}`, [
         `- Reviewer context: \`${run.reviewer.threadId}\``,
-        `- Disk handback: \`${path.relative(project, expectedFile)}\``,
+        `- Disk handback: \`${current.handbackPath ?? path.relative(project, expectedFile)}\``,
         kind === "consultation"
           ? "- Consultation response was written before the producer resumed."
+          : current.completion === "OWNER_HANDBACK"
+            ? "- Kristian acknowledged the active review and explicitly sent a bound owner-direction handback before the producer resumed."
           : "- Owner acknowledgement was recorded through Koda in Window B; Kristian's quote entered neither model chat.",
       ]);
       await removeReviewerJob(runRoot);
@@ -451,12 +454,32 @@ async function producePhase(phaseName: string, revision: boolean): Promise<void>
   ].join(" "));
 }
 
+async function applyOwnerDirection(phaseName: string, artifactFile: string, handbacks: OwnerHandback[]): Promise<void> {
+  const before = await readFile(artifactFile, "utf8");
+  const relativeHandbacks = handbacks.map((handback) => path.relative(project, handback.path));
+  await modelTurn("producer", `apply confirmed owner direction in ${phaseName}`, [
+    `Read ${producerSkill(phaseName)} completely and explicitly use koda-c-${phaseName} for the current phase named ${phaseName} on disk.`,
+    `Use node ${run.cli} wherever the skill says koda.`,
+    `Kristian explicitly sent these owner-via-reviewer handbacks after reading the active review: ${relativeHandbacks.join(", ")}.`,
+    "Read each complete handback, revise the current phase artifact from the verbatim owner direction, and cite each exact handback path in that artifact.",
+    "The old review receipt is recorded, but the handback does not approve or advance the phase. Leave the revised artifact for a fresh formal review.",
+    "You are the non-interactive producer. Never review, approve, advance, quote a receipt, or ask the owner in chat. Verify the disk handover and stop.",
+  ].join(" "));
+  const revised = await readNonEmpty(artifactFile);
+  if (!revised || sha256(revised) === sha256(before)) {
+    throw new Error(`Producer did not change ${artifactFile} after the confirmed owner handback.`);
+  }
+  for (const relative of relativeHandbacks) {
+    if (!revised.includes(relative)) throw new Error(`The revised artifact does not cite owner handback ${relative}.`);
+  }
+}
+
 async function reviewPhase(phaseName: string, mode: "formal" | "repair" | "fresh"): Promise<void> {
   const modeInstruction = mode === "formal"
     ? "Create the first formal review of the completed current artifact."
     : mode === "repair"
       ? "Repair the current unread formal-review artifact so its protected metadata, definitive findings, verdict, and status are valid. Do not overwrite an acknowledged review."
-      : "The blocking review was acknowledged and the artifact changed. Create a fresh definitive formal review, preserving the archived handback.";
+      : "The prior review was acknowledged and the artifact changed. Create a fresh definitive formal review, preserving the archived handback.";
   const prompt = [
     `Read ${reviewerSkill()} completely and explicitly use koda-c-review in formal-review mode for current phase ${phaseName}.`,
     `Use node ${run.cli} wherever the skill says koda.`,
@@ -738,6 +761,18 @@ async function main(): Promise<void> {
       continue;
     }
 
+    const ownerHandbacks = await pendingOwnerHandbacks({
+      sessionDir: session.directory,
+      phase: active.phase.name,
+      phaseIndex: active.index,
+      artifactPath: artifactFile,
+      reviewPath: reviewPath(session.directory, active.phase, active.index),
+    });
+    if (ownerHandbacks.length > 0) {
+      await applyOwnerDirection(active.phase.name, artifactFile, ownerHandbacks);
+      continue;
+    }
+
     const reviewFile = reviewPath(session.directory, active.phase, active.index);
     if (!(await pathExists(reviewFile))) {
       await reviewPhase(active.phase.name, "formal");
@@ -759,6 +794,10 @@ async function main(): Promise<void> {
     ].some((code) => issueCodes.has(code));
     if (reviewInvalid) {
       await reviewPhase(active.phase.name, "repair");
+      continue;
+    }
+    if (issueCodes.has("artifact_changed")) {
+      await reviewPhase(active.phase.name, "fresh");
       continue;
     }
 

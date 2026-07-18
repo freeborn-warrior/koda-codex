@@ -5,7 +5,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { pathExists, readProjectConfig } from "../src/config.ts";
-import { currentPhase, loadSessionState, sessionRoot } from "../src/project.ts";
+import { artifactPath, currentPhase, loadSessionState, reviewPath, sessionRoot } from "../src/project.ts";
+import { pendingOwnerHandbacks, readOwnerHandbacks } from "./owner-handback.ts";
 import {
   readReviewerJob,
   readReviewerWindowState,
@@ -90,6 +91,8 @@ const job = await readReviewerJob(runRoot);
 const lock = await reviewerWindowLockStatus(runRoot);
 
 let phase = "Session not opened";
+let ownerHandbackCount = 0;
+let pendingOwnerHandbackCount = 0;
 if (run.sessionId) {
   const config = await readProjectConfig(project);
   const directory = sessionRoot(project, config, run.sessionId);
@@ -98,6 +101,25 @@ if (run.sessionId) {
   phase = active
     ? `${active.index + 1}/${state.phases.length} — ${active.phase.name}`
     : `${state.phases.length}/${state.phases.length} — phases complete`;
+  if (active) {
+    try {
+      const handbacks = await readOwnerHandbacks(directory, active.phase.name, active.index);
+      ownerHandbackCount = handbacks.length;
+      const artifact = artifactPath(directory, active.phase, active.index);
+      const review = reviewPath(directory, active.phase, active.index);
+      if (handbacks.length > 0 && await pathExists(artifact) && await pathExists(review)) {
+        pendingOwnerHandbackCount = (await pendingOwnerHandbacks({
+          sessionDir: directory,
+          phase: active.phase.name,
+          phaseIndex: active.index,
+          artifactPath: artifact,
+          reviewPath: review,
+        })).length;
+      }
+    } catch (error) {
+      refuse(`Owner handback state is corrupt: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
 }
 
 console.log(`KODA-C RELAY — ${path.basename(runRoot)}`);
@@ -125,11 +147,15 @@ else console.log(`Console process: stopped; stale lock belongs to ${lock.pid}`);
 console.log(`Console state: ${reviewerState?.status ?? "not started"}`);
 
 console.log("\nDISK HANDOVER");
+console.log(`Owner handbacks in active phase: ${ownerHandbackCount}`);
+console.log(`Acknowledged handbacks pending producer use: ${pendingOwnerHandbackCount}`);
 if (!job) console.log("No reviewer job is waiting.");
 else {
   console.log(`Job: ${job.kind} / ${job.phase}`);
   console.log(`Status: ${job.status}`);
   console.log(`Expected artifact: ${job.expectedPath}`);
+  if (job.handbackPath) console.log(`Owner handback: ${job.handbackPath}`);
+  if (job.completion) console.log(`Completion: ${job.completion}`);
   if (job.error) console.log(`Error: ${job.error}`);
 }
 

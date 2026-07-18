@@ -35,7 +35,7 @@ non-interactive persistent producer           persistent owner-facing reviewer
 - A read-only `relay:status` command reconstructs the current run, phase, contexts, lock process, job, error, and next safe action directly from disk. It refuses corrupt or multiple unfinished runs.
 - A stale reviewer lock is never removed merely because a second window asks. Explicit `--recover-stale-lock` succeeds only when the recorded process is no longer alive; a live process still refuses.
 - At `REVIEW READY`, Kristian may reread, ask the same persistent reviewer explanation questions, acknowledge, or pause. Explanation turns are preserved as reviewer events but alter no file and do not become producer input.
-- A new owner product direction is mechanically different from an explanation: the reviewer emits the exact handoff-required marker, the job records `OWNER_DIRECTION_HANDOFF_REQUIRED`, acknowledgement remains paused, and the ledger stays untouched until a future named handback can carry it.
+- A new owner product direction is mechanically different from an explanation: the reviewer emits the exact handoff-required marker and the job records `OWNER_DIRECTION_HANDOFF_REQUIRED`. Kristian must explicitly send or discard it. Send writes a bound owner handback and still requires the review receipt; discard writes nothing.
 - Both panes render model-emitted messages, completed checks, file changes, context IDs, and turn completion from raw Codex events. The complete JSONL remains evidence.
 - Protected review metadata and receipt lines are removed from the readable event rendering.
 - Window B snapshots the complete review before opening it and refuses if it changes while being read.
@@ -61,7 +61,7 @@ The corrected tests prove:
 - a wrong quote exits nonzero, writes no ledger entry, and preserves a failed job;
 - a pending formal-review job wakes a fake persistent reviewer context, writes a definitive review, shows redacted progress, and returns acknowledged disk evidence.
 
-No live model was called by these deterministic tests. A full one-phase simulation now starts Window A and Window B as separate processes, uses distinct fake persistent context IDs, wakes the reviewer through the real job file, records the exact quote, advances, commits and pushes, prepares immutable close, and ends both windows from `COMPLETE`. A genuine live-model two-window full-session run is still required before calling this runtime proved in use.
+No live model was called by these deterministic tests. A full one-phase simulation now starts Window A and Window B as separate processes, uses distinct fake persistent context IDs, wakes the reviewer through the real job file, records a new owner direction, serializes it, records the exact receipt, returns to the same producer, revises and cites the handback, forces a fresh review and receipt, advances, commits and pushes, prepares immutable close, and ends both windows from `COMPLETE`. A genuine live-model two-window full-session run is still required before calling this runtime proved in use.
 
 ## Still missing
 
@@ -72,4 +72,4 @@ No live model was called by these deterministic tests. A full one-phase simulati
 - Guided recovery when Ctrl-C or a platform failure occurs during a model turn.
 - External notifications, remote control, and a graphical split-pane interface.
 
-The next safe product step is free-form reviewer discussion with a rule that no actionable owner direction reaches the producer until the reviewer serializes it into a named disk handback. The current disk gate remains the only phase authority.
+The next safe product step is making the reviewer available between formal handoffs without weakening the shipped rule that no actionable owner direction reaches the producer until it is explicitly sent and serialized. The current disk gate remains the only phase authority.

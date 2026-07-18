@@ -13,7 +13,7 @@ Map what is true on disk before anyone plans. Hand the evidence map to the share
 2. Require the current phase name to equal `orient`. Refuse and name the actual phase otherwise.
 3. Require a non-empty session prompt and the current phase's declared input files.
 4. Derive the prior phase from `state.json`; verify its non-empty artifact, definitive review, exact receipt in `approvals.md`, and matching advancement record. Never infer approval from prose.
-5. If an orient artifact already exists, preserve it unless explicitly asked to resume or revise. Permit revision after a blocking review only after its receipt is recorded.
+5. If an orient artifact already exists, preserve it unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
 
 ## ITS OWN JOB
 

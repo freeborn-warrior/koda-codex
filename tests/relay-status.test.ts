@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdir, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
 import { REVIEWER_LOCK_DIR } from "../scripts/relay-window-protocol.ts";
-import { writeJsonAtomic } from "../src/project.ts";
+import { readProjectConfig } from "../src/config.ts";
+import { artifactPath, createSession, writeJsonAtomic } from "../src/project.ts";
 
 async function prepareRun(root: string): Promise<string> {
   const prepared = spawnSync(process.execPath, [
@@ -98,4 +99,29 @@ test("RELAY STATUS TRUTH: corrupt or ambiguous run state refuses instead of gues
   const ambiguous = status(temporary);
   assert.equal(ambiguous.status, 1);
   assert.match(ambiguous.stderr, /More than one unfinished run exists/);
+});
+
+test("RELAY STATUS TRUTH: a corrupt owner handback refuses immediately by name", async (t) => {
+  const temporary = await mkdtemp(path.join(tmpdir(), "koda-relay-status-handback-"));
+  t.after(() => rm(temporary, { recursive: true, force: true }));
+  const runRoot = await prepareRun(temporary);
+  const project = path.join(runRoot, "project");
+  const config = await readProjectConfig(project);
+  const prompt = await readFile(path.join(project, "owner-prompt.md"), "utf8");
+  const session = await createSession(project, config, prompt);
+  const phase = session.state.phases[0];
+  await writeFile(artifactPath(session.directory, phase, 0), "# Brief\n\nCurrent artifact.\n", "utf8");
+  const directory = path.join(session.directory, "owner-handbacks", "01-brief");
+  await mkdir(directory, { recursive: true });
+  await writeFile(path.join(directory, "01-direction.md"), "# forged handback\n", "utf8");
+  const runPath = path.join(runRoot, "RUN.json");
+  const run = JSON.parse(await readFile(runPath, "utf8"));
+  run.status = "RUNNING";
+  run.sessionId = session.id;
+  await writeJsonAtomic(runPath, run);
+
+  const result = status(temporary);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /RELAY STATUS REFUSED — Owner handback state is corrupt/);
+  assert.match(result.stderr, /exactly one generated KODA_OWNER_HANDBACK marker/);
 });

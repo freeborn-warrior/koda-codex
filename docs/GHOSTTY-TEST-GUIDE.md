@@ -45,12 +45,16 @@ For a formal review, Window B shows the reviewer progress and then says `REVIEW 
    - type `r` to reread the complete review;
    - type `p` to pause safely with the producer still waiting.
 6. Explanation questions resume the same reviewer context, alter no files, and return to this menu. Ask as many as needed.
-7. When you acknowledge, the exact receipt is on the macOS clipboard. Press Command–V and Return when Koda asks in this same window.
-8. If Koda asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
+7. If your discussion introduces new product direction, Window B says `OWNER DIRECTION — DISK HANDOFF REQUIRED`. It then offers two additional choices:
+   - type `s` to send the direction to the producer as a bound disk handback;
+   - type `x` to discard it, sending nothing.
+   You may also keep discussing, reread, or pause. Classification by the reviewer never sends it automatically.
+8. When you acknowledge—or after explicitly sending a direction—the exact receipt is on the macOS clipboard. Press Command–V and Return when Koda asks in this same window.
+9. If Koda asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
 
 The reviewer console never prints the receipt into its readable progress stream, and Kristian's acknowledgement input is never sent as a model message. The raw reviewer event evidence may contain the generated receipt because the reviewer creates and validates the review that contains it; the receipt is not treated as a secret. A changed review or wrong quote refuses, writes no approval, and leaves a named failed job on disk. After a valid acknowledgement, Window A re-reads the gate and automatically advances, revises, or requests a fresh review according to the verdict.
 
-Owner discussion is deliberately bounded in this slice. The reviewer can explain findings, evidence, implications, and `DISCUSS` options without changing the review. If Kristian introduces a new product direction outside the active review, the reviewer marks `OWNER DIRECTION — DISK HANDOFF REQUIRED`; acknowledgement stays paused and no ledger entry is written. That direction has not reached the producer. The general disk handback for such owner-initiated direction is the next product layer, so the runtime refuses instead of pretending conversation became evidence.
+The reviewer can explain findings, evidence, implications, and `DISCUSS` options without changing the review. A confirmed new direction is written under the active session's `owner-handbacks/<NN>-<phase>/` directory. It binds Kristian's verbatim statement, the reviewer relay, current artifact hash, active review ID, and review hash. The receipt remains mandatory. Window A consumes the handback before an otherwise open gate, requires the producer to revise and cite it, then routes the stale artifact to a fresh formal review and fresh receipt. See the [owner-direction handback protocol](OWNER-DIRECTION-HANDBACK.md).
 
 For an in-phase owner question, Window B displays the reviewer's recorded question, accepts Kristian's answer there, resumes the same reviewer context, and requires the answer to be written into the consultation response before Window A continues.
 
@@ -101,7 +105,7 @@ Success exists only when Window A prints `RELAY COMPLETE` and Window B prints `S
 
 This slice proves the automatic producer-to-reviewer wake-up, one persistent Window B reviewer, same-window review explanations and exact receipt acknowledgement, an owner-ruling loop for in-phase consultations, and readable progress derived from actual Codex events. It is still a repository relay harness around the bounded `software-clean` scenario—not yet the general project launcher or the Guide-started experience.
 
-Window B now offers explanation conversation at a formal decision point, but not yet an always-open conversation while the producer is working. Product decisions entered through defined `DISCUSS` or consultation prompts are disk-backed; arbitrary conversational owner directions are deliberately paused and not relayed yet. Notification transport, remote control, a polished split-pane interface, and complete abort recovery remain later layers.
+Window B now offers explanation conversation and confirmed owner-direction handbacks at a formal decision point, but not yet an always-open conversation while the producer is working. Product decisions entered through `DISCUSS`, consultation prompts, or explicitly sent owner handbacks are disk-backed. Notification transport, remote control, a polished split-pane interface, and complete abort recovery remain later layers.
 
 ## Safety boundaries
 

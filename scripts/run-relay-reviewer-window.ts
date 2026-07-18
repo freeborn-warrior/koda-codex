@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import { pathExists } from "../src/config.ts";
 import { writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
+import { createOwnerHandback } from "./owner-handback.ts";
 import {
   acquireReviewerWindow,
   readReviewerJob,
@@ -40,6 +41,7 @@ const runsRoot = await realpath(process.env.KODA_RELAY_RUNS_ROOT
 const recoverStaleLock = process.argv.includes("--recover-stale-lock");
 const requested = process.argv.slice(2).find((argument) => argument !== "--recover-stale-lock");
 let stopping = false;
+let testDiscussionConsumed = false;
 process.once("SIGINT", () => { stopping = true; });
 process.once("SIGTERM", () => { stopping = true; });
 
@@ -214,6 +216,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   await writeReviewerWindowState(runRoot, state);
 
   const testMode = Boolean(process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CONFIRM_READ === "1");
+  let pendingDirection: { statement: string; relay: string } | null = null;
   const beforeHash = createHash("sha256").update(before).digest("hex");
   const requireUnchangedReview = async () => {
     const current = await readFile(review, "utf8");
@@ -239,24 +242,55 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: null });
     await writeReviewerWindowState(runRoot, state);
     if (response.trimStart().startsWith("OWNER DIRECTION — DISK HANDOFF REQUIRED") && parsed.verdict !== "DISCUSS") {
+      pendingDirection = { statement: question, relay: response.trim() };
       job.error = "OWNER_DIRECTION_HANDOFF_REQUIRED";
       await writeReviewerJob(runRoot, job);
       console.log("\nACKNOWLEDGEMENT PAUSED — this is new owner direction, not an explanation.");
       console.log("It has not reached the producer. This runtime will not turn chat into work without a disk handback.");
     }
   };
+  const writeDirectionHandback = async () => {
+    if (!pendingDirection) throw new Error("No classified owner direction is waiting for handback.");
+    const match = /^(\d{2})-([a-z0-9-]+)-review\.md$/.exec(path.basename(review));
+    if (!match || match[2] !== job.phase) throw new Error("The active review path cannot locate its phase handback directory.");
+    const sessionDir = path.dirname(path.dirname(review));
+    const artifact = path.join(sessionDir, "phases", `${match[1]}-${job.phase}.md`);
+    const handback = await createOwnerHandback({
+      sessionDir,
+      phase: job.phase,
+      phaseIndex: Number(match[1]) - 1,
+      artifactPath: artifact,
+      reviewPath: review,
+      ownerStatement: pendingDirection.statement,
+      reviewerRelay: pendingDirection.relay,
+    });
+    job.handbackPath = path.relative(project, handback.path);
+    job.error = null;
+    await writeReviewerJob(runRoot, job);
+    console.log(`OWNER HANDBACK WRITTEN — ${job.handbackPath}`);
+    console.log("The exact review receipt is still required before Window A may consume it.");
+  };
 
   console.log(`\nREVIEW READY — ${job.phase.toUpperCase()} — ${parsed.verdict}`);
   console.log("This is your decision point in Window B. The producer is waiting in Window A.");
   await openReview();
 
-  const testQuestion = testMode ? process.env.KODA_RELAY_TEST_DISCUSSION_QUESTION?.trim() : undefined;
-  if (testQuestion) await discuss(testQuestion);
+  const configuredTestQuestion = testMode ? process.env.KODA_RELAY_TEST_DISCUSSION_QUESTION?.trim() : undefined;
+  const testQuestion = configuredTestQuestion && (
+    process.env.KODA_RELAY_TEST_DISCUSSION_ONCE !== "1" || !testDiscussionConsumed
+  ) ? configuredTestQuestion : undefined;
+  if (testQuestion) {
+    testDiscussionConsumed = true;
+    await discuss(testQuestion);
+  }
+  if (testMode && pendingDirection && process.env.KODA_RELAY_TEST_DIRECTION_ACTION === "handoff") {
+    await writeDirectionHandback();
+  }
   if (!testMode) {
     for (;;) {
       const blocked = job.error === "OWNER_DIRECTION_HANDOFF_REQUIRED";
       const choice = (await promptOwner(blocked
-        ? "Type d to discuss again, r to reread, or p to pause safely: "
+        ? "Type s to send this direction, d to discuss, x to discard it, r to reread, or p to pause: "
         : "Press Return to acknowledge, d to discuss, r to reread, or p to pause safely: ")).trim().toLowerCase();
       if ((choice === "" || choice === "a") && !blocked) break;
       if (choice === "r") {
@@ -270,6 +304,17 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
           continue;
         }
         await discuss(question);
+        continue;
+      }
+      if (choice === "s" && blocked) {
+        await writeDirectionHandback();
+        break;
+      }
+      if (choice === "x" && blocked) {
+        pendingDirection = null;
+        job.error = null;
+        await writeReviewerJob(runRoot, job);
+        console.log("Owner direction discarded. Nothing was sent to the producer.");
         continue;
       }
       if (choice === "p") throw new OwnerPaused("Kristian paused at the reviewer decision point.");
@@ -304,6 +349,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     env: { ...process.env, KODA_COMMAND: `${process.execPath} ${cli}` },
   });
   if (approved.status !== 0) throw new Error(`Owner acknowledgement exited ${approved.status ?? -1}.`);
+  job.completion = job.handbackPath ? "OWNER_HANDBACK" : "ACKNOWLEDGED";
   console.log("ACKNOWLEDGED — Window A will now derive the route from disk.");
 }
 
@@ -342,8 +388,12 @@ async function processJob(job: ReviewerJob): Promise<void> {
   }
 
   const output = await expectedFile(job);
-  if (job.kind === "consultation") await completeConsultation(job, output);
-  else await ownerAcknowledge(job, output);
+  if (job.kind === "consultation") {
+    await completeConsultation(job, output);
+    job.completion = "CONSULTATION_ANSWERED";
+  } else {
+    await ownerAcknowledge(job, output);
+  }
 
   job.status = "COMPLETE";
   job.error = null;

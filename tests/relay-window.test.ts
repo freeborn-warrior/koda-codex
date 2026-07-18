@@ -8,6 +8,7 @@ import test from "node:test";
 import { readProjectConfig } from "../src/config.ts";
 import { artifactPath, createSession, reviewPath, writeJsonAtomic } from "../src/project.ts";
 import { createFreshReview, readApprovalEntries } from "../src/receipt.ts";
+import { parseOwnerHandback, pendingOwnerHandbacks } from "../scripts/owner-handback.ts";
 import {
   acquireReviewerWindow,
   newReviewerJob,
@@ -23,7 +24,7 @@ import {
 
 async function preparedAcknowledgementRun(
   receiptInput: "correct" | "wrong",
-  options: { discussionResponse?: string } = {},
+  options: { discussionResponse?: string; directionAction?: "handoff" } = {},
 ) {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-reviewer-window-"));
   const prepared = spawnSync(process.execPath, [
@@ -91,11 +92,12 @@ async function preparedAcknowledgementRun(
         ? {
             KODA_CODEX_BIN: fakeCodex,
             KODA_RELAY_TEST_DISCUSSION_QUESTION: "Please add a new product requirement.",
+            ...(options.directionAction ? { KODA_RELAY_TEST_DIRECTION_ACTION: options.directionAction } : {}),
           }
         : {}),
     },
   });
-  return { temporary, runRoot, session, review, executed, clipboard };
+  return { temporary, runRoot, project, phase, session, review, executed, clipboard };
 }
 
 test("TWO-WINDOW PROTOCOL: reviewer jobs are bounded and duplicate reviewer windows refuse", async (t) => {
@@ -185,6 +187,92 @@ test("OWNER DISCUSSION SAFETY: a new product direction stays paused without a di
   assert.equal(job?.status, "AWAITING_OWNER");
   assert.equal(job?.error, "OWNER_DIRECTION_HANDOFF_REQUIRED");
   assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
+});
+
+test("OWNER HANDBACK RELAY: an explicitly sent direction is bound to disk before acknowledgement", async (t) => {
+  const result = await preparedAcknowledgementRun("correct", {
+    discussionResponse: "OWNER DIRECTION — DISK HANDOFF REQUIRED\nAdd a second output format and require it in the brief.",
+    directionAction: "handoff",
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  assert.match(result.executed.stdout, /OWNER HANDBACK WRITTEN/);
+  const job = await readReviewerJob(result.runRoot);
+  assert.equal(job?.status, "COMPLETE");
+  assert.equal(job?.completion, "OWNER_HANDBACK");
+  assert.match(job?.handbackPath ?? "", /owner-handbacks\/01-brief\/01-direction\.md$/);
+  const handbackPath = path.join(result.project, job!.handbackPath!);
+  const handback = await readFile(handbackPath, "utf8");
+  const metadata = parseOwnerHandback(handback);
+  assert.equal(metadata.ownerStatement, "Please add a new product requirement.");
+  assert.equal(metadata.reviewId, result.review.metadata.id);
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
+
+  const artifact = artifactPath(result.session.directory, result.phase, 0);
+  assert.equal((await pendingOwnerHandbacks({
+    sessionDir: result.session.directory,
+    phase: result.phase.name,
+    phaseIndex: 0,
+    artifactPath: artifact,
+    reviewPath: reviewPath(result.session.directory, result.phase, 0),
+  })).length, 1);
+  await writeFile(artifact, `${await readFile(artifact, "utf8")}\nOwner direction applied.\n`, "utf8");
+  assert.equal((await pendingOwnerHandbacks({
+    sessionDir: result.session.directory,
+    phase: result.phase.name,
+    phaseIndex: 0,
+    artifactPath: artifact,
+    reviewPath: reviewPath(result.session.directory, result.phase, 0),
+  })).length, 0);
+});
+
+test("OWNER HANDBACK RECEIPT BINDING: a handback remains unusable after a wrong receipt", async (t) => {
+  const result = await preparedAcknowledgementRun("wrong", {
+    discussionResponse: "OWNER DIRECTION — DISK HANDOFF REQUIRED\nAdd a second output format.",
+    directionAction: "handoff",
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 1, result.executed.stderr);
+  const job = await readReviewerJob(result.runRoot);
+  assert.equal(job?.status, "FAILED");
+  assert.match(job?.handbackPath ?? "", /owner-handbacks\/01-brief\/01-direction\.md$/);
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
+  assert.equal((await pendingOwnerHandbacks({
+    sessionDir: result.session.directory,
+    phase: result.phase.name,
+    phaseIndex: 0,
+    artifactPath: artifactPath(result.session.directory, result.phase, 0),
+    reviewPath: reviewPath(result.session.directory, result.phase, 0),
+  })).length, 0);
+});
+
+test("OWNER HANDBACK MUTATION: changed prose and symbolic-link evidence refuse", async (t) => {
+  const result = await preparedAcknowledgementRun("correct", {
+    discussionResponse: "OWNER DIRECTION — DISK HANDOFF REQUIRED\nAdd a second output format.",
+    directionAction: "handoff",
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  const job = await readReviewerJob(result.runRoot);
+  const handbackPath = path.join(result.project, job!.handbackPath!);
+  const original = await readFile(handbackPath, "utf8");
+  await writeFile(handbackPath, original.replace("> Please add a new product requirement.", "> Please remove a product requirement."), "utf8");
+  await assert.rejects(pendingOwnerHandbacks({
+    sessionDir: result.session.directory,
+    phase: result.phase.name,
+    phaseIndex: 0,
+    artifactPath: artifactPath(result.session.directory, result.phase, 0),
+    reviewPath: reviewPath(result.session.directory, result.phase, 0),
+  }), /handback is incomplete/);
+  await rm(handbackPath);
+  await symlink(reviewPath(result.session.directory, result.phase, 0), handbackPath);
+  await assert.rejects(pendingOwnerHandbacks({
+    sessionDir: result.session.directory,
+    phase: result.phase.name,
+    phaseIndex: 0,
+    artifactPath: artifactPath(result.session.directory, result.phase, 0),
+    reviewPath: reviewPath(result.session.directory, result.phase, 0),
+  }), /handback must be a regular file/);
 });
 
 test("TWO-WINDOW RELAY: a pending formal-review job wakes one persistent reviewer and returns acknowledged disk evidence", async (t) => {
@@ -336,6 +424,12 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
     "  writeFileSync(review, ['VERDICT: APPROVE', '', metadata, '', '# Peer review — brief', '', '## Findings', '', '- The artifact states one bounded outcome and is supported by the session prompt.', '', receipt, ''].join('\\n'));",
     "  writeFileSync(process.env.KODA_TEST_RECEIPT_FILE, receipt);",
     "}",
+    "else if (prompt.includes('owner-via-reviewer handbacks')) {",
+    "  const session = latest();",
+    "  const phaseDir = path.join(sessionsRoot, session, 'phases');",
+    "  const handback = `docs/sessions/${session}/owner-handbacks/01-brief/01-direction.md`;",
+    "  writeFileSync(path.join(phaseDir, '01-brief.md'), `# Brief\\n\\n## Purpose\\nOne bounded outcome with the owner-requested JSON output.\\n\\n## Inputs resolved during this phase\\n- Source and answer: [${handback}](${handback})\\n`);",
+    "}",
     "else if (prompt.includes('current phase named brief')) {",
     "  const phaseDir = path.join(sessionsRoot, latest(), 'phases');",
     "  mkdirSync(phaseDir, { recursive: true });",
@@ -346,7 +440,7 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
     "else { process.stderr.write(`Unknown fake turn: ${prompt}`); process.exit(1); }",
     "const thread = role === 'reviewer' ? '019f0000-0000-7000-8000-000000000004' : '019f0000-0000-7000-8000-000000000003';",
     "console.log(JSON.stringify({ type: 'thread.started', thread_id: thread }));",
-    "const message = prompt.includes('owner-explanation mode') ? 'The finding means the bounded claim matches the cited prompt; it adds no new direction.' : `${role} handover complete.`;",
+    "const message = prompt.includes('owner-explanation mode') ? 'OWNER DIRECTION — DISK HANDOFF REQUIRED\\nAdd the requested JSON output to the brief and require a fresh review.' : `${role} handover complete.`;",
     "console.log(JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: message } }));",
     "console.log(JSON.stringify({ type: 'turn.completed' }));",
   ].join("\n"), "utf8");
@@ -359,7 +453,9 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
     KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
     KODA_RELAY_TEST_CONFIRM_READ: "1",
     KODA_RELAY_TEST_RECEIPT_INPUT_FILE: generatedReceipt,
-    KODA_RELAY_TEST_DISCUSSION_QUESTION: "What does this finding mean?",
+    KODA_RELAY_TEST_DISCUSSION_QUESTION: "Please add JSON output to this session's brief.",
+    KODA_RELAY_TEST_DISCUSSION_ONCE: "1",
+    KODA_RELAY_TEST_DIRECTION_ACTION: "handoff",
     KODA_CODEX_BIN: fakeCodex,
     KODA_TEST_CLI: path.join(process.cwd(), "src", "cli.ts"),
     KODA_TEST_RECEIPT_FILE: generatedReceipt,
@@ -397,14 +493,17 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   assert.match(producerResult.stdout, /RELAY COMPLETE/);
   assert.match(reviewerResult.stdout, /REVIEWER 1 — formal review of brief/);
   assert.match(reviewerResult.stdout, /REVIEWER 2 — explain brief review/);
+  assert.match(reviewerResult.stdout, /OWNER HANDBACK WRITTEN/);
+  assert.match(reviewerResult.stdout, /REVIEWER 3 — fresh review of brief/);
   assert.match(reviewerResult.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
   assert.match(reviewerResult.stdout, /SESSION CLOSED — reviewer window complete/);
 
   const completed = JSON.parse(await readFile(runPath, "utf8"));
   assert.equal(completed.status, "COMPLETE");
   assert.notEqual(completed.producer.threadId, completed.reviewer.threadId);
-  assert.equal(completed.ownerAcknowledgements, 1);
-  assert.equal(completed.reviewer.turns, 2);
+  assert.equal(completed.ownerAcknowledgements, 2);
+  assert.equal(completed.reviewer.turns, 3);
+  assert.match(await readFile(path.join(project, "docs", "sessions", completed.sessionId, "phases", "01-brief.md"), "utf8"), /owner-handbacks\/01-brief\/01-direction\.md/);
   assert.match(await readFile(path.join(runRoot, "RESULT.md"), "utf8"), /Completed phases: 1\/1/);
   assert.match(await readFile(path.join(runRoot, "TRANSCRIPT.md"), "utf8"), /Window B completed formal review of brief/);
 });

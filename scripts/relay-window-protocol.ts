@@ -11,6 +11,7 @@ export const REVIEWER_LOCK_DIR = ".reviewer-window.lock";
 
 export type ReviewerJobKind = "formal" | "repair" | "fresh" | "consultation" | "acknowledge";
 export type ReviewerJobStatus = "PENDING" | "RUNNING" | "AWAITING_OWNER" | "COMPLETE" | "FAILED";
+export type ReviewerJobCompletion = "ACKNOWLEDGED" | "CONSULTATION_ANSWERED" | "OWNER_HANDBACK";
 
 export type ReviewerJob = {
   version: 1;
@@ -24,6 +25,8 @@ export type ReviewerJob = {
   createdAt: string;
   updatedAt: string;
   error: string | null;
+  completion: ReviewerJobCompletion | null;
+  handbackPath: string | null;
 };
 
 export type ReviewerWindowState = {
@@ -42,6 +45,7 @@ const PHASE = /^[a-z0-9][a-z0-9-]*$/;
 const JOB_ID = /^[0-9a-f-]{36}$/;
 const KINDS = new Set<ReviewerJobKind>(["formal", "repair", "fresh", "consultation", "acknowledge"]);
 const STATUSES = new Set<ReviewerJobStatus>(["PENDING", "RUNNING", "AWAITING_OWNER", "COMPLETE", "FAILED"]);
+const COMPLETIONS = new Set<ReviewerJobCompletion>(["ACKNOWLEDGED", "CONSULTATION_ANSWERED", "OWNER_HANDBACK"]);
 
 function now(): string {
   return new Date().toISOString();
@@ -57,6 +61,8 @@ export function newReviewerJob(input: Omit<ReviewerJob, "version" | "id" | "stat
     createdAt,
     updatedAt: createdAt,
     error: null,
+    completion: null,
+    handbackPath: null,
   };
 }
 
@@ -74,7 +80,16 @@ export function validateReviewerJob(value: unknown): ReviewerJob {
     typeof job.status !== "string" || !STATUSES.has(job.status as ReviewerJobStatus) ||
     typeof job.createdAt !== "string" ||
     typeof job.updatedAt !== "string" ||
-    !(job.error === null || typeof job.error === "string")
+    !(job.error === null || typeof job.error === "string") ||
+    !(job.completion === null || (typeof job.completion === "string" && COMPLETIONS.has(job.completion as ReviewerJobCompletion))) ||
+    !(job.handbackPath === null || (
+      typeof job.handbackPath === "string" &&
+      job.handbackPath.trim() !== "" &&
+      !path.isAbsolute(job.handbackPath) &&
+      !job.handbackPath.split(path.sep).includes("..")
+    )) ||
+    (job.completion === "OWNER_HANDBACK" && job.handbackPath === null) ||
+    (job.completion !== null && job.completion !== "OWNER_HANDBACK" && job.handbackPath !== null)
   ) {
     throw new Error("Reviewer job has invalid or unsafe fields.");
   }
