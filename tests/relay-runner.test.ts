@@ -136,6 +136,10 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(execute, /evaluateGate/);
   assert.match(execute, /evaluateSessionClosure/);
   assert.match(execute, /git\(\["add", "-A"\]\)/);
+  assert.match(execute, /git\(\["add", relativeSession\]\)/);
+  assert.match(execute, /`close session \$\{session\.id\}`/);
+  assert.match(execute, /workspace-write intentionally protects `\.git`/);
+  assert.match(execute, /verify immutable session close/);
   assert.match(execute, /"bundle", "create"/);
   assert.match(execute, /path\.join\(project, "\.git"\)/);
   assert.match(reviewHelper, /run\.status !== "AWAITING_OWNER_RECEIPT"/);

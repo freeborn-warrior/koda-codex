@@ -21,7 +21,9 @@ The producer context opens the session, explicitly invokes the producer skill fo
 - each owner receipt is entered through Koda's interactive `approve` command;
 - blocking verdicts return to the same producer and require a changed artifact plus fresh review;
 - all produced project output is committed and pushed before close preparation;
-- `close.md` then receives its own required commit and push before Koda derives `SESSION CLOSED`;
+- the persistent producer prepares and validates immutable `close.md`;
+- the trusted supervisor performs the exact session-specific Git commit and push because Codex's least-privilege workspace sandbox protects `.git` metadata;
+- the same producer context resumes to verify the unchanged binding and both Koda close commands before `SESSION CLOSED` is accepted;
 - event streams, stderr, transcript, final project snapshot, and a restorable Git bundle remain in this repository.
 
 This harness does **not** yet provide the mature interactive reviewer conversation Kristian ultimately wants. The persistent reviewer runs as a supervised context and writes formal handbacks; Kristian interacts with the harness at the receipt prompt. If an in-phase response says `AWAITING OWNER`, the run pauses and names the response file rather than inventing a ruling. A later owner-facing reviewer interface may resume that same context for discussion. Abort-safe signal handling and notification delivery also remain product work; this harness does not claim an unattended production daemon.
@@ -65,7 +67,7 @@ If execution is interrupted or a model turn fails, `RUN.json` keeps the last act
 
 ## Close evidence
 
-Before immutable close, the supervisor stages, commits, and pushes all non-ignored project changes so produced source, checks, live evidence, and the completed session state are durable. The producer then invokes `koda-c-close`, which prepares `close.md`, runs Koda's printed session-specific Git commands, pushes again, and verifies `SESSION CLOSED` from both close and status.
+Before immutable close, the supervisor stages, commits, and pushes all non-ignored project changes so produced source, checks, live evidence, and the completed session state are durable. The producer then invokes `koda-c-close` in supervised mode and prepares and validates `close.md`. Codex's `workspace-write` sandbox deliberately protects `.git`, so the trusted supervisor—not the model—stages exactly the prepared session path, makes the honest close commit, and pushes it. The same persistent producer context is then resumed to recompute the binding and verify `SESSION CLOSED` from both close and status.
 
 After successful verification, the harness captures:
 

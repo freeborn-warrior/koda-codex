@@ -425,3 +425,21 @@ Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effor
 - **How:** Updated root guidance, README, project contract, backlog, and the dated runtime design. Explicitly removed the prior suggestion that either context might normally be replaced at phase handoffs, distinguished exposed progress from hidden chain-of-thought, and ran `npm run test:record -- 2026-07-18-persistent-side-by-side-runtime-ruling`. Every named result is preserved in [the per-test transcript](test-results/2026-07-18-persistent-side-by-side-runtime-ruling.md).
 - **What happened:** All 77 checks passed. Fresh reviewer contexts remain useful for blind fixtures, but are not the ruled in-session experience. The current harness still proves only two persistent backend contexts behind a supervisor, not the future side-by-side interactive surface.
 - **Verdict:** PASS. Independent review is now defined as producer/reviewer context separation, not per-phase reviewer replacement, without changing any mechanical gate condition.
+
+## 2026-07-18 — First genuine relay close attempt
+
+- **Variant:** Producer `gpt-5.6-sol` at medium effort in the active persistent relay.
+- **Effort:** Medium.
+- **What:** Immutable close after all six phases advanced, including one unplanned Summary REVISE loop and seven genuine owner acknowledgements.
+- **How:** The relay supervisor committed and pushed every produced output before resuming the producer with `koda-c-close`. The producer prepared `close.md`, recomputed and matched its session binding, then attempted Koda's exact Git staging command.
+- **What happened:** Codex's least-privilege `workspace-write` sandbox denied creation of `.git/index.lock`. The producer correctly reported the permission boundary, verified that no lock, staged change, or commit remained, and left only the immutable untracked `close.md`. Koda reported `PHASES COMPLETE — SESSION NOT CLOSED`; the supervisor preserved the pause as `PAUSED_ERROR` rather than claiming completion.
+- **Verdict:** SUPERVISOR RESPONSIBILITY DEFECT; CLOSE GATE PASS. The model must not receive broad filesystem access merely to mutate repository metadata. Keep close preparation and final verification in the same producer context, but assign the exact intervening Git commit and push to the trusted relay supervisor.
+
+## 2026-07-18 — Supervised immutable-close recovery validation
+
+- **Variant:** Not applicable; deterministic Node.js, package, mutation, status, and local-Git suite. No model was called.
+- **Effort:** Not applicable.
+- **What:** A resumable three-part close: persistent producer prepares and validates immutable `close.md`; trusted supervisor commits and pushes exactly the session path; the same producer context resumes and independently verifies close and status.
+- **How:** Added supervised mode to `koda-c-close`, required the runner to refuse any preparation change other than the one untracked `close.md`, stage the exact session path, use an honest session-close commit, push, require both Koda close/status checks, and resume the saved producer thread for verification. Ran `npm run test:record -- 2026-07-18-supervised-close-recovery-final`; every named result is preserved in [the per-test transcript](test-results/2026-07-18-supervised-close-recovery-final.md).
+- **What happened:** All 77 checks passed. The gate, receipt adversarial, stale-review, disk-truth, printed-command, package, skill, and Git-close tests remain intact. The active relay is still paused with its original immutable close artifact; the correction has not yet been credited as live success.
+- **Verdict:** PASS FOR RECOVERY IMPLEMENTATION; LIVE CLOSE PENDING. Resume the same run only after this correction is committed and pushed, then accept success solely if the same session reaches `RELAY COMPLETE` with verified Git evidence.

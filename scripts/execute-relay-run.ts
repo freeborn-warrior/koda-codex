@@ -5,7 +5,7 @@ import { appendFile, readFile, readdir, realpath, rm, writeFile } from "node:fs/
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { evaluateSessionClosure } from "../src/close.ts";
+import { closePath, evaluateSessionClosure } from "../src/close.ts";
 import { pathExists, readProjectConfig } from "../src/config.ts";
 import { evaluateGate } from "../src/gate.ts";
 import {
@@ -374,13 +374,52 @@ async function commitProducedOutput(): Promise<void> {
 }
 
 async function closeSession(): Promise<void> {
-  await commitProducedOutput();
-  await modelTurn("producer", "perform immutable session close", [
-    `Read ${producerSkill("close")} completely and explicitly use koda-c-close.`,
+  const session = await latest();
+  if (!session) throw new Error("No session exists for close preparation.");
+  const closeFile = closePath(session.directory);
+
+  if (!(await pathExists(closeFile))) {
+    await commitProducedOutput();
+    await modelTurn("producer", "prepare immutable session close", [
+      `Read ${producerSkill("close")} completely and explicitly use koda-c-close in supervised mode.`,
+      `Use node ${run.cli} wherever the skill says koda.`,
+      "Every configured phase is advanced and all produced output was committed and pushed by the relay supervisor.",
+      "Prepare and validate immutable close.md, then stop before Git. The trusted relay supervisor owns the exact Git mutation because your workspace sandbox intentionally cannot write repository metadata.",
+      "Do not create another session or edit close.md after preparation. The same producer context will be resumed after the supervisor push for independent close verification.",
+    ].join(" "));
+  }
+
+  if (!(await pathExists(closeFile))) throw new Error("The producer did not prepare immutable close.md.");
+  const relativeSession = path.relative(project, session.directory);
+  const relativeClose = path.relative(project, closeFile);
+  const pending = git(["status", "--porcelain", "--untracked-files=all"]).stdout.trim();
+  if (pending !== `?? ${relativeClose}`) {
+    throw new Error(`Close preparation changed files other than immutable close.md: ${pending || "none"}`);
+  }
+
+  git(["add", relativeSession]);
+  git(["commit", "-m", `close session ${session.id}`]);
+  git(["push"]);
+  await note("supervisor close commit and push", [
+    `- Exact prepared session path: \`${relativeSession}\``,
+    `- Commit message: \`close session ${session.id}\``,
+    "- Reason: Codex workspace-write intentionally protects `.git`; the supervisor is the trusted repository operator.",
+  ]);
+
+  const closeResult = koda(["session", "close"]);
+  if (closeResult.status !== 0 || !closeResult.stdout.includes("SESSION CLOSED")) {
+    throw new Error(`Koda did not verify the supervisor close commit: ${closeResult.stdout}${closeResult.stderr}`);
+  }
+  const statusResult = koda(["status"]);
+  if (statusResult.status !== 0 || !statusResult.stdout.includes("SESSION CLOSED")) {
+    throw new Error(`Koda status did not derive the supervisor close: ${statusResult.stdout}${statusResult.stderr}`);
+  }
+
+  await modelTurn("producer", "verify immutable session close", [
+    `Read ${producerSkill("close")} completely and explicitly resume koda-c-close in supervised verification mode.`,
     `Use node ${run.cli} wherever the skill says koda.`,
-    "Every configured phase is advanced and all produced output was committed and pushed by the relay supervisor.",
-    "Perform the complete prepare → exact Git commands → push → verify ceremony. Do not create another session or ask the owner.",
-    "Stop only after both koda session close and koda status derive SESSION CLOSED from disk and Git.",
+    "The trusted relay supervisor executed the exact prepared-session Git add, honest close commit, and upstream push.",
+    "Do not edit close.md or any session file. Recompute its binding, inspect Git and upstream state, run koda session close and koda status, and stop only after both derive SESSION CLOSED.",
   ].join(" "));
 }
 
