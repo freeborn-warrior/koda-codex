@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { realpathSync } from "node:fs";
 import path from "node:path";
 
 export interface ClosureCheck {
@@ -27,7 +28,7 @@ export function checkSessionClosed(projectRoot: string, sessionDir: string, phas
     return { closed: false, reasons: ["The project is not inside a Git repository."] };
   }
 
-  const relativeSession = path.relative(top.stdout, sessionDir);
+  const relativeSession = path.relative(realpathSync(top.stdout), realpathSync(sessionDir));
   if (relativeSession.startsWith("..") || path.isAbsolute(relativeSession)) {
     return { closed: false, reasons: ["The session folder is outside the Git repository."] };
   }

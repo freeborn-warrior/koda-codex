@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { appendFile, mkdir, readFile, readdir, rename } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename } from "node:fs/promises";
 import path from "node:path";
 
 import { pathExists } from "./config.ts";
@@ -87,6 +87,21 @@ export async function createFreshReview(
   let archivedPath: string | null = null;
   if (await pathExists(target)) {
     const existing = parseReview(await readFile(target, "utf8"));
+    if (!existing.verdict || !existing.receipt || !existing.metadata) {
+      throw new Error("The current review is incomplete or damaged. Repair it before requesting a fresh review.");
+    }
+    const approvals = await readApprovalEntries(sessionDir);
+    const acknowledgement = approvals.findLast((entry) =>
+      entry.phase === phase.name &&
+      entry.reviewId === existing.metadata!.id &&
+      entry.receipt.trim() === existing.receipt!.trim()
+    );
+    if (!acknowledgement) {
+      throw new Error("Record the current review's exact receipt before requesting a fresh review.");
+    }
+    if (existing.verdict === "DISCUSS" && !acknowledgement.ruling?.trim()) {
+      throw new Error("Record the owner's DISCUSS ruling before requesting a fresh review.");
+    }
     const archiveId = existing.metadata?.id ?? randomUUID();
     const historyDir = path.join(sessionDir, "reviews", "history");
     await mkdir(historyDir, { recursive: true });
@@ -188,7 +203,9 @@ function humanLine(value: string | null): string {
 }
 
 export async function recordApproval(sessionDir: string, entry: ApprovalEntry): Promise<void> {
-  const existing = await readApprovalEntries(sessionDir);
+  const file = ledgerPath(sessionDir);
+  const ledger = await readFile(file, "utf8");
+  const existing = parseApprovalEntries(ledger);
   if (existing.some((item) => item.reviewId === entry.reviewId && item.receipt === entry.receipt)) {
     return;
   }
@@ -206,5 +223,5 @@ export async function recordApproval(sessionDir: string, entry: ApprovalEntry): 
     `<!-- ${APPROVAL_MARKER} ${JSON.stringify(entry)} -->`,
     "",
   ].join("\n");
-  await appendFile(ledgerPath(sessionDir), block, "utf8");
+  await writeTextAtomic(file, `${ledger.trimEnd()}${block}`);
 }

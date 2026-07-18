@@ -111,8 +111,7 @@ async function initCommand(args: string[], cwd: string, io: CliIo): Promise<void
   io.out(`✓ Initialized Koda in ${root}`);
 
   if (!demo) {
-    io.out("Create a non-empty session prompt, then start the first session:");
-    io.out(`  ${command("session", "new", "PATH_TO_PROMPT.md")}`);
+    io.out("Create a non-empty session prompt, then pass its path to `koda session new`.");
     return;
   }
 
@@ -246,8 +245,8 @@ async function reviewNewCommand(args: string[], cwd: string, io: CliIo): Promise
 
 async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<void> {
   const approver = option(args, "--approver") ?? "Owner";
-  const comments = option(args, "--comments");
-  const ruling = option(args, "--ruling");
+  let comments = option(args, "--comments");
+  let ruling = option(args, "--ruling");
   rejectUnknownOptions(args);
   if (args.length < 1 || args.length > 2) {
     throw new Error("Usage: koda approve <phase> [quoted-receipt] [--approver <name>] [--comments <text>] [--ruling <text>]");
@@ -284,10 +283,12 @@ async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<v
   const quoted = (args[1] ?? await io.prompt("Paste the exact RECEIPT line: ")).trim();
   if (quoted !== parsed.receipt.trim()) throw new Error("Receipt mismatch. Nothing was written to the ledger.");
   if (parsed.verdict === "APPROVE WITH COMMENTS" && !comments?.trim()) {
-    throw new Error("APPROVE WITH COMMENTS requires --comments so the ledger preserves them.");
+    comments = await io.prompt("Enter the review comments for the ledger: ");
+    if (!comments.trim()) throw new Error("APPROVE WITH COMMENTS requires comments in the ledger.");
   }
   if (parsed.verdict === "DISCUSS" && !ruling?.trim()) {
-    throw new Error("DISCUSS requires Kristian's ruling through --ruling before a fresh review.");
+    ruling = await io.prompt("Enter Kristian's ruling for the ledger: ");
+    if (!ruling.trim()) throw new Error("DISCUSS requires Kristian's ruling before a fresh review.");
   }
 
   const entry: ApprovalEntry = {

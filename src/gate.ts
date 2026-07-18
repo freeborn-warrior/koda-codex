@@ -83,6 +83,9 @@ export async function evaluateGate(
       if (review.verdict && approval.verdict !== review.verdict) {
         issues.push(issue("approval_verdict_mismatch", "The ledger entry records a different verdict."));
       }
+      if (!approval.approver.trim()) {
+        issues.push(issue("approval_approver_missing", "The ledger entry has no approver."));
+      }
       if (review.verdict === "APPROVE WITH COMMENTS" && !approval.comments?.trim()) {
         issues.push(issue("approval_comments_missing", "APPROVE WITH COMMENTS requires the comments in the ledger."));
       }
