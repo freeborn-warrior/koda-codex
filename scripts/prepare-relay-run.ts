@@ -50,6 +50,7 @@ const runRoot = path.join(runsRoot, `${prefix}-${sequence}`);
 const project = path.join(runRoot, "project");
 const runtime = path.join(project, ".runtime");
 const remote = path.join(runtime, "remote.git");
+await mkdir(runRoot, { recursive: false });
 await mkdir(project, { recursive: true });
 await mkdir(runtime, { recursive: true });
 

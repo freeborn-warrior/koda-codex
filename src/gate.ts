@@ -1,7 +1,5 @@
-import { readFile } from "node:fs/promises";
-
 import { pathExists } from "./config.ts";
-import { artifactPath, ledgerPath, reviewPath } from "./project.ts";
+import { artifactPath, ledgerPath, readRegularText, reviewPath } from "./project.ts";
 import {
   parseReview,
   readApprovalLedger,
@@ -14,6 +12,18 @@ function issue(code: string, message: string): GateIssue {
   return { code, message };
 }
 
+async function regularEvidence(filePath: string, label: string): Promise<{ missing: boolean; unsafe: boolean; content: string | null }> {
+  if (!(await pathExists(filePath))) return { missing: true, unsafe: false, content: null };
+  try {
+    return { missing: false, unsafe: false, content: await readRegularText(filePath, label) };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("must be a regular file")) {
+      return { missing: false, unsafe: true, content: null };
+    }
+    throw error;
+  }
+}
+
 export async function evaluateGate(
   sessionDir: string,
   phase: PhaseConfig,
@@ -24,19 +34,25 @@ export async function evaluateGate(
   const phaseReview = reviewPath(sessionDir, phase, index);
 
   let artifact: string | null = null;
-  if (!(await pathExists(phaseArtifact))) {
+  const artifactEvidence = await regularEvidence(phaseArtifact, "The phase artifact");
+  if (artifactEvidence.missing) {
     issues.push(issue("artifact_missing", "The phase artifact does not exist."));
+  } else if (artifactEvidence.unsafe) {
+    issues.push(issue("artifact_not_regular", "The phase artifact must be a regular file; symbolic links and special files are refused."));
   } else {
-    artifact = await readFile(phaseArtifact, "utf8");
+    artifact = artifactEvidence.content;
     if (artifact.trim() === "") issues.push(issue("artifact_empty", "The phase artifact is empty."));
   }
 
   let review = null;
   let reviewContent: string | null = null;
-  if (!(await pathExists(phaseReview))) {
+  const reviewEvidence = await regularEvidence(phaseReview, "The peer-review file");
+  if (reviewEvidence.missing) {
     issues.push(issue("review_missing", "The peer-review file does not exist."));
+  } else if (reviewEvidence.unsafe) {
+    issues.push(issue("review_not_regular", "The peer-review file must be a regular file; symbolic links and special files are refused."));
   } else {
-    reviewContent = await readFile(phaseReview, "utf8");
+    reviewContent = reviewEvidence.content;
     review = parseReview(reviewContent);
     if (!review.verdictText) {
       issues.push(issue("verdict_missing", "The review must open with a VERDICT line."));
@@ -76,7 +92,28 @@ export async function evaluateGate(
   if (!(await pathExists(ledgerPath(sessionDir)))) {
     issues.push(issue("ledger_missing", "The approval ledger does not exist."));
   } else if (review?.metadata && review.receipt) {
-    const ledger = await readApprovalLedger(sessionDir);
+    let ledger;
+    try {
+      ledger = await readApprovalLedger(sessionDir);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("must be a regular file")) {
+        issues.push(issue("ledger_not_regular", "The approval ledger must be a regular file; symbolic links and special files are refused."));
+        ledger = null;
+      } else {
+        throw error;
+      }
+    }
+    if (!ledger) {
+      return {
+        open: false,
+        phase,
+        artifactPath: phaseArtifact,
+        reviewPath: phaseReview,
+        issues,
+        review,
+        approval,
+      };
+    }
     if (ledger.invalidMarkers > 0) {
       issues.push(issue("ledger_corrupt", "The approval ledger contains malformed KODA_APPROVAL metadata."));
     }

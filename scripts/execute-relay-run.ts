@@ -72,11 +72,30 @@ const run = JSON.parse(await readFile(runPath, "utf8")) as RunRecord;
 if (run.version !== 1 || run.status === "COMPLETE") {
   throw new Error(`Relay run cannot execute from status ${run.status}.`);
 }
+if (
+  typeof run.project !== "string" ||
+  typeof run.runtime !== "string" ||
+  typeof run.cli !== "string" ||
+  !Number.isInteger(run.maxTurns) ||
+  run.maxTurns < 1 ||
+  run.maxTurns > 100
+) {
+  throw new Error("Relay RUN.json has invalid paths or turn limit.");
+}
 
-const project = path.resolve(runRoot, run.project);
-const runtime = path.resolve(runRoot, run.runtime);
-if (!project.startsWith(`${runRoot}${path.sep}`) || !runtime.startsWith(`${project}${path.sep}`)) {
+const projectCandidate = path.resolve(runRoot, run.project);
+const runtimeCandidate = path.resolve(runRoot, run.runtime);
+if (!projectCandidate.startsWith(`${runRoot}${path.sep}`) || !runtimeCandidate.startsWith(`${projectCandidate}${path.sep}`)) {
   throw new Error("Relay run paths escape their prepared run folder.");
+}
+const project = await realpath(projectCandidate);
+const runtime = await realpath(runtimeCandidate);
+if (!project.startsWith(`${runRoot}${path.sep}`) || !runtime.startsWith(`${project}${path.sep}`)) {
+  throw new Error("Relay run paths resolve outside their prepared run folder.");
+}
+const expectedCli = await realpath(path.join(root, "src", "cli.ts"));
+if (await realpath(run.cli) !== expectedCli) {
+  throw new Error("Relay RUN.json does not name this checkout's trusted Koda CLI.");
 }
 
 function timestamp(): string {

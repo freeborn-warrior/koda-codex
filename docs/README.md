@@ -44,6 +44,8 @@ After the final phase advances, the first `session close` creates immutable `clo
 
 Requirements: Git and Node.js 22.18 or newer. The source is TypeScript; `prepack` emits dependency-free plain JavaScript under `dist/` so the installed CLI does not ask Node to type-strip code inside `node_modules`.
 
+The core has no runtime dependencies, install hook, daemon, or network call. Its exact write and trust boundaries—including the model-launching relay scripts—are documented in [SECURITY.md](SECURITY.md).
+
 From a fresh checkout:
 
 ```bash

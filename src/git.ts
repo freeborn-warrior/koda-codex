@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { realpathSync } from "node:fs";
+import { readdirSync, realpathSync } from "node:fs";
 import path from "node:path";
 
 export interface ClosureCheck {
@@ -28,6 +28,25 @@ function git(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr
   };
 }
 
+function regularSessionFiles(directory: string, root = directory): { files: string[]; unsafe: string[] } {
+  const files: string[] = [];
+  const unsafe: string[] = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const candidate = path.join(directory, entry.name);
+    const relative = path.relative(root, candidate);
+    if (entry.isDirectory()) {
+      const nested = regularSessionFiles(candidate, root);
+      files.push(...nested.files);
+      unsafe.push(...nested.unsafe);
+    } else if (entry.isFile()) {
+      files.push(candidate);
+    } else {
+      unsafe.push(relative);
+    }
+  }
+  return { files, unsafe };
+}
+
 export function checkGitClosure(projectRoot: string, sessionDir: string, phasesComplete: boolean): ClosureCheck {
   const reasons: string[] = [];
   if (!phasesComplete) {
@@ -40,13 +59,26 @@ export function checkGitClosure(projectRoot: string, sessionDir: string, phasesC
     return { closed: false, reasons: ["The project is not inside a Git repository."] };
   }
 
-  const relativeSession = path.relative(realpathSync(top.stdout), realpathSync(sessionDir));
+  const resolvedTop = realpathSync(top.stdout);
+  const resolvedSession = realpathSync(sessionDir);
+  const relativeSession = path.relative(resolvedTop, resolvedSession);
   if (relativeSession.startsWith("..") || path.isAbsolute(relativeSession)) {
     return { closed: false, reasons: ["The session folder is outside the Git repository."] };
   }
 
-  const trackedState = git(projectRoot, ["ls-files", "--error-unmatch", "--", path.join(relativeSession, "state.json")]);
-  if (!trackedState.ok) reasons.push("The completed session has not been committed.");
+  const entries = regularSessionFiles(resolvedSession);
+  if (entries.unsafe.length > 0) {
+    reasons.push(`Session evidence contains symbolic links or special files: ${entries.unsafe.join(", ")}.`);
+  }
+  const untracked = entries.files
+    .map((file) => path.relative(resolvedTop, file))
+    .filter((file) => !git(projectRoot, ["ls-files", "--error-unmatch", "--", file]).ok);
+  const trackedState = !untracked.includes(path.join(relativeSession, "state.json"));
+  if (!trackedState) reasons.push("The completed session has not been committed.");
+  const otherUntracked = untracked.filter((file) => file !== path.join(relativeSession, "state.json"));
+  if (otherUntracked.length > 0) {
+    reasons.push(`Every session file must be committed; untracked or ignored: ${otherUntracked.join(", ")}.`);
+  }
 
   const dirty = git(projectRoot, ["status", "--porcelain", "--untracked-files=all", "--", relativeSession]);
   if (!dirty.ok || dirty.stdout !== "") reasons.push("The session has uncommitted changes.");

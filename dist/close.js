@@ -5,7 +5,7 @@ import path from "node:path";
 import { pathExists } from "./config.js";
 import { checkGitClosure } from "./git.js";
 import { validateAdvancedHistory } from "./history.js";
-import { nowIso, writeTextAtomic } from "./project.js";
+import { nowIso, readRegularText, writeTextAtomic } from "./project.js";
                                                               
 
 const CLOSE_MARKER = "KODA_CLOSE";
@@ -19,9 +19,12 @@ async function durableSessionFiles(directory        , sessionDir        )       
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const candidate = path.join(directory, entry.name);
     const relative = path.relative(sessionDir, candidate);
-    if (relative === "close.md" || entry.name.includes(".tmp-")) continue;
+    if (relative === "close.md") continue;
     if (entry.isDirectory()) files.push(...await durableSessionFiles(candidate, sessionDir));
     if (entry.isFile()) files.push(candidate);
+    if (!entry.isDirectory() && !entry.isFile()) {
+      throw new Error(`Session evidence must use regular files and directories; refused ${relative}.`);
+    }
   }
   return files;
 }
@@ -43,9 +46,11 @@ export async function sessionDigest(sessionDir        )                  {
 
 export function parseCloseArtifact(content        )                       {
   const prefix = `<!-- ${CLOSE_MARKER} `;
-  const line = content.replace(/\r\n/g, "\n").split("\n")
-    .find((candidate) => candidate.startsWith(prefix) && candidate.endsWith(" -->"));
-  if (!line) return null;
+  const markerLines = content.replace(/\r\n/g, "\n").split("\n")
+    .filter((candidate) => candidate.startsWith(`<!-- ${CLOSE_MARKER}`));
+  if (markerLines.length !== 1) return null;
+  const line = markerLines[0];
+  if (!line.startsWith(prefix) || !line.endsWith(" -->")) return null;
   try {
     const candidate = JSON.parse(line.slice(prefix.length, -" -->".length))                          ;
     if (
@@ -123,7 +128,14 @@ export async function evaluateSessionClosure(
     reasons.push("The immutable close.md artifact has not been prepared.");
     return { closed: false, reasons };
   }
-  const metadata = parseCloseArtifact(await readFile(file, "utf8"));
+  let closeContent        ;
+  try {
+    closeContent = await readRegularText(file, "close.md");
+  } catch (error) {
+    reasons.push(error instanceof Error ? error.message : String(error));
+    return { closed: false, reasons };
+  }
+  const metadata = parseCloseArtifact(closeContent);
   if (!metadata) {
     reasons.push("close.md has missing or invalid generated metadata.");
   } else {

@@ -64,3 +64,16 @@ test("STATUS TRUTH SUITE: invalid state JSON refuses instead of guessing", async
   assert.match(result.stderr, /ERROR: state\.json is not valid JSON/);
   assert.doesNotMatch(result.stdout, /GATE OPEN/);
 });
+
+test("STATUS TRUTH SUITE: a path-like phase name in state refuses instead of escaping", async (t) => {
+  const h = await readyGate(t);
+  const file = statePath(h.session.directory);
+  const state = JSON.parse(await readFile(file, "utf8")) as { phases: Array<{ name: string }> };
+  state.phases[0].name = "phase/../../../outside";
+  await writeFile(file, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+
+  const result = status(h.root);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /ERROR: state\.json: every phase name/i);
+  assert.doesNotMatch(result.stdout, /GATE OPEN/);
+});

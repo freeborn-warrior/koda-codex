@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { mkdtemp } from "node:fs/promises";
 import test from "node:test";
 
-import { evaluateSessionClosure, prepareCloseArtifact } from "../src/close.ts";
+import { evaluateSessionClosure, parseCloseArtifact, prepareCloseArtifact } from "../src/close.ts";
 import { artifactPath, createSession, saveSessionState, writeJsonAtomic } from "../src/project.ts";
 import { createFreshReview, recordApproval, reviewSha256 } from "../src/receipt.ts";
 import { DEFAULT_CONFIG } from "../src/config.ts";
-import { projectHarness } from "./helpers.ts";
+import { projectHarness, readyGate, temporaryRoot } from "./helpers.ts";
 
 test("session creation requires a prompt and numbers dated folders", async (t) => {
   const h = await projectHarness(t);
@@ -97,4 +97,71 @@ test("a completed session is closed only after its state is committed and pushed
   assert.equal(changed.closed, false);
   assert(changed.reasons.includes("Session files changed after close.md was prepared."));
   assert(changed.reasons.includes("The session has uncommitted changes."));
+});
+
+test("immutable close refuses symbolic links inside session evidence", async (t) => {
+  const h = await readyGate(t);
+  h.session.state.currentPhaseIndex = 1;
+  h.session.state.advances.push({
+    phase: h.phase.name,
+    receipt: h.review.metadata.receipt,
+    reviewId: h.review.metadata.id,
+    advancedAt: new Date().toISOString(),
+  });
+  await saveSessionState(h.session.directory, h.session.state);
+  const outside = path.join(h.root, "outside-evidence.md");
+  await writeFile(outside, "Evidence outside the session.\n", "utf8");
+  await symlink(outside, path.join(h.session.directory, "linked-evidence.md"));
+
+  await assert.rejects(
+    () => prepareCloseArtifact(h.session.directory, h.session.state),
+    /Session evidence must use regular files and directories/,
+  );
+});
+
+test("immutable close refuses duplicate generated metadata markers", () => {
+  const metadata = JSON.stringify({
+    version: 1,
+    id: "close-id",
+    sessionId: "2026-07-18-01",
+    sessionSha256: "hash",
+    finalPhase: "summary",
+    finalReviewId: "review-id",
+    finalReceipt: "RECEIPT: Review read — review-id",
+    preparedAt: "2026-07-18T00:00:00.000Z",
+  });
+  const marker = `<!-- KODA_CLOSE ${metadata} -->`;
+  assert.equal(parseCloseArtifact(`${marker}\n${marker}\n`), null);
+});
+
+test("immutable close refuses a bound session file that Git ignored instead of pushing", async (t) => {
+  const h = await readyGate(t);
+  h.session.state.currentPhaseIndex = 1;
+  h.session.state.advances.push({
+    phase: h.phase.name,
+    receipt: h.review.metadata.receipt,
+    reviewId: h.review.metadata.id,
+    advancedAt: new Date().toISOString(),
+  });
+  await saveSessionState(h.session.directory, h.session.state);
+
+  const ignored = path.join(h.session.directory, "ignored-evidence.txt");
+  await writeFile(ignored, "This evidence is bound by close but deliberately ignored by Git.\n", "utf8");
+  await writeFile(path.join(h.root, ".gitignore"), "ignored-evidence.txt\n", "utf8");
+  await prepareCloseArtifact(h.session.directory, h.session.state);
+
+  const remoteRoot = await temporaryRoot(t, "koda-ignored-remote-");
+  const remote = path.join(remoteRoot, "remote.git");
+  execFileSync("git", ["init", "--bare", remote]);
+  execFileSync("git", ["init", "-b", "main"], { cwd: h.root });
+  execFileSync("git", ["config", "user.name", "Koda Test"], { cwd: h.root });
+  execFileSync("git", ["config", "user.email", "koda@example.invalid"], { cwd: h.root });
+  execFileSync("git", ["remote", "add", "origin", remote], { cwd: h.root });
+  execFileSync("git", ["add", "-A"], { cwd: h.root });
+  execFileSync("git", ["commit", "-m", "attempt close with ignored evidence"], { cwd: h.root });
+  execFileSync("git", ["push", "-u", "origin", "main"], { cwd: h.root });
+
+  const closure = await evaluateSessionClosure(h.root, h.session.directory, h.session.state);
+  assert.equal(closure.closed, false);
+  assert(closure.reasons.some((reason) => /Every session file must be committed.*ignored-evidence\.txt/.test(reason)));
 });

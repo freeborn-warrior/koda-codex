@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 
 import type { PhaseConfig, ProjectConfig } from "./types.ts";
@@ -24,8 +24,11 @@ export async function pathExists(candidate: string): Promise<boolean> {
   try {
     await access(candidate);
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT" || (error as NodeJS.ErrnoException).code === "ENOTDIR") {
+      return false;
+    }
+    throw error;
   }
 }
 
@@ -45,6 +48,26 @@ export async function findProjectRoot(start = process.cwd()): Promise<string> {
   }
 }
 
+export function validatePhaseChain(value: unknown, source = CONFIG_FILE): PhaseConfig[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`${source} must declare at least one phase.`);
+  }
+  const names = new Set<string>();
+  for (const phase of value) {
+    if (!phase || typeof phase.name !== "string" || !/^[a-z0-9][a-z0-9-]*$/.test(phase.name)) {
+      throw new Error(`${source}: every phase name must use lowercase letters, numbers, or hyphens.`);
+    }
+    if (names.has(phase.name)) {
+      throw new Error(`Duplicate phase name: ${phase.name}`);
+    }
+    if (typeof phase.description !== "string" || phase.description.trim() === "") {
+      throw new Error(`Phase ${phase.name} needs a description.`);
+    }
+    names.add(phase.name);
+  }
+  return value as PhaseConfig[];
+}
+
 export function validateConfig(value: unknown): ProjectConfig {
   if (!value || typeof value !== "object") {
     throw new Error(`${CONFIG_FILE} must contain a JSON object.`);
@@ -62,25 +85,28 @@ export function validateConfig(value: unknown): ProjectConfig {
   ) {
     throw new Error(`${CONFIG_FILE} sessionsDir must be a non-empty relative path.`);
   }
-  if (!Array.isArray(candidate.phases) || candidate.phases.length === 0) {
-    throw new Error(`${CONFIG_FILE} must declare at least one phase.`);
-  }
-
-  const names = new Set<string>();
-  for (const phase of candidate.phases) {
-    if (!phase || typeof phase.name !== "string" || !/^[a-z0-9][a-z0-9-]*$/.test(phase.name)) {
-      throw new Error("Every phase name must use lowercase letters, numbers, or hyphens.");
-    }
-    if (names.has(phase.name)) {
-      throw new Error(`Duplicate phase name: ${phase.name}`);
-    }
-    if (typeof phase.description !== "string" || phase.description.trim() === "") {
-      throw new Error(`Phase ${phase.name} needs a description.`);
-    }
-    names.add(phase.name);
-  }
+  validatePhaseChain(candidate.phases);
 
   return candidate as ProjectConfig;
+}
+
+export async function assertSafeSessionsDirectory(root: string, config: ProjectConfig): Promise<string> {
+  const resolvedRoot = await realpath(root);
+  const candidate = path.resolve(root, config.sessionsDir);
+  const resolved = await realpath(candidate).catch((error) => {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error(`${CONFIG_FILE} sessionsDir does not exist: ${candidate}`);
+    }
+    throw error;
+  });
+  const relative = path.relative(resolvedRoot, resolved);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`${CONFIG_FILE} sessionsDir resolves outside the project root.`);
+  }
+  if (!(await stat(resolved)).isDirectory()) {
+    throw new Error(`${CONFIG_FILE} sessionsDir must resolve to a directory.`);
+  }
+  return resolved;
 }
 
 export async function readProjectConfig(root: string): Promise<ProjectConfig> {
@@ -94,5 +120,7 @@ export async function readProjectConfig(root: string): Promise<ProjectConfig> {
     }
     throw error;
   }
-  return validateConfig(parsed);
+  const config = validateConfig(parsed);
+  await assertSafeSessionsDirectory(root, config);
+  return config;
 }

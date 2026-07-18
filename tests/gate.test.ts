@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { copyFile, mkdir, readFile, rm, unlink, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
@@ -45,10 +45,40 @@ test("GATE MUTATION SUITE: each core condition refuses and names itself", async 
     await assertNamedRefusal(h, "artifact_empty", /artifact is empty/i);
   });
 
+  await t.test("artifact is a regular file", async (t) => {
+    const h = await readyGate(t);
+    const artifact = artifactPath(h.session.directory, h.phase, 0);
+    const outside = path.join(h.root, "outside-artifact.md");
+    await writeFile(outside, h.artifact, "utf8");
+    await unlink(artifact);
+    await symlink(outside, artifact);
+    await assertNamedRefusal(h, "artifact_not_regular", /symbolic links.*refused/i);
+  });
+
   await t.test("review exists", async (t) => {
     const h = await readyGate(t);
     await unlink(reviewPath(h.session.directory, h.phase, 0));
     await assertNamedRefusal(h, "review_missing", /review file does not exist/i);
+  });
+
+  await t.test("review is a regular file", async (t) => {
+    const h = await readyGate(t);
+    const review = reviewPath(h.session.directory, h.phase, 0);
+    const outside = path.join(h.root, "outside-review.md");
+    await copyFile(review, outside);
+    await unlink(review);
+    await symlink(outside, review);
+    await assertNamedRefusal(h, "review_not_regular", /symbolic links.*refused/i);
+  });
+
+  await t.test("approval ledger is a regular file", async (t) => {
+    const h = await readyGate(t);
+    const ledger = ledgerPath(h.session.directory);
+    const outside = path.join(h.root, "outside-ledger.md");
+    await copyFile(ledger, outside);
+    await unlink(ledger);
+    await symlink(outside, ledger);
+    await assertNamedRefusal(h, "ledger_not_regular", /symbolic links.*refused/i);
   });
 
   for (const verdict of ["REVISE", "REJECT", "DISCUSS"] as const) {
@@ -144,6 +174,15 @@ test("every gate condition fails closed when deliberately broken", async (t) => 
     const file = reviewPath(h.session.directory, h.phase, 0);
     await writeFile(file, (await readFile(file, "utf8")).replace(/<!-- KODA_REVIEW .+ -->\n/, ""));
     assert((await codes(h)).includes("review_metadata_missing"));
+  });
+
+  await t.test("duplicate generated review metadata is ambiguous", async (t) => {
+    const h = await readyGate(t);
+    const file = reviewPath(h.session.directory, h.phase, 0);
+    const content = await readFile(file, "utf8");
+    const marker = content.split("\n").find((line) => line.startsWith("<!-- KODA_REVIEW "))!;
+    await writeFile(file, content.replace(marker, `${marker}\n${marker}`), "utf8");
+    await assertNamedRefusal(h, "review_metadata_missing", /metadata is missing or invalid/i);
   });
 
   await t.test("review metadata names a different phase", async (t) => {

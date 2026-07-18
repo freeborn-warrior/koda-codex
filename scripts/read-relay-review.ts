@@ -2,7 +2,7 @@
 
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { readFile, readdir, realpath, writeFile } from "node:fs/promises";
+import { lstat, readFile, readdir, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -54,19 +54,30 @@ const run = JSON.parse(await readFile(path.join(runRoot, "RUN.json"), "utf8")) a
 if (run.status !== "AWAITING_OWNER_RECEIPT") {
   refuse(`Window A is currently ${run.status}, not waiting for an owner receipt.`);
 }
-if (!run.sessionId) refuse("RUN.json names no active session.");
+if (!run.sessionId || !/^\d{4}-\d{2}-\d{2}-\d{2}$/.test(run.sessionId)) refuse("RUN.json names no valid active session.");
+if (typeof run.project !== "string") refuse("RUN.json names no valid project path.");
 
-const project = path.resolve(runRoot, run.project);
-if (!project.startsWith(`${runRoot}${path.sep}`)) refuse("The project path escapes the relay run.");
-const session = path.join(project, "docs", "sessions", run.sessionId);
-const state = JSON.parse(await readFile(path.join(session, "state.json"), "utf8")) as SessionState;
+const projectCandidate = path.resolve(runRoot, run.project);
+if (!projectCandidate.startsWith(`${runRoot}${path.sep}`)) refuse("The project path escapes the relay run.");
+const project = await realpath(projectCandidate);
+if (!project.startsWith(`${runRoot}${path.sep}`)) refuse("The project path resolves outside the relay run.");
+const session = await realpath(path.join(project, "docs", "sessions", run.sessionId));
+if (!session.startsWith(`${project}${path.sep}`)) refuse("The active session resolves outside the relay project.");
+const stateCandidate = path.join(session, "state.json");
+if (!(await lstat(stateCandidate)).isFile()) refuse("The active state must be a regular file.");
+const state = JSON.parse(await readFile(stateCandidate, "utf8")) as SessionState;
+if (!Number.isInteger(state.currentPhaseIndex) || state.currentPhaseIndex < 0) refuse("The session has an invalid current phase index.");
 const phase = state.phases[state.currentPhaseIndex];
-if (!phase) refuse("The session has no current phase awaiting review.");
-const review = path.join(
+if (!phase || !/^[a-z0-9][a-z0-9-]*$/.test(phase.name)) refuse("The session has no valid current phase awaiting review.");
+const reviewCandidate = path.join(
   session,
   "reviews",
   `${String(state.currentPhaseIndex + 1).padStart(2, "0")}-${phase.name}-review.md`,
 );
+const review = await realpath(reviewCandidate).catch(() => refuse(`The expected review does not exist: ${reviewCandidate}`));
+if (!review.startsWith(`${session}${path.sep}`) || !(await lstat(reviewCandidate)).isFile()) {
+  refuse("The expected review must be a regular file inside the active session.");
+}
 
 async function reviewSnapshot(): Promise<{ content: string; receipt: string; hash: string }> {
   const content = await readFile(review, "utf8").catch(() => refuse(`The expected review does not exist: ${review}`));

@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Finish submission-critical proof and polish: security audit, judge journey, video script, and submission checklist.
+- [ ] Finish submission-critical proof and polish: judge journey, video script, and submission checklist.
 
 ## Next
 
@@ -63,6 +63,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Complete and stop the sealed reviewer program: two Luna baseline repeats plus nine new medium cells. All three models passed the inference, temperament, and missing-evidence score contracts; no unique inference winner existed, so the conditional low-effort run was correctly skipped.
 - [x] Prove root `AGENTS.md` and all nine `.agents/skills/` packages are injected into a fresh ephemeral Codex task without tool calls or repository reads; preserve raw events and bind the result into the permanent suite.
 - [x] Run the README's exact one-line local `npx` path from a fresh public checkout, preserve the first executable-mode failure, correct it in the build and Git, and prove the pushed checkout remains clean afterward.
+- [x] Audit package and runtime safety; close ignored-file and linked-evidence gaps, constrain relay paths, scan tracked content, and document the honest threat and concurrency boundaries.
 
 ## Definition of target (a) done
 

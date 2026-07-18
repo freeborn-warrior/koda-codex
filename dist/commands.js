@@ -24,6 +24,7 @@ import {
   loadLatestSession,
   loadSessionState,
   nowIso,
+  readRegularText,
   reviewPath,
   saveSessionState,
   sessionRoot,
@@ -165,7 +166,7 @@ async function sessionNewCommand(args          , cwd        , io       )        
 
 function gateNextStep(root        , result            )           {
   const codes = new Set(result.issues.map((item) => item.code));
-  if (codes.has("artifact_missing") || codes.has("artifact_empty")) {
+  if (codes.has("artifact_missing") || codes.has("artifact_empty") || codes.has("artifact_not_regular")) {
     return [`Write a non-empty artifact at: ${displayPath(root, result.artifactPath)}`];
   }
   if (codes.has("review_missing")) {
@@ -176,6 +177,7 @@ function gateNextStep(root        , result            )           {
     codes.has("receipt_missing") ||
     codes.has("receipt_mismatch") ||
     codes.has("receipt_not_unique") ||
+    codes.has("review_not_regular") ||
     codes.has("review_metadata_missing") ||
     codes.has("review_phase_mismatch") ||
     codes.has("review_incomplete") ||
@@ -278,12 +280,12 @@ async function approveCommand(args          , cwd        , io       )           
   if (!(await pathExists(phaseReviewPath))) throw new Error(`Review missing: ${displayPath(root, phaseReviewPath)}`);
   if (!(await pathExists(phaseArtifactPath))) throw new Error(`Artifact missing: ${displayPath(root, phaseArtifactPath)}`);
 
-  const reviewContent = await readFile(phaseReviewPath, "utf8");
+  const reviewContent = await readRegularText(phaseReviewPath, "The peer-review file");
   const parsed = parseReview(reviewContent);
   if (!parsed.verdict || !parsed.receipt || !parsed.metadata) {
     throw new Error("The review's verdict, generated metadata, or final receipt is invalid.");
   }
-  const artifact = await readFile(phaseArtifactPath, "utf8");
+  const artifact = await readRegularText(phaseArtifactPath, "The phase artifact");
   if (artifact.trim() === "" || sha256(artifact) !== parsed.metadata.artifactSha256) {
     throw new Error("The artifact is empty or changed after this review was generated. Create a fresh review.");
   }

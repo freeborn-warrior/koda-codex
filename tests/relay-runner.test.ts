@@ -119,16 +119,18 @@ test("FULL RELAY RUNNER: preparation creates a clean pushed project with local s
 });
 
 test("FULL RELAY RUNNER: execution preserves two contexts and never automates owner receipt proof", async () => {
-  const [prepare, execute, reviewHelper, protocol, ghostty, packageJson] = await Promise.all([
+  const [prepare, execute, reviewHelper, reviewerExecute, protocol, ghostty, packageJson] = await Promise.all([
     readFile("scripts/prepare-relay-run.ts", "utf8"),
     readFile("scripts/execute-relay-run.ts", "utf8"),
     readFile("scripts/read-relay-review.ts", "utf8"),
+    readFile("scripts/execute-reviewer-run.ts", "utf8"),
     readFile("docs/FULL-RELAY-RUN.md", "utf8"),
     readFile("docs/GHOSTTY-TEST-GUIDE.md", "utf8"),
     readFile("package.json", "utf8"),
   ]);
   assert.match(prepare, /threadId: null/);
   assert.match(prepare, /git\(project, \["push", "-u", "origin", "main"\]\)/);
+  assert.match(prepare, /mkdir\(runRoot, \{ recursive: false \}\)/);
   assert.doesNotMatch(execute, /--ephemeral/);
   assert.match(execute, /"exec",\s*\n/);
   assert.match(execute, /"resume"/);
@@ -147,11 +149,16 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(execute, /verify immutable session close/);
   assert.match(execute, /"bundle", "create"/);
   assert.match(execute, /path\.join\(project, "\.git"\)/);
+  assert.match(execute, /const project = await realpath\(projectCandidate\)/);
+  assert.match(execute, /trusted Koda CLI/);
   assert.match(reviewHelper, /run\.status !== "AWAITING_OWNER_RECEIPT"/);
   assert.match(reviewHelper, /candidates\.length > 1/);
   assert.match(reviewHelper, /after\.hash !== before\.hash/);
   assert.match(reviewHelper, /spawnSync\("pbcopy"/);
   assert.doesNotMatch(reviewHelper, /console\.log\(after\.receipt/);
+  assert.match(reviewHelper, /project path resolves outside the relay run/);
+  assert.match(reviewHelper, /must be a regular file inside the active session/);
+  assert.match(reviewerExecute, /Reviewer project resolves outside its prepared run folder/);
   assert.match(protocol, /persistent producer/);
   assert.match(protocol, /persistent reviewer/);
   assert.match(protocol, /does \*\*not\*\* yet provide the mature interactive reviewer conversation/);

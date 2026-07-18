@@ -30,7 +30,16 @@ if (path.dirname(runRoot) !== runsRoot) {
 
 const runPath = path.join(runRoot, "RUN.json");
 const run = JSON.parse(await readFile(runPath, "utf8")) as RunRecord;
-if (run.version !== 1 || run.status !== "PREPARED") {
+const validModels = new Set(["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]);
+const validEfforts = new Set(["low", "medium", "high", "xhigh"]);
+if (
+  run.version !== 1 ||
+  run.status !== "PREPARED" ||
+  !validModels.has(run.model) ||
+  !validEfforts.has(run.effort) ||
+  typeof run.prompt !== "string" ||
+  run.prompt.trim() === ""
+) {
   throw new Error(`Reviewer run is not a prepared version-1 run: ${run.status}`);
 }
 
@@ -38,7 +47,10 @@ run.status = "RUNNING";
 run.startedAt = new Date().toISOString();
 await writeFile(runPath, `${JSON.stringify(run, null, 2)}\n`, "utf8");
 
-const project = path.join(runRoot, "project");
+const project = await realpath(path.join(runRoot, "project"));
+if (!project.startsWith(`${runRoot}${path.sep}`)) {
+  throw new Error("Reviewer project resolves outside its prepared run folder.");
+}
 const args = [
   "--ask-for-approval", "never",
   "exec",

@@ -1,9 +1,9 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, readFile, readdir, rename } from "node:fs/promises";
+import { mkdir, readdir, rename } from "node:fs/promises";
 import path from "node:path";
 
 import { pathExists } from "./config.ts";
-import { artifactPath, ledgerPath, nowIso, reviewPath, writeTextAtomic } from "./project.ts";
+import { artifactPath, ledgerPath, nowIso, readRegularText, reviewPath, writeTextAtomic } from "./project.ts";
 import { VERDICTS } from "./types.ts";
 import type {
   ApprovalEntry,
@@ -40,8 +40,9 @@ export function parseReview(content: string): ParsedReview {
   const receipt = /^RECEIPT: .+/.test(lastLine) ? lastLine : null;
 
   let metadata: ReviewMetadata | null = null;
-  const markerLine = lines.find((line) => line.startsWith(`<!-- ${REVIEW_MARKER} `) && line.endsWith(" -->"));
-  if (markerLine) {
+  const markerLines = lines.filter((line) => line.startsWith(`<!-- ${REVIEW_MARKER}`));
+  const markerLine = markerLines.length === 1 ? markerLines[0] : null;
+  if (markerLine?.startsWith(`<!-- ${REVIEW_MARKER} `) && markerLine.endsWith(" -->")) {
     try {
       const raw = markerLine.slice(`<!-- ${REVIEW_MARKER} `.length, -" -->".length);
       const candidate = JSON.parse(raw) as Partial<ReviewMetadata>;
@@ -78,7 +79,7 @@ export async function createFreshReview(
   if (!(await pathExists(phaseArtifact))) {
     throw new Error(`Artifact missing: ${phaseArtifact}`);
   }
-  const artifact = await readFile(phaseArtifact, "utf8");
+  const artifact = await readRegularText(phaseArtifact, "Phase artifact");
   if (artifact.trim() === "") {
     throw new Error(`Artifact is empty: ${phaseArtifact}`);
   }
@@ -86,7 +87,7 @@ export async function createFreshReview(
   const target = reviewPath(sessionDir, phase, index);
   let archivedPath: string | null = null;
   if (await pathExists(target)) {
-    const existing = parseReview(await readFile(target, "utf8"));
+    const existing = parseReview(await readRegularText(target, "Current review"));
     if (!existing.verdict || !existing.receipt || !existing.metadata) {
       throw new Error("The current review is incomplete or damaged. Repair it before requesting a fresh review.");
     }
@@ -160,14 +161,14 @@ async function reviewFiles(directory: string): Promise<string[]> {
 export async function receiptOccurrenceCount(sessionDir: string, receipt: string): Promise<number> {
   let count = 0;
   for (const file of await reviewFiles(path.join(sessionDir, "reviews"))) {
-    const parsed = parseReview(await readFile(file, "utf8"));
+    const parsed = parseReview(await readRegularText(file, "Review evidence"));
     if (parsed.receipt === receipt || parsed.metadata?.receipt === receipt) count += 1;
   }
   return count;
 }
 
 export async function reviewSha256(sessionDir: string, phase: PhaseConfig, index: number): Promise<string> {
-  return sha256(await readFile(reviewPath(sessionDir, phase, index), "utf8"));
+  return sha256(await readRegularText(reviewPath(sessionDir, phase, index), "Current review"));
 }
 
 export function parseApprovalEntries(content: string): ApprovalEntry[] {
@@ -220,7 +221,7 @@ export async function readApprovalEntries(sessionDir: string): Promise<ApprovalE
 export async function readApprovalLedger(sessionDir: string): Promise<ParsedApprovalLedger> {
   const file = ledgerPath(sessionDir);
   if (!(await pathExists(file))) return { entries: [], invalidMarkers: 0 };
-  return parseApprovalLedger(await readFile(file, "utf8"));
+  return parseApprovalLedger(await readRegularText(file, "Approval ledger"));
 }
 
 function humanLine(value: string | null): string {
@@ -229,7 +230,7 @@ function humanLine(value: string | null): string {
 
 export async function recordApproval(sessionDir: string, entry: ApprovalEntry): Promise<void> {
   const file = ledgerPath(sessionDir);
-  const ledger = await readFile(file, "utf8");
+  const ledger = await readRegularText(file, "Approval ledger");
   const existing = parseApprovalEntries(ledger);
   const duplicate = existing.find((item) => item.reviewId === entry.reviewId && item.receipt === entry.receipt);
   if (duplicate && duplicate.reviewSha256 !== entry.reviewSha256) {

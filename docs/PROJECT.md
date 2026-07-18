@@ -94,6 +94,8 @@ owner contract
 - [Owner-readable bounded reviewer program report](test-results/2026-07-18-bounded-reviewer-model-program.md)
 - [Fresh Codex startup discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md)
 - [Fresh public-checkout local npx proof](package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md)
+- [Safety and threat boundaries](SECURITY.md)
+- [Dated local safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md)
 - Git history on `main` contains honest pushed milestones.
 
 ## Drift watch against the starting document

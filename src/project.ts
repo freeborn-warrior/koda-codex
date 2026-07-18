@@ -1,8 +1,8 @@
-import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { PhaseConfig, ProjectConfig, SessionState } from "./types.ts";
-import { pathExists } from "./config.ts";
+import { assertSafeSessionsDirectory, pathExists, validatePhaseChain } from "./config.ts";
 
 const SESSION_PATTERN = /^(\d{4}-\d{2}-\d{2})-(\d{2})$/;
 
@@ -54,8 +54,14 @@ export function reviewPath(sessionDir: string, phase: PhaseConfig, index: number
 
 export async function writeTextAtomic(filePath: string, content: string): Promise<void> {
   const temporary = `${filePath}.tmp-${process.pid}-${Math.random().toString(16).slice(2)}`;
-  await writeFile(temporary, content, { encoding: "utf8", flag: "wx" });
-  await rename(temporary, filePath);
+  try {
+    await writeFile(temporary, content, { encoding: "utf8", flag: "wx" });
+    await rename(temporary, filePath);
+  } finally {
+    await unlink(temporary).catch((error) => {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    });
+  }
 }
 
 export async function writeJsonAtomic(filePath: string, value: unknown): Promise<void> {
@@ -100,6 +106,8 @@ export async function createSession(
   if (prompt.trim() === "") {
     throw new Error("The session prompt must exist and be non-empty.");
   }
+  validatePhaseChain(config.phases);
+  await assertSafeSessionsDirectory(root, config);
 
   const id = await nextSessionId(root, config);
   const directory = sessionRoot(root, config, id);
@@ -130,12 +138,19 @@ export function validateSessionState(value: unknown, expectedId?: string): Sessi
     throw new Error("state.json must contain a JSON object.");
   }
   const state = value as Partial<SessionState>;
-  if (state.version !== 1 || typeof state.id !== "string" || (expectedId && state.id !== expectedId)) {
+  if (
+    state.version !== 1 ||
+    typeof state.id !== "string" ||
+    !SESSION_PATTERN.test(state.id) ||
+    typeof state.createdAt !== "string" ||
+    (expectedId && state.id !== expectedId)
+  ) {
     throw new Error("state.json has invalid session identity or version.");
   }
   if (!Array.isArray(state.phases) || state.phases.length === 0) {
     throw new Error("state.json has no phase chain.");
   }
+  validatePhaseChain(state.phases, "state.json");
   if (!Number.isInteger(state.currentPhaseIndex) || state.currentPhaseIndex! < 0 || state.currentPhaseIndex! > state.phases.length) {
     throw new Error("state.json has an invalid currentPhaseIndex.");
   }
@@ -163,7 +178,7 @@ export function validateSessionState(value: unknown, expectedId?: string): Sessi
 export async function loadSessionState(directory: string, expectedId?: string): Promise<SessionState> {
   let parsed: unknown;
   try {
-    parsed = JSON.parse(await readFile(statePath(directory), "utf8"));
+    parsed = JSON.parse(await readRegularText(statePath(directory), "state.json"));
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new Error("state.json is not valid JSON.");
@@ -201,6 +216,14 @@ export function displayPath(root: string, filePath: string): string {
 
 export async function readNonEmpty(filePath: string): Promise<string | null> {
   if (!(await pathExists(filePath))) return null;
-  const content = await readFile(filePath, "utf8");
+  const content = await readRegularText(filePath, path.basename(filePath));
   return content.trim() === "" ? null : content;
+}
+
+export async function readRegularText(filePath: string, label = "Evidence file"): Promise<string> {
+  const metadata = await lstat(filePath);
+  if (!metadata.isFile()) {
+    throw new Error(`${label} must be a regular file; symbolic links and special files are refused.`);
+  }
+  return readFile(filePath, "utf8");
 }
