@@ -353,3 +353,12 @@ Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effor
 - **How:** Replaced recursive parent-folder copying with a nine-name skill allowlist, corrected only the Markdown-aware boundary assertion, and ran `npm run test:record -- 2026-07-18-persistent-relay-runner-final`. Every named result is preserved in [the per-test transcript](test-results/2026-07-18-persistent-relay-runner-final.md).
 - **What happened:** All 77 checks passed. A real temporary preparation produced a clean project, exactly nine skills, an initial commit, a configured upstream, and zero unpushed commits. Static execution contracts require persistent thread resume, distinct role IDs, closed model stdin, interactive Kristian approval, disk gate/close evaluation, pre-close output commit, verified Git bundle capture, and cleanup of only nested runtime Git.
 - **Verdict:** PASS. The harness is ready for a genuine owner-acknowledged run; this deterministic result does not claim that such a model-driven run has happened.
+
+## 2026-07-18 — First-time Ghostty guide validation
+
+- **Variant:** Not applicable; Node.js test runner. No model was called.
+- **Effort:** Not applicable.
+- **What:** Kristian's exact two-window procedure for the prepared full relay, including the distinction between the supervised reviewer context and window B's current role as a review-reading surface.
+- **How:** Added `docs/GHOSTTY-TEST-GUIDE.md`, linked it from the relay protocol and README, added plain-language baseline interpretation to the model matrix, and required the guide to preserve the exact execution command, chat receipt prohibition, resume rule, and `RELAY COMPLETE` evidence. Ran `npm run test:record -- 2026-07-18-ghostty-guide-final`; every named result is preserved in [the per-test transcript](test-results/2026-07-18-ghostty-guide-final.md).
+- **What happened:** All 77 checks passed. The prepared run remains `PREPARED — NOT RUN`; its folder is deliberately excluded from this documentation commit until Kristian completes the relay.
+- **Verdict:** PASS. The instructions no longer imply that the second Ghostty window is already an interactive reviewer interface.

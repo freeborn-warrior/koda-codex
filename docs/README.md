@@ -93,6 +93,8 @@ The real collaboration uses two persistent Codex tasks sharing one Koda session:
 
 The repository also contains a [persistent full-relay test harness](FULL-RELAY-RUN.md) that resumes two distinct Codex thread IDs across all six phases and pauses for Kristian's real receipt at every gate. It is a test bridge toward the mature runtime, not yet a replacement for the interactive owner-facing reviewer conversation.
 
+Kristian's exact two-window terminal procedure is in the [first-time Ghostty test guide](GHOSTTY-TEST-GUIDE.md).
+
 That separation is a tested operating protocol, not a permission claim. `SKILL.md` cannot prove a task had no hidden context or restrict which files/tools it could access. Koda-C mechanically enforces the evidence on disk; fresh-task fixtures test reviewer independence and temperament in practice.
 
 ## Tests and evidence

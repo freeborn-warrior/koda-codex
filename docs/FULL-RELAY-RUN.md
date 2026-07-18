@@ -2,6 +2,8 @@
 
 This harness is the next proof above Koda-C's deterministic six-phase scenarios. It runs one complete native session through two distinct persistent Codex contexts:
 
+For the exact first-time Ghostty procedure, follow the [step-by-step Ghostty test guide](GHOSTTY-TEST-GUIDE.md).
+
 ```text
 persistent producer → phase artifact → persistent reviewer → review file
        ↑                                                   ↓

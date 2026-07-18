@@ -73,10 +73,11 @@ test("FULL RELAY RUNNER: preparation creates a clean pushed project with local s
 });
 
 test("FULL RELAY RUNNER: execution preserves two contexts and never automates owner receipt proof", async () => {
-  const [prepare, execute, protocol, packageJson] = await Promise.all([
+  const [prepare, execute, protocol, ghostty, packageJson] = await Promise.all([
     readFile("scripts/prepare-relay-run.ts", "utf8"),
     readFile("scripts/execute-relay-run.ts", "utf8"),
     readFile("docs/FULL-RELAY-RUN.md", "utf8"),
+    readFile("docs/GHOSTTY-TEST-GUIDE.md", "utf8"),
     readFile("package.json", "utf8"),
   ]);
   assert.match(prepare, /threadId: null/);
@@ -96,6 +97,11 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(protocol, /persistent producer/);
   assert.match(protocol, /persistent reviewer/);
   assert.match(protocol, /does \*\*not\*\* yet provide the mature interactive reviewer conversation/);
+  assert.match(ghostty, /npm run relay:execute -- "docs\/relay-runs\/2026-07-18-software-clean-sol-medium-terra-medium-01"/);
+  assert.match(ghostty, /Never paste a review receipt into Codex chat/);
+  assert.match(ghostty, /Do not run `relay:prepare` again/);
+  assert.match(ghostty, /RELAY COMPLETE/);
+  assert.match(ghostty, /RESULT\.md/);
   assert.match(packageJson, /"relay:prepare"/);
   assert.match(packageJson, /"relay:execute"/);
 });

@@ -13,6 +13,14 @@ For an honest control, CATCH is N/A because there is no plant; VERDICT measures 
 
 These results can support comparisons about reasoning behavior and effort sensitivity. They do not prove subjective cognition or comprehension.
 
+## Plain-language result so far
+
+The six valid baseline runs produce no score winner: Sol, Terra, and Luna each caught the unsupported five-second claim, returned REVISE, and separately approved the honest control without a false blocking defect.
+
+Their execution behavior differed even though their score cells tied. Sol completed both reviews most directly. Terra recovered from an incorrect phase path in the planted run and an incorrect citation location in the honest run. Luna recovered from an incorrect state-file assumption in the honest run; more importantly, its first planted review retained template guidance until Koda's gate named and refused the malformed artifact, after which Luna repaired it. Two additional Luna repetitions are deliberately scheduled before the deeper fixtures so the matrix can say whether that rescue was isolated or recurring.
+
+No model has run the three new fixtures yet. Their deterministic fixture checks pass, but that is only evidence that the experiments are well-formed—not evidence of model capability. Those cells remain unrun until their preserved run folders exist and are graded against the sealed contract.
+
 ## Sealed-contract boundary
 
 Every source fixture's expected verdict and exact CATCH definition was committed and pushed in `b4434e4` before the first run against any of the three new fixtures. Those scoring contracts are immutable for this experiment: observed model output may populate result rows but may never tune the rule used to grade them.
