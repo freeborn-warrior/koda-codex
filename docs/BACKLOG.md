@@ -16,7 +16,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Design the long-lived, disk-recoverable guide/session-prompter from real use; decide whether it is one guide skill or a distinct prompt skill before creating either.
-- [ ] After the manual two-task relay is proved, design a supervisor that launches a non-interactive producer and owner-facing reviewer after an owner-approved prompt; keep all authority in the existing disk gate.
+- [ ] After the backend relay is proved, build the ruled side-by-side runtime: one visible full-session producer stream with owner input closed, one visible full-session interactive reviewer, and all cross-context actions routed through the existing disk gate.
 - [ ] Add abort/recovery semantics before claiming the producer can run unattended; Ctrl-C must leave named recoverable state.
 
 ## Later, only after target (a) is secure

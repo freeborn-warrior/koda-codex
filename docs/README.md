@@ -89,7 +89,7 @@ A phase may pause for a disk-backed [in-phase consultation](IN-PHASE-CONSULTATIO
 
 Every reviewer → producer handback is an artifact before it is actionable: a consultation response, relayed owner ruling, or formal review. Conversation and notifications may draw attention to the file, but the producer never continues from chat text or memory.
 
-The real collaboration uses two persistent Codex tasks sharing one Koda session: one producer task explicitly invokes the current phase skill; one owner-facing reviewer task carries consultations, explanations, rulings, and formal handoffs through the one `koda-c-review` skill. Kristian speaks only in the reviewer task during the session. See the [two-task walkthrough](DEMO.md#two-codex-task-collaboration).
+The real collaboration uses two visible persistent Codex tasks side by side for the full Koda session. The producer task explicitly invokes the current phase skill and shows its available progress, but its conversational input is closed; Kristian can watch or terminate it but cannot type into it. The separate owner-facing reviewer task carries consultations, explanations, rulings, and formal handoffs through the one `koda-c-review` skill. Kristian speaks only there and can discuss anything he notices in the producer stream. Neither context is recreated at phase boundaries. See the [two-task walkthrough](DEMO.md#two-codex-task-collaboration).
 
 The repository also contains a [persistent full-relay test harness](FULL-RELAY-RUN.md) that resumes two distinct Codex thread IDs across all six phases and pauses for Kristian's real receipt at every gate. It is a test bridge toward the mature runtime, not yet a replacement for the interactive owner-facing reviewer conversation.
 
@@ -130,7 +130,7 @@ Koda-C stays a clean plain-file engine. Guide, explore, architect, and triage re
 
 The next adoption layer is project adaptation. It should help create project-local guidance and relay skills from the owner's actual purpose, with writing and software as initial profiles, while preserving any existing project instructions and keeping all generated material inside that project. That bootstrap layer is not implemented in the current entry and must not be confused with the already working gate.
 
-The mature runtime is one owner-facing guide/reviewer and one non-interactive producer: Kristian approves a written session prompt in the guide interface, a supervisor launches the session, and every later producer input arrives through reviewer-authored files. The current release documents and tests the manual two-task relay; it does not yet claim automatic process launch or unattended orchestration. See the [dated runtime design](design-notes/2026-07-18-owner-facing-session-runtime.md).
+The mature runtime is one visible persistent producer beside one visible persistent owner-facing reviewer. Kristian approves a written session prompt in the guide interface, a supervisor launches both contexts for the session, and every later producer input arrives through reviewer-authored files. Kristian may follow the producer's exposed progress but speaks only with the reviewer. The current release proves the backend two-context relay; it does not yet claim that side-by-side interactive surface, automatic process launch, or unattended orchestration. See the [dated runtime design](design-notes/2026-07-18-owner-facing-session-runtime.md).
 
 The current build record and deliberate extensions from the starting document are tracked in [PROJECT.md](PROJECT.md#drift-watch-against-the-starting-document).
 

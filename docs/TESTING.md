@@ -416,3 +416,12 @@ Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effor
 - **How:** Ran `npm run test:record -- 2026-07-18-one-command-owner-review-corrected`; every named result is preserved in [the corrected per-test transcript](test-results/2026-07-18-one-command-owner-review-corrected.md).
 - **What happened:** All 77 checks passed. The executable helper finds exactly one `AWAITING_OWNER_RECEIPT` run, derives its current review from `RUN.json` and `state.json`, refuses zero or multiple waiters, verifies the review hash is unchanged after reading, copies the receipt without printing it, and leaves the actual Koda acknowledgement manual. The complete mutation, adversarial-receipt, status-truth, stale-review, package, and close suites remain intact.
 - **Verdict:** PASS. Window B now requires one stable command for every phase while the guide states honestly that the mature owner-facing reviewer conversation is still future work.
+
+## 2026-07-18 — Persistent side-by-side runtime ruling
+
+- **Variant:** Not applicable; owner product ruling plus deterministic regression suite. No model was called for this validation.
+- **Effort:** Not applicable.
+- **What:** Clarify that one persistent producer context and one separate persistent reviewer context span the entire visible session; producer progress is observable but owner input is closed, while the reviewer is the sole conversational interface.
+- **How:** Updated root guidance, README, project contract, backlog, and the dated runtime design. Explicitly removed the prior suggestion that either context might normally be replaced at phase handoffs, distinguished exposed progress from hidden chain-of-thought, and ran `npm run test:record -- 2026-07-18-persistent-side-by-side-runtime-ruling`. Every named result is preserved in [the per-test transcript](test-results/2026-07-18-persistent-side-by-side-runtime-ruling.md).
+- **What happened:** All 77 checks passed. Fresh reviewer contexts remain useful for blind fixtures, but are not the ruled in-session experience. The current harness still proves only two persistent backend contexts behind a supervisor, not the future side-by-side interactive surface.
+- **Verdict:** PASS. Independent review is now defined as producer/reviewer context separation, not per-phase reviewer replacement, without changing any mechanical gate condition.

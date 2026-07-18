@@ -25,6 +25,7 @@
 - Reviewer-fixture runs must record the real date, fixture, model variant, effort, actual verdict, CATCH score, and VERDICT score. A vague block never counts as a catch; execution behavior stays secondary. Never imply an unrun model test passed.
 - Treat fresh-task reviewer isolation as test evidence, not as a permission guarantee supplied by `SKILL.md`.
 - In Koda's product relay, the owner initiates a session by invoking `koda-c-session` with a written prompt. Once the session is active, the producer never solicits the owner: every request goes to the owner-facing reviewer, and every actionable reviewer handback exists as a named disk artifact before producer use.
+- Preserve the owner-ruled runtime: one visible persistent producer context and one separate visible persistent reviewer context span the full session. Owner input to producer is closed; owner conversation happens only with the reviewer. Do not replace the reviewer with fresh per-phase contexts.
 
 ## Git
 

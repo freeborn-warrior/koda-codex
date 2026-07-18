@@ -21,6 +21,7 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - Every gate condition receives a deliberate mutation test proving refusal.
 - Reviewer experiments score the specific evidence-backed CATCH separately from the chosen VERDICT; operational recovery notes never inflate either score.
 - Producer work and independent review are separate Codex tasks sharing one Koda session folder.
+- One persistent producer context and one separate persistent reviewer context span the full session. Both are visible side by side; Kristian may watch but not type into the producer and speaks only with the reviewer. Phase boundaries never create a fresh reviewer.
 - There is one producer skill per declared native phase and one shared reviewer skill with per-phase criteria.
 - A producer hands its artifact to the reviewer. Only an allowed verdict, owner receipt, and `advance` activate the next phase from config.
 - Session closure is an immutable artifact with Git between preparation and verification. A new session cannot open until that close is pushed.
@@ -52,6 +53,7 @@ owner contract
 
 - A **Koda session** is the dated, disk-backed project record under the configured sessions directory.
 - A **Codex task** is one agent context/window. The producer and reviewer should use separate tasks so the review does not inherit producer reasoning.
+- Runtime continuity is session-scoped: the same producer task and the same reviewer task traverse every configured phase. Fresh reviewer tasks remain fixture/testing tools, not the intended owner session experience.
 - Context handover happens through artifacts, cited evidence, reviews, receipts, and state—not through copied chat summaries.
 - Kristian deliberately starts a session in the producer window by invoking `koda-c-session` with a written prompt prepared beforehand. After that opening handoff, he speaks only with the owner-facing reviewer until close. Every producer request enters that reviewer task, and every actionable handback returns as a named disk artifact.
 - A new session reads the prior pushed close and final summary, then records deliberate carry-forward items in its new owner prompt.
@@ -92,6 +94,7 @@ owner contract
 - **Owner-approved extension:** `close.md` makes the original committed-and-pushed closure rule immutable and independently checkable.
 - **Owner-approved extension:** New sessions deliberately cite prior pushed closure and summary carry-forward; phase artifacts record owner/adviser input resolved mid-phase.
 - **Owner-approved extension:** Mid-phase input now has an explicit request/response artifact. The producer sends everything to the reviewer; reviewer authority covers evidence and technical questions, while owner authority is obtained through the reviewer window. The persistent reviewer may later formally review because it did not author the artifact and must disclose its consultation.
+- **Owner-approved runtime ruling:** The mature session is two visible persistent contexts side by side. Producer output is observable but its input is closed; only the full-session reviewer is conversational. Independent review means separation from producer context, not a new reviewer at every phase.
 - **Transparency extension:** `PROJECT.md` and `BACKLOG.md` expose work that would otherwise live only in Codex's internal plan.
 - **Codex-native packaging correction:** Skills first existed under top-level `skills/`; official discovery requires `.agents/skills/`. They were moved without duplication, and root `AGENTS.md` now holds durable repository guidance.
 - **State-namespace correction:** The abandoned build attempt was removed from `docs/sessions/` after its meaningful owner contract and design note were moved to `docs/origin/` and `docs/design-notes/`. Git history retains the discarded brief and review without exposing them as live session state.
