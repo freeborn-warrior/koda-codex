@@ -53,3 +53,12 @@ Every durable test result is recorded here. Deterministic Node.js tests do not i
 - **Terra / effort levels:** Skipped for now; no model-assisted product test has run yet.
 - **Luna / effort levels:** Skipped for now; no model-assisted product test has run yet.
 - **Reason:** Per the owner's bounded-testing rule, model-assisted runs default to one variant and the full matrix begins only after target (a) has landed and time remains. A later entry must name the actual available variant and effort rather than infer them.
+
+## 2026-07-18 — Reviewer skill package validation
+
+- **Variant:** Not applicable; deterministic skill validator.
+- **Effort:** Not applicable.
+- **What:** `skills/peer-reviewer/SKILL.md` frontmatter, naming, and package structure.
+- **How:** Ran Codex's `quick_validate.py` against the repository-local skill folder.
+- **What happened:** The bundled artifact Python lacked its optional YAML package, so that runtime could not start the validator. The system Python had the required parser and returned `Skill is valid!`. The first Node run then failed because its assertion looked for different wording than the skill's actual “review is saved on disk” instruction; the assertion was corrected without weakening the requirement. The Node test checks the six default phase sections, custom-phase rule, write-before-report rule, receipt boundary, and four-line `agents/openai.yaml` sidecar.
+- **Verdict:** PASS. After correcting the assertion, all 31 repository checks passed and the Codex validator again returned `Skill is valid!`. The skill exists only inside this project; nothing was installed globally.

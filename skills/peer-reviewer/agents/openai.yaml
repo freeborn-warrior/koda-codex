@@ -1,0 +1,4 @@
+interface:
+  display_name: "Peer Reviewer"
+  short_description: "Verify phase artifacts and issue receipt reviews"
+  default_prompt: "Use $peer-reviewer to verify the current Koda phase artifact and write its review to disk."
