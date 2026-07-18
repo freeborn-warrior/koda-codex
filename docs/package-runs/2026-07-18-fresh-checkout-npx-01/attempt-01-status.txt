@@ -1,0 +1,5 @@
+$ git status --short --untracked-files=all
+ M dist/cli.js
+
+$ git diff --summary
+ mode change 100644 => 100755 dist/cli.js

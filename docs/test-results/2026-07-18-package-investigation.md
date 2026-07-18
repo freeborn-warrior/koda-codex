@@ -32,3 +32,28 @@ The installed demo initialized successfully, but a recovery hint still printed `
 The build now rewrites local `.ts` path literals as well as import specifiers. The package test creates a real tarball, installs it through `npm exec`, runs `koda --help`, initializes a demo project, extracts the exact printed `dist/cli.js advance` command, executes it, and asserts the expected named gate refusal.
 
 The corrected automated result is recorded per test in [2026-07-18-packaged-recovery-command-final.md](2026-07-18-packaged-recovery-command-final.md).
+
+## Attempt 4 — fresh checkout became dirty
+
+The documented command was then run against a shallow clone of pushed commit
+`4d0b959b83d87abe133edbdb9714bcc42b405b8b`:
+
+```text
+npx --yes . --help
+```
+
+Help printed successfully, but `git status --short --untracked-files=all`
+reported `M dist/cli.js`. The content was unchanged; npm had made the package
+binary executable while Git recorded it as mode `100644`. A command that
+silently changes its fresh checkout does not satisfy the no-hidden-setup claim,
+so the attempt is recorded as a packaging failure even though the CLI ran.
+
+## Correction 3 — executable state is built and tested
+
+The build now explicitly writes `dist/cli.js` as mode `0755`, and Git records
+the executable bit. The package suite first requires that state, then copies the
+repository into isolation, executes the exact local `npx --yes . --help`
+command, and asserts that the binary's content and executable state are
+unchanged afterward. The full corrected suite passed 81/81. A new public
+checkout must still repeat the exact command after this correction is pushed;
+local success is not substituted for that final proof.

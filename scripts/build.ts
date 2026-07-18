@@ -1,4 +1,4 @@
-import { readFile, mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { chmod, readFile, mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { stripTypeScriptTypes } from "node:module";
 import path from "node:path";
 
@@ -23,5 +23,7 @@ for (const name of sources) {
     .replaceAll(/(["']\.{1,2}\/[^"']+)\.ts(["'])/g, "$1.js$2");
   await writeFile(path.join(outputDir, name.replace(/\.ts$/, ".js")), javascript, "utf8");
 }
+
+await chmod(path.join(outputDir, "cli.js"), 0o755);
 
 console.log(`Built ${sources.length} dependency-free JavaScript files in dist/.`);
