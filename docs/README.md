@@ -83,6 +83,8 @@ All skills live inside this repository under Codex's discoverable `.agents/skill
 - `koda-c-review` is the only formal reviewer skill; its per-phase criteria never drift into copies.
 - `koda-c-close` performs the prepare → Git → verify ceremony outside the phase chain.
 
+A [fresh ephemeral Codex startup proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md) discovered all nine skills and root project guidance without any tool call or repository read. Discovery is therefore recorded behavior, not an assumption based only on folder placement.
+
 Every producer skill has three hard sections: ENTRY CHECK, ITS OWN JOB, and HANDOVER OBLIGATION. It refuses when required disk evidence is absent, writes only its own artifact, then hands to the shared reviewer without self-reviewing or advancing.
 
 A phase may pause for a disk-backed [in-phase consultation](IN-PHASE-CONSULTATION.md). The producer suggests reviewer authority for evidence/technical ambiguity or owner authority for product judgment, but every request goes to the reviewer. The reviewer answers or asks Kristian in its own owner-facing window, then relays the recorded response to the producer. After Kristian's one deliberate session-start invocation, the producer never solicits him directly. Consultation creates no verdict or receipt; the persistent reviewer may later formally review because it did not author the artifact, and it discloses its prior advice.

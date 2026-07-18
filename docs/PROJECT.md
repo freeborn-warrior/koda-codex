@@ -68,6 +68,7 @@ owner contract
 - Immutable close-artifact hashing plus Git-derived commit/push verification.
 - Repository-local Koda-C skills: seven producer relay legs, one shared reviewer, and one close ceremony.
 - A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda session.
+- A preserved fresh ephemeral Codex startup proves all nine local skills and root guidance are injected before any tool call or repository read.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.
 - Five sealed reviewer fixtures: the original hard-number capability check and honest control, plus an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap.
 - A completed seventeen-run model ledger: six original comparable runs, two Luna baseline repetitions, and nine new-fixture medium runs. All sealed score cells passed; Sol was operationally most consistent, while Terra recovered from path errors and Luna more often needed gate repair or skipped safe checks.
@@ -87,9 +88,11 @@ owner contract
 - [Codex skill-platform implications](design-notes/2026-07-18-codex-skill-platform.md)
 - [Owner-facing session runtime](design-notes/2026-07-18-owner-facing-session-runtime.md)
 - [Long-lived guide context research](design-notes/2026-07-18-long-lived-guide-context.md)
+- [Guide-to-session prompt thesis](design-notes/2026-07-18-guide-to-session-thesis.md)
 - [Completed genuine six-phase relay](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
 - [Completed reviewer model and effort matrix](MODEL-TEST-MATRIX.md)
 - [Owner-readable bounded reviewer program report](test-results/2026-07-18-bounded-reviewer-model-program.md)
+- [Fresh Codex startup discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md)
 - Git history on `main` contains honest pushed milestones.
 
 ## Drift watch against the starting document
@@ -100,6 +103,7 @@ owner contract
 - **Owner-approved extension:** New sessions deliberately cite prior pushed closure and summary carry-forward; phase artifacts record owner/adviser input resolved mid-phase.
 - **Owner-approved extension:** Mid-phase input now has an explicit request/response artifact. The producer sends everything to the reviewer; reviewer authority covers evidence and technical questions, while owner authority is obtained through the reviewer window. The persistent reviewer may later formally review because it did not author the artifact and must disclose its consultation.
 - **Owner-approved runtime ruling:** The mature session is two visible persistent contexts side by side. Producer output is observable but its input is closed; only the full-session reviewer is conversational. Independent review means separation from producer context, not a new reviewer at every phase.
+- **Owner-approved guide direction:** A long-lived Guide hosts a distinct `koda-c-session-prompt` skill. Only an explicitly confirmed, hashed prompt may ask the supervisor to launch the separate producer/reviewer session; pushed Summary and close evidence return to the Guide afterward.
 - **Transparency extension:** `PROJECT.md` and `BACKLOG.md` expose work that would otherwise live only in Codex's internal plan.
 - **Codex-native packaging correction:** Skills first existed under top-level `skills/`; official discovery requires `.agents/skills/`. They were moved without duplication, and root `AGENTS.md` now holds durable repository guidance.
 - **State-namespace correction:** The abandoned build attempt was removed from `docs/sessions/` after its meaningful owner contract and design note were moved to `docs/origin/` and `docs/design-notes/`. Git history retains the discarded brief and review without exposing them as live session state.
@@ -119,9 +123,9 @@ Self-hosting Koda-C development remains an optional later validation, not the cu
 
 The later adoption layer must turn an owner's project purpose into project-local operating material without weakening the invariant gate. Likely starting profiles are writing and software, but a profile is only a starting point: the resulting `AGENTS.md`, producer artifacts, live checks, and shared-reviewer criteria must be adapted to the actual project and remain in that project's repository. The exact bootstrap command and authoring ceremony are not yet settled.
 
-Between sessions, the leading owner-facing role is a guide/session-prompter with a long-lived project conversation. Its continuity is reconstructed from project state, prior pushed close, summary, backlog, and design notes rather than trusted to chat memory alone. It writes the next session prompt with Kristian; Kristian then invokes the existing `koda-c-session` ceremony in the producer window with that prompt. The ceremony validates and consumes the artifact without interviewing him. Whether guide and session-prompter become one skill is intentionally still open.
+Between sessions, the leading owner-facing role is a long-lived Guide whose continuity is reconstructed from project state, prior pushed close, summary, backlog, and design notes rather than trusted to chat memory alone. Owner direction now places a distinct `koda-c-session-prompt` skill inside that Guide conversation. It drafts one bounded prompt with Kristian, requires explicit launch confirmation, and hands a hashed ready artifact to the supervisor; the existing `koda-c-session` ceremony then validates and consumes it without interviewing him. The Guide remains separate from the launched producer and reviewer contexts and resumes from their pushed Summary and close evidence.
 
-The mature runtime may remove even that one producer-window action: after Kristian approves the written prompt in the guide interface, a supervisor can open the session and launch a non-interactive producer plus the owner-facing reviewer. This is a roadmap orchestration layer, not current behavior and not new gate authority.
+The mature runtime should remove even that one producer-window action: after `koda-c-session-prompt` records Kristian's explicit confirmation in the Guide, a supervisor revalidates the prior pushed close, opens the session, and launches a non-interactive producer plus the owner-facing reviewer. This is a roadmap orchestration layer, not current behavior and not new gate authority.
 
 ## Open owner decision
 

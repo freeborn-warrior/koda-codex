@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "date": "2026-07-18",
+  "model": "gpt-5.6-sol",
+  "effort": "low",
+  "ephemeral": true,
+  "ignoredUserConfig": true,
+  "sandbox": "read-only",
+  "toolsPermittedByPrompt": false,
+  "repositoryReadsPermittedByPrompt": false,
+  "threadId": "019f7649-b472-7272-ac76-c2628abed7da",
+  "status": "PASS",
+  "prompt": "Do not call any tool and do not read any repository file. From the startup context already supplied to this fresh task only, report: (1) every available skill whose name starts with koda-c-, exactly as listed; (2) the total number; (3) one repository guidance rule about where project skills must live. If startup context does not contain any requested item, say unavailable instead of searching. Finish with DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY."
+}

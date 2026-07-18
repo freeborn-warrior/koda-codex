@@ -113,3 +113,46 @@ test("session open and close remain ceremonies outside producer phase routing", 
   assert.match(close, /`close\.md`/);
   assert.match(close, /writes nothing/);
 });
+
+test("fresh Codex startup discovers all nine local skills and root guidance without reading disk", async () => {
+  const runRoot = "docs/discovery-runs/2026-07-18-fresh-codex-startup-01";
+  const [runText, result, eventsText] = await Promise.all([
+    readFile(path.join(runRoot, "RUN.json"), "utf8"),
+    readFile(path.join(runRoot, "RESULT.md"), "utf8"),
+    readFile(path.join(runRoot, "CODEX-EVENTS.jsonl"), "utf8"),
+  ]);
+  const run = JSON.parse(runText) as {
+    status: string;
+    ephemeral: boolean;
+    ignoredUserConfig: boolean;
+    sandbox: string;
+    toolsPermittedByPrompt: boolean;
+    repositoryReadsPermittedByPrompt: boolean;
+    prompt: string;
+  };
+  assert.equal(run.status, "PASS");
+  assert.equal(run.ephemeral, true);
+  assert.equal(run.ignoredUserConfig, true);
+  assert.equal(run.sandbox, "read-only");
+  assert.equal(run.toolsPermittedByPrompt, false);
+  assert.equal(run.repositoryReadsPermittedByPrompt, false);
+  for (const name of skillNames) assert.doesNotMatch(run.prompt, new RegExp(name));
+  assert.doesNotMatch(run.prompt, /\b9\b/);
+
+  const events = eventsText.trim().split("\n").map((line) => JSON.parse(line)) as Array<{
+    type: string;
+    item?: { type?: string; text?: string };
+  }>;
+  const toolEvents = events.filter((event) => event.item?.type && event.item.type !== "agent_message");
+  assert.deepEqual(toolEvents, []);
+  const answer = events.find((event) => event.item?.type === "agent_message")?.item?.text ?? "";
+  const discovered = [...answer.matchAll(/\bkoda-c-[a-z]+\b/g)].map((match) => match[0]).sort();
+  assert.deepEqual(discovered, [...skillNames].sort());
+  assert.match(answer, /Total: 9/);
+  assert.match(answer, /\.agents\/skills\//);
+  assert.match(answer, /never install Koda-C skills globally/i);
+  assert.match(answer, /DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY/);
+  assert.match(result, /Koda-C skills discovered from startup context: 9 of 9/);
+  assert.match(result, /Tool calls: none/);
+  assert.match(result, /Repository file reads: none/);
+});
