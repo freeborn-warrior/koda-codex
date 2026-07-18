@@ -50,6 +50,8 @@ From a fresh checkout:
 npx --yes . --help
 ```
 
+That exact path is preserved as a [fresh public-checkout proof](package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md): the first run exposed an executable-mode defect, and the corrected pushed checkout prints help without changing any tracked or untracked file.
+
 Then follow the [one-minute fixture](DEMO.md#one-minute-mechanical-proof). Its money moment is:
 
 ```text

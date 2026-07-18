@@ -508,3 +508,12 @@ Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effor
 - **How:** Cloned pushed commit `4d0b959b83d87abe133edbdb9714bcc42b405b8b` from GitHub into `/tmp`, ran the command under Node `v26.0.0`, then inspected every tracked/untracked change. Preserved the command and status output under [the package run](package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md). Corrected the build to set the package binary executable, added pre-npm and post-local-npx mutation checks, and ran `npm run test:record -- 2026-07-18-clean-local-npx-final`; all 81 results are preserved in [the local correction transcript](test-results/2026-07-18-clean-local-npx-final.md).
 - **What happened:** Help printed successfully, but the first checkout became dirty because npm changed `dist/cli.js` from mode `100644` to `100755`. This is a packaging failure, not a pass with a cosmetic caveat. The corrected local suite passes 81/81 and now catches both a non-executable source binary and mutation by the documented command.
 - **Verdict:** REVISE PENDING PUBLIC RE-CHECK. Commit and push the executable correction, then repeat the same command from another shallow public checkout and require an empty `git status` before changing this result to PASS.
+
+## 2026-07-18 — Corrected public fresh-checkout npx proof
+
+- **Variant:** Not applicable; fresh public Git checkout and npm. No model was called.
+- **Effort:** Not applicable.
+- **What:** Repeat the failed public-checkout proof only after the executable correction exists on the pushed branch.
+- **How:** Cloned public commit `6ed7d4470c51119bfd3ec341d404b006c15a5085` into a second new `/tmp` directory, verified the initial binary mode was `0755`, ran the exact README command `npx --yes . --help`, then required empty short status plus successful unstaged and staged `git diff --exit-code` checks. Raw outputs and the initial restricted-cache detour are preserved in [the completed package run](package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md).
+- **What happened:** Koda printed its complete help and the public checkout remained byte- and mode-clean. The desktop sandbox first denied access to npm's normal user cache before Koda executed; that non-product attempt left the checkout clean and was rerun unchanged with normal cache access.
+- **Verdict:** PASS AFTER PRESERVED REVISE. A fresh public checkout now runs the one-line local command without dependency setup or repository mutation.

@@ -2,11 +2,12 @@
 
 - Date: 2026-07-18
 - Repository: `https://github.com/freeborn-warrior/koda-codex.git`
-- First tested commit: `4d0b959b83d87abe133edbdb9714bcc42b405b8b`
+- Failed commit: `4d0b959b83d87abe133edbdb9714bcc42b405b8b`
+- Corrected commit: `6ed7d4470c51119bfd3ec341d404b006c15a5085`
 - Platform: macOS arm64
 - Node: `v26.0.0`
 - Command: `npx --yes . --help`
-- Current result: **REVISE — corrected public re-check pending**
+- Final result: **PASS after a preserved REVISE**
 
 ## What happened
 
@@ -21,6 +22,15 @@ exact local command cannot change the copied package source. The complete local
 suite passes 81/81 in
 [`2026-07-18-clean-local-npx-final.md`](../../test-results/2026-07-18-clean-local-npx-final.md).
 
-The result remains REVISE until the correction exists on the public branch and
-the same shallow-clone command leaves that checkout clean. The failed attempt is
-kept beside the future corrected attempt rather than overwritten.
+After commit `6ed7d44` was pushed, a second new shallow clone recorded
+`dist/cli.js` as executable before npm ran. The exact command printed Koda help,
+and both tracked and untracked status were empty afterward. `git diff
+--exit-code` and `git diff --cached --exit-code` also succeeded.
+
+The desktop's restricted first invocation could not create npm's normal cache
+directory and exited before Koda ran; that infrastructure-only attempt also
+left the checkout clean. It is preserved separately and was repeated unchanged
+with normal cache access rather than hidden or credited as a product result.
+
+This run now passes. The failed checkout remains beside the corrected checkout
+so the public result tells the complete packaging story.

@@ -1,0 +1,11 @@
+Commit: 6ed7d4470c51119bfd3ec341d404b006c15a5085
+Node: v26.0.0
+Environment: Codex desktop restricted filesystem; normal npm user cache unavailable
+
+$ npx --yes . --help
+npm error code EPERM
+npm error syscall mkdir
+npm error path /Users/freeborn/.npm/_npx/2c6eee30ba6dbd55
+
+The process stopped before Koda ran. The checkout remained clean. This is
+preserved as an infrastructure-only attempt and is not scored as a Koda result.

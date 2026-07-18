@@ -6,11 +6,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Finish submission-critical proof and polish: fresh skill discovery, fresh one-line package path, video script, and submission checklist.
+- [ ] Finish submission-critical proof and polish: security audit, judge journey, video script, and submission checklist.
 
 ## Next
 
-- [ ] Verify the one-line local `npx` path from a fresh checkout/package.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Build the disk-recoverable Guide around the owner-approved separate `koda-c-session-prompt` skill: explicit drafting mode, owner-confirmed hashed prompt, single-session launch request, separate producer/reviewer contexts, and pushed Summary/close return.
@@ -63,6 +62,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Execute and preserve the first genuine owner-acknowledged relay through all six phases: persistent Sol producer, persistent Terra reviewer, an unplanned Summary REVISE loop, seven owner acknowledgements, supervised Git recovery, verified bundle, and pushed immutable close.
 - [x] Complete and stop the sealed reviewer program: two Luna baseline repeats plus nine new medium cells. All three models passed the inference, temperament, and missing-evidence score contracts; no unique inference winner existed, so the conditional low-effort run was correctly skipped.
 - [x] Prove root `AGENTS.md` and all nine `.agents/skills/` packages are injected into a fresh ephemeral Codex task without tool calls or repository reads; preserve raw events and bind the result into the permanent suite.
+- [x] Run the README's exact one-line local `npx` path from a fresh public checkout, preserve the first executable-mode failure, correct it in the build and Git, and prove the pushed checkout remains clean afterward.
 
 ## Definition of target (a) done
 

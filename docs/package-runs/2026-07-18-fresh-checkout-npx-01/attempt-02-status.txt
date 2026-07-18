@@ -1,0 +1,8 @@
+$ git status --short --untracked-files=all
+
+$ git diff --exit-code
+
+$ git diff --cached --exit-code
+
+Final binary mode: 0755
+Result: all commands exited 0; no status or diff output

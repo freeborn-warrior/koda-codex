@@ -57,3 +57,15 @@ command, and asserts that the binary's content and executable state are
 unchanged afterward. The full corrected suite passed 81/81. A new public
 checkout must still repeat the exact command after this correction is pushed;
 local success is not substituted for that final proof.
+
+## Corrected public checkout — pass
+
+Pushed commit `6ed7d4470c51119bfd3ec341d404b006c15a5085` was cloned into a second new
+temporary directory. Its binary arrived as mode `0755`. The exact documented
+command printed Koda help, and the binary remained mode `0755`; short status,
+working-tree diff, and staged diff were all empty afterward.
+
+The first invocation inside the restricted desktop sandbox stopped before Koda
+ran because npm could not create its normal user-cache directory. It changed no
+repository file. The identical command was rerun with normal cache access and
+passed; the infrastructure attempt is retained in the [run evidence](../package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md) and is not counted as product execution.

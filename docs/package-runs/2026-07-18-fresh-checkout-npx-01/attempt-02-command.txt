@@ -1,0 +1,17 @@
+Repository: https://github.com/freeborn-warrior/koda-codex.git
+Checkout: /tmp/koda-fresh-checkout-corrected.C7KGSV/repo
+Commit: 6ed7d4470c51119bfd3ec341d404b006c15a5085
+Node: v26.0.0
+Initial binary mode: 0755
+
+$ npx --yes . --help
+Koda — phase gates with proof the review was read
+
+Commands:
+  koda init [directory] [--demo]
+  koda session new <prompt-file>
+  koda status
+  koda review new <phase>
+  koda approve <phase> [quoted-receipt] [--approver <name>]
+  koda advance
+  koda session close
