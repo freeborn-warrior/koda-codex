@@ -8,7 +8,7 @@ import test from "node:test";
 import { readProjectConfig } from "../src/config.ts";
 import { artifactPath, createSession, reviewPath, writeJsonAtomic } from "../src/project.ts";
 import { createFreshReview, readApprovalEntries } from "../src/receipt.ts";
-import { parseOwnerHandback, pendingOwnerHandbacks } from "../scripts/owner-handback.ts";
+import { createOwnerHandback, parseOwnerHandback, pendingOwnerHandbacks } from "../scripts/owner-handback.ts";
 import {
   acquireReviewerWindow,
   newReviewerJob,
@@ -273,6 +273,25 @@ test("OWNER HANDBACK MUTATION: changed prose and symbolic-link evidence refuse",
     artifactPath: artifactPath(result.session.directory, result.phase, 0),
     reviewPath: reviewPath(result.session.directory, result.phase, 0),
   }), /handback must be a regular file/);
+});
+
+test("OWNER HANDBACK CONTAINMENT: a linked handback directory cannot redirect writes", async (t) => {
+  const result = await preparedAcknowledgementRun("correct");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  const outside = path.join(result.temporary, "outside-handbacks");
+  await mkdir(outside);
+  await symlink(outside, path.join(result.session.directory, "owner-handbacks"));
+  await assert.rejects(createOwnerHandback({
+    sessionDir: result.session.directory,
+    phase: result.phase.name,
+    phaseIndex: 0,
+    artifactPath: artifactPath(result.session.directory, result.phase, 0),
+    reviewPath: reviewPath(result.session.directory, result.phase, 0),
+    ownerStatement: "Add a second output format.",
+    reviewerRelay: "OWNER DIRECTION — DISK HANDOFF REQUIRED\nThis must reach the producer through disk.",
+  }), /handback root must be a real directory inside the active session/);
+  assert.deepEqual(await readdir(outside), []);
 });
 
 test("TWO-WINDOW RELAY: a pending formal-review job wakes one persistent reviewer and returns acknowledged disk evidence", async (t) => {

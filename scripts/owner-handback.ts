@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { lstat, mkdir, readFile, readdir } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 
 import { pathExists } from "../src/config.ts";
@@ -80,9 +80,9 @@ export function parseOwnerHandback(content: string): OwnerHandbackMetadata {
   if (
     !content.includes(`# Owner direction handback\n`) ||
     !content.includes(exactRelay) ||
-    content.split("## Owner direction (verbatim)").length !== 2 ||
-    content.split("## Reviewer relay").length !== 2 ||
-    content.split("## Producer obligation").length !== 2
+    [...content.matchAll(/^## Owner direction \(verbatim\)$/gm)].length !== 1 ||
+    [...content.matchAll(/^## Reviewer relay$/gm)].length !== 1 ||
+    [...content.matchAll(/^## Producer obligation$/gm)].length !== 1
   ) {
     throw new Error("Owner handback is incomplete.");
   }
@@ -122,12 +122,29 @@ export async function createOwnerHandback(input: {
     throw new Error("The active review is stale; owner direction must be bound after re-review.");
   }
 
-  const directory = path.join(
-    input.sessionDir,
-    "owner-handbacks",
-    `${phasePrefix(input.phaseIndex)}-${input.phase}`,
-  );
-  await mkdir(directory, { recursive: true });
+  const handbacksRoot = path.join(input.sessionDir, "owner-handbacks");
+  const directory = path.join(handbacksRoot, `${phasePrefix(input.phaseIndex)}-${input.phase}`);
+  const resolvedSession = await realpath(input.sessionDir);
+  if (await pathExists(handbacksRoot)) {
+    if (!(await lstat(handbacksRoot)).isDirectory()) {
+      throw new Error("Owner handback root must be a real directory inside the active session.");
+    }
+  } else {
+    await mkdir(handbacksRoot);
+  }
+  const resolvedRoot = await realpath(handbacksRoot);
+  if (!resolvedRoot.startsWith(`${resolvedSession}${path.sep}`)) {
+    throw new Error("Owner handback root resolves outside the active session.");
+  }
+  if (await pathExists(directory)) {
+    if (!(await lstat(directory)).isDirectory()) throw new Error("Owner handback phase location must be a real directory.");
+  } else {
+    await mkdir(directory);
+  }
+  const resolvedDirectory = await realpath(directory);
+  if (!resolvedDirectory.startsWith(`${resolvedSession}${path.sep}`)) {
+    throw new Error("Owner handback directory resolves outside the active session.");
+  }
   const existing = (await readdir(directory)).filter((name) => /^\d{2}-direction\.md$/.test(name)).sort();
   const sequence = Number(existing.at(-1)?.slice(0, 2) ?? "0") + 1;
   if (sequence > 99) throw new Error(`No owner handback numbers remain for phase ${input.phase}.`);
@@ -182,7 +199,16 @@ export async function readOwnerHandbacks(
 ): Promise<OwnerHandback[]> {
   const directory = path.join(sessionDir, "owner-handbacks", `${phasePrefix(phaseIndex)}-${phase}`);
   if (!(await pathExists(directory))) return [];
+  const root = path.join(sessionDir, "owner-handbacks");
+  if (!(await lstat(root)).isDirectory()) throw new Error("Owner handback root must be a real directory inside the active session.");
   if (!(await lstat(directory)).isDirectory()) throw new Error("Owner handback location must be a directory.");
+  const [resolvedSession, resolvedRoot, resolvedDirectory] = await Promise.all([realpath(sessionDir), realpath(root), realpath(directory)]);
+  if (!resolvedRoot.startsWith(`${resolvedSession}${path.sep}`)) {
+    throw new Error("Owner handback root resolves outside the active session.");
+  }
+  if (!resolvedDirectory.startsWith(`${resolvedSession}${path.sep}`)) {
+    throw new Error("Owner handback directory resolves outside the active session.");
+  }
   const results: OwnerHandback[] = [];
   for (const name of (await readdir(directory)).sort()) {
     if (!/^\d{2}-direction\.md$/.test(name)) {

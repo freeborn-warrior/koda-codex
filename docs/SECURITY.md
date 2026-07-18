@@ -76,6 +76,10 @@ disposable relay project—commit and push to its nested test remote. The relay 
 removes only its verified nested runtime `.git` and `.runtime` directories after
 capturing a restorable bundle. Resolved-path checks now refuse a run project,
 runtime, review, or CLI that escapes its prepared run folder or this checkout.
+Owner-direction handbacks add the same containment rule inside the active session:
+their root and phase directory must be real directories resolving beneath that
+session, and every handback must be a regular file. A linked parent directory
+cannot redirect even the initial atomic write.
 
 Run those scripts only against a run folder created by the matching preparation
 command in a trusted checkout. Do not execute a modified `RUN.json` received from
@@ -107,3 +111,5 @@ tracked symbolic links, common committed credential signatures, destructive
 call sites, real package contents, and all 93 functional/security checks.
 The result and limitations live in
 [`security-runs/2026-07-18-local-audit-01/RESULT.md`](security-runs/2026-07-18-local-audit-01/RESULT.md).
+Later evidence classes retain their own adversarial checks in the current full
+suite; the latest named transcript is linked from the README.
