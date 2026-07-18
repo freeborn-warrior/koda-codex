@@ -7,8 +7,10 @@
 - Effort: medium
 - Verdict: NOT RUN
 - Expected behavior: sealed in the source fixture metadata; not evaluated because Codex could not initialize
-- Caught/missed: not evaluated
+- CATCH score: NOT RUN
+- VERDICT score: NOT RUN
 - False positive: not evaluated
+- Secondary execution observations: desktop sandbox denied Codex state-database initialization
 - Review path: none
 - Codex event log: [`CODEX-EVENTS.jsonl`](CODEX-EVENTS.jsonl)
 - Stderr: [`CODEX-STDERR.txt`](CODEX-STDERR.txt)

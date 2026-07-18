@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "id": "missing-evidence",
+  "kind": "planted-defect",
+  "expectedVerdicts": ["REVISE"],
+  "scoring": {
+    "catch": {
+      "applies": true,
+      "expectedFinding": "The production record claims a saved three-check transcript at evidence/test-output.txt, but that cited record does not exist, so the reported run is unverifiable as delivered.",
+      "requiredEvidence": [
+        "docs/sessions/2026-07-18-01/phases/01-produce.md"
+      ]
+    },
+    "verdict": {
+      "expected": ["REVISE"]
+    }
+  }
+}

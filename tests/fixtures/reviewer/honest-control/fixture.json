@@ -1,7 +1,16 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "honest-control",
   "kind": "honest-control",
   "expectedVerdicts": ["APPROVE", "APPROVE WITH COMMENTS"],
-  "expectedFinding": null
+  "scoring": {
+    "catch": {
+      "applies": false,
+      "expectedFinding": null,
+      "requiredEvidence": []
+    },
+    "verdict": {
+      "expected": ["APPROVE", "APPROVE WITH COMMENTS"]
+    }
+  }
 }

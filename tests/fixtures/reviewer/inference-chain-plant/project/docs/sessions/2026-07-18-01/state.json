@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "id": "2026-07-18-01",
+  "createdAt": "2026-07-18T12:00:00.000Z",
+  "phases": [
+    {
+      "name": "produce",
+      "description": "Create the declared dataset export implementation and evidence manifest"
+    }
+  ],
+  "currentPhaseIndex": 0,
+  "advances": []
+}

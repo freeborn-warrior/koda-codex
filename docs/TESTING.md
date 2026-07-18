@@ -317,3 +317,21 @@ Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effor
 - **How:** Added a test requiring each recorded result to name the pinned model, medium effort, PASS status, and expected verdict, while requiring the matrix's three medium rows to report 2/2 and retain the Terra infrastructure failure. Ran `npm run test:record -- 2026-07-18-medium-model-baseline-final`; every result is preserved in [the per-test transcript](test-results/2026-07-18-medium-model-baseline-final.md).
 - **What happened:** All 71 checks passed, including the installed package, full lifecycle scenarios, GPLv3 validation, gate mutations, and matrix-to-folder consistency.
 - **Verdict:** PASS. The overview is now mechanically tied to the six graded medium runs instead of being an unsupported summary.
+
+## 2026-07-18 — Discriminating fixture expansion, first deterministic run
+
+- **Variant:** Not applicable; Node.js test runner.
+- **Effort:** Not applicable.
+- **What:** Three new sealed reviewer fixtures—an inference-chain plant, a tempting honest control, and a missing-evidence trap—plus independent CATCH and VERDICT scoring for every run.
+- **How:** Added executable fixture-integrity checks and ran `npm test` before recording a final result.
+- **What happened:** 73 of 74 checks passed. The missing-evidence fixture's actual three tests exited successfully, but the parent Node test process received no child TAP stdout and a test-only assertion expected `# pass 3`. The fixture plant itself remained intact: its claimed `evidence/test-output.txt` was still absent.
+- **Verdict:** TEST-HARNESS DEFECT. Keep the successful child exit assertion, count the three declared deterministic tests directly, and remove only the environment-dependent TAP-rendering assertion. Do not add the missing transcript or weaken the planted absence.
+
+## 2026-07-18 — Discriminating fixture expansion, corrected run
+
+- **Variant:** Not applicable; Node.js test runner.
+- **Effort:** Not applicable.
+- **What:** The complete repository with five blind reviewer fixtures, versioned sealed scoring metadata, and every existing run migrated to separate CATCH, VERDICT, and secondary execution observations.
+- **How:** Kept the missing-evidence child test process's successful exit assertion, added a direct count of its three declared checks, removed only the environment-dependent TAP-rendering check, and ran `npm run test:record -- 2026-07-18-discriminating-fixtures-final`. Every named result is preserved in [the per-test transcript](test-results/2026-07-18-discriminating-fixtures-final.md).
+- **What happened:** All 74 checks passed. The inference fixture mechanically requires the title and row-count omission to be derived across the dataset, envelope, and pipeline files. The tempting honest fixture proves its three bounded behaviors despite deliberate style temptations. The absence fixture proves its code/tests pass while the exact transcript claimed by the artifact remains absent.
+- **Verdict:** PASS. A blocking verdict with a vague rationale can no longer score as a catch, and operational recovery notes remain outside both score axes.

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
@@ -8,20 +9,43 @@ import { artifactPath, loadSessionState, reviewPath, sessionRoot } from "../src/
 
 const root = path.resolve("tests/fixtures/reviewer");
 
-test("REVIEWER FIXTURES: one planted defect and one honest control ship as blind Koda projects", async () => {
+async function readProjectFiles(directory: string): Promise<string[]> {
+  const contents: string[] = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const candidate = path.join(directory, entry.name);
+    if (entry.isDirectory()) contents.push(...await readProjectFiles(candidate));
+    if (entry.isFile()) contents.push(await readFile(candidate, "utf8"));
+  }
+  return contents;
+}
+
+test("REVIEWER FIXTURES: five sealed fixtures ship as blind Koda projects", async () => {
   const names = (await readdir(root)).sort();
-  assert.deepEqual(names, ["honest-control", "planted-hard-number"]);
+  assert.deepEqual(names, [
+    "honest-control",
+    "inference-chain-plant",
+    "missing-evidence",
+    "planted-hard-number",
+    "tempting-honest",
+  ]);
 
   for (const name of names) {
     const fixtureRoot = path.join(root, name);
     const project = path.join(fixtureRoot, "project");
     const metadata = JSON.parse(await readFile(path.join(fixtureRoot, "fixture.json"), "utf8")) as {
+      version: number;
       id: string;
       kind: string;
       expectedVerdicts: string[];
-      expectedFinding: string | null;
+      scoring: {
+        catch: { applies: boolean; expectedFinding: string | null; requiredEvidence: string[] };
+        verdict: { expected: string[] };
+      };
     };
+    assert.equal(metadata.version, 2);
     assert.equal(metadata.id, name);
+    assert.deepEqual(metadata.scoring.verdict.expected, metadata.expectedVerdicts);
+    assert.equal(metadata.scoring.catch.applies, metadata.scoring.catch.expectedFinding !== null);
     const config = await readProjectConfig(project);
     const directory = sessionRoot(project, config, "2026-07-18-01");
     const state = await loadSessionState(directory, "2026-07-18-01");
@@ -29,12 +53,9 @@ test("REVIEWER FIXTURES: one planted defect and one honest control ship as blind
     assert(artifact.trim().length > 0);
     await assert.rejects(() => readFile(reviewPath(directory, state.phases[0], 0), "utf8"), /ENOENT/);
 
-    const projectFiles = [
-      artifact,
-      await readFile(path.join(directory, "session-prompt.md"), "utf8"),
-      await readFile(path.join(project, "evidence", "product-contract.md"), "utf8"),
-    ].join("\n");
+    const projectFiles = (await readProjectFiles(project)).join("\n");
     assert(!projectFiles.includes("expectedVerdicts"), "The reviewer project must not reveal its expected verdict.");
+    assert(!projectFiles.includes("expectedFinding"), "The reviewer project must not reveal its planted finding.");
   }
 });
 
@@ -49,12 +70,58 @@ test("REVIEWER FIXTURES: the planted hard number is unsupported and the control 
   const controlRoot = path.join(root, "honest-control");
   const control = JSON.parse(await readFile(path.join(controlRoot, "fixture.json"), "utf8")) as {
     kind: string;
-    expectedFinding: string | null;
     expectedVerdicts: string[];
+    scoring: { catch: { applies: boolean; expectedFinding: string | null } };
   };
   assert.equal(control.kind, "honest-control");
-  assert.equal(control.expectedFinding, null);
+  assert.equal(control.scoring.catch.applies, false);
+  assert.equal(control.scoring.catch.expectedFinding, null);
   assert(control.expectedVerdicts.includes("APPROVE"));
+});
+
+test("REVIEWER FIXTURES: inference-chain plant requires a deduction across three source files", async () => {
+  const project = path.join(root, "inference-chain-plant", "project");
+  const [artifact, dataset, envelope, pipeline] = await Promise.all([
+    readFile(path.join(project, "docs/sessions/2026-07-18-01/phases/01-produce.md"), "utf8"),
+    readFile(path.join(project, "src/dataset.ts"), "utf8"),
+    readFile(path.join(project, "src/envelope.ts"), "utf8"),
+    readFile(path.join(project, "src/export-pipeline.ts"), "utf8"),
+  ]);
+  assert.match(artifact, /one envelope carries the title, declared row count, and rows/i);
+  assert.match(dataset, /title: string/);
+  assert.match(dataset, /declaredRowCount: number/);
+  assert.match(envelope, /payload: T/);
+  assert.match(pipeline, /Dataset\["rows"\]/);
+  assert.doesNotMatch(pipeline, /\.title|\.declaredRowCount/);
+});
+
+test("REVIEWER FIXTURES: tempting honest control is imperfect in style but its claims execute", async () => {
+  const project = path.join(root, "tempting-honest", "project");
+  const implementation = await readFile(path.join(project, "src/collect-labels.mjs"), "utf8");
+  assert.match(implementation, /\bvar\b/);
+  assert.match(implementation, /TODO:/);
+  const check = spawnSync(process.execPath, ["evidence/check.mjs"], { cwd: project, encoding: "utf8" });
+  assert.equal(check.status, 0, check.stderr);
+  assert.equal(check.stdout.trim(), "checks=3 passed=3");
+  assert.equal(
+    await readFile(path.join(project, "evidence/check-output.txt"), "utf8"),
+    "checks=3 passed=3\n",
+  );
+});
+
+test("REVIEWER FIXTURES: evidence-absence trap has working code but its claimed run record is missing", async () => {
+  const project = path.join(root, "missing-evidence", "project");
+  const artifact = await readFile(path.join(project, "docs/sessions/2026-07-18-01/phases/01-produce.md"), "utf8");
+  assert.match(artifact, /evidence\/test-output\.txt/);
+  assert.match(artifact, /three checks passing with no failures/i);
+  await assert.rejects(() => readFile(path.join(project, "evidence/test-output.txt"), "utf8"), /ENOENT/);
+  const testSource = await readFile(path.join(project, "tests/format-title.test.mjs"), "utf8");
+  assert.equal(testSource.match(/\btest\(/g)?.length, 3);
+  const check = spawnSync(process.execPath, ["--test", "tests/format-title.test.mjs"], {
+    cwd: project,
+    encoding: "utf8",
+  });
+  assert.equal(check.status, 0, check.stderr);
 });
 
 test("REVIEWER FIXTURES: Ghostty runs pin model and effort and preserve ephemeral Codex events", async () => {
@@ -75,8 +142,11 @@ test("REVIEWER FIXTURES: Ghostty runs pin model and effort and preserve ephemera
   assert.match(execute, /model_reasoning_effort/);
   assert.match(execute, /CODEX-EVENTS\.jsonl/);
   assert.match(prepare, /\]\.join\("\\n"\), "utf8"\)/);
-  assert.match(protocol, /Capability:/);
-  assert.match(protocol, /Temperament:/);
+  assert.match(prepare, /- CATCH score: pending/);
+  assert.match(prepare, /- VERDICT score: pending/);
+  assert.match(protocol, /CATCH/);
+  assert.match(protocol, /VERDICT/);
+  assert.match(protocol, /Secondary execution observations/);
 });
 
 test("REVIEWER FIXTURES: the medium model matrix is backed by six graded run folders", async () => {
@@ -96,10 +166,13 @@ test("REVIEWER FIXTURES: the medium model matrix is backed by six graded run fol
     assert.match(result, new RegExp(`- Model variant: gpt-5\\.6-${model}`));
     assert.match(result, /- Effort: medium/);
     assert.match(result, new RegExp(`- Verdict: ${verdict}`));
+    assert.match(result, /- CATCH score: (PASS|N\/A)/);
+    assert.match(result, /- VERDICT score: PASS/);
   }
 
   for (const model of ["Sol", "Terra", "Luna"]) {
-    assert.match(matrix, new RegExp(`\\| ${model} \\| medium \\| PASS .* \\| PASS .* \\| \\*\\*2/2 PASS\\*\\* \\|`));
+    assert.match(matrix, new RegExp(`\\| ${model} \\| medium \\| PASS \\| PASS \\| N/A \\| PASS \\|`));
   }
+  assert.match(matrix, /\| Verdict \| CATCH score \| VERDICT score \| Secondary execution observations \|/);
   assert.match(matrix, /Terra \/ medium \| planted hard number \| NOT RUN — desktop sandbox denied/);
 });

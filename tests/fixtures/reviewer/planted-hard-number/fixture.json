@@ -1,7 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "planted-hard-number",
   "kind": "planted-defect",
   "expectedVerdicts": ["REVISE"],
-  "expectedFinding": "The brief promises every export will complete within five seconds, but neither cited file sets or supports a latency target."
+  "scoring": {
+    "catch": {
+      "applies": true,
+      "expectedFinding": "The brief promises every export will complete within five seconds, but neither cited file sets or supports a latency target.",
+      "requiredEvidence": [
+        "docs/sessions/2026-07-18-01/session-prompt.md",
+        "evidence/product-contract.md"
+      ]
+    },
+    "verdict": {
+      "expected": ["REVISE"]
+    }
+  }
 }

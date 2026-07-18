@@ -22,7 +22,7 @@
 - Run `npm run test:record -- YYYY-MM-DD-label` for durable per-test evidence and add the outcome—including failures—to `docs/TESTING.md`.
 - Never weaken a test to make a failure disappear. Fix the product or violated contract. Change an assertion only when evidence shows it encoded the wrong requirement, and record the failed run, reasoning, and corrected run.
 - Mutation tests must break one gate condition at a time, prove refusal, and assert the named reason. Printed recovery commands must execute from the state that printed them.
-- Reviewer-fixture runs must record the real date, fixture, model variant, effort, verdict, and caught/missed result. Never imply an unrun model test passed.
+- Reviewer-fixture runs must record the real date, fixture, model variant, effort, actual verdict, CATCH score, and VERDICT score. A vague block never counts as a catch; execution behavior stays secondary. Never imply an unrun model test passed.
 - Treat fresh-task reviewer isolation as test evidence, not as a permission guarantee supplied by `SKILL.md`.
 - In Koda's product relay, the owner initiates a session by invoking `koda-c-session` with a written prompt. Once the session is active, the producer never solicits the owner: every request goes to the owner-facing reviewer, and every actionable reviewer handback exists as a named disk artifact before producer use.
 

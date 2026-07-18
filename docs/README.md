@@ -103,7 +103,7 @@ The suite deliberately breaks every gate condition and proves refusal: missing/e
 
 The committed [dogfood transcript](dogfood/TRANSCRIPT.md) preserves the complete six-phase native chain: review refusal, receipt refusal, and gate success at every phase, followed by immutable close preparation, refusal after local commit, Git push, and derived `SESSION CLOSED`. Its session snapshot is also committed and re-hashed by the test suite.
 
-Every run—including defects and corrected test assertions—is recorded in [TESTING.md](TESTING.md), with dated [per-test transcripts](test-results/) that name every individual result. The blind model-assisted protocol and honest control are documented in [REVIEWER-FIXTURES.md](REVIEWER-FIXTURES.md). Current Codex skill-platform implications are captured in a [dated design note](design-notes/2026-07-18-codex-skill-platform.md). Current build direction and status live in [PROJECT.md](PROJECT.md) and [BACKLOG.md](BACKLOG.md).
+Every run—including defects and corrected test assertions—is recorded in [TESTING.md](TESTING.md), with dated [per-test transcripts](test-results/) that name every individual result. The blind model-assisted protocol covers five sealed fixtures: the original hard-number plant and pristine honest control, an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap. Its [fixture protocol](REVIEWER-FIXTURES.md) scores the specific CATCH separately from the chosen VERDICT so a vague block cannot masquerade as reasoning success. Current Codex skill-platform implications are captured in a [dated design note](design-notes/2026-07-18-codex-skill-platform.md). Current build direction and status live in [PROJECT.md](PROJECT.md) and [BACKLOG.md](BACKLOG.md).
 
 The [reviewer model and effort matrix](MODEL-TEST-MATRIX.md) summarizes only runs that actually exist, keeps Terra/Luna and untested effort levels visibly unrun, and separates comparative behavioral evidence from claims about cognition.
 
@@ -111,11 +111,11 @@ The [reviewer model and effort matrix](MODEL-TEST-MATRIX.md) summarizes only run
 
 Kristian supplied the lived failure, product doctrine, phase vocabulary, owner rulings, relay model, skill boundaries, immutable close ceremony, two-task collaboration model, and the requirement that all work remain visible in repository files.
 
-GPT-5.6 Codex translated that direction into the TypeScript CLI, disk schemas, artifact and session hashing, exact receipt matching, Git-derived closure, skill packages, mutation suite, fixture, dogfood evidence, and documentation. It also surfaced implementation defects through tests: macOS path aliases initially broke Git containment, and the first close hint printed the wrong first-push command.
+GPT-5.6 Codex translated that direction into the TypeScript CLI, disk schemas, artifact and session hashing, exact receipt matching, Git-derived closure, skill packages, mutation suite, fixtures, dogfood evidence, and documentation. It also surfaced implementation defects through tests: macOS path aliases initially broke Git containment, and the first close hint printed the wrong first-push command.
 
 Kristian explicitly chose to let Codex build in its own engineering order rather than phase-gating the construction. That choice is recorded honestly: the discipline lives in the tool, not in the process that made it. An initial gated-build attempt and its unused REVISE review remain recoverable in pushed Git history, but were removed from `docs/sessions/` so abandoned build evidence cannot masquerade as live Koda state.
 
-No external model or benchmark was used. Deterministic tests are marked model-not-applicable; unrun GPT-5.6 variant/effort combinations are recorded as skipped rather than silently implied.
+No external benchmark dataset is used. Deterministic tests are marked model-not-applicable. Blind GPT-5.6 Sol, Terra, and Luna runs use repository fixtures, preserve model and effort metadata, and leave every unrun combination visibly unrun. Their observable differences can inform a reasoning comparison; Koda-C does not present them as proof of subjective cognition.
 
 ## Project boundary and roadmap
 

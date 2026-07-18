@@ -19,6 +19,7 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - Durable Codex guidance lives in root `AGENTS.md`; repository-local skills live in the discoverable `.agents/skills/` path.
 - The initial Phase 01 build attempt and unused REVISE receipt remain only in pushed Git history, not in the live `docs/sessions/` namespace.
 - Every gate condition receives a deliberate mutation test proving refusal.
+- Reviewer experiments score the specific evidence-backed CATCH separately from the chosen VERDICT; operational recovery notes never inflate either score.
 - Producer work and independent review are separate Codex tasks sharing one Koda session folder.
 - There is one producer skill per declared native phase and one shared reviewer skill with per-phase criteria.
 - A producer hands its artifact to the reviewer. Only an allowed verdict, owner receipt, and `advance` activate the next phase from config.
@@ -64,6 +65,7 @@ owner contract
 - Repository-local Koda-C skills: seven producer relay legs, one shared reviewer, and one close ceremony.
 - A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda session.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.
+- Five sealed reviewer fixtures: the original hard-number capability check and honest control, plus an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
 - The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.
 
@@ -89,7 +91,8 @@ owner contract
 - **Transparency extension:** `PROJECT.md` and `BACKLOG.md` expose work that would otherwise live only in Codex's internal plan.
 - **Codex-native packaging correction:** Skills first existed under top-level `skills/`; official discovery requires `.agents/skills/`. They were moved without duplication, and root `AGENTS.md` now holds durable repository guidance.
 - **State-namespace correction:** The abandoned build attempt was removed from `docs/sessions/` after its meaningful owner contract and design note were moved to `docs/origin/` and `docs/design-notes/`. Git history retains the discarded brief and review without exposing them as live session state.
-- **Owner-approved test expansion:** Receipt-adversarial, stale-review, status-truth, and bounded reviewer-fixture classes make the tests part of the product contract. The first model-assisted set stays limited to one planted defect and one honest control until target (a) is secure.
+- **Owner-approved test expansion:** Receipt-adversarial, stale-review, status-truth, and bounded reviewer-fixture classes make the tests part of the product contract. The first model-assisted baseline stayed limited to one planted defect and one honest control until the core target was secure.
+- **Owner-approved fixture refinement:** The original 2/2 medium tie is treated as a fixture-floor result, not model equality. Three bounded fixtures deepen inference, temperament, and evidence-absence testing; CATCH and VERDICT are scored independently, with limited repetitions used only to expose decision-relevant variance.
 - **Platform boundary clarified:** Skill descriptions are a bounded discovery surface, not a tool-permission boundary. Koda-C tests fresh-task independence but claims mechanical enforcement only for its disk evidence and gate.
 - **Boundary preserved:** A reviewer handoff is mechanically required and may run in a separate Codex task, but the CLI does not launch agents or run a daemon.
 - **No change:** Sections 3–6 remain the product contract: file truth, configurable phases, independent review, verdict routing, unique receipt proof, fail-closed gates, mutation tests, and pasteable recovery actions.

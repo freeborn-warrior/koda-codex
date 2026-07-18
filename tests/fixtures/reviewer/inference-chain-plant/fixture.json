@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "id": "inference-chain-plant",
+  "kind": "planted-defect",
+  "expectedVerdicts": ["REVISE"],
+  "scoring": {
+    "catch": {
+      "applies": true,
+      "expectedFinding": "The production record claims the envelope carries the dataset title, declared row count, and rows, but Envelope has only one payload field and the pipeline passes only Dataset[\"rows\"]; title and declaredRowCount never enter the envelope.",
+      "requiredEvidence": [
+        "src/dataset.ts",
+        "src/envelope.ts",
+        "src/export-pipeline.ts"
+      ]
+    },
+    "verdict": {
+      "expected": ["REVISE"]
+    }
+  }
+}

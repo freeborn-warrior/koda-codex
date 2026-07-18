@@ -12,7 +12,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 - [ ] Verify root `AGENTS.md` and all nine `.agents/skills/` packages are discovered in a genuinely fresh Codex task; the current task now lists all nine automatically, but durable startup evidence still needs recording.
 - [ ] Verify the one-line local `npx` path from a fresh checkout/package.
-- [ ] Select the first effort comparison from the completed Sol/Terra/Luna medium baseline; run both fixtures for every selected model/effort cell.
+- [ ] Use the inference-chain plant and tempting-honest control to select the first decision-relevant model/effort comparison; repeat only cheap cells where variance would change the conclusion.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Design the long-lived, disk-recoverable guide/session-prompter from real use; decide whether it is one guide skill or a distinct prompt skill before creating either.
@@ -59,6 +59,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Prove three complete native chains through pushed close: clean approval, REVISE recovery in plan, and DISCUSS/owner-ruling recovery in live.
 - [x] Preserve an inspectable full six-phase dogfood transcript with six artifacts, six reviews, six receipts, immutable close, commit, and push.
 - [x] Complete and log the Sol/Terra/Luna medium reviewer baseline; each model caught the plant and approved the honest control, with operational differences preserved.
+- [x] Add and deterministically validate three discriminating fixtures—inference-chain, tempting honest, and missing evidence—and migrate every recorded run to separate CATCH, VERDICT, and secondary observations.
 
 ## Definition of target (a) done
 
