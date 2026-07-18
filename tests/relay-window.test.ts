@@ -21,7 +21,10 @@ import {
   writeReviewerJob,
 } from "../scripts/relay-window-protocol.ts";
 
-async function preparedAcknowledgementRun(receiptInput: "correct" | "wrong") {
+async function preparedAcknowledgementRun(
+  receiptInput: "correct" | "wrong",
+  options: { discussionResponse?: string } = {},
+) {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-reviewer-window-"));
   const prepared = spawnSync(process.execPath, [
     "scripts/prepare-relay-run.ts",
@@ -62,6 +65,17 @@ async function preparedAcknowledgementRun(receiptInput: "correct" | "wrong") {
   });
   await writeReviewerJob(runRoot, job);
   const clipboard = path.join(temporary, "clipboard.txt");
+  let fakeCodex: string | undefined;
+  if (options.discussionResponse) {
+    fakeCodex = path.join(temporary, "fake-explainer.mjs");
+    await writeFile(fakeCodex, [
+      "#!/usr/bin/env node",
+      "console.log(JSON.stringify({ type: 'thread.started', thread_id: '019f0000-0000-7000-8000-000000000001' }));",
+      `console.log(JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: ${JSON.stringify(options.discussionResponse)} } }));`,
+      "console.log(JSON.stringify({ type: 'turn.completed' }));",
+    ].join("\n"), "utf8");
+    await chmod(fakeCodex, 0o755);
+  }
   const executed = spawnSync(process.execPath, ["scripts/run-relay-reviewer-window.ts"], {
     cwd: process.cwd(),
     encoding: "utf8",
@@ -73,6 +87,12 @@ async function preparedAcknowledgementRun(receiptInput: "correct" | "wrong") {
       KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
       KODA_RELAY_TEST_CONFIRM_READ: "1",
       KODA_RELAY_TEST_RECEIPT_INPUT: receiptInput === "correct" ? review.metadata.receipt : "RECEIPT: Review read — wrong",
+      ...(fakeCodex
+        ? {
+            KODA_CODEX_BIN: fakeCodex,
+            KODA_RELAY_TEST_DISCUSSION_QUESTION: "Please add a new product requirement.",
+          }
+        : {}),
     },
   });
   return { temporary, runRoot, session, review, executed, clipboard };
@@ -150,6 +170,20 @@ test("TWO-WINDOW RECEIPT MUTATION: a wrong quote refuses and names the preserved
   const job = await readReviewerJob(result.runRoot);
   assert.equal(job?.status, "FAILED");
   assert.match(job?.error ?? "", /Owner acknowledgement exited 1/);
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
+});
+
+test("OWNER DISCUSSION SAFETY: a new product direction stays paused without a disk handback", async (t) => {
+  const result = await preparedAcknowledgementRun("correct", {
+    discussionResponse: "OWNER DIRECTION — DISK HANDOFF REQUIRED\nAdd a second output format.",
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 2, result.executed.stderr);
+  assert.match(result.executed.stdout, /ACKNOWLEDGEMENT PAUSED — this is new owner direction/);
+  assert.match(result.executed.stderr, /REVIEWER PAUSED SAFELY/);
+  const job = await readReviewerJob(result.runRoot);
+  assert.equal(job?.status, "AWAITING_OWNER");
+  assert.equal(job?.error, "OWNER_DIRECTION_HANDOFF_REQUIRED");
   assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
 });
 
@@ -291,6 +325,7 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
     "const latest = () => readdirSync(sessionsRoot).sort().at(-1);",
     "let role = 'producer';",
     "if (prompt.includes('explicitly use koda-c-session')) { call(['session', 'new', path.join(process.cwd(), 'owner-prompt.md')]); }",
+    "else if (prompt.includes('owner-explanation mode')) { role = 'reviewer'; }",
     "else if (prompt.includes('formal-review mode')) {",
     "  role = 'reviewer';",
     "  call(['review', 'new', 'brief']);",
@@ -311,7 +346,8 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
     "else { process.stderr.write(`Unknown fake turn: ${prompt}`); process.exit(1); }",
     "const thread = role === 'reviewer' ? '019f0000-0000-7000-8000-000000000004' : '019f0000-0000-7000-8000-000000000003';",
     "console.log(JSON.stringify({ type: 'thread.started', thread_id: thread }));",
-    "console.log(JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: `${role} handover complete.` } }));",
+    "const message = prompt.includes('owner-explanation mode') ? 'The finding means the bounded claim matches the cited prompt; it adds no new direction.' : `${role} handover complete.`;",
+    "console.log(JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: message } }));",
     "console.log(JSON.stringify({ type: 'turn.completed' }));",
   ].join("\n"), "utf8");
   await chmod(fakeCodex, 0o755);
@@ -323,6 +359,7 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
     KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
     KODA_RELAY_TEST_CONFIRM_READ: "1",
     KODA_RELAY_TEST_RECEIPT_INPUT_FILE: generatedReceipt,
+    KODA_RELAY_TEST_DISCUSSION_QUESTION: "What does this finding mean?",
     KODA_CODEX_BIN: fakeCodex,
     KODA_TEST_CLI: path.join(process.cwd(), "src", "cli.ts"),
     KODA_TEST_RECEIPT_FILE: generatedReceipt,
@@ -359,6 +396,7 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   assert.match(producerResult.stdout, /WINDOW B HANDOVER COMPLETE/);
   assert.match(producerResult.stdout, /RELAY COMPLETE/);
   assert.match(reviewerResult.stdout, /REVIEWER 1 — formal review of brief/);
+  assert.match(reviewerResult.stdout, /REVIEWER 2 — explain brief review/);
   assert.match(reviewerResult.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
   assert.match(reviewerResult.stdout, /SESSION CLOSED — reviewer window complete/);
 
@@ -366,6 +404,7 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   assert.equal(completed.status, "COMPLETE");
   assert.notEqual(completed.producer.threadId, completed.reviewer.threadId);
   assert.equal(completed.ownerAcknowledgements, 1);
+  assert.equal(completed.reviewer.turns, 2);
   assert.match(await readFile(path.join(runRoot, "RESULT.md"), "utf8"), /Completed phases: 1\/1/);
   assert.match(await readFile(path.join(runRoot, "TRANSCRIPT.md"), "utf8"), /Window B completed formal review of brief/);
 });

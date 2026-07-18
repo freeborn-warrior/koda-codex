@@ -31,6 +31,8 @@ type RunRecord = {
   reviewer: { model: string; effort: string; threadId: string | null; turns: number };
 };
 
+class OwnerPaused extends Error {}
+
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const runsRoot = await realpath(process.env.KODA_RELAY_RUNS_ROOT
   ? path.resolve(process.env.KODA_RELAY_RUNS_ROOT)
@@ -121,7 +123,7 @@ function threadIdFromEvents(output: string): string | null {
   return null;
 }
 
-async function modelTurn(purpose: string, prompt: string): Promise<void> {
+async function modelTurn(purpose: string, prompt: string): Promise<string> {
   const turn = state.turns + 1;
   state = reviewerWindowState({ ...state, status: "WORKING", turns: turn, lastError: null });
   await writeReviewerWindowState(runRoot, state);
@@ -146,9 +148,18 @@ async function modelTurn(purpose: string, prompt: string): Promise<void> {
   });
   let stdout = "";
   let stderr = "";
+  let lastAgentMessage = "";
   const lines = createInterface({ input: child.stdout });
   lines.on("line", (line) => {
     stdout += `${line}\n`;
+    try {
+      const event = JSON.parse(line) as { type?: string; item?: { type?: string; text?: string } };
+      if (event.type === "item.completed" && event.item?.type === "agent_message" && typeof event.item.text === "string") {
+        lastAgentMessage = event.item.text;
+      }
+    } catch {
+      // The raw event remains saved; malformed diagnostics never become conversation state.
+    }
     const rendered = renderCodexEvent(line, "REVIEWER");
     if (rendered) console.log(rendered);
   });
@@ -170,6 +181,7 @@ async function modelTurn(purpose: string, prompt: string): Promise<void> {
   if (exit !== 0) throw new Error(`Reviewer turn ${turn} exited ${exit}. See ${prefix}-STDERR.txt.`);
   state = reviewerWindowState({ ...state, status: "READY", lastError: null });
   await writeReviewerWindowState(runRoot, state);
+  return lastAgentMessage;
 }
 
 async function promptOwner(message: string): Promise<string> {
@@ -201,15 +213,73 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: null });
   await writeReviewerWindowState(runRoot, state);
 
+  const testMode = Boolean(process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CONFIRM_READ === "1");
+  const beforeHash = createHash("sha256").update(before).digest("hex");
+  const requireUnchangedReview = async () => {
+    const current = await readFile(review, "utf8");
+    if (createHash("sha256").update(current).digest("hex") !== beforeHash) {
+      throw new Error("The review changed during owner reading or discussion. Nothing was acknowledged.");
+    }
+  };
+  const openReview = async () => {
+    if (!testMode) await promptOwner("Press Return to open the complete review. ");
+    const pager = spawnSync(process.env.KODA_RELAY_REVIEW_PAGER ?? "less", [review], { stdio: "inherit" });
+    if (pager.status !== 0) throw new Error(`The review reader exited ${pager.status ?? -1}; nothing was acknowledged.`);
+    await requireUnchangedReview();
+  };
+  const discuss = async (question: string) => {
+    const response = await modelTurn(`explain ${job.phase} review`, [
+      `Read ${path.join(project, ".agents", "skills", "koda-c-review", "SKILL.md")} completely and explicitly use koda-c-review in owner-explanation mode.`,
+      `The active review is ${review}.`,
+      `The owner's exact question is ${JSON.stringify(question)}.`,
+      "Explain only from the review and evidence it cites. Do not edit any file, run Koda, approve, advance, or quote the receipt.",
+      "If this introduces a new product direction outside the active review, follow the skill's exact OWNER DIRECTION marker and make clear it has not reached the producer.",
+    ].join(" "));
+    await requireUnchangedReview();
+    state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: null });
+    await writeReviewerWindowState(runRoot, state);
+    if (response.trimStart().startsWith("OWNER DIRECTION — DISK HANDOFF REQUIRED") && parsed.verdict !== "DISCUSS") {
+      job.error = "OWNER_DIRECTION_HANDOFF_REQUIRED";
+      await writeReviewerJob(runRoot, job);
+      console.log("\nACKNOWLEDGEMENT PAUSED — this is new owner direction, not an explanation.");
+      console.log("It has not reached the producer. This runtime will not turn chat into work without a disk handback.");
+    }
+  };
+
   console.log(`\nREVIEW READY — ${job.phase.toUpperCase()} — ${parsed.verdict}`);
   console.log("This is your decision point in Window B. The producer is waiting in Window A.");
-  const testMode = Boolean(process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CONFIRM_READ === "1");
-  if (!testMode) await promptOwner("Press Return to open the complete review. ");
-  const pager = spawnSync(process.env.KODA_RELAY_REVIEW_PAGER ?? "less", [review], { stdio: "inherit" });
-  if (pager.status !== 0) throw new Error(`The review reader exited ${pager.status ?? -1}; nothing was acknowledged.`);
-  const after = await readFile(review, "utf8");
-  if (createHash("sha256").update(after).digest("hex") !== createHash("sha256").update(before).digest("hex")) {
-    throw new Error("The review changed while it was open. Read the current review again.");
+  await openReview();
+
+  const testQuestion = testMode ? process.env.KODA_RELAY_TEST_DISCUSSION_QUESTION?.trim() : undefined;
+  if (testQuestion) await discuss(testQuestion);
+  if (!testMode) {
+    for (;;) {
+      const blocked = job.error === "OWNER_DIRECTION_HANDOFF_REQUIRED";
+      const choice = (await promptOwner(blocked
+        ? "Type d to discuss again, r to reread, or p to pause safely: "
+        : "Press Return to acknowledge, d to discuss, r to reread, or p to pause safely: ")).trim().toLowerCase();
+      if ((choice === "" || choice === "a") && !blocked) break;
+      if (choice === "r") {
+        await openReview();
+        continue;
+      }
+      if (choice === "d") {
+        const question = (await promptOwner("Your question for the reviewer: ")).trim();
+        if (!question) {
+          console.log("No question entered; the producer remains paused.");
+          continue;
+        }
+        await discuss(question);
+        continue;
+      }
+      if (choice === "p") throw new OwnerPaused("Kristian paused at the reviewer decision point.");
+      console.log(blocked
+        ? "Acknowledgement remains paused until the owner direction has a disk handback."
+        : "Choose Return, d, r, or p.");
+    }
+  }
+  if (job.error === "OWNER_DIRECTION_HANDOFF_REQUIRED") {
+    throw new OwnerPaused("A new owner direction still requires a disk handback before acknowledgement.");
   }
 
   const testClipboard = process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CLIPBOARD_FILE;
@@ -310,6 +380,16 @@ try {
       if (process.env.KODA_RELAY_REVIEWER_ONCE === "1") break;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      if (error instanceof OwnerPaused) {
+        job.status = "AWAITING_OWNER";
+        await writeReviewerJob(runRoot, job);
+        state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: message });
+        await writeReviewerWindowState(runRoot, state);
+        console.error(`\nREVIEWER PAUSED SAFELY — ${message}`);
+        console.error("Resume with: npm run relay:reviewer");
+        process.exitCode = 2;
+        break;
+      }
       job.status = "FAILED";
       job.error = message;
       await writeReviewerJob(runRoot, job);

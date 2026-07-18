@@ -34,6 +34,8 @@ non-interactive persistent producer           persistent owner-facing reviewer
 - If Window A stops after Window B has completed but before cleanup, resume consumes the completed job idempotently and re-derives the owner acknowledgement count from the ledger instead of incrementing cached state.
 - A read-only `relay:status` command reconstructs the current run, phase, contexts, lock process, job, error, and next safe action directly from disk. It refuses corrupt or multiple unfinished runs.
 - A stale reviewer lock is never removed merely because a second window asks. Explicit `--recover-stale-lock` succeeds only when the recorded process is no longer alive; a live process still refuses.
+- At `REVIEW READY`, Kristian may reread, ask the same persistent reviewer explanation questions, acknowledge, or pause. Explanation turns are preserved as reviewer events but alter no file and do not become producer input.
+- A new owner product direction is mechanically different from an explanation: the reviewer emits the exact handoff-required marker, the job records `OWNER_DIRECTION_HANDOFF_REQUIRED`, acknowledgement remains paused, and the ledger stays untouched until a future named handback can carry it.
 - Both panes render model-emitted messages, completed checks, file changes, context IDs, and turn completion from raw Codex events. The complete JSONL remains evidence.
 - Protected review metadata and receipt lines are removed from the readable event rendering.
 - Window B snapshots the complete review before opening it and refuses if it changes while being read.

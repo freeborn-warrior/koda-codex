@@ -11,7 +11,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Next
 
-- [ ] Add reviewer-window discussion turns that use the same persistent reviewer context and write every actionable owner handback to disk before the producer resumes.
+- [ ] Complete reviewer-window discussion beyond the shipped formal-review explanation mode: define and enforce the named disk artifact for arbitrary actionable owner direction before the producer resumes, then keep the reviewer conversational between handoffs.
 - [ ] Finish submission-critical proof and polish only after the product runtime above is honest: final hygiene, owner recording, and external submission.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.

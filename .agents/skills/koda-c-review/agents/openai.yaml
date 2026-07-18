@@ -1,4 +1,4 @@
 interface:
   display_name: "Koda-C Review"
-  short_description: "Verify phase artifacts and issue receipt reviews"
-  default_prompt: "Use $koda-c-review to independently verify the current phase artifact and write its review to disk."
+  short_description: "Review evidence, consult, and explain findings"
+  default_prompt: "Use $koda-c-review to review the current artifact, answer its consultation, or explain its active review in the explicitly named mode."

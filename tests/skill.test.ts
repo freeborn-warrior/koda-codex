@@ -68,6 +68,9 @@ test("the shared reviewer keeps all phase criteria in one place", async () => {
   }
   assert.match(review, /review does not activate another phase/i);
   assert.match(review, /Do not quote the receipt in chat/);
+  assert.match(review, /Owner-explanation mode/);
+  assert.match(review, /OWNER DIRECTION — DISK HANDOFF REQUIRED/);
+  assert.match(review, /alter no file/i);
 
   for (const phase of producerPhases) {
     const producer = await readFile(`.agents/skills/koda-c-${phase}/SKILL.md`, "utf8");

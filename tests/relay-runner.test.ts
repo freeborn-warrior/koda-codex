@@ -170,6 +170,8 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(reviewerWindow, /parseReview\(before\)/);
   assert.match(reviewerWindow, /"approve", job\.phase, "--approver", "Kristian"/);
   assert.match(reviewerWindow, /The exact receipt is copied/);
+  assert.match(reviewerWindow, /owner-explanation mode/);
+  assert.match(reviewerWindow, /OWNER_DIRECTION_HANDOFF_REQUIRED/);
   assert.match(protocol, /persistent producer/);
   assert.match(protocol, /persistent reviewer/);
   assert.match(protocol, /first owner-facing slice/);
