@@ -16,7 +16,7 @@ function git(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr
   };
 }
 
-export function checkSessionClosed(projectRoot: string, sessionDir: string, phasesComplete: boolean): ClosureCheck {
+export function checkGitClosure(projectRoot: string, sessionDir: string, phasesComplete: boolean): ClosureCheck {
   const reasons: string[] = [];
   if (!phasesComplete) {
     reasons.push("The summary phase has not advanced.");

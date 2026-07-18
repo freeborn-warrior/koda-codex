@@ -1,0 +1,4 @@
+interface:
+  display_name: "Koda-C Plan"
+  short_description: "Turn approved evidence into a checkable plan"
+  default_prompt: "Use $koda-c-plan to write the active session's checkable plan artifact."

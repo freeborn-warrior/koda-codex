@@ -1,0 +1,4 @@
+interface:
+  display_name: "Koda-C Session"
+  short_description: "Open a verified Koda session from an owner prompt"
+  default_prompt: "Use $koda-c-session to open a Koda session from the owner's written contract."

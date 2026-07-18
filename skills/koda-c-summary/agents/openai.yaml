@@ -1,0 +1,4 @@
+interface:
+  display_name: "Koda-C Summary"
+  short_description: "Verify and summarize the completed session work"
+  default_prompt: "Use $koda-c-summary to write an evidence-backed summary for the active session."

@@ -1,0 +1,64 @@
+---
+name: koda-c-brief
+description: Turn the active Koda session prompt into a bounded, checkable brief and prepare evidence for the configured receiving phase. Use only when the current phase in state.json is named brief.
+---
+
+# Koda-C Brief
+
+Translate the owner's session contract into a precise brief. Hand the completed artifact to the shared reviewer. Do not orient, plan, produce, self-review, approve, or advance.
+
+## ENTRY CHECK
+
+1. Locate `koda.config.json`, the latest session folder, and `state.json`. Refuse if any is missing or invalid.
+2. Require `state.json.phases[currentPhaseIndex].name` to equal `brief`. Refuse and name the actual current phase otherwise.
+3. Require a non-empty `session-prompt.md`. Read it as the owner contract; do not substitute chat memory.
+4. When `currentPhaseIndex > 0`, derive the prior phase from `state.json`, then verify its non-empty artifact, active review, exact receipt entry in `approvals.md`, and matching `advances` record. Refuse on the first missing proof.
+5. If the brief artifact already exists, preserve it unless the user explicitly asks to resume or revise it. Permit revision after a blocking review only when that review's receipt has been recorded.
+
+## ITS OWN JOB
+
+Write `phases/<NN>-brief.md`, where `NN` is the one-based current phase index padded to two digits. Cite `../session-prompt.md` and distinguish owner rulings from producer interpretation.
+
+Use this exact shape:
+
+```markdown
+# Brief
+
+## Source contract
+- [Session prompt](../session-prompt.md)
+
+## Purpose and why
+<Outcome and reason>
+
+## In scope
+- <Included work>
+
+## Out of scope
+- <Explicit limit>
+
+## Success evidence
+- <Checkable proof>
+
+## Constraints and owner rulings
+- <Ruling, constraint, or none>
+
+## Inputs resolved during this phase
+- Question: <input needed, or none>
+- Source and answer: <owner/adviser and answer recorded on disk>
+
+## Deliverable or demonstration
+<What will exist or be shown>
+
+## Review handover
+- Immediate receiver: `koda-c-review`
+- Evidence to inspect: <artifact and cited file paths>
+- Unresolved items: none
+```
+
+When owner or adviser input is needed mid-phase, remain in `brief`, ask one clear question, and record the answer and source in the artifact. Do not declare the artifact ready with unresolved input. The gate—not this skill—selects the next configured phase after independent review and owner approval.
+
+## HANDOVER OBLIGATION
+
+Before stopping, verify from disk that the brief exists, is non-empty, cites the prompt, states scope and checkable success, resolves required input, and names `koda-c-review` as its immediate receiver. Leave `currentPhaseIndex` unchanged. Do not create or edit a review, quote a receipt, write an approval, or run `koda advance`.
+
+Run `koda status`; the phase must remain `brief` and the gate must remain closed pending independent review proof. Report the artifact path and hand it to `koda-c-review`.

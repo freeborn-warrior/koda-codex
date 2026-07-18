@@ -142,6 +142,21 @@ export function validateSessionState(value: unknown, expectedId?: string): Sessi
   if (!Array.isArray(state.advances)) {
     throw new Error("state.json has no advancement history.");
   }
+  if (state.advances.length !== state.currentPhaseIndex) {
+    throw new Error("state.json advancement history does not match the current phase.");
+  }
+  for (let index = 0; index < state.advances.length; index += 1) {
+    const advance = state.advances[index];
+    if (
+      !advance ||
+      advance.phase !== state.phases[index]?.name ||
+      typeof advance.receipt !== "string" ||
+      typeof advance.reviewId !== "string" ||
+      typeof advance.advancedAt !== "string"
+    ) {
+      throw new Error(`state.json has an invalid advancement record at index ${index}.`);
+    }
+  }
   return state as SessionState;
 }
 

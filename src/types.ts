@@ -35,6 +35,17 @@ export interface SessionState {
   advances: AdvanceRecord[];
 }
 
+export interface CloseMetadata {
+  version: 1;
+  id: string;
+  sessionId: string;
+  sessionSha256: string;
+  finalPhase: string;
+  finalReviewId: string;
+  finalReceipt: string;
+  preparedAt: string;
+}
+
 export interface ReviewMetadata {
   version: 1;
   id: string;

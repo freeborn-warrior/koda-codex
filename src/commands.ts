@@ -10,8 +10,9 @@ import {
   pathExists,
   readProjectConfig,
 } from "./config.ts";
+import { closePath, evaluateSessionClosure, prepareCloseArtifact } from "./close.ts";
 import { evaluateGate } from "./gate.ts";
-import { checkSessionClosed } from "./git.ts";
+import { requireAdvancedHistory, validateAdvancedHistory } from "./history.ts";
 import {
   artifactPath,
   createSession,
@@ -148,7 +149,7 @@ async function sessionNewCommand(args: string[], cwd: string, io: CliIo): Promis
   if (previousId) {
     const previousDir = sessionRoot(root, config, previousId);
     const previous = await loadSessionState(previousDir, previousId);
-    const closure = checkSessionClosed(root, previousDir, previous.currentPhaseIndex === previous.phases.length);
+    const closure = await evaluateSessionClosure(root, previousDir, previous);
     if (!closure.closed) {
       throw new Error(`Session ${previousId} is not closed:\n- ${closure.reasons.join("\n- ")}`);
     }
@@ -212,8 +213,14 @@ async function statusCommand(args: string[], cwd: string, io: CliIo): Promise<vo
   const active = currentPhase(session.state);
 
   io.out(`KODA — ${session.id}`);
+  const historyIssues = await validateAdvancedHistory(session.directory, session.state);
+  if (historyIssues.length) {
+    io.out("SESSION EVIDENCE BROKEN — ENTRY REFUSED");
+    for (const finding of historyIssues) io.out(`✗ ${finding.phase}: ${finding.message}`);
+    return;
+  }
   if (!active) {
-    const closure = checkSessionClosed(root, session.directory, true);
+    const closure = await evaluateSessionClosure(root, session.directory, session.state);
     io.out(closure.closed ? "SESSION CLOSED" : "PHASES COMPLETE — SESSION NOT CLOSED");
     for (const reason of closure.reasons) io.out(`✗ ${reason}`);
     return;
@@ -232,6 +239,7 @@ async function reviewNewCommand(args: string[], cwd: string, io: CliIo): Promise
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
   const session = await loadLatestSession(root, config);
+  await requireAdvancedHistory(session.directory, session.state);
   const active = currentPhase(session.state);
   if (!active) throw new Error("All phases are complete; no review can be created.");
   if (args[0] !== active.phase.name) throw new Error(`Current phase is ${active.phase.name}, not ${args[0]}.`);
@@ -256,6 +264,7 @@ async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<v
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
   const session = await loadLatestSession(root, config);
+  await requireAdvancedHistory(session.directory, session.state);
   const active = currentPhase(session.state);
   if (!active) throw new Error("All phases are complete; there is nothing to approve.");
   if (args[0] !== active.phase.name) throw new Error(`Current phase is ${active.phase.name}, not ${args[0]}.`);
@@ -320,6 +329,7 @@ async function advanceCommand(args: string[], cwd: string, io: CliIo): Promise<v
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
   const session = await loadLatestSession(root, config);
+  await requireAdvancedHistory(session.directory, session.state);
   const active = currentPhase(session.state);
   if (!active) throw new Error("All phases have already advanced. Commit and push, then run `koda session close`." );
 
@@ -346,7 +356,7 @@ async function advanceCommand(args: string[], cwd: string, io: CliIo): Promise<v
     io.out(`Next phase: ${next.phase.name}`);
     io.out(`Write the artifact: ${displayPath(root, artifactPath(session.directory, next.phase, next.index))}`);
   } else {
-    io.out("All phases are complete. Commit and push this session, then verify closure:");
+    io.out("All phases are complete. Prepare the immutable close artifact:");
     io.out(`  ${command("session", "close")}`);
   }
 }
@@ -357,7 +367,25 @@ async function sessionCloseCommand(args: string[], cwd: string, io: CliIo): Prom
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
   const session = await loadLatestSession(root, config);
-  const closure = checkSessionClosed(root, session.directory, session.state.currentPhaseIndex === session.state.phases.length);
+  if (session.state.currentPhaseIndex !== session.state.phases.length) {
+    io.out(`SESSION NOT CLOSED — ${session.id}`);
+    io.out("✗ Every declared phase has not advanced.");
+    process.exitCode = 2;
+    return;
+  }
+  if (!(await pathExists(closePath(session.directory)))) {
+    const prepared = await prepareCloseArtifact(session.directory, session.state);
+    const relativeSession = displayPath(root, session.directory);
+    io.out(`CLOSE PREPARED — ${session.id} — NOT CLOSED`);
+    io.out(`✓ Created immutable ${displayPath(root, prepared)}`);
+    io.out("Commit and push the bound session, then run `koda session close` again:");
+    io.out(`  git add ${shellQuote(relativeSession)}`);
+    io.out(`  git commit -m ${shellQuote(`close session ${session.id}`)}`);
+    io.out("  git push");
+    process.exitCode = 2;
+    return;
+  }
+  const closure = await evaluateSessionClosure(root, session.directory, session.state);
   if (!closure.closed) {
     io.out(`SESSION NOT CLOSED — ${session.id}`);
     for (const reason of closure.reasons) io.out(`✗ ${reason}`);
@@ -365,7 +393,7 @@ async function sessionCloseCommand(args: string[], cwd: string, io: CliIo): Prom
     return;
   }
   io.out(`SESSION CLOSED — ${session.id}`);
-  io.out("✓ Summary gated, session committed, and branch pushed.");
+  io.out("✓ Final phase gated, immutable close committed, and branch pushed.");
 }
 
 function help(io: CliIo): void {

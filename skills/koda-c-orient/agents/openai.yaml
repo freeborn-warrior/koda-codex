@@ -1,0 +1,4 @@
+interface:
+  display_name: "Koda-C Orient"
+  short_description: "Map the cited ground before planning begins"
+  default_prompt: "Use $koda-c-orient to inspect and record the active session's actual ground."
