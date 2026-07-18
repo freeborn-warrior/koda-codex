@@ -8,6 +8,104 @@ docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01
 
 It uses Sol at medium effort as the persistent producer and Terra at medium effort as the persistent reviewer. The models run in separate Codex contexts behind the supervisor. Ghostty window A shows progress and accepts owner acknowledgement; Ghostty window B is where Kristian reads each review. This is not yet the future interface with two visible conversational model panes.
 
+## Complete copy-and-paste command sheet
+
+These are every shell command needed for the prepared test.
+
+### Window A — start
+
+Paste the first command and press Return:
+
+```bash
+cd /Users/freeborn/Dev/koda-codex
+```
+
+Paste the second command and press Return:
+
+```bash
+npm run relay:execute -- "docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01"
+```
+
+Leave window A alone until it prints `OWNER ACKNOWLEDGEMENT REQUIRED` and waits at `Paste the exact RECEIPT line:`.
+
+### Window B — set up once
+
+Open the second Ghostty window. Paste these two commands separately, pressing Return after each:
+
+```bash
+cd /Users/freeborn/Dev/koda-codex
+```
+
+```bash
+export KODA_RELAY_DIR="/Users/freeborn/Dev/koda-codex/docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01"
+```
+
+### Window B — repeat whenever window A asks for a receipt
+
+Paste this command to find the current review:
+
+```bash
+export KODA_REVIEW_FILE="$(find "$KODA_RELAY_DIR/project/docs/sessions" -type f -path '*/reviews/[0-9][0-9]-*-review.md' -print | sort | tail -n 1)"
+```
+
+Paste this command to confirm which review will open:
+
+```bash
+printf '%s\n' "$KODA_REVIEW_FILE"
+```
+
+Paste this command to read the complete review:
+
+```bash
+less "$KODA_REVIEW_FILE"
+```
+
+Inside `less`, press Space to move down. Read every finding through the final receipt. Press `q` to return to the normal prompt.
+
+Paste this command to display the final non-empty line again:
+
+```bash
+awk 'NF { last = $0 } END { print last }' "$KODA_REVIEW_FILE"
+```
+
+After confirming that the displayed line begins with `RECEIPT:`, paste this command to copy that exact line to the macOS clipboard:
+
+```bash
+awk 'NF { last = $0 } END { print last }' "$KODA_REVIEW_FILE" | pbcopy
+```
+
+Return to window A. Press Command–V to paste the receipt at Koda's waiting prompt, then press Return. Command–V and Return are interactive input, not Bash commands.
+
+Repeat the five window-B commands above at every later receipt prompt. Refreshing `KODA_REVIEW_FILE` matters because each phase has a different review, and a blocking verdict creates a fresh review at the same path.
+
+### Window B — inspect a pause
+
+If window A says `RELAY PAUSED`, paste:
+
+```bash
+sed -n '1,240p' "$KODA_RELAY_DIR/RUN.json"
+```
+
+To resume, return to window A and paste the same execution command again:
+
+```bash
+npm run relay:execute -- "docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01"
+```
+
+### Window B — verify completion
+
+After window A prints `RELAY COMPLETE`, paste these commands separately:
+
+```bash
+sed -n '1,240p' "$KODA_RELAY_DIR/RESULT.md"
+```
+
+```bash
+sed -n '1,240p' "$KODA_RELAY_DIR/GIT-EVIDENCE.json"
+```
+
+No other Bash commands are required for the test.
+
 ## Before starting
 
 1. Do not create another relay run.

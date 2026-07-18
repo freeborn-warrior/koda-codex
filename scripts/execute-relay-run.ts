@@ -144,6 +144,7 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
     "--json",
     "-m", roleRecord.model,
     "-c", `model_reasoning_effort=\"${roleRecord.effort}\"`,
+    "-c", 'sandbox_mode="workspace-write"',
   ];
   const args = roleRecord.threadId
     ? [...base, "resume", ...common, roleRecord.threadId, prompt]

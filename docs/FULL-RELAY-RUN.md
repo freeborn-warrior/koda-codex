@@ -61,7 +61,7 @@ Paste the exact RECEIPT line:
 
 Open the named file in the adjacent Ghostty pane or editor, read it through the final line, and paste the exact line into Koda. The harness never reads the receipt on Kristian's behalf and does not copy it into `TRANSCRIPT.md`. The receipt remains where it belongs: the review and Koda approval ledger.
 
-If execution is interrupted or a model turn fails, `RUN.json` keeps the last action, role thread IDs, and named pause status. Rerun the same `relay:execute` command; the supervisor re-derives current work from disk and resumes the existing role context. `COMPLETE` runs refuse re-execution.
+If execution is interrupted or a model turn fails, `RUN.json` keeps the last action, role thread IDs, and named pause status. Rerun the same `relay:execute` command; the supervisor re-derives current work from disk and resumes the existing role context. Initial and resumed model turns both receive the same explicit `workspace-write` sandbox so a continuation cannot silently fall back to Codex's read-only non-interactive default. `COMPLETE` runs refuse re-execution.
 
 ## Close evidence
 

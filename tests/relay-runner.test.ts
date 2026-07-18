@@ -85,6 +85,8 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.doesNotMatch(execute, /--ephemeral/);
   assert.match(execute, /"exec",\s*\n/);
   assert.match(execute, /"resume"/);
+  assert.match(execute, /'sandbox_mode="workspace-write"'/);
+  assert.match(execute, /\? \[\.\.\.base, "resume", \.\.\.common/);
   assert.match(execute, /run\.producer\.threadId === run\.reviewer\.threadId/);
   assert.match(execute, /stdio: "inherit"/);
   assert.match(execute, /\["approve", phaseName, "--approver", "Kristian"\]/);
@@ -102,6 +104,11 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(ghostty, /Do not run `relay:prepare` again/);
   assert.match(ghostty, /RELAY COMPLETE/);
   assert.match(ghostty, /RESULT\.md/);
+  assert.match(ghostty, /export KODA_RELAY_DIR=/);
+  assert.match(ghostty, /export KODA_REVIEW_FILE=/);
+  assert.match(ghostty, /less "\$KODA_REVIEW_FILE"/);
+  assert.match(ghostty, /awk .*"\$KODA_REVIEW_FILE" \| pbcopy/);
+  assert.match(ghostty, /No other Bash commands are required for the test/);
   assert.match(packageJson, /"relay:prepare"/);
   assert.match(packageJson, /"relay:execute"/);
 });

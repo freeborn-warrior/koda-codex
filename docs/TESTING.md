@@ -362,3 +362,30 @@ Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effor
 - **How:** Added `docs/GHOSTTY-TEST-GUIDE.md`, linked it from the relay protocol and README, added plain-language baseline interpretation to the model matrix, and required the guide to preserve the exact execution command, chat receipt prohibition, resume rule, and `RELAY COMPLETE` evidence. Ran `npm run test:record -- 2026-07-18-ghostty-guide-final`; every named result is preserved in [the per-test transcript](test-results/2026-07-18-ghostty-guide-final.md).
 - **What happened:** All 77 checks passed. The prepared run remains `PREPARED — NOT RUN`; its folder is deliberately excluded from this documentation commit until Kristian completes the relay.
 - **Verdict:** PASS. The instructions no longer imply that the second Ghostty window is already an interactive reviewer interface.
+
+## 2026-07-18 — Complete Ghostty command-sheet validation
+
+- **Variant:** Not applicable; Node.js test runner. No model was called.
+- **Effort:** Not applicable.
+- **What:** A literal copy-and-paste command sheet covering Window A execution, Window B review discovery and full reading, exact receipt copying, pause inspection, resume, and completion evidence.
+- **How:** Required every command and the receipt-safety boundary from `docs/GHOSTTY-TEST-GUIDE.md`, then ran `npm run test:record -- 2026-07-18-ghostty-command-sheet-final`. Every named result is preserved in [the per-test transcript](test-results/2026-07-18-ghostty-command-sheet-final.md).
+- **What happened:** All 77 checks passed. The command sheet keeps receipt discovery in Kristian's reading window and never sends a receipt through model chat.
+- **Verdict:** PASS. The prepared relay has a complete operator procedure with no implied terminal commands omitted.
+
+## 2026-07-18 — First genuine persistent-relay attempt
+
+- **Variant:** Producer `gpt-5.6-sol` at medium effort; reviewer `gpt-5.6-terra` at medium effort was not reached.
+- **Effort:** Medium for the one producer context used.
+- **What:** The prepared six-phase relay in Ghostty, using the real persistent producer context and owner-visible supervisor.
+- **How:** Kristian ran `npm run relay:execute -- docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01`. The supervisor saved every event stream, stderr file, thread ID, session artifact, and pause reason in that run folder.
+- **What happened:** Producer turn 1 opened session `2026-07-18-01`. Producer turn 2 resumed the same thread but Codex rejected its brief edit because the resumed non-interactive invocation had fallen back to a read-only sandbox. No brief and no consultation request were written, so the supervisor refused to guess and paused with the missing-artifact condition named. The reviewer never ran.
+- **Verdict:** RUNNER DEFECT; RELAY NOT COMPLETE. Preserve the session and persistent producer thread, explicitly bind `workspace-write` to resumed turns, then continue the same run. This is not a model-quality result and must not enter the reviewer matrix.
+
+## 2026-07-18 — Persistent-relay resume permission correction
+
+- **Variant:** Not applicable; deterministic Node.js and local Git tests. No model was called.
+- **Effort:** Not applicable.
+- **What:** Regression protection for identical least-privilege write access on initial and resumed Codex relay turns.
+- **How:** Added the per-invocation Codex configuration override `sandbox_mode="workspace-write"` to the argument list shared by both branches, required the resume branch to consume that shared list, documented the recovery invariant, and ran `npm run test:record -- 2026-07-18-relay-resume-sandbox-final`. Every named result is preserved in [the per-test transcript](test-results/2026-07-18-relay-resume-sandbox-final.md).
+- **What happened:** All 77 checks passed. The saved run remains paused and unchanged apart from its already-recorded evidence; rerunning its exact execute command will resume the same producer thread from current disk state.
+- **Verdict:** PASS. The concrete first-run failure now has a tested correction, without broadening the model sandbox to `danger-full-access` or weakening any gate or mutation test.
