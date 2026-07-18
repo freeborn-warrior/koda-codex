@@ -1,0 +1,4 @@
+interface:
+  display_name: "Koda-C Close"
+  short_description: "Commit, push, and verify immutable session closure"
+  default_prompt: "Use $koda-c-close to prepare, push, and verify the completed Koda session close artifact."

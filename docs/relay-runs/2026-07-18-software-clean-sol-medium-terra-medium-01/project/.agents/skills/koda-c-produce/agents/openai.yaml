@@ -1,0 +1,4 @@
+interface:
+  display_name: "Koda-C Produce"
+  short_description: "Create the declared output and evidence manifest"
+  default_prompt: "Use $koda-c-produce to make the declared output and record its evidence."

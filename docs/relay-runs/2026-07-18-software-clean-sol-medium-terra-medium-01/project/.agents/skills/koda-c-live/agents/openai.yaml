@@ -1,0 +1,4 @@
+interface:
+  display_name: "Koda-C Live"
+  short_description: "Exercise the real output and record evidence"
+  default_prompt: "Use $koda-c-live to exercise the real output and save observed results."

@@ -1,0 +1,1 @@
+word-count: cannot read "test/fixtures/missing.txt": ENOENT: no such file or directory, open 'test/fixtures/missing.txt'

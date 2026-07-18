@@ -1,0 +1,3 @@
+bbcb5cf (HEAD -> main, origin/main) close session 2026-07-18-01
+45de6b1 chore: record 2026-07-18-01 output before close
+b6388b9 chore: prepare relay fixture

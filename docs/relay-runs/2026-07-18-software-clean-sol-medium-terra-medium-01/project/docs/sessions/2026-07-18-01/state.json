@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "id": "2026-07-18-01",
+  "createdAt": "2026-07-18T15:57:29.954Z",
+  "phases": [
+    {
+      "name": "brief",
+      "description": "What we are doing, why, and the limits"
+    },
+    {
+      "name": "orient",
+      "description": "Read and record the actual ground before planning"
+    },
+    {
+      "name": "plan",
+      "description": "Set out the work in checkable steps"
+    },
+    {
+      "name": "produce",
+      "description": "Create the session's real output"
+    },
+    {
+      "name": "live",
+      "description": "Exercise the real output and record what happened"
+    },
+    {
+      "name": "summary",
+      "description": "Verify and record what was completed"
+    }
+  ],
+  "currentPhaseIndex": 6,
+  "advances": [
+    {
+      "phase": "brief",
+      "receipt": "RECEIPT: Review read — abbada42-3807-4608-acc8-103faad5400a",
+      "reviewId": "abbada42-3807-4608-acc8-103faad5400a",
+      "advancedAt": "2026-07-18T16:12:32.714Z"
+    },
+    {
+      "phase": "orient",
+      "receipt": "RECEIPT: Review read — 2f3fb99f-fc95-4bce-a5be-43711885af54",
+      "reviewId": "2f3fb99f-fc95-4bce-a5be-43711885af54",
+      "advancedAt": "2026-07-18T16:17:26.975Z"
+    },
+    {
+      "phase": "plan",
+      "receipt": "RECEIPT: Review read — c5e4b97f-0ffa-4435-aa3f-4169a23518b0",
+      "reviewId": "c5e4b97f-0ffa-4435-aa3f-4169a23518b0",
+      "advancedAt": "2026-07-18T16:20:45.928Z"
+    },
+    {
+      "phase": "produce",
+      "receipt": "RECEIPT: Review read — 4d4c3c24-acb4-4b0d-a9cb-bcd57ec43d16",
+      "reviewId": "4d4c3c24-acb4-4b0d-a9cb-bcd57ec43d16",
+      "advancedAt": "2026-07-18T16:25:35.432Z"
+    },
+    {
+      "phase": "live",
+      "receipt": "RECEIPT: Review read — 274f92e9-6cb0-426c-b072-810131b78abe",
+      "reviewId": "274f92e9-6cb0-426c-b072-810131b78abe",
+      "advancedAt": "2026-07-18T16:31:13.301Z"
+    },
+    {
+      "phase": "summary",
+      "receipt": "RECEIPT: Review read — 996ca2ec-23d8-405c-8108-4e6b79cd5348",
+      "reviewId": "996ca2ec-23d8-405c-8108-4e6b79cd5348",
+      "advancedAt": "2026-07-18T16:37:53.960Z"
+    }
+  ]
+}

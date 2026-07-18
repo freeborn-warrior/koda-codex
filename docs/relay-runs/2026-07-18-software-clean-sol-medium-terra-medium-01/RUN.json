@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "scenario": "software-clean",
+  "status": "COMPLETE",
+  "preparedAt": "2026-07-18T15:52:45.201Z",
+  "producer": {
+    "model": "gpt-5.6-sol",
+    "effort": "medium",
+    "threadId": "019f75f2-2596-7ee3-a2aa-dca03ad614ae",
+    "turns": 11
+  },
+  "reviewer": {
+    "model": "gpt-5.6-terra",
+    "effort": "medium",
+    "threadId": "019f75f9-9cdc-70d0-b202-7b26af93ff8e",
+    "turns": 7
+  },
+  "project": "project",
+  "runtime": "project/.runtime",
+  "cli": "/Users/freeborn/Dev/koda-codex/src/cli.ts",
+  "initialCommit": "b6388b9e47e61e61b384a941c750d77c60bde5f7",
+  "maxTurns": 40,
+  "startedAt": "2026-07-18T15:57:10.771Z",
+  "ownerAcknowledgements": 7,
+  "lastAction": "producer turn 11: verify immutable session close",
+  "sessionId": "2026-07-18-01",
+  "completedAt": "2026-07-18T16:45:13.488Z",
+  "finalCommit": "bbcb5cf097e88db5ab95d8065f43c116eb926690"
+}

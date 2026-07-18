@@ -39,10 +39,20 @@ A visible Ghostty producer pane can still be non-interactive by running a superv
 
 Visibility means the progress information the platform legitimately exposes. Koda-C does not claim access to hidden private chain-of-thought; it can show emitted reasoning summaries, messages, tool calls, file changes, and phase milestones when the runtime surface provides them.
 
+## Visible role stream and turn summaries
+
+The current relay prints only role/turn labels while preserving complete model events in JSONL. That is test evidence, not the desired owner experience. The side-by-side runtime should render each context's available progress while it works and end every producer or reviewer turn with a concise role-authored summary.
+
+The producer pane should show the current phase, entry-check outcome, exposed reasoning summaries, tool and file activity, verification commands, artifact path, and whether it handed over or paused for consultation. Its closing message should say what artifact was produced, what was actually checked, what remains unresolved, and that control passed to the reviewer. It must not invite owner input.
+
+The reviewer pane should show the current review or consultation mode, evidence being inspected, exposed reasoning summaries, verification activity, definitive verdict, review/response path, required-revision count or owner question, and resulting gate state. Its closing message should explain the actionable outcome to Kristian without printing the receipt; the receipt remains inside the complete review opened through the owner-reading flow.
+
+These are visibility and comprehension features, not new authority. Rendered status must come from the event stream and current disk state, never from a separate optimistic UI cache. A polished summary cannot substitute for the artifact, formal review, receipt, or gate check.
+
 ## Current bridge and gap
 
 Koda-C proves the disk gate, phase skills, review/receipt relay, close, deterministic full-session scenarios, and a documented manual two-task workflow. A repository harness now prepares and supervises two persistent Codex thread IDs with closed stdin, watches disk handoffs, pauses for Kristian's actual receipt, commits produced output, and preserves pushed-close Git evidence. Until a genuine run reaches `COMPLETE`, that is implemented test machinery rather than end-to-end proof.
 
-The harness still does not show the producer's full progress stream in its own read-only pane or provide the mature interactive reviewer conversation, external notifications, or robust signal/abort recovery. Its two model contexts are persistent and separate, but currently run behind one supervisor while Window B is only a review reader. An in-phase `AWAITING OWNER` response pauses with named disk state; it does not yet open a discussion loop in the reviewer context. Those remain orchestration work above the core CLI and must not be implied by a successful scripted relay.
+The harness still does not show either role's progress stream or turn-end summary in dedicated panes, show the producer's full progress in a read-only view, or provide the mature interactive reviewer conversation, external notifications, or robust signal/abort recovery. Its two model contexts are persistent and separate, but currently run behind one supervisor while Window B is only a review reader. An in-phase `AWAITING OWNER` response pauses with named disk state; it does not yet open a discussion loop in the reviewer context. Those remain orchestration work above the core CLI and must not be implied by a successful scripted relay.
 
 Automatic launch should mean “after owner-approved prompt,” not “the guide independently chose product work.” Whether a later configuration permits any broader scheduling remains an owner decision.

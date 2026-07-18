@@ -91,7 +91,7 @@ Every reviewer → producer handback is an artifact before it is actionable: a c
 
 The real collaboration uses two visible persistent Codex tasks side by side for the full Koda session. The producer task explicitly invokes the current phase skill and shows its available progress, but its conversational input is closed; Kristian can watch or terminate it but cannot type into it. The separate owner-facing reviewer task carries consultations, explanations, rulings, and formal handoffs through the one `koda-c-review` skill. Kristian speaks only there and can discuss anything he notices in the producer stream. Neither context is recreated at phase boundaries. See the [two-task walkthrough](DEMO.md#two-codex-task-collaboration).
 
-The repository also contains a [persistent full-relay test harness](FULL-RELAY-RUN.md) that resumes two distinct Codex thread IDs across all six phases and pauses for Kristian's real receipt at every gate. It is a test bridge toward the mature runtime, not yet a replacement for the interactive owner-facing reviewer conversation.
+The repository also contains a [persistent full-relay test harness](FULL-RELAY-RUN.md) that resumes two distinct Codex thread IDs across all six phases and pauses for Kristian's real receipt at every gate. Its [first genuine run](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md) completed with an unplanned Summary REVISE loop, seven owner acknowledgements, and a pushed immutable close. It proves the backend relay but remains a bridge, not yet the mature side-by-side owner-facing interface.
 
 Kristian's exact two-window terminal procedure is in the [first-time Ghostty test guide](GHOSTTY-TEST-GUIDE.md).
 

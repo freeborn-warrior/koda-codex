@@ -70,7 +70,7 @@ owner contract
 - A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda session.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.
 - Five sealed reviewer fixtures: the original hard-number capability check and honest control, plus an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap.
-- A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its first genuine run is active and remains explicitly incomplete until all six phases and pushed close are verified.
+- A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its first genuine run completed all six phases with distinct persistent contexts, an unplanned Summary REVISE recovery, seven owner acknowledgements, and a pushed immutable close.
 - In supervised close, the persistent producer prepares and later verifies immutable `close.md`, while the trusted relay supervisor performs the exact intervening session commit and push. This keeps `.git` protected from model sandboxes without moving closure authority out of Koda's disk checks.
 - The interim owner reader reduces Window B to `npm run relay:review`: it derives the only waiting session and current review from disk, opens the full file, detects concurrent review changes, and copies the exact receipt without printing or submitting it. This is a bridge, not the mature conversational reviewer interface.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
@@ -86,6 +86,7 @@ owner contract
 - [Codex skill-platform implications](design-notes/2026-07-18-codex-skill-platform.md)
 - [Owner-facing session runtime](design-notes/2026-07-18-owner-facing-session-runtime.md)
 - [Long-lived guide context research](design-notes/2026-07-18-long-lived-guide-context.md)
+- [Completed genuine six-phase relay](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
 - Git history on `main` contains honest pushed milestones.
 
 ## Drift watch against the starting document

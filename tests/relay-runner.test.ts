@@ -51,6 +51,10 @@ test("FULL RELAY RUNNER: preparation creates a clean pushed project with local s
       "koda-c-session",
       "koda-c-summary",
     ]);
+    for (const name of skills) {
+      const files = await readdir(path.join(project, ".agents", "skills", name), { recursive: true });
+      assert.equal(files.includes(".DS_Store"), false, `${name} copied macOS metadata`);
+    }
 
     const status = spawnSync("git", ["status", "--porcelain", "--untracked-files=all"], {
       cwd: project,
@@ -58,6 +62,7 @@ test("FULL RELAY RUNNER: preparation creates a clean pushed project with local s
     });
     assert.equal(status.status, 0, status.stderr);
     assert.equal(status.stdout, "");
+    assert.match(await readFile(path.join(project, ".gitignore"), "utf8"), /^\.DS_Store$/m);
     const head = spawnSync("git", ["rev-parse", "HEAD"], { cwd: project, encoding: "utf8" });
     assert.equal(head.status, 0, head.stderr);
     assert.equal(head.stdout.trim(), run.initialCommit);
@@ -160,4 +165,76 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(packageJson, /"relay:prepare"/);
   assert.match(packageJson, /"relay:execute"/);
   assert.match(packageJson, /"relay:review"/);
+});
+
+test("GENUINE FULL RELAY EVIDENCE: six phases, revision recovery, distinct contexts, and pushed close", async () => {
+  const runRoot = path.join(
+    process.cwd(),
+    "docs",
+    "relay-runs",
+    "2026-07-18-software-clean-sol-medium-terra-medium-01",
+  );
+  const session = path.join(runRoot, "project", "docs", "sessions", "2026-07-18-01");
+  const [runText, result, gitText, stateText, approvals, transcript, close, blockingReview] = await Promise.all([
+    readFile(path.join(runRoot, "RUN.json"), "utf8"),
+    readFile(path.join(runRoot, "RESULT.md"), "utf8"),
+    readFile(path.join(runRoot, "GIT-EVIDENCE.json"), "utf8"),
+    readFile(path.join(session, "state.json"), "utf8"),
+    readFile(path.join(session, "approvals.md"), "utf8"),
+    readFile(path.join(runRoot, "TRANSCRIPT.md"), "utf8"),
+    readFile(path.join(session, "close.md"), "utf8"),
+    readFile(
+      path.join(session, "reviews", "history", "06-summary-review-1ffa6120-fb4e-4c21-89de-1a6359223ed8.md"),
+      "utf8",
+    ),
+  ]);
+  const run = JSON.parse(runText) as {
+    status: string;
+    sessionId: string;
+    ownerAcknowledgements: number;
+    finalCommit: string;
+    producer: { threadId: string; turns: number };
+    reviewer: { threadId: string; turns: number };
+  };
+  const gitEvidence = JSON.parse(gitText) as {
+    head: string;
+    remoteHead: string;
+    aheadCount: number;
+    projectStatus: string;
+    kodaStatus: string;
+  };
+  const state = JSON.parse(stateText) as { currentPhaseIndex: number; phases: unknown[]; advances: unknown[] };
+
+  assert.equal(run.status, "COMPLETE");
+  assert.equal(run.sessionId, "2026-07-18-01");
+  assert.notEqual(run.producer.threadId, run.reviewer.threadId);
+  assert.equal(run.producer.turns, 11);
+  assert.equal(run.reviewer.turns, 7);
+  assert.equal(run.ownerAcknowledgements, 7);
+  assert.equal(state.currentPhaseIndex, 6);
+  assert.equal(state.phases.length, 6);
+  assert.equal(state.advances.length, 6);
+  assert.equal((approvals.match(/<!-- KODA_APPROVAL /g) ?? []).length, 7);
+  assert.match(blockingReview, /^VERDICT: REVISE$/m);
+  assert.match(close, /<!-- KODA_CLOSE /);
+  assert.match(result, /Status: COMPLETE/);
+  assert.match(result, /Completed phases: 6\/6/);
+  assert.match(result, /Owner acknowledgements: 7/);
+  assert.equal(gitEvidence.head, run.finalCommit);
+  assert.equal(gitEvidence.remoteHead, run.finalCommit);
+  assert.equal(gitEvidence.aheadCount, 0);
+  assert.equal(gitEvidence.projectStatus, "");
+  assert.match(gitEvidence.kodaStatus, /SESSION CLOSED/);
+  assert.match(transcript, /producer turn 9: revise summary/);
+  assert.match(transcript, /supervisor close commit and push/);
+  assert.match(transcript, /Producer \/ reviewer threads remained distinct: true/);
+
+  await assert.rejects(readdir(path.join(runRoot, "project", ".git")), { code: "ENOENT" });
+  await assert.rejects(readdir(path.join(runRoot, "project", ".runtime")), { code: "ENOENT" });
+  const verified = spawnSync("git", ["bundle", "verify", path.join(runRoot, "PROJECT-HISTORY.bundle")], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+  });
+  assert.equal(verified.status, 0, verified.stderr);
+  assert.match(`${verified.stdout}${verified.stderr}`, /complete history/);
 });

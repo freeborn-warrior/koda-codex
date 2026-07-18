@@ -1,0 +1,4 @@
+before ordinary  8b85a9a03249a356fc850b4e61f935bf53ccdc9d8cdb1e6ac8cc530b07d2c4d4  test/fixtures/ordinary.txt
+before empty     e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/fixtures/empty.txt
+after ordinary   8b85a9a03249a356fc850b4e61f935bf53ccdc9d8cdb1e6ac8cc530b07d2c4d4  test/fixtures/ordinary.txt
+after empty      e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  test/fixtures/empty.txt

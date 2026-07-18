@@ -1,0 +1,13 @@
+✔ reports the expected count for ordinary text without changing it (43.600625ms)
+✔ reports zero for a zero-byte file without changing it (40.538625ms)
+✔ refuses a missing path with a clear error (40.475542ms)
+✔ refuses a missing argument (41.534416ms)
+✔ refuses more than one argument (40.502791ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 264.238375

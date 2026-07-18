@@ -1,0 +1,4 @@
+interface:
+  display_name: "Koda-C Brief"
+  short_description: "Turn the session contract into a checked brief"
+  default_prompt: "Use $koda-c-brief to write the active session's brief artifact."
