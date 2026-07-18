@@ -78,3 +78,28 @@ test("REVIEWER FIXTURES: Ghostty runs pin model and effort and preserve ephemera
   assert.match(protocol, /Capability:/);
   assert.match(protocol, /Temperament:/);
 });
+
+test("REVIEWER FIXTURES: the medium model matrix is backed by six graded run folders", async () => {
+  const matrix = await readFile("docs/MODEL-TEST-MATRIX.md", "utf8");
+  const runs = [
+    ["sol", "planted-hard-number-sol-medium-03", "REVISE"],
+    ["sol", "honest-control-sol-medium-01", "APPROVE"],
+    ["terra", "planted-hard-number-terra-medium-02", "REVISE"],
+    ["terra", "honest-control-terra-medium-01", "APPROVE"],
+    ["luna", "planted-hard-number-luna-medium-01", "REVISE"],
+    ["luna", "honest-control-luna-medium-01", "APPROVE"],
+  ] as const;
+
+  for (const [model, suffix, verdict] of runs) {
+    const result = await readFile(path.join("docs/reviewer-runs", `2026-07-18-${suffix}`, "RESULT.md"), "utf8");
+    assert.match(result, /- Status: PASS/);
+    assert.match(result, new RegExp(`- Model variant: gpt-5\\.6-${model}`));
+    assert.match(result, /- Effort: medium/);
+    assert.match(result, new RegExp(`- Verdict: ${verdict}`));
+  }
+
+  for (const model of ["Sol", "Terra", "Luna"]) {
+    assert.match(matrix, new RegExp(`\\| ${model} \\| medium \\| PASS .* \\| PASS .* \\| \\*\\*2/2 PASS\\*\\* \\|`));
+  }
+  assert.match(matrix, /Terra \/ medium \| planted hard number \| NOT RUN — desktop sandbox denied/);
+});

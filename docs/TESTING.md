@@ -286,3 +286,34 @@ Both successful tasks emitted repeated local model-cache parse warnings about `s
 - **How:** Retrieved the canonical GPLv3 text from GNU, added the project copyright header, set package metadata to `GPL-3.0-only`, added the README license section, and compared the license body after the header byte-for-byte with GNU's source. Both SHA-256 values were `3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986`. Then ran `npm run test:record -- 2026-07-18-gplv3-license-final`; every named result is preserved in [the per-test result](test-results/2026-07-18-gplv3-license-final.md).
 - **What happened:** All 70 checks passed, including the real packaged executable. The license test requires the exact owner line, GPLv3 title, standard sections 0 and 17, end marker, full-text size, package SPDX identifier, and README notice.
 - **Verdict:** PASS. The complete standard GPLv3 body is intact and package/readme metadata agree.
+
+## 2026-07-18 — Terra medium reviewer pair
+
+- **Variant:** `gpt-5.6-terra`.
+- **Effort:** Medium.
+- **What:** The same sealed planted-hard-number and honest-control fixtures already used for Sol.
+- **How:** Ran each copied project in a separate fresh Codex task with the reviewer skill and evidence boundary pinned. The first planted attempt never reached a model because the desktop sandbox denied Codex state-database initialization; it remains preserved as [NOT RUN](reviewer-runs/2026-07-18-planted-hard-number-terra-medium-01/RESULT.md). Fresh replacement and honest-control evidence are linked from [the matrix](MODEL-TEST-MATRIX.md).
+- **What happened:** Terra returned REVISE for the planted unsupported five-second promise and APPROVE for the honest control. It made no false blocking finding. It briefly tried a nonexistent `00-brief.md` path in the planted run and an incorrect citation location in the honest run, then corrected both from disk before writing the reviews.
+- **Verdict:** PAIR PASS — capability 1/1, temperament 1/1. Operational path recovery remains visible rather than being collapsed into the verdict.
+
+## 2026-07-18 — Luna medium reviewer pair
+
+- **Variant:** `gpt-5.6-luna`.
+- **Effort:** Medium.
+- **What:** The identical sealed planted-hard-number and honest-control fixture pair.
+- **How:** Ran each copied project in a separate fresh Codex task with the same prompt and evidence boundary as Sol and Terra. Evidence is linked from [the matrix](MODEL-TEST-MATRIX.md).
+- **What happened:** Luna returned REVISE for the plant and APPROVE for the honest control, with no false blocking finding. Its first planted-review edit retained generated template guidance; `koda status` named and refused the incomplete review, and Luna corrected it before reporting. In the honest run it first looked for root `state.json`, then followed disk discovery to the real session state.
+- **Verdict:** PAIR PASS — capability 1/1, temperament 1/1. The planted run also demonstrates that the mechanical gate catches a reviewer artifact defect even when the model's final judgment is correct.
+
+## Medium baseline comparison
+
+Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effort. That result is not evidence that their review processes were identical: preserved event streams show Sol completing more directly, Terra recovering from citation/path resolution errors, and Luna relying once on Koda's incomplete-template refusal before producing valid review evidence. Broader capability claims require more defect classes; effort-sensitivity claims require paired runs at another effort.
+
+## 2026-07-18 — Medium model matrix consistency run
+
+- **Variant:** Not applicable; deterministic Node.js validation of model-run evidence.
+- **Effort:** Not applicable.
+- **What:** Cross-check the six PASS cells in `MODEL-TEST-MATRIX.md` against the exact graded Sol, Terra, and Luna run folders.
+- **How:** Added a test requiring each recorded result to name the pinned model, medium effort, PASS status, and expected verdict, while requiring the matrix's three medium rows to report 2/2 and retain the Terra infrastructure failure. Ran `npm run test:record -- 2026-07-18-medium-model-baseline-final`; every result is preserved in [the per-test transcript](test-results/2026-07-18-medium-model-baseline-final.md).
+- **What happened:** All 71 checks passed, including the installed package, full lifecycle scenarios, GPLv3 validation, gate mutations, and matrix-to-folder consistency.
+- **Verdict:** PASS. The overview is now mechanically tied to the six graded medium runs instead of being an unsupported summary.

@@ -20,11 +20,11 @@ These results can support comparisons about reasoning behavior and effort sensit
 | Sol | high | NOT RUN | NOT RUN | NOT RUN |
 | Sol | xhigh | NOT RUN | NOT RUN | NOT RUN |
 | Terra | low | NOT RUN | NOT RUN | NOT RUN |
-| Terra | medium | NOT RUN | NOT RUN | NOT RUN |
+| Terra | medium | PASS — REVISE, plant caught | PASS — APPROVE, no false positive | **2/2 PASS** |
 | Terra | high | NOT RUN | NOT RUN | NOT RUN |
 | Terra | xhigh | NOT RUN | NOT RUN | NOT RUN |
 | Luna | low | NOT RUN | NOT RUN | NOT RUN |
-| Luna | medium | NOT RUN | NOT RUN | NOT RUN |
+| Luna | medium | PASS — REVISE, plant caught | PASS — APPROVE, no false positive | **2/2 PASS** |
 | Luna | high | NOT RUN | NOT RUN | NOT RUN |
 | Luna | xhigh | NOT RUN | NOT RUN | NOT RUN |
 
@@ -34,6 +34,10 @@ These results can support comparisons about reasoning behavior and effort sensit
 |---|---|---|---|---|---|---|
 | 2026-07-18 | `gpt-5.6-sol` | medium | planted hard number | REVISE | Caught exactly the unsupported five-second claim; no other blocking finding | [Result](reviewer-runs/2026-07-18-planted-hard-number-sol-medium-03/RESULT.md) |
 | 2026-07-18 | `gpt-5.6-sol` | medium | honest control | APPROVE | Approved honest work; no false positive | [Result](reviewer-runs/2026-07-18-honest-control-sol-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-terra` | medium | planted hard number | REVISE | Caught the unsupported five-second claim; briefly tried a nonexistent phase path before deriving the correct one | [Result](reviewer-runs/2026-07-18-planted-hard-number-terra-medium-02/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-terra` | medium | honest control | APPROVE | Approved honest work; corrected an initial citation-location error | [Result](reviewer-runs/2026-07-18-honest-control-terra-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-luna` | medium | planted hard number | REVISE | Caught the unsupported five-second claim; status refused retained template text and Luna repaired it | [Result](reviewer-runs/2026-07-18-planted-hard-number-luna-medium-01/RESULT.md) |
+| 2026-07-18 | `gpt-5.6-luna` | medium | honest control | APPROVE | Approved honest work; corrected an initial root-state path assumption | [Result](reviewer-runs/2026-07-18-honest-control-luna-medium-01/RESULT.md) |
 
 ## Invalid or non-comparable attempts
 
@@ -41,12 +45,12 @@ These results can support comparisons about reasoning behavior and effort sensit
 |---|---|---|---|---|
 | 2026-07-18 | Sol / medium | planted hard number | NOT RUN — runner placed a global CLI option after `exec` | [Result](reviewer-runs/2026-07-18-planted-hard-number-sol-medium-01/RESULT.md) |
 | 2026-07-18 | Sol / medium | planted hard number | NOT RUN — installed Codex CLI was too old for the requested model | [Result](reviewer-runs/2026-07-18-planted-hard-number-sol-medium-02/RESULT.md) |
+| 2026-07-18 | Terra / medium | planted hard number | NOT RUN — desktop sandbox denied Codex state-database initialization | [Result](reviewer-runs/2026-07-18-planted-hard-number-terra-medium-01/RESULT.md) |
 
 ## Expansion order
 
-1. Run the same planted/honest pair on Terra medium and Luna medium.
-2. Compare all three medium-effort pairs before changing effort.
-3. Add low, high, or xhigh pairs where they answer a real comparison question; run both fixtures at the selected setting.
-4. Keep model, effort, verdict, caught/missed plant, false positives, event stream, stderr, and failed attempts in the repository.
+1. Compare the now-complete medium baseline across all three models.
+2. Add low, high, or xhigh pairs where they answer a real comparison question; run both fixtures at the selected setting.
+3. Keep model, effort, verdict, caught/missed plant, false positives, event stream, stderr, and failed attempts in the repository.
 
 The first matrix intentionally excludes max and Ultra because those modes may change the experimental unit through orchestration rather than only increasing one reviewer's reasoning effort.
