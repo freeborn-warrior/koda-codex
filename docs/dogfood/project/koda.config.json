@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "sessionsDir": "docs/sessions",
+  "phases": [
+    {
+      "name": "brief",
+      "description": "Define one tiny checkable outcome"
+    }
+  ]
+}

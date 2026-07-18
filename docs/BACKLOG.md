@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Run and preserve the complete tiny dogfood session, including close preparation, Git push, and verified closure.
+- [ ] Finish judge-facing README and one-window/two-window demo instructions.
 
 ## Next
 
@@ -36,6 +36,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Bind immutable `close.md` to every durable session file and the final review receipt.
 - [x] Prove close is not official before commit/push and `session new` refuses both uncommitted and local-only closes.
 - [x] Revalidate every prior advanced gate from disk before allowing work in the current phase.
+- [x] Run and preserve a complete tiny session through receipt refusal, advancement, immutable close, local-commit refusal, push, and verified closure under `docs/dogfood/`.
 
 ## Definition of target (a) done
 

@@ -75,3 +75,12 @@ Every durable test result is recorded here. Deterministic Node.js tests do not i
 The first corrected rerun passed 34 of 35 checks. One assertion still assumed the words “resolved input” were adjacent, while five skills use the explicit heading “Inputs resolved during this phase.” The assertion was narrowed to the two accepted artifact headings and scheduled for another full rerun.
 
 The final corrected run passed all 35 checks. A subsequent full run also proved `session new` refuses both an uncommitted close and a locally committed but unpushed close, then succeeds only after the close commit reaches the configured upstream. All nine skill folders independently returned `Skill is valid!` from Codex's validator.
+
+## 2026-07-18 — Tiny end-to-end dogfood session
+
+- **Variant:** Not applicable; deterministic CLI lifecycle proof.
+- **Effort:** Not applicable.
+- **What:** One complete configured phase from session open through review, receipt approval, advancement, immutable close, Git commit, push, and derived closure.
+- **How:** Ran `npm run dogfood` in a disposable project with a disposable local bare Git remote. Saved the normalized transcript and session snapshot under `docs/dogfood/` and removed the temporary repositories.
+- **What happened:** The first run reached verified closure but revealed that the first-push hint printed `git push` while the harness needed `git push -u origin main`. Close was changed to inspect branch/upstream, print the exact first-push command, and refuse preparation when no remote exists. The rerun executed all three printed Git commands verbatim, refused closure after the local commit, pushed commit `feb18dfda2913e7378000f227ddef7da4b16de82`, then reported `SESSION CLOSED` from both close and status.
+- **Verdict:** PASS after UX correction. A repository test re-hashes the preserved session and checks that `close.md` still binds its final state, review, and receipt.

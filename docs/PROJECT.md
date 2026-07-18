@@ -54,6 +54,7 @@ owner contract
 - Fail-closed checks for missing, empty, stale, malformed, duplicated, or mismatched evidence.
 - Immutable close-artifact hashing plus Git-derived commit/push verification.
 - Repository-local Koda-C skills: seven producer relay legs, one shared reviewer, and one close ceremony.
+- A preserved tiny end-to-end session and normalized transcript under `docs/dogfood/`.
 
 ## Build evidence
 

@@ -12,6 +12,7 @@ import {
 } from "./config.ts";
 import { closePath, evaluateSessionClosure, prepareCloseArtifact } from "./close.ts";
 import { evaluateGate } from "./gate.ts";
+import { pushCommandArgs } from "./git.ts";
 import { requireAdvancedHistory, validateAdvancedHistory } from "./history.ts";
 import {
   artifactPath,
@@ -374,6 +375,13 @@ async function sessionCloseCommand(args: string[], cwd: string, io: CliIo): Prom
     return;
   }
   if (!(await pathExists(closePath(session.directory)))) {
+    const pushArgs = pushCommandArgs(root);
+    if (!pushArgs) {
+      io.out(`SESSION NOT CLOSED — ${session.id}`);
+      io.out("✗ Configure a Git remote and named branch before preparing close.md.");
+      process.exitCode = 2;
+      return;
+    }
     const prepared = await prepareCloseArtifact(session.directory, session.state);
     const relativeSession = displayPath(root, session.directory);
     io.out(`CLOSE PREPARED — ${session.id} — NOT CLOSED`);
@@ -381,7 +389,7 @@ async function sessionCloseCommand(args: string[], cwd: string, io: CliIo): Prom
     io.out("Commit and push the bound session, then run `koda session close` again:");
     io.out(`  git add ${shellQuote(relativeSession)}`);
     io.out(`  git commit -m ${shellQuote(`close session ${session.id}`)}`);
-    io.out("  git push");
+    io.out(`  git ${pushArgs.map(shellQuote).join(" ")}`);
     process.exitCode = 2;
     return;
   }

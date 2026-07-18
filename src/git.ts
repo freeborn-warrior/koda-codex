@@ -7,6 +7,18 @@ export interface ClosureCheck {
   reasons: string[];
 }
 
+export function pushCommandArgs(projectRoot: string): string[] | null {
+  const upstream = git(projectRoot, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
+  if (upstream.ok) return ["push"];
+
+  const branch = git(projectRoot, ["branch", "--show-current"]);
+  const remotes = git(projectRoot, ["remote"]);
+  if (!branch.ok || branch.stdout === "" || !remotes.ok || remotes.stdout === "") return null;
+  const names = remotes.stdout.split("\n").filter(Boolean);
+  const remote = names.includes("origin") ? "origin" : names[0];
+  return ["push", "-u", remote, branch.stdout];
+}
+
 function git(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr: string } {
   const result = spawnSync("git", args, { cwd, encoding: "utf8" });
   return {
