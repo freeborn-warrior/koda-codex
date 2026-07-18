@@ -40,6 +40,7 @@ await writeFile(runPath, `${JSON.stringify(run, null, 2)}\n`, "utf8");
 
 const project = path.join(runRoot, "project");
 const args = [
+  "--ask-for-approval", "never",
   "exec",
   "--ephemeral",
   "--ignore-user-config",
@@ -49,7 +50,6 @@ const args = [
   "-m", run.model,
   "-c", `model_reasoning_effort=\"${run.effort}\"`,
   "-s", "workspace-write",
-  "-a", "never",
   run.prompt,
 ];
 const executed = spawnSync("codex", args, {

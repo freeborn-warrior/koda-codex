@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "id": "2026-07-18-01",
+  "createdAt": "2026-07-18T12:00:00.000Z",
+  "phases": [
+    {
+      "name": "brief",
+      "description": "What we are doing, why, and the limits"
+    }
+  ],
+  "currentPhaseIndex": 0,
+  "advances": []
+}

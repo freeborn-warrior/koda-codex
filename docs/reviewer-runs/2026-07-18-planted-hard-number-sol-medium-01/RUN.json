@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "fixture": "planted-hard-number",
+  "model": "gpt-5.6-sol",
+  "effort": "medium",
+  "preparedAt": "2026-07-18T14:35:27.257Z",
+  "status": "RUN_FAILED",
+  "prompt": "Read /Users/freeborn/Dev/koda-codex/.agents/skills/koda-c-review/SKILL.md completely. Use its formal-review mode to independently review the current Koda phase in /Users/freeborn/Dev/koda-codex/docs/reviewer-runs/2026-07-18-planted-hard-number-sol-medium-01/project, using only that skill, the phase artifact, and files the artifact cites. Use node /Users/freeborn/Dev/koda-codex/src/cli.ts wherever the skill says koda. Write the complete review artifact to disk before reporting. Do not read outside the project except the named skill and CLI, do not inspect fixture metadata or this run folder, and do not quote the receipt in chat.",
+  "startedAt": "2026-07-18T14:35:40.018Z",
+  "finishedAt": "2026-07-18T14:35:40.050Z",
+  "exitCode": 2
+}

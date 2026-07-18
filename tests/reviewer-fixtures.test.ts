@@ -70,8 +70,11 @@ test("REVIEWER FIXTURES: Ghostty runs pin model and effort and preserve ephemera
   assert.match(execute, /--ephemeral/);
   assert.match(execute, /--ignore-user-config/);
   assert.match(execute, /--json/);
+  assert.match(execute, /"--ask-for-approval", "never",\s*\n\s*"exec"/);
+  assert.doesNotMatch(execute, /"-a", "never"/);
   assert.match(execute, /model_reasoning_effort/);
   assert.match(execute, /CODEX-EVENTS\.jsonl/);
+  assert.match(prepare, /\]\.join\("\\n"\), "utf8"\)/);
   assert.match(protocol, /Capability:/);
   assert.match(protocol, /Temperament:/);
 });

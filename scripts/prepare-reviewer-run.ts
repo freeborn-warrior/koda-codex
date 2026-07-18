@@ -61,7 +61,7 @@ await writeFile(path.join(runRoot, "RESULT.md"), [
   "- Review path: pending",
   "- Codex event log: `CODEX-EVENTS.jsonl` after execution",
   "",
-], "utf8");
+].join("\n"), "utf8");
 
 const relativeRun = path.relative(root, runRoot);
 console.log(`Prepared blind reviewer project: ${project}`);

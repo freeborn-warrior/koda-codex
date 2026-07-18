@@ -7,12 +7,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 ## In progress
 
 - [ ] Verify root `AGENTS.md` and all nine `.agents/skills/` packages are discovered in a genuinely fresh Codex task.
-- [ ] Run the planted reviewer fixture and honest control in separate fresh Codex tasks; log every actual result.
+- [ ] Verify the one-line local `npx` path from a fresh checkout/package.
 
 ## Next
 
-- [ ] Forward-test the reviewer in a fresh Codex task with no producer context; record the task setup, available GPT-5.6 variant/effort, result, and verdict.
-- [ ] Verify the one-line local `npx` path from a fresh checkout/package.
+- [ ] Run the medium-effort Terra and Luna fixture pairs only if submission time remains; preserve every run or skip honestly.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Design the long-lived, disk-recoverable guide/session-prompter from real use; decide whether it is one guide skill or a distinct prompt skill before creating either.
 - [ ] After the manual two-task relay is proved, design a supervisor that launches a non-interactive producer and owner-facing reviewer after an owner-approved prompt; keep all authority in the existing disk gate.
@@ -52,6 +51,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Rehearse the one-minute demo through refusal, interactive receipt entry, and successful advancement using only printed commands.
 - [x] Define disk-backed in-phase consultation, producer stop classification, reviewer-to-owner escalation, and fresh formal-review independence.
 - [x] Make the reviewer Kristian's only in-session interface and require every reviewer-to-producer handback to exist as an artifact before use.
+- [x] Forward-test the shared reviewer in two separate fresh Sol/medium tasks: it caught the planted unsupported number and approved the honest control; preserve both runner failures and both valid results.
 
 ## Definition of target (a) done
 

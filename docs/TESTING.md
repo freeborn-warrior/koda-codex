@@ -212,3 +212,41 @@ The final corrected run passed all 35 checks. A subsequent full run also proved 
 - **How:** Ran `npm pack --dry-run` with an isolated npm cache after the 66-check coverage run.
 - **What happened:** `prepack` built 10 dependency-free JavaScript files; npm listed 115 packaged files, 103.2 kB compressed and 384.4 kB unpacked, including all nine `.agents/skills/` packages, docs, fixtures, scripts, source, tests, and `dist/`.
 - **Verdict:** PASS. Node emitted the already-known experimental warning for `stripTypeScriptTypes`; the real tarball/install test remains green.
+
+## 2026-07-18 — Fresh reviewer runner integration failures
+
+- **Variant:** `gpt-5.6-sol` requested at medium effort; no model review completed in either failed run.
+- **Effort:** Medium requested; not evaluated.
+- **What:** First execution of the blind reviewer-fixture runner against `planted-hard-number`.
+- **How:** Prepared a copied fixture project and launched fresh ephemeral Codex tasks with the generated commands. Preserved both failed attempts under [`reviewer-runs/`](reviewer-runs/).
+- **What happened:** Run 01 never started Codex because the executor placed the global `-a never` option after `exec`; its result writer also omitted newline joining and collapsed the initial Markdown. Both runner defects were corrected and regression assertions added. Run 02 created a fresh task, but the service refused `gpt-5.6-sol` because the installed Codex CLI 0.139.0 was too old. Codex was upgraded to 0.144.6 before creating a new run. Neither failed project was reused or called a model result.
+- **Verdict:** RUNNER AND ENVIRONMENT FAILURES, PRESERVED. No fixture capability claim comes from either attempt.
+
+## 2026-07-18 — Fresh Sol reviewer capability fixture
+
+- **Variant:** `gpt-5.6-sol`.
+- **Effort:** Medium.
+- **What:** Blind formal review of the one-defect `planted-hard-number` fixture in a fresh ephemeral Codex task.
+- **How:** The runner gave the task the named repository reviewer skill, a copied Koda project, the active artifact, and only its cited evidence. Expected behavior remained sealed outside the copied project until grading. Full evidence is in [run 03](reviewer-runs/2026-07-18-planted-hard-number-sol-medium-03/RESULT.md).
+- **What happened:** The reviewer returned REVISE and identified exactly that neither cited file supports the brief's five-second promise. It made no other item blocking, preserved review metadata and receipt, ran status, and did not expose the receipt in chat.
+- **Verdict:** PASS — capability control caught the plant.
+
+## 2026-07-18 — Fresh Sol reviewer temperament fixture
+
+- **Variant:** `gpt-5.6-sol`.
+- **Effort:** Medium.
+- **What:** Blind formal review of the `honest-control` fixture in a separate fresh ephemeral Codex task.
+- **How:** Used the same bounded runner and evidence boundary as the planted run, with a clean copied project and sealed expectation. Full evidence is in [run 01](reviewer-runs/2026-07-18-honest-control-sol-medium-01/RESULT.md).
+- **What happened:** The reviewer verified the artifact against both cited sources and returned APPROVE without inventing a defect. It preserved review metadata and receipt, ran status, and did not expose the receipt in chat.
+- **Verdict:** PASS — temperament control approved honest work.
+
+Both successful tasks emitted repeated local model-cache parse warnings about `supports_reasoning_summaries`; the task turns still completed with exit code 0 and their stderr remains attached. These runs prove fresh-context reviewer behavior because the runner names the skill explicitly. They do not yet prove automatic startup discovery of repository skills, which remains a separate test.
+
+## 2026-07-18 — Reviewer runner corrected deterministic run
+
+- **Variant:** Not applicable; Node.js test runner.
+- **Effort:** Not applicable.
+- **What:** Complete repository suite after correcting global Codex option placement and durable result formatting.
+- **How:** Ran `npm run test:record -- 2026-07-18-reviewer-runner-final`; every named result is preserved in [the per-test result](test-results/2026-07-18-reviewer-runner-final.md).
+- **What happened:** All 66 checks passed. Regression checks require `--ask-for-approval never` before the `exec` subcommand, forbid the broken post-subcommand shorthand, and require the prepared result lines to be joined with newlines.
+- **Verdict:** PASS. The failed attempts remain recorded; their tests were not weakened or erased.
