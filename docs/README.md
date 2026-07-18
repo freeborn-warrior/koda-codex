@@ -4,6 +4,8 @@
 
 Koda-C is a small, headless phase gate over plain files. It refuses to advance work until the current artifact exists, an independent review exists, the verdict permits advancement, and the owner quotes that review's unique closing receipt into the approval ledger.
 
+The naming is deliberate: **Koda-C** is the product, `koda` is its CLI command, and `koda-codex` is this lowercase repository/package slug for the Codex-built competition implementation.
+
 No UI, daemon, database, or hidden conversational state. The files are the truth.
 
 This repository is the competition entry and the meta-harness, not a universal ready-made project persona. Koda-C keeps the proof mechanism stable; each project is expected to keep purpose-specific `AGENTS.md`, producer skills, shared-reviewer criteria, evidence shapes, and verification commands in its own repository. A novel-writing project and a Rust project can use the same gate without pretending their work or review standards are interchangeable.
@@ -89,6 +91,8 @@ Every reviewer → producer handback is an artifact before it is actionable: a c
 
 The real collaboration uses two persistent Codex tasks sharing one Koda session: one producer task explicitly invokes the current phase skill; one owner-facing reviewer task carries consultations, explanations, rulings, and formal handoffs through the one `koda-c-review` skill. Kristian speaks only in the reviewer task during the session. See the [two-task walkthrough](DEMO.md#two-codex-task-collaboration).
 
+The repository also contains a [persistent full-relay test harness](FULL-RELAY-RUN.md) that resumes two distinct Codex thread IDs across all six phases and pauses for Kristian's real receipt at every gate. It is a test bridge toward the mature runtime, not yet a replacement for the interactive owner-facing reviewer conversation.
+
 That separation is a tested operating protocol, not a permission claim. `SKILL.md` cannot prove a task had no hidden context or restrict which files/tools it could access. Koda-C mechanically enforces the evidence on disk; fresh-task fixtures test reviewer independence and temperament in practice.
 
 ## Tests and evidence
@@ -97,6 +101,7 @@ That separation is a tested operating protocol, not a permission claim. `SKILL.m
 npm test
 npm run test:coverage
 npm run dogfood
+npm run relay:prepare -- software-clean gpt-5.6-sol medium gpt-5.6-terra medium
 ```
 
 The suite deliberately breaks every gate condition and proves refusal: missing/empty artifacts, missing or malformed reviews, bad verdicts, missing/mismatched/reused receipts, altered artifacts, broken ledger proof, missing approver/comments, and every blocking verdict. It also executes recovery commands from the states that printed them.

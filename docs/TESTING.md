@@ -335,3 +335,21 @@ Sol, Terra, and Luna each score 2/2 on this bounded fixture pair at medium effor
 - **How:** Kept the missing-evidence child test process's successful exit assertion, added a direct count of its three declared checks, removed only the environment-dependent TAP-rendering check, and ran `npm run test:record -- 2026-07-18-discriminating-fixtures-final`. Every named result is preserved in [the per-test transcript](test-results/2026-07-18-discriminating-fixtures-final.md).
 - **What happened:** All 74 checks passed. The inference fixture mechanically requires the title and row-count omission to be derived across the dataset, envelope, and pipeline files. The tempting honest fixture proves its three bounded behaviors despite deliberate style temptations. The absence fixture proves its code/tests pass while the exact transcript claimed by the artifact remains absent.
 - **Verdict:** PASS. A blocking verdict with a vague rationale can no longer score as a catch, and operational recovery notes remain outside both score axes.
+
+## 2026-07-18 — Persistent full-relay runner, first deterministic run
+
+- **Variant:** Not applicable; Node.js test runner and local Git preparation fixture. No model was called.
+- **Effort:** Not applicable.
+- **What:** Preparation and static execution contracts for a resumable six-phase relay using distinct persistent producer/reviewer thread IDs, real owner receipt prompts, pre-close output push, and restorable close evidence.
+- **How:** Ran `npm test` after adding the runner, package commands, protocol, and two deterministic relay checks.
+- **What happened:** 75 of 77 checks passed. Real preparation copied two ignored source residues—`.DS_Store` and an otherwise empty legacy `peer-reviewer/` directory—because it recursively copied the entire `.agents/skills` parent instead of the declared nine packages. The second failure was a test-only wording mismatch: the protocol's exact limitation used Markdown emphasis around `not`, while the assertion expected unformatted text.
+- **Verdict:** PACKAGING DEFECT AND ASSERTION DEFECT. Copy only the explicit nine-skill allowlist so ignored filesystem residue cannot enter a prepared project. Preserve the emphasized limitation and correct the assertion to its actual exact wording; do not accept an eleventh skill or weaken the runtime boundary.
+
+## 2026-07-18 — Persistent full-relay runner, corrected deterministic run
+
+- **Variant:** Not applicable; Node.js test runner and local Git preparation fixture. No model was called.
+- **Effort:** Not applicable.
+- **What:** The complete repository after constraining relay preparation to the declared nine skills and retaining the explicit interactive-reviewer boundary.
+- **How:** Replaced recursive parent-folder copying with a nine-name skill allowlist, corrected only the Markdown-aware boundary assertion, and ran `npm run test:record -- 2026-07-18-persistent-relay-runner-final`. Every named result is preserved in [the per-test transcript](test-results/2026-07-18-persistent-relay-runner-final.md).
+- **What happened:** All 77 checks passed. A real temporary preparation produced a clean project, exactly nine skills, an initial commit, a configured upstream, and zero unpushed commits. Static execution contracts require persistent thread resume, distinct role IDs, closed model stdin, interactive Kristian approval, disk gate/close evaluation, pre-close output commit, verified Git bundle capture, and cleanup of only nested runtime Git.
+- **Verdict:** PASS. The harness is ready for a genuine owner-acknowledged run; this deterministic result does not claim that such a model-driven run has happened.

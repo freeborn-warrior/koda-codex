@@ -13,6 +13,10 @@ For an honest control, CATCH is N/A because there is no plant; VERDICT measures 
 
 These results can support comparisons about reasoning behavior and effort sensitivity. They do not prove subjective cognition or comprehension.
 
+## Sealed-contract boundary
+
+Every source fixture's expected verdict and exact CATCH definition was committed and pushed in `b4434e4` before the first run against any of the three new fixtures. Those scoring contracts are immutable for this experiment: observed model output may populate result rows but may never tune the rule used to grade them.
+
 ## Original comparable fixture pair
 
 | Model | Effort | Hard-number CATCH | Hard-number VERDICT | Honest CATCH | Honest VERDICT |
@@ -51,10 +55,10 @@ These results can support comparisons about reasoning behavior and effort sensit
 
 ## Expansion order
 
-1. Use the inference-chain plant as the primary capability discriminator and tempting-honest as its temperament control.
-2. Use missing-evidence to measure whether a specific citation is verified rather than trusted.
-3. Repeat a cheap, decision-relevant cell two or three times when variance would change the conclusion; preserve every run separately.
-4. Add low, high, or xhigh cells only where they answer a named comparison question.
+1. Before any new-fixture run, execute two more fresh Luna / medium runs against `planted-hard-number`. Score each separately to see whether gate rescue of a malformed review recurs or was isolated.
+2. Run `inference-chain-plant`, `tempting-honest`, and `missing-evidence` once at medium on Sol, Terra, and Luna: nine fresh runs with unchanged fixture sources.
+3. If those inference-chain results identify one defensible medium winner, run that model once on the same inference-chain fixture at low effort. If medium ties, record no unique winner and do not manufacture a low-effort comparison.
+4. Stop model testing. Do not run high, xhigh, max, Ultra, extra fixtures, or completeness cells before submission.
 5. Keep model, effort, actual verdict, CATCH, VERDICT, false positives, secondary execution observations, event stream, stderr, and failed attempts in the repository.
 
-The first matrix intentionally excludes max and Ultra because those modes may change the experimental unit through orchestration rather than only increasing one reviewer's reasoning effort.
+The matrix is intentionally incomplete. Its purpose is honest, saved behavioral evidence—not a filled grid.

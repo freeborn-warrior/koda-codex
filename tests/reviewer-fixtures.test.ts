@@ -124,6 +124,15 @@ test("REVIEWER FIXTURES: evidence-absence trap has working code but its claimed 
   assert.equal(check.status, 0, check.stderr);
 });
 
+test("REVIEWER FIXTURES: new scoring contracts still match their pre-run Git seal", async () => {
+  for (const name of ["inference-chain-plant", "tempting-honest", "missing-evidence"]) {
+    const relative = `tests/fixtures/reviewer/${name}/fixture.json`;
+    const sealed = spawnSync("git", ["show", `b4434e4:${relative}`], { encoding: "utf8" });
+    assert.equal(sealed.status, 0, sealed.stderr);
+    assert.equal(await readFile(relative, "utf8"), sealed.stdout, `${name} changed after its pre-run seal`);
+  }
+});
+
 test("REVIEWER FIXTURES: Ghostty runs pin model and effort and preserve ephemeral Codex events", async () => {
   const [prepare, execute, protocol] = await Promise.all([
     readFile("scripts/prepare-reviewer-run.ts", "utf8"),

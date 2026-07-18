@@ -35,8 +35,10 @@ The existing plain-file CLI remains the gate authority. A future supervisor may 
 
 A visible Ghostty producer pane can still be non-interactive by running a supervised `codex exec` process with stdin closed. The reviewer pane remains an interactive Codex task. Internally, the supervisor may need to resume or replace producer contexts at safe file handoffs while preserving the appearance and contract of one running session.
 
-## Current gap
+## Current bridge and gap
 
-Koda-C currently proves the disk gate, phase skills, review/receipt relay, close, and a documented manual two-task workflow. It does not yet launch or supervise two Codex processes, watch handoffs, notify Kristian, or prevent terminal input to an interactive producer. Those are roadmap orchestration features above the core CLI.
+Koda-C proves the disk gate, phase skills, review/receipt relay, close, deterministic full-session scenarios, and a documented manual two-task workflow. A repository harness now prepares and supervises two persistent Codex thread IDs with closed stdin, watches disk handoffs, pauses for Kristian's actual receipt, commits produced output, and preserves pushed-close Git evidence. Until a genuine run reaches `COMPLETE`, that is implemented test machinery rather than end-to-end proof.
+
+The harness still does not provide the mature interactive reviewer conversation, external notifications, or robust signal/abort recovery. An in-phase `AWAITING OWNER` response pauses with named disk state; it does not yet open a discussion loop in the reviewer context. Those remain orchestration work above the core CLI and must not be implied by a successful scripted relay.
 
 Automatic launch should mean “after owner-approved prompt,” not “the guide independently chose product work.” Whether a later configuration permits any broader scheduling remains an owner decision.

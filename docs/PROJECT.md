@@ -26,6 +26,8 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - Session closure is an immutable artifact with Git between preparation and verification. A new session cannot open until that close is pushed.
 - The current target keeps owner receipt acknowledgement at every gate. Exception-only owner attention is a distinct open policy decision and must not be introduced silently.
 - The competition entry is licensed under GPLv3 only, with `Copyright (C) 2026 Kristian Bengtsson` as the sole project copyright line.
+- The product name remains **Koda-C**. The CLI command is `koda`; `koda-codex` is the lowercase repository and package slug for this Codex-built competition implementation.
+- New reviewer fixtures are scored only by contracts committed before their first model run. The final model program is capped at two Luna baseline repeats, nine medium runs across the three new fixtures and models, and—only for a clear inference-chain winner—one low-effort confirmation.
 
 ## Lifecycle
 
@@ -66,6 +68,7 @@ owner contract
 - A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda session.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.
 - Five sealed reviewer fixtures: the original hard-number capability check and honest control, plus an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap.
+- A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its code is not yet an executed end-to-end result.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
 - The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.
 
