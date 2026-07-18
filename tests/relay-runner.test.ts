@@ -119,9 +119,10 @@ test("FULL RELAY RUNNER: preparation creates a clean pushed project with local s
 });
 
 test("FULL RELAY RUNNER: execution preserves two contexts and never automates owner receipt proof", async () => {
-  const [prepare, execute, reviewHelper, reviewerExecute, protocol, ghostty, packageJson] = await Promise.all([
+  const [prepare, execute, reviewerWindow, reviewHelper, reviewerExecute, protocol, ghostty, packageJson] = await Promise.all([
     readFile("scripts/prepare-relay-run.ts", "utf8"),
     readFile("scripts/execute-relay-run.ts", "utf8"),
+    readFile("scripts/run-relay-reviewer-window.ts", "utf8"),
     readFile("scripts/read-relay-review.ts", "utf8"),
     readFile("scripts/execute-reviewer-run.ts", "utf8"),
     readFile("docs/FULL-RELAY-RUN.md", "utf8"),
@@ -142,6 +143,11 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(execute, /The relay does not read or print it for you/);
   assert.match(execute, /evaluateGate/);
   assert.match(execute, /evaluateSessionClosure/);
+  assert.match(execute, /dispatchReviewerWindowJob/);
+  assert.match(execute, /AWAITING_REVIEWER_WINDOW/);
+  assert.match(execute, /renderCodexEvent/);
+  assert.match(execute, /recoverCompletedReviewerJob/);
+  assert.match(execute, /readApprovalEntries\(session\.directory\)/);
   assert.match(execute, /git\(\["add", "-A"\]\)/);
   assert.match(execute, /git\(\["add", relativeSession\]\)/);
   assert.match(execute, /`close session \$\{session\.id\}`/);
@@ -159,18 +165,24 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(reviewHelper, /project path resolves outside the relay run/);
   assert.match(reviewHelper, /must be a regular file inside the active session/);
   assert.match(reviewerExecute, /Reviewer project resolves outside its prepared run folder/);
+  assert.match(reviewerWindow, /acquireReviewerWindow/);
+  assert.match(reviewerWindow, /stdio: \["ignore", "pipe", "pipe"\]/);
+  assert.match(reviewerWindow, /parseReview\(before\)/);
+  assert.match(reviewerWindow, /"approve", job\.phase, "--approver", "Kristian"/);
+  assert.match(reviewerWindow, /The exact receipt is copied/);
   assert.match(protocol, /persistent producer/);
   assert.match(protocol, /persistent reviewer/);
-  assert.match(protocol, /does \*\*not\*\* yet provide the mature interactive reviewer conversation/);
-  assert.match(ghostty, /npm run relay:execute -- "docs\/relay-runs\/2026-07-18-software-clean-sol-medium-terra-medium-01"/);
+  assert.match(protocol, /first owner-facing slice/);
+  assert.match(protocol, /does not yet support arbitrary free-form discussion/);
+  assert.match(ghostty, /npm run relay:producer\n/);
+  assert.match(ghostty, /npm run relay:reviewer\n/);
   assert.match(ghostty, /Never paste a review receipt into Codex chat/);
-  assert.match(ghostty, /Do not run `relay:prepare` again/);
   assert.match(ghostty, /RELAY COMPLETE/);
   assert.match(ghostty, /RESULT\.md/);
-  assert.match(ghostty, /npm run relay:review\n/);
-  assert.match(ghostty, /one Window B command/);
   assert.match(packageJson, /"relay:prepare"/);
   assert.match(packageJson, /"relay:execute"/);
+  assert.match(packageJson, /"relay:producer"/);
+  assert.match(packageJson, /"relay:reviewer"/);
   assert.match(packageJson, /"relay:review"/);
 });
 

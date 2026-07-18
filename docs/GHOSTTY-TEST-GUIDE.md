@@ -1,93 +1,88 @@
-# First Koda-C full-relay test in Ghostty
+# Koda-C two-window relay in Ghostty
 
-This guide is for Kristian's first genuine owner-acknowledged relay. The prepared run uses Sol at medium effort as producer and Terra at medium effort as reviewer:
+This is the current owner-facing runtime preview. Window A is the visible producer/supervisor. Its conversational input is closed. Window B owns one separate persistent reviewer context for the whole session and is the only place Kristian interacts.
 
-```text
-docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01
-```
+The first completed relay remains preserved at [`relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01`](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md). Do not rerun that closed evidence. Prepare a new run for another live test.
 
-The two Codex contexts are independent but bound to the same disk-backed relay run and Koda session. Window A is the supervisor. Window B is currently a simple owner review reader; it is not yet the future interactive reviewer conversation.
+## Prepare once
 
-## Window A — start or resume
-
-From the repository:
+In either Ghostty window:
 
 ```bash
 cd /Users/freeborn/Dev/koda-codex
+npm run relay:prepare -- software-clean gpt-5.6-sol medium gpt-5.6-terra medium
 ```
 
-Start or resume the prepared run:
+Preparation creates exactly one new run. It does not call either model and does not open a Koda session.
 
-```bash
-npm run relay:execute -- "docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01"
-```
-
-Leave Window A alone while it prints producer and reviewer turns. Move to Window B only when A prints `OWNER ACKNOWLEDGEMENT REQUIRED` and waits for a receipt.
-
-## Window B — one command whenever A waits
-
-Move to the repository once if needed:
+## Window A — producer
 
 ```bash
 cd /Users/freeborn/Dev/koda-codex
+npm run relay:producer
 ```
 
-This is the one Window B command used for every phase review:
+Leave this running. It discovers the one prepared run, starts or resumes the non-interactive producer, and streams the role's emitted updates, completed checks, file changes, and turn endings. When an artifact is ready, Window A writes one reviewer job to disk and waits. It does not run the reviewer itself in this mode.
+
+## Window B — reviewer and owner
 
 ```bash
-npm run relay:review
+cd /Users/freeborn/Dev/koda-codex
+npm run relay:reviewer
 ```
 
-The command finds the one relay run whose status is `AWAITING_OWNER_RECEIPT`, derives its current session and phase from disk, and opens that exact review. It refuses rather than guessing if no run or more than one run is waiting.
+Leave this running too. It discovers the same run and waits. When Window A posts a handover, Window B automatically resumes the same persistent reviewer context. There is no phase-specific command to copy.
 
-When the review opens:
+For a formal review, Window B shows the reviewer progress and then says `REVIEW READY`. It asks you to press Return, opens the complete review, and waits while you read it:
 
 1. Read the verdict and every finding.
 2. Press Space to move down when needed.
 3. Read through the final receipt line.
 4. Press `q` when finished.
+5. The exact receipt is now on the macOS clipboard. When Koda asks in this same window, press Command–V and Return.
+6. If Koda asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
 
-The helper then re-reads the review, refuses if it changed while open, and copies the exact receipt to the macOS clipboard without printing it or sending it to either model context.
+The reviewer console never prints the receipt into its readable progress stream, and Kristian's acknowledgement input is never sent as a model message. The raw reviewer event evidence may contain the generated receipt because the reviewer creates and validates the review that contains it; the receipt is not treated as a secret. A changed review or wrong quote refuses, writes no approval, and leaves a named failed job on disk. After a valid acknowledgement, Window A re-reads the gate and automatically advances, revises, or requests a fresh review according to the verdict.
 
-Return to Window A, press Command–V, then press Return. That is the complete owner acknowledgement action.
+For an in-phase owner question, Window B displays the reviewer's recorded question, accepts Kristian's answer there, resumes the same reviewer context, and requires the answer to be written into the consultation response before Window A continues.
 
-If the verdict is non-blocking, the gate advances and the producer begins the next configured phase automatically. If it is blocking, the same producer context receives the acknowledged disk handback, revises the artifact, and the same reviewer context performs a fresh review. Run `npm run relay:review` again when Window A waits again.
+## One-session and one-reviewer invariants
 
-## One-session invariant
+The two commands discover rather than guess. They refuse if more than one unfinished run exists. A lock directory refuses a second Window B process for the same run. Producer and reviewer share the run and session only through files; their Codex context IDs must remain distinct. A new Koda session still cannot open until the prior immutable close is committed and pushed.
 
-The normal product state has one active session, one current phase, and at most one review awaiting owner acknowledgement. Producer and reviewer share the run ID and session ID through files, never through assumed conversational memory. A new Koda session cannot open until the prior session is closed at a pushed Git commit.
+## Stopping and resuming
 
-The helper's multiple-waiter refusal is corruption and operator-error protection for this test repository, which can contain several archived or prepared fixture projects. It is not an expected owner workflow.
+Ctrl-C preserves the run, reviewer job, context IDs, and last action. A completed Window B job is consumed idempotently on Window A resume, with acknowledgement count re-derived from the ledger. The current slice still names a reviewer process that stopped mid-model-turn as requiring explicit recovery rather than guessing whether the turn completed. Stronger guided recovery is backlog work.
 
-## What this bridge proves—and does not
-
-This run proves that two distinct persistent Codex thread IDs can relay artifacts and handbacks through one disk-backed session while Koda independently controls advancement. The supervisor resumes the contexts in turn; it does not yet show two visible conversations waiting concurrently.
-
-The intended product experience is simpler: Kristian speaks only with the reviewer, records approval or discusses a product decision there, Koda verifies the resulting disk evidence, and the producer resumes automatically. The reviewer never gains authority to bypass the gate. Window B's one-command reader is an interim bridge toward that interface.
-
-## If Window A pauses
-
-Do not delete the run. Do not run `relay:prepare` again. Resume with:
+To resume Window A:
 
 ```bash
-npm run relay:execute -- "docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01"
+cd /Users/freeborn/Dev/koda-codex
+npm run relay:producer
 ```
 
-If the pause names an owner consultation instead of a receipt, stop and report only the named question and response-file path. Never send a receipt through chat.
+To resume Window B when no stale lock is present:
+
+```bash
+cd /Users/freeborn/Dev/koda-codex
+npm run relay:reviewer
+```
+
+Do not prepare another run merely because one window paused. Do not delete `REVIEWER-JOB.json`; it is the recovery evidence.
 
 ## Successful ending
 
-Success exists only when Window A prints `RELAY COMPLETE`. Then Window B may inspect:
+Success exists only when Window A prints `RELAY COMPLETE` and Window B prints `SESSION CLOSED`. The run's `RESULT.md` must say `Status: COMPLETE`, show distinct context IDs, record every phase advancement and owner acknowledgement, and name the pushed close commit.
 
-```bash
-sed -n '1,240p' docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md
-```
+## Current honest boundary
 
-The result must say `Status: COMPLETE`, show distinct producer and reviewer thread IDs, record all six phase advancements and owner acknowledgements, and name the pushed close commit. A prepared folder, a model exit, or `6/6 phases` without close evidence is not success.
+This slice proves the automatic producer-to-reviewer wake-up, one persistent Window B reviewer, same-window exact receipt acknowledgement, an owner-ruling loop for in-phase consultations, and readable progress derived from actual Codex events. It is still a repository relay harness around the bounded `software-clean` scenario—not yet the general project launcher or the Guide-started experience.
+
+Window B does not yet offer a free-form reviewer conversation between formal handoffs. Product decisions entered through defined `DISCUSS` or consultation prompts are disk-backed; arbitrary conversational owner directions are deliberately not relayed yet. Notification transport, remote control, a polished split-pane interface, and complete abort recovery remain later layers.
 
 ## Safety boundaries
 
 - Never paste a review receipt into Codex chat or documentation.
-- Do not manually edit artifacts or reviews during the run.
-- Do not manually run Koda approval or advancement commands outside Window A's prompt.
-- Do not start another run while this run is active.
+- Do not manually edit artifacts or reviews while either role is working.
+- Use the Koda prompt in Window B for acknowledgement; do not edit the ledger.
+- Do not start another run while this one is active.

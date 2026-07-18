@@ -24,6 +24,8 @@
     "prepack": "npm run build",
     "relay:prepare": "node scripts/prepare-relay-run.ts",
     "relay:execute": "node scripts/execute-relay-run.ts",
+    "relay:producer": "node scripts/execute-relay-run.ts --reviewer-window",
+    "relay:reviewer": "node scripts/run-relay-reviewer-window.ts",
     "relay:review": "node scripts/read-relay-review.ts",
     "reviewer:prepare": "node scripts/prepare-reviewer-run.ts",
     "reviewer:execute": "node scripts/execute-reviewer-run.ts",

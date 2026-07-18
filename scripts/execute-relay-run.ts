@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
-import { appendFile, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
+import { spawn, spawnSync } from "node:child_process";
+import { appendFile, lstat, readFile, readdir, realpath, rm } from "node:fs/promises";
 import path from "node:path";
+import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
 import { closePath, evaluateSessionClosure } from "../src/close.ts";
@@ -17,8 +18,18 @@ import {
   reviewPath,
   sessionRoot,
   writeJsonAtomic,
+  writeTextAtomic,
 } from "../src/project.ts";
-import { sha256 } from "../src/receipt.ts";
+import { readApprovalEntries, sha256 } from "../src/receipt.ts";
+import {
+  newReviewerJob,
+  readReviewerJob,
+  readReviewerWindowState,
+  renderCodexEvent,
+  removeReviewerJob,
+  writeReviewerJob,
+  type ReviewerJobKind,
+} from "./relay-window-protocol.ts";
 
 type Role = "producer" | "reviewer";
 
@@ -53,21 +64,43 @@ type RunRecord = {
 class PausedRun extends Error {}
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const requested = process.argv[2];
+const twoWindow = process.argv.includes("--reviewer-window");
+const requested = process.argv.slice(2).find((argument) => argument !== "--reviewer-window");
+let stopRequested = false;
+process.once("SIGINT", () => { stopRequested = true; });
+process.once("SIGTERM", () => { stopRequested = true; });
 
-if (!requested) {
-  console.error("Usage: npm run relay:execute -- docs/relay-runs/<prepared-run>");
-  process.exit(1);
+const runsRoot = await realpath(process.env.KODA_RELAY_RUNS_ROOT
+  ? path.resolve(process.env.KODA_RELAY_RUNS_ROOT)
+  : path.join(root, "docs", "relay-runs"));
+async function discoverExecutableRun(): Promise<string> {
+  const candidates: string[] = [];
+  for (const entry of await readdir(runsRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const candidate = path.join(runsRoot, entry.name);
+    const record = await readFile(path.join(candidate, "RUN.json"), "utf8")
+      .then((content) => JSON.parse(content) as { version?: number; status?: string })
+      .catch(() => null);
+    if (record?.version === 1 && record.status !== "COMPLETE") candidates.push(candidate);
+  }
+  if (candidates.length === 0) throw new Error("No prepared or paused relay run exists. Prepare one first.");
+  if (candidates.length > 1) throw new Error("More than one relay run is active. Koda will not guess which session you mean.");
+  return candidates[0];
 }
 
-const runsRoot = await realpath(path.join(root, "docs", "relay-runs"));
-const runRoot = await realpath(path.resolve(root, requested));
+const runRoot = await (requested ? realpath(path.resolve(root, requested)) : discoverExecutableRun()).catch((error) => {
+  console.error(`RELAY REFUSED — ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+});
 if (path.dirname(runRoot) !== runsRoot) {
   throw new Error(`Relay run must be one direct child of ${runsRoot}`);
 }
 
 const runPath = path.join(runRoot, "RUN.json");
 const transcriptPath = path.join(runRoot, "TRANSCRIPT.md");
+if (!(await lstat(runPath)).isFile() || !(await lstat(transcriptPath)).isFile()) {
+  throw new Error("Relay RUN.json and TRANSCRIPT.md must be regular files.");
+}
 const run = JSON.parse(await readFile(runPath, "utf8")) as RunRecord;
 if (run.version !== 1 || run.status === "COMPLETE") {
   throw new Error(`Relay run cannot execute from status ${run.status}.`);
@@ -173,17 +206,27 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
   await saveRun();
   console.log(`\n${role.toUpperCase()} ${turn}: ${purpose}`);
 
-  const executed = spawnSync("codex", args, {
+  const child = spawn(process.env.KODA_CODEX_BIN ?? "codex", args, {
     cwd: project,
-    encoding: "utf8",
-    maxBuffer: 50 * 1024 * 1024,
     env: process.env,
+    stdio: ["ignore", "pipe", "pipe"],
   });
-  const stdout = executed.stdout ?? "";
-  const stderr = executed.stderr ?? String(executed.error ?? "");
+  let stdout = "";
+  let stderr = "";
+  const lines = createInterface({ input: child.stdout });
+  lines.on("line", (line) => {
+    stdout += `${line}\n`;
+    const rendered = renderCodexEvent(line, role === "producer" ? "PRODUCER" : "REVIEWER");
+    if (rendered) console.log(rendered);
+  });
+  child.stderr.on("data", (chunk) => { stderr += String(chunk); });
+  const exit = await new Promise<number>((resolve, reject) => {
+    child.once("error", reject);
+    child.once("close", (code) => resolve(code ?? -1));
+  });
   await Promise.all([
-    writeFile(path.join(runRoot, eventFile), stdout, "utf8"),
-    writeFile(path.join(runRoot, stderrFile), stderr, "utf8"),
+    writeTextAtomic(path.join(runRoot, eventFile), stdout),
+    writeTextAtomic(path.join(runRoot, stderrFile), stderr),
   ]);
 
   roleRecord.turns = turn;
@@ -211,15 +254,15 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
   await note(`${role} turn ${turn}: ${purpose}`, [
     `- Thread: \`${roleRecord.threadId}\``,
     `- Model / effort: \`${roleRecord.model}\` / \`${roleRecord.effort}\``,
-    `- Exit: ${executed.status ?? -1}`,
+    `- Exit: ${exit}`,
     `- Event stream: [${eventFile}](${eventFile})`,
     `- Stderr: [${stderrFile}](${stderrFile})`,
     "- Conversational stdin: closed",
   ]);
 
-  if (executed.status !== 0) {
+  if (exit !== 0) {
     run.status = "PAUSED_MODEL_FAILURE";
-    run.lastError = `${role} turn ${turn} exited ${executed.status ?? -1}.`;
+    run.lastError = `${role} turn ${turn} exited ${exit}.`;
     await saveRun();
     throw new PausedRun(run.lastError);
   }
@@ -290,6 +333,98 @@ function reviewerSkill(): string {
   return path.join(project, ".agents", "skills", "koda-c-review", "SKILL.md");
 }
 
+async function syncReviewerCompletion(): Promise<void> {
+  const reviewerState = await readReviewerWindowState(runRoot);
+  if (!reviewerState?.threadId) throw new Error("The reviewer job completed without a persistent reviewer context.");
+  if (run.producer.threadId && reviewerState.threadId === run.producer.threadId) {
+    throw new Error("Producer and reviewer resolved to the same Codex context.");
+  }
+  run.reviewer.threadId = reviewerState.threadId;
+  run.reviewer.turns = reviewerState.turns;
+  const session = await latest();
+  if (session) run.ownerAcknowledgements = (await readApprovalEntries(session.directory)).length;
+}
+
+async function recoverCompletedReviewerJob(): Promise<void> {
+  const job = await readReviewerJob(runRoot);
+  if (job?.status !== "COMPLETE") return;
+  await syncReviewerCompletion();
+  await note(`recovered completed Window B job ${job.id}`, [
+    `- Kind / phase: \`${job.kind}\` / \`${job.phase}\``,
+    "- Reviewer context and owner acknowledgement count were re-derived from disk before cleanup.",
+  ]);
+  await removeReviewerJob(runRoot);
+  await saveRun();
+}
+
+async function dispatchReviewerWindowJob(
+  kind: ReviewerJobKind,
+  phaseName: string,
+  purpose: string,
+  prompt: string,
+  expectedFile: string,
+): Promise<void> {
+  let job = await readReviewerJob(runRoot);
+  if (job) {
+    if (job.kind !== kind || job.phase !== phaseName || job.expectedPath !== path.relative(project, expectedFile)) {
+      throw new Error(`A different reviewer job is already active: ${job.kind} ${job.phase} (${job.status}).`);
+    }
+  } else {
+    job = newReviewerJob({
+      kind,
+      phase: phaseName,
+      purpose,
+      prompt,
+      expectedPath: path.relative(project, expectedFile),
+    });
+    await writeReviewerJob(runRoot, job);
+  }
+
+  run.status = "AWAITING_REVIEWER_WINDOW";
+  run.lastAction = `${purpose} in Window B`;
+  run.lastError = undefined;
+  await saveRun();
+  console.log(`\nHANDOVER TO WINDOW B — ${purpose}`);
+  console.log("The persistent reviewer window receives this automatically. Window A will wait here.");
+  if (!(await readReviewerWindowState(runRoot))) {
+    console.log("If Window B is not open yet, run: npm run relay:reviewer");
+  }
+
+  for (;;) {
+    if (stopRequested) {
+      run.status = "PAUSED_BY_OWNER";
+      run.lastError = "Window A was stopped while a disk-backed reviewer job remained pending.";
+      await saveRun();
+      throw new PausedRun(run.lastError);
+    }
+    const current = await readReviewerJob(runRoot);
+    if (!current) throw new Error("The reviewer job disappeared before Window A consumed it.");
+    if (current.status === "FAILED") {
+      run.status = "PAUSED_REVIEWER_FAILURE";
+      run.lastError = current.error ?? `The reviewer window failed ${purpose}.`;
+      await saveRun();
+      throw new PausedRun(run.lastError);
+    }
+    if (current.status === "COMPLETE") {
+      await syncReviewerCompletion();
+      run.status = "RUNNING";
+      run.lastError = undefined;
+      await saveRun();
+      await note(`Window B completed ${purpose}`, [
+        `- Reviewer context: \`${run.reviewer.threadId}\``,
+        `- Disk handback: \`${path.relative(project, expectedFile)}\``,
+        kind === "consultation"
+          ? "- Consultation response was written before the producer resumed."
+          : "- Owner acknowledgement was recorded through Koda in Window B; Kristian's quote entered neither model chat.",
+      ]);
+      await removeReviewerJob(runRoot);
+      console.log("WINDOW B HANDOVER COMPLETE — deriving the next route from disk.");
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 350));
+  }
+}
+
 async function openSession(): Promise<void> {
   await modelTurn("producer", "open the Koda session", [
     `Read ${producerSkill("session")} completely and explicitly use koda-c-session.`,
@@ -322,25 +457,53 @@ async function reviewPhase(phaseName: string, mode: "formal" | "repair" | "fresh
     : mode === "repair"
       ? "Repair the current unread formal-review artifact so its protected metadata, definitive findings, verdict, and status are valid. Do not overwrite an acknowledged review."
       : "The blocking review was acknowledged and the artifact changed. Create a fresh definitive formal review, preserving the archived handback.";
-  await modelTurn("reviewer", `${mode} review of ${phaseName}`, [
+  const prompt = [
     `Read ${reviewerSkill()} completely and explicitly use koda-c-review in formal-review mode for current phase ${phaseName}.`,
     `Use node ${run.cli} wherever the skill says koda.`,
     modeInstruction,
     "Remain independent from the producer context. Use only the artifact and files it cites, write the complete review to disk, run Koda status, and stop.",
     "Never approve, advance, modify the producer artifact, or quote the receipt in your response.",
-  ].join(" "));
+  ].join(" ");
+  if (twoWindow) {
+    const session = await latest();
+    if (!session) throw new Error("No active session exists for reviewer handover.");
+    const active = currentPhase(session.state);
+    if (!active || active.phase.name !== phaseName) throw new Error(`Disk no longer names ${phaseName} as current.`);
+    await dispatchReviewerWindowJob(mode, phaseName, `${mode} review of ${phaseName}`, prompt, reviewPath(session.directory, active.phase, active.index));
+    return;
+  }
+  await modelTurn("reviewer", `${mode} review of ${phaseName}`, prompt);
 }
 
 async function answerConsultation(request: string): Promise<void> {
-  await modelTurn("reviewer", `answer consultation ${path.basename(request)}`, [
+  const prompt = [
     `Read ${reviewerSkill()} completely and explicitly use koda-c-review in in-phase consultation mode for request ${request}.`,
     `Read ${path.join(project, "docs", "IN-PHASE-CONSULTATION.md")} completely.`,
     "Answer only from the request and its cited evidence. Write the response artifact before stopping.",
     "If owner judgment is required, record AWAITING OWNER and the smallest clear owner question; never impersonate Kristian or create a formal verdict.",
-  ].join(" "));
+  ].join(" ");
+  if (twoWindow) {
+    const response = request.replace(/-request\.md$/, "-response.md");
+    const session = await latest();
+    const active = session ? currentPhase(session.state) : null;
+    if (!active) throw new Error("No active phase exists for reviewer consultation.");
+    await dispatchReviewerWindowJob("consultation", active.phase.name, `answer consultation ${path.basename(request)}`, prompt, response);
+    return;
+  }
+  await modelTurn("reviewer", `answer consultation ${path.basename(request)}`, prompt);
 }
 
 async function ownerAcknowledge(phaseName: string, reviewFile: string): Promise<void> {
+  if (twoWindow) {
+    await dispatchReviewerWindowJob(
+      "acknowledge",
+      phaseName,
+      `owner acknowledgement of ${phaseName}`,
+      "No model turn is permitted for this owner-only acknowledgement job.",
+      reviewFile,
+    );
+    return;
+  }
   run.status = "AWAITING_OWNER_RECEIPT";
   run.lastAction = `owner acknowledgement for ${phaseName}`;
   await saveRun();
@@ -480,7 +643,7 @@ async function finalize(): Promise<void> {
       bundle: "PROJECT-HISTORY.bundle",
       capturedAt: timestamp(),
     }),
-    writeFile(path.join(runRoot, "GIT-LOG.txt"), log, "utf8"),
+    writeTextAtomic(path.join(runRoot, "GIT-LOG.txt"), log),
   ]);
 
   run.status = "COMPLETE";
@@ -488,7 +651,7 @@ async function finalize(): Promise<void> {
   run.finalCommit = head;
   run.lastError = undefined;
   await saveRun();
-  await writeFile(path.join(runRoot, "RESULT.md"), [
+  await writeTextAtomic(path.join(runRoot, "RESULT.md"), [
     `# Full relay result — ${path.basename(runRoot)}`,
     "",
     "- Status: COMPLETE",
@@ -509,7 +672,7 @@ async function finalize(): Promise<void> {
     "",
     "The nested runtime Git repository was removed after the verified bundle and Git evidence were captured so this run can be committed as ordinary repository evidence. Restore the bundle to independently replay its Git history.",
     "",
-  ].join("\n"), "utf8");
+  ].join("\n"));
   await note("relay complete", [
     `- Session: ${session.id}`,
     `- Producer / reviewer threads remained distinct: ${run.producer.threadId !== run.reviewer.threadId}`,
@@ -531,6 +694,7 @@ async function main(): Promise<void> {
   await saveRun();
 
   for (;;) {
+    await recoverCompletedReviewerJob();
     const session = await latest();
     if (!session) {
       await openSession();
@@ -549,6 +713,10 @@ async function main(): Promise<void> {
     const consultation = await outstandingConsultation(session.directory, active.phase.name, active.index);
     if (consultation) {
       if (consultation.awaitingOwner) {
+        if (twoWindow) {
+          await answerConsultation(consultation.request);
+          continue;
+        }
         run.status = "AWAITING_OWNER_CONSULTATION";
         run.lastError = `Reviewer recorded an owner question at ${consultation.response}.`;
         await saveRun();
@@ -638,6 +806,6 @@ try {
     await saveRun();
   }
   console.error(`\nRELAY PAUSED — ${run.lastError ?? String(error)}`);
-  console.error(`Resume with: npm run relay:execute -- ${path.relative(root, runRoot)}`);
+  console.error(`Resume with: npm run ${twoWindow ? "relay:producer" : "relay:execute"} -- ${path.relative(root, runRoot)}`);
   process.exitCode = error instanceof PausedRun ? 2 : 1;
 }

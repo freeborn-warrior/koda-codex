@@ -6,15 +6,17 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Finish submission-critical proof and polish: final hygiene, owner recording, and external submission.
+- [ ] Build the first real two-window runtime slice: Window A streams the non-interactive persistent producer and automatically posts review/consultation jobs; Window B keeps the persistent reviewer, receives those jobs without a copied command, and owns the explicit receipt acknowledgement flow.
+- [ ] Replace the current test-harness-only owner experience with one simple, recoverable start procedure and named pause/abort states. Preserve the disk gate as the only authority.
 
 ## Next
 
+- [ ] Add reviewer-window discussion turns that use the same persistent reviewer context and write every actionable owner handback to disk before the producer resumes.
+- [ ] Finish submission-critical proof and polish only after the product runtime above is honest: final hygiene, owner recording, and external submission.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Build the disk-recoverable Guide around the owner-approved separate `koda-c-session-prompt` skill: explicit drafting mode, owner-confirmed hashed prompt, single-session launch request, separate producer/reviewer contexts, and pushed Summary/close return.
-- [ ] After the backend relay is proved, build the ruled side-by-side runtime: one visible full-session producer stream with owner input closed, one visible full-session interactive reviewer, and all cross-context actions routed through the existing disk gate.
-- [ ] In that runtime, stream each role's exposed reasoning summaries, tool/file activity, checks, and milestones, then require a clear turn-end artifact/handover summary. Never claim hidden chain-of-thought, leak receipts, or let rendered status outrank disk truth.
+- [ ] Finish the ruled side-by-side runtime beyond the first job relay: free-form owner/reviewer discussion, general actionable handback artifacts, and a consistently structured turn-end artifact/handover summary. Never claim hidden chain-of-thought, leak receipts, or let rendered status outrank disk truth.
 - [ ] Add abort/recovery semantics before claiming the producer can run unattended; Ctrl-C must leave named recoverable state.
 
 ## Later, only after target (a) is secure

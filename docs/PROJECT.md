@@ -74,7 +74,8 @@ owner contract
 - A completed seventeen-run model ledger: six original comparable runs, two Luna baseline repetitions, and nine new-fixture medium runs. All sealed score cells passed; Sol was operationally most consistent, while Terra recovered from path errors and Luna more often needed gate repair or skipped safe checks.
 - A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its first genuine run completed all six phases with distinct persistent contexts, an unplanned Summary REVISE recovery, seven owner acknowledgements, and a pushed immutable close.
 - In supervised close, the persistent producer prepares and later verifies immutable `close.md`, while the trusted relay supervisor performs the exact intervening session commit and push. This keeps `.git` protected from model sandboxes without moving closure authority out of Koda's disk checks.
-- The interim owner reader reduces Window B to `npm run relay:review`: it derives the only waiting session and current review from disk, opens the full file, detects concurrent review changes, and copies the exact receipt without printing or submitting it. This is a bridge, not the mature conversational reviewer interface.
+- The historical owner reader reduced Window B to `npm run relay:review`. The first real two-window slice now uses `npm run relay:producer` and `npm run relay:reviewer`: Window A posts an atomic disk job and waits; Window B owns a single persistent reviewer context, automatically receives formal reviews and consultations, streams readable activity with receipts redacted, opens the complete review, and keeps exact owner receipt acknowledgement in that same window.
+- The reviewer-window lock prevents two Window B processes from claiming the same run. Unsafe job paths, ambiguous unfinished runs, wrong receipts, changed reviews, and missing persistent context identity all refuse with named disk state.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
 - The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.
 
@@ -87,6 +88,7 @@ owner contract
 - [Dated builder assessment](design-notes/2026-07-18-builder-assessment.md)
 - [Codex skill-platform implications](design-notes/2026-07-18-codex-skill-platform.md)
 - [Owner-facing session runtime](design-notes/2026-07-18-owner-facing-session-runtime.md)
+- [First implemented two-window runtime slice](design-notes/2026-07-18-first-two-window-runtime-slice.md)
 - [Long-lived guide context research](design-notes/2026-07-18-long-lived-guide-context.md)
 - [Guide-to-session prompt thesis](design-notes/2026-07-18-guide-to-session-thesis.md)
 - [Completed genuine six-phase relay](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
@@ -130,7 +132,7 @@ The later adoption layer must turn an owner's project purpose into project-local
 
 Between sessions, the leading owner-facing role is a long-lived Guide whose continuity is reconstructed from project state, prior pushed close, summary, backlog, and design notes rather than trusted to chat memory alone. Owner direction now places a distinct `koda-c-session-prompt` skill inside that Guide conversation. It drafts one bounded prompt with Kristian, requires explicit launch confirmation, and hands a hashed ready artifact to the supervisor; the existing `koda-c-session` ceremony then validates and consumes it without interviewing him. The Guide remains separate from the launched producer and reviewer contexts and resumes from their pushed Summary and close evidence.
 
-The mature runtime should remove even that one producer-window action: after `koda-c-session-prompt` records Kristian's explicit confirmation in the Guide, a supervisor revalidates the prior pushed close, opens the session, and launches a non-interactive producer plus the owner-facing reviewer. This is a roadmap orchestration layer, not current behavior and not new gate authority.
+The mature runtime should remove even the current prepare/start terminal actions: after `koda-c-session-prompt` records Kristian's explicit confirmation in the Guide, a supervisor revalidates the prior pushed close, opens the session, and launches a non-interactive producer plus the owner-facing reviewer. The first two-window job relay is now implemented, but Guide launch and general project adaptation remain roadmap orchestration rather than current behavior or new gate authority.
 
 ## Open owner decision
 

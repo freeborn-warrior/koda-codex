@@ -1,6 +1,6 @@
 # Owner-facing session runtime — 2026-07-18
 
-This note records the mature runtime Kristian described. It is a product direction, not a claim about the current submission build.
+This note records the mature runtime Kristian described and the first shipped two-window slice toward it. The desired experience remains broader than the current harness.
 
 ## Desired experience
 
@@ -41,7 +41,7 @@ Visibility means the progress information the platform legitimately exposes. Kod
 
 ## Visible role stream and turn summaries
 
-The current relay prints only role/turn labels while preserving complete model events in JSONL. That is test evidence, not the desired owner experience. The side-by-side runtime should render each context's available progress while it works and end every producer or reviewer turn with a concise role-authored summary.
+The two-window relay now renders agent messages, completed checks, file changes, context identity, and turn completion from the real JSONL event stream while preserving the full raw events. Receipt and protected review-metadata lines are removed from the readable progress rendering. The next presentation step is to make phase entry, artifact handover, unresolved items, and role-authored turn summaries consistently explicit rather than depending on each model's natural message quality.
 
 The producer pane should show the current phase, entry-check outcome, exposed reasoning summaries, tool and file activity, verification commands, artifact path, and whether it handed over or paused for consultation. Its closing message should say what artifact was produced, what was actually checked, what remains unresolved, and that control passed to the reviewer. It must not invite owner input.
 
@@ -53,6 +53,8 @@ These are visibility and comprehension features, not new authority. Rendered sta
 
 Koda-C proves the disk gate, phase skills, review/receipt relay, close, deterministic full-session scenarios, and a documented manual two-task workflow. A repository harness now prepares and supervises two persistent Codex thread IDs with closed stdin, watches disk handoffs, pauses for Kristian's actual receipt, commits produced output, and preserves pushed-close Git evidence. The first genuine run reached `COMPLETE` after exposing and recovering from real resume, owner-interface, review, and close defects; its transcript, event streams, restored Git bundle, and test result are preserved in the repository.
 
-The harness still does not show either role's progress stream or turn-end summary in dedicated panes, show the producer's full progress in a read-only view, or provide the mature interactive reviewer conversation, external notifications, or robust signal/abort recovery. Its two model contexts are persistent and separate, but currently run behind one supervisor while Window B is only a review reader. An in-phase `AWAITING OWNER` response pauses with named disk state; it does not yet open a discussion loop in the reviewer context. Those remain orchestration work above the core CLI and must not be implied by a successful scripted relay.
+The first runtime slice now separates execution across the two visible windows. Window A owns the non-interactive producer and supervisor. It posts one bounded `REVIEWER-JOB.json` and waits. Window B holds a single-process lock, owns the persistent reviewer context, automatically receives formal-review and consultation work, shows readable event progress, opens the complete review, and runs the exact receipt acknowledgement in that same owner-facing window. A wrong quote leaves the approval ledger untouched and preserves a named failed job. An in-phase `AWAITING OWNER` response is shown in Window B; Kristian's answer is returned to the same reviewer context and must be written into the response artifact before the producer resumes.
+
+The remaining gap is substantial but narrower: Window B does not yet provide free-form discussion between handoffs or serialize arbitrary actionable owner direction into a general handback artifact; the launcher remains tied to a prepared relay fixture rather than an adapted real project; Ctrl-C during a model turn is preserved as explicit failure but lacks guided retry/replace-context recovery; and there are no external notifications or graphical split panes. The implemented event renderer shows exposed messages and activity, not hidden chain-of-thought. None of these unbuilt layers may be implied by the automatic reviewer wake-up.
 
 Automatic launch should mean “after owner-approved prompt,” not “the guide independently chose product work.” Whether a later configuration permits any broader scheduling remains an owner decision.

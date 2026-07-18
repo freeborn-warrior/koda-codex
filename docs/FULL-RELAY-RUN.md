@@ -26,7 +26,9 @@ The producer context opens the session, explicitly invokes the producer skill fo
 - the same producer context resumes to verify the unchanged binding and both Koda close commands before `SESSION CLOSED` is accepted;
 - event streams, stderr, transcript, final project snapshot, and a restorable Git bundle remain in this repository.
 
-This harness does **not** yet provide the mature interactive reviewer conversation Kristian ultimately wants. The persistent reviewer runs as a supervised context and writes formal handbacks; Kristian interacts with the harness at the receipt prompt. If an in-phase response says `AWAITING OWNER`, the run pauses and names the response file rather than inventing a ruling. A later owner-facing reviewer interface may resume that same context for discussion. Abort-safe signal handling and notification delivery also remain product work; this harness does not claim an unattended production daemon.
+The original executor still preserves the completed backend proof exactly as run. A new two-window mode now moves reviewer execution and owner acknowledgement into Window B: Window A posts one atomic reviewer job and waits; Window B resumes one persistent reviewer context, streams its emitted progress, opens the complete review, and runs Koda's exact-receipt prompt in that same window. An in-phase `AWAITING OWNER` response is also resolved through Window B and written to the response artifact before the producer continues.
+
+This is the first owner-facing slice, not the mature interface. Window B does not yet support arbitrary free-form discussion between formal handoffs, the prepared scenario is still the bounded software fixture, and a process stopped during a model turn requires explicit recovery rather than an inferred retry. Notification delivery and a general Guide-launched project runtime also remain product work; the harness does not claim an unattended production daemon.
 
 Codex retains authentication and persistent thread runtime state in its platform-owned storage. Koda-C preserves every project-relevant output in the run folder: complete JSONL event streams, stderr, thread IDs, disk artifacts, Git evidence, and transcript. The platform cache is not represented as project evidence.
 
@@ -49,7 +51,23 @@ Preparation writes one run under `docs/relay-runs/`. Its copied software project
 
 Preparation does not call a model and does not create a Koda session.
 
-## Execute and acknowledge
+## Execute and acknowledge — current two-window mode
+
+Start the two persistent sides once:
+
+```bash
+# Window A
+npm run relay:producer
+
+# Window B
+npm run relay:reviewer
+```
+
+Each command discovers the only unfinished run and refuses ambiguity. Window B stays open and receives formal review or consultation jobs automatically. At `REVIEW READY`, Kristian opens the complete review and quotes the copied exact receipt into Koda in Window B. The readable progress renderer removes receipt lines, and Kristian's acknowledgement input is not submitted as a model message. Raw reviewer events may contain the generated receipt because the reviewer creates the review that contains it. Window A consumes only the completed job plus disk gate state and then derives the route.
+
+The six deterministic two-window tests cover bounded job paths, a single reviewer-window lock, progress receipt redaction, successful same-window acknowledgement, wrong-receipt refusal with an untouched ledger, a pending formal job waking a persistent reviewer context, and separate producer/reviewer processes rendezvousing through phase advancement and pushed close.
+
+## Historical single-supervisor mode
 
 Run the exact command printed by preparation in Ghostty. The executor creates one persistent producer thread and one persistent reviewer thread, then resumes each by ID for its later turns.
 

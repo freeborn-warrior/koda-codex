@@ -31,7 +31,7 @@ truth for the exact submission requirements.
 - [x] The one-minute refusal fixture is documented in [DEMO.md](DEMO.md).
 - [x] Package safety, install hooks, dependencies, and model-harness boundaries
   are documented in [SECURITY.md](SECURITY.md).
-- [x] The current full suite passes 96/96 and preserves its named transcript.
+- [x] The current full suite passes 102/102 and preserves its named transcript.
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.
 
 ## Submission form

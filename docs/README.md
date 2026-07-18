@@ -15,9 +15,9 @@ This repository is the competition entry and the meta-harness, not a universal r
 1. **Run without rebuilding:** `node dist/cli.js --help`.
 2. **See the refusal:** follow the [one-minute fixture](DEMO.md#one-minute-mechanical-proof).
 3. **Inspect the real relay:** the [genuine six-phase result](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md) records distinct persistent producer/reviewer contexts, an unplanned Summary REVISE, seven owner acknowledgements, and pushed close.
-4. **Check the claims:** the [96-check transcript](test-results/2026-07-18-judge-journey-corrected.md), [model matrix](MODEL-TEST-MATRIX.md), [fresh skill-discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md), and [safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md) are all committed evidence.
+4. **Check the claims:** the [102-check transcript](test-results/2026-07-18-two-window-rendezvous-corrected.md), [model matrix](MODEL-TEST-MATRIX.md), [fresh skill-discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md), and [safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md) are all committed evidence.
 
-Tested here on macOS 26.5.1 arm64 with Node.js 26.0.0 and Apple Git 2.50.1. The core requires Node.js 22.18+ and Git; other platforms are not claimed as tested. The optional one-command owner reader currently uses macOS `less` and `pbcopy`.
+Tested here on macOS 26.5.1 arm64 with Node.js 26.0.0 and Apple Git 2.50.1. The core requires Node.js 22.18+ and Git; other platforms are not claimed as tested. The current reviewer window uses macOS `less` and `pbcopy` for the owner-reading ceremony.
 
 ## Why it exists
 
@@ -147,7 +147,7 @@ Koda-C stays a clean plain-file engine. Guide, explore, architect, and triage re
 
 The next adoption layer is project adaptation. It should help create project-local guidance and relay skills from the owner's actual purpose, with writing and software as initial profiles, while preserving any existing project instructions and keeping all generated material inside that project. That bootstrap layer is not implemented in the current entry and must not be confused with the already working gate.
 
-The mature runtime is one visible persistent producer beside one visible persistent owner-facing reviewer. Kristian approves a written session prompt in the guide interface, a supervisor launches both contexts for the session, and every later producer input arrives through reviewer-authored files. Kristian may follow the producer's exposed progress but speaks only with the reviewer. The current release proves the backend two-context relay; it does not yet claim that side-by-side interactive surface, automatic process launch, or unattended orchestration. See the [dated runtime design](design-notes/2026-07-18-owner-facing-session-runtime.md).
+The mature runtime is one visible persistent producer beside one visible persistent owner-facing reviewer. The first two-window slice now exists: `relay:producer` streams the non-interactive producer and posts disk jobs; `relay:reviewer` automatically wakes one persistent reviewer context, handles in-phase owner questions, opens formal reviews, and keeps exact receipt acknowledgement in Window B. It is still a prepared-fixture harness, not yet the Guide-launched general-project experience or a free-form reviewer conversation between handoffs. See the [Ghostty guide](GHOSTTY-TEST-GUIDE.md) and [dated runtime design](design-notes/2026-07-18-owner-facing-session-runtime.md).
 
 The current build record and deliberate extensions from the starting document are tracked in [PROJECT.md](PROJECT.md#drift-watch-against-the-starting-document).
 
