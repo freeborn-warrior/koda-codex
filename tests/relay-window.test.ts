@@ -101,6 +101,7 @@ async function preparedAcknowledgementRun(
 }
 
 async function preparedIdleConversationRun(response: string, options: { throughTty?: boolean } = {}) {
+  const reviewerThreadId = "019f0000-0000-7000-8000-000000000099";
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-reviewer-conversation-"));
   const prepared = spawnSync(process.execPath, [
     "scripts/prepare-relay-run.ts",
@@ -124,6 +125,8 @@ async function preparedIdleConversationRun(response: string, options: { throughT
   const run = JSON.parse(await readFile(runPath, "utf8"));
   run.status = "RUNNING";
   run.sessionId = session.id;
+  run.reviewer.threadId = reviewerThreadId;
+  run.reviewer.turns = 2;
   await writeJsonAtomic(runPath, run);
   const projectStatusBefore = spawnSync("git", ["status", "--porcelain", "--untracked-files=all"], {
     cwd: project,
@@ -134,7 +137,8 @@ async function preparedIdleConversationRun(response: string, options: { throughT
     "#!/usr/bin/env node",
     "const prompt = process.argv.at(-1) ?? '';",
     "if (!prompt.includes('owner-conversation mode')) { process.stderr.write('missing owner-conversation mode'); process.exit(1); }",
-    "console.log(JSON.stringify({ type: 'thread.started', thread_id: '019f0000-0000-7000-8000-000000000099' }));",
+    `if (!process.argv.includes('resume') || !process.argv.includes(${JSON.stringify(reviewerThreadId)})) { process.stderr.write('existing reviewer context was not resumed'); process.exit(1); }`,
+    `console.log(JSON.stringify({ type: 'thread.started', thread_id: ${JSON.stringify(reviewerThreadId)} }));`,
     `console.log(JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: ${JSON.stringify(response)} } }));`,
     "console.log(JSON.stringify({ type: 'turn.completed' }));",
   ].join("\n"), "utf8");
@@ -234,7 +238,19 @@ test("REVIEWER OPEN CONVERSATION: an idle owner question resumes the Reviewer bu
   assert.match(result.executed.stdout, /owner conversation while Producer works/);
   assert.match(result.executed.stdout, /REVIEWER CONVERSATION COMPLETE — no producer handback was created/);
   assert.equal(result.projectStatusAfter, result.projectStatusBefore);
-  assert.equal((await readReviewerWindowState(result.runRoot))?.threadId, "019f0000-0000-7000-8000-000000000099");
+  const state = await readReviewerWindowState(result.runRoot);
+  assert.equal(state?.threadId, "019f0000-0000-7000-8000-000000000099");
+  assert.equal(state?.turns, 3);
+  assert.equal(await pathExists(path.join(result.session.directory, "owner-handbacks")), false);
+});
+
+test("REVIEWER OPEN CONVERSATION SCOPE: project-level thought returns to Guide without mutation", async (t) => {
+  const result = await preparedIdleConversationRun("GUIDE CONVERSATION — PROJECT SCOPE\nThis belongs in the project path, not the active session.");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  assert.match(result.executed.stdout, /GUIDE SCOPE — continue this project-level thought in the Guide conversation/);
+  assert.match(result.executed.stdout, /Nothing from this Reviewer conversation changed the active session/);
+  assert.equal(result.projectStatusAfter, result.projectStatusBefore);
   assert.equal(await pathExists(path.join(result.session.directory, "owner-handbacks")), false);
 });
 

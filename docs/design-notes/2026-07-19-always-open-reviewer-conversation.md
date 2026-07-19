@@ -30,9 +30,10 @@ Likewise, Guide conversation cannot silently change the confirmed session snapsh
 
 The deterministic slice proves three distinct cases:
 
-1. a pipe-driven active-session question resumes Reviewer and changes no project file;
-2. adversarial actionable direction creates no owner-handback and is named as unsent;
-3. a real macOS pseudo-terminal displays `reviewer> `, accepts one typed line, receives the Reviewer response, exits cleanly, and leaves the project unchanged.
+1. a pipe-driven active-session question invokes the `resume` path with the already saved Reviewer context ID, increments its saved turn count, and changes no project file;
+2. a project-level thought returns to Guide without creating a handback or project mutation;
+3. adversarial actionable direction creates no owner-handback and is named as unsent;
+4. a real macOS pseudo-terminal displays `reviewer> `, accepts one typed line, receives the Reviewer response, exits cleanly, and leaves the project unchanged.
 
 The pseudo-terminal fixture uses the installed `/usr/bin/expect`; it validates the actual terminal-input branch that ordinary captured-process tests cannot reach. The shared `koda-c-review` package also passes Codex's system skill validator.
 
