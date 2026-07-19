@@ -106,6 +106,7 @@ owner contract
 - [Guide real-project runtime development failures](test-results/2026-07-18-guide-runtime-development-failures.md)
 - [Ghostty launcher development failures](test-results/2026-07-18-ghostty-launcher-development-failures.md)
 - [Ghostty launcher 132-check result](test-results/2026-07-18-ghostty-launcher-final.md)
+- [Ghostty launcher post-push 132-check result](test-results/2026-07-18-ghostty-launcher-pushed-final.md)
 - [Guide continuity development failures](test-results/2026-07-18-guide-continuity-development-failures.md)
 - [Guide continuity 123-check result](test-results/2026-07-18-guide-continuity-security-final.md)
 - [Guide continuity documentation-final result](test-results/2026-07-18-guide-continuity-docs-final.md)
