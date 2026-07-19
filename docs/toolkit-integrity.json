@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "ghostty-pre-handoff-v3",
-  "verifiedAt": "2026-07-19T21:41:43.193Z",
+  "verifiedAt": "2026-07-19T21:53:18.419Z",
   "repairCommit": "15cbdd385a8fec08b180df9b45b1768fccf97095",
-  "testedCommit": "15cbdd385a8fec08b180df9b45b1768fccf97095",
+  "testedCommit": "4e3b7df782e57288fd21b530c5cf1bfc37d7ad23",
   "testCount": 197,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-pre-handoff-pushed-final.md",
-    "sha256": "1ffa69dd827731d1b95e5ed6bec6dd7ff3c5b50fae6f69b19935b2c7c9da4751"
+    "path": "docs/test-results/2026-07-19-pre-handoff-manifest-pushed.md",
+    "sha256": "410676a468225231796482dc4324c4691bca1465937e3ceb541fc64dbde2c1bb"
   },
   "files": [
     {

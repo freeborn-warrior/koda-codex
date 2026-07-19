@@ -72,8 +72,8 @@ That is the intended project-level conversational experience.
 
 - Complete deterministic suite: **197/197**.
 - Coverage suite: **197/197**, 89.17% line coverage overall.
-- Pushed-code durable suite:
-  [197/197](../../test-results/2026-07-19-pre-handoff-pushed-final.md).
+- Pushed-audit durable suite:
+  [197/197](../../test-results/2026-07-19-pre-handoff-manifest-pushed.md).
 - Fresh ten-skill discovery:
   [PASS](../../discovery-runs/2026-07-19-fresh-codex-startup-06/RESULT.md).
 - Fresh plural-session Guide preflight:

@@ -1201,6 +1201,12 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Corrected documentation result:** After promoting the current evidence and
   strengthening the judge assertion, the complete suite returned to **197/197** and
   the final focused integrity/skill/security/submission slice passed **25/25**.
+- **Pushed-audit durable result:** After the audit, living ledger, current judge
+  assertion, first-use report, and toolkit manifest were pushed at `4e3b7df`, the
+  complete suite passed **197/197** again with that pushed commit as its base. Every
+  result is preserved in the
+  [final durable transcript](test-results/2026-07-19-pre-handoff-manifest-pushed.md),
+  now bound by toolkit capability `ghostty-pre-handoff-v3`.
 - **Reports:** [Security audit 08](security-runs/2026-07-19-pre-handoff-audit-08/RESULT.md)
   and [first-use UX audit 03](quality-runs/2026-07-19-first-use-ux-audit-03/RESULT.md).
 - **Verdict:** MECHANICAL, FRESH-CONTEXT, PACKAGE, AND SECURITY PRE-HANDOFF PASS.

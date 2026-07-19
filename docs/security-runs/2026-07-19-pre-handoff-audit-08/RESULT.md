@@ -38,9 +38,9 @@ recovery reopens Reviewer before Producer without replacing either context.
 - Coverage suite: **197/197**, 89.17% lines, 68.53% branches, and 87.02% functions
   overall. The gate engine remains at 97.51% lines, 98.73% branches, and 100%
   functions; the environment sanitizer remains at 100% for all three measures.
-- Pushed-code durable suite:
-  [197/197](../../test-results/2026-07-19-pre-handoff-pushed-final.md) at base commit
-  `15cbdd3`.
+- Pushed-audit durable suite:
+  [197/197](../../test-results/2026-07-19-pre-handoff-manifest-pushed.md) at base
+  commit `4e3b7df`.
 - Final integrity/skill/security/submission slice after documentation updates:
   **25/25**.
 - Fresh skill discovery: **PASS**, all ten local skills, zero tools and zero reads.
