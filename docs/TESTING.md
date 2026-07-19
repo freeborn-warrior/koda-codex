@@ -1009,6 +1009,12 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   passed 63/63.
 - **Complete result:** The ordinary suite passed **194/194**. The coverage suite
   passed **194/194** at 89.34% lines, 68.52% branches, and 86.97% functions.
+- **Pushed-code durable result:** After the complete repair was committed and pushed
+  at `d7bd3dc`, the unchanged complete suite passed **194/194** with that commit as
+  its recorded base in
+  [the durable transcript](test-results/2026-07-19-owner-ceremony-recovery-pushed-final.md).
+  Toolkit capability `ghostty-owner-ceremony-v2` binds that transcript, all changed
+  recovery/Guide/receipt files, and the changed direction reader.
 - **Package/security checks:** Isolated `npm pack --dry-run` passed; an isolated
   dependency-free npm audit reported zero vulnerabilities; skill validation passed;
   diff whitespace passed; reachable Git history passed with only dangling

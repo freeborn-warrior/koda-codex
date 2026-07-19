@@ -177,6 +177,8 @@ test("the fresh Guide preflight model run is sealed, blind, ephemeral, and read-
   assert.match(runner, /const before = await snapshot\(fixture\)/);
   assert.match(runner, /const after = await snapshot\(fixture\)/);
   assert.match(runner, /Object\.values\(checks\)\.every\(Boolean\)/);
+  assert.match(runner, /await mkdir\(destination\);/);
+  assert.doesNotMatch(runner, /mkdir\(destination, \{ recursive: true \}\)/);
 });
 
 test("historical fresh Codex startup discovered the original nine local skills and root guidance without reading disk", async () => {

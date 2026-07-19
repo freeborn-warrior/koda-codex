@@ -81,7 +81,7 @@ async function writeRunFiles(
   metadata: Record<string, unknown>,
   result: string,
 ): Promise<void> {
-  await mkdir(destination, { recursive: true });
+  await mkdir(destination);
   await Promise.all([
     writeFile(path.join(destination, "CODEX-EVENTS.jsonl"), run.stdout, "utf8"),
     writeFile(path.join(destination, "CODEX-STDERR.txt"), run.stderr, "utf8"),
@@ -119,7 +119,7 @@ async function discoveryRun(): Promise<void> {
     answer.includes(`Total: ${expected.length}`) &&
     answer.includes(".agents/skills/") &&
     answer.includes("DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY");
-  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-02`);
+  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-03`);
   await writeRunFiles(destination, run, {
     effort: "low",
     threadId: threadId(parsed),
@@ -129,7 +129,7 @@ async function discoveryRun(): Promise<void> {
     toolEventCount: toolEvents.length,
     status: pass ? "PASS" : "FAIL",
   }, [
-    `# Fresh Codex startup discovery — ${date} — Sol low — 02`,
+    `# Fresh Codex startup discovery — ${date} — Sol low — 03`,
     "",
     `- Status: **${pass ? "PASS" : "FAIL"}**`,
     `- Model: \`${model}\``,
@@ -204,7 +204,7 @@ async function activePreflightRun(): Promise<void> {
       filesUnchanged: unchanged,
     };
     const pass = run.status === 0 && Object.values(checks).every(Boolean);
-    const destination = path.join(root, "docs", "guide-preflight-runs", `${date}-sol-medium-01`);
+    const destination = path.join(root, "docs", "guide-preflight-runs", `${date}-sol-medium-02`);
     await writeRunFiles(destination, run, {
       effort: "medium",
       threadId: threadId(parsed),
@@ -213,7 +213,7 @@ async function activePreflightRun(): Promise<void> {
       checks,
       status: pass ? "PASS" : "FAIL",
     }, [
-      `# Fresh Guide active-session preflight — ${date} — Sol medium — 01`,
+      `# Fresh Guide active-session preflight — ${date} — Sol medium — 02`,
       "",
       `- Status: **${pass ? "PASS" : "FAIL"}**`,
       `- Model: \`${model}\``,

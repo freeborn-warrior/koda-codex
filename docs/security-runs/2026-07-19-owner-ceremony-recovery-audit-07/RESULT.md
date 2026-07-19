@@ -35,6 +35,8 @@ refuses after 250 ms.
 
 - Complete ordinary suite: 194/194.
 - Complete coverage suite: 194/194, including 100% lines in the environment sanitizer.
+- Pushed-code durable suite: [194/194](../../test-results/2026-07-19-owner-ceremony-recovery-pushed-final.md)
+  at `d7bd3dc`.
 - Expanded owner-error/security slice: 73/73.
 - Credential-signature scan: no tracked finding.
 - Tracked symbolic-link scan: none.

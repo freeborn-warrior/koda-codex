@@ -58,6 +58,8 @@ different failure states refuse.
 - Expanded first-use, security, Guide, and relay slice: 73/73.
 - Complete deterministic suite: 194/194.
 - Complete coverage suite: 194/194; 89.34% line coverage overall.
+- Pushed-code durable suite: [194/194](../../test-results/2026-07-19-owner-ceremony-recovery-pushed-final.md)
+  at base commit `d7bd3dc`.
 - Current skill passed the packaged validator through Python.
 - The real paused project now renders the two-choice recovery surface from disk.
 

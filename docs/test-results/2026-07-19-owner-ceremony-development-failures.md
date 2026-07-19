@@ -39,12 +39,18 @@ gate condition.
 10. A combined command later tried to locate root tests from inside the isolated
     verification project. Node named the missing files and ran zero tests. Rerunning
     from the repository root passed 63/63; no assertion or product file changed.
+    The same working-directory mistake recurred once during post-push hash collection;
+    `shasum` named the absent root paths and the command chain stopped before any
+    mutation. Hash collection was rerun from the repository root.
 11. The skill validator is not executable on this machine, so direct invocation
     returned permission denied. `python3 .../quick_validate.py` passed the same skill.
 12. Default `npm pack --dry-run` could not write to Kristian's pre-existing,
     root-owned npm cache. An isolated cache passed. Default `npm audit` could not run
     because this dependency-free package intentionally has no lockfile; an isolated
     temporary package-lock audit reported zero vulnerabilities.
+13. The final audit found that the fresh-model runner reused fixed historical output
+    folders. A rerun could overwrite sealed raw evidence. The next runs use new IDs,
+    and destination creation now refuses if the folder already exists.
 
 The toolkit integrity manifest used during uncommitted testing was only a local
 bootstrap so Guide tests could exercise the changed bytes. It must never be published

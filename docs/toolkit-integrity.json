@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "capability": "ghostty-clean-launch-v1",
-  "verifiedAt": "2026-07-19T20:08:39.852Z",
-  "repairCommit": "963a76b563397bfe0400373563db57e3b79a5862",
-  "testedCommit": "d9e51d2c8ad79fb743d9dee000fc02a8dc849d7a",
-  "testCount": 187,
+  "capability": "ghostty-owner-ceremony-v2",
+  "verifiedAt": "2026-07-19T21:13:02.142Z",
+  "repairCommit": "d7bd3dc182198e62824a4353f9a369d56b49fad2",
+  "testedCommit": "d7bd3dc182198e62824a4353f9a369d56b49fad2",
+  "testCount": 194,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-guide-toolkit-integrity-pushed-final.md",
-    "sha256": "d6982a869e9cb103f2b5f8af90c5c8a213c832e16ea0194339035ab523c82378"
+    "path": "docs/test-results/2026-07-19-owner-ceremony-recovery-pushed-final.md",
+    "sha256": "1935c15f974c531d7db9fc66f29fcf17ff474b25822f1741a7d135f2d30f4f7b"
   },
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "fde0443035484d15c430afe3e21db69353787b688e7e2d90282dd96b39d5bd55"
+      "sha256": "b91279da9875408312bb1662c1983026398921adfe19908cb4ba86de0b0aa946"
     },
     {
       "path": "src/relay-environment.ts",
@@ -28,11 +28,11 @@
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "dd1acfa75d76eb6ec9277c155d52e06b166d16c0f1cabf896c94ffd146cb94df"
+      "sha256": "c5248782d5be096e994310dcb2b91d00eb24ff3db8cdd8a11989c89002027f8a"
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "45f5c2b9c133c350194d5c62f01db0503fa0ad86362f7f488df1937f0f747c10"
+      "sha256": "ffdb143ca07f2d631abc0f0ae2ce78d1bcad58a21cca14f409dee500d7c33ee8"
     },
     {
       "path": "dist/relay-environment.js",
@@ -60,15 +60,35 @@
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "4bb01ce4cd3aa573a7f3f78f3d8e8fa55285301ae884309d53282b73a48b73c8"
+      "sha256": "067233a1cf30a0f7ea1e5522b9dc4fe9f6a40ddfaf0f499666c65e25912d68f9"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "b9fceedfdf830449e025c1efa249522791f1466d5b545d2bc485b427fbcb027b"
+      "sha256": "3f98a31f17ec2cfaf2a057f3151e5da6b482d08a9cecee86f0aaad7a90ecc1f8"
     },
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",
-      "sha256": "87eeca0b2c16add003d6f81c6c008878c995088fa8ce71d19f1606f49ba07b6e"
+      "sha256": "68c96c0e31c36767fb281344863e3073827c5e0691b11dfe3283c1536488bcde"
+    },
+    {
+      "path": "src/commands.ts",
+      "sha256": "445f7f64a586771dc6d4a6a7e3fef58a36a272df7b22f3d9172a7d0aa75eefd5"
+    },
+    {
+      "path": "dist/commands.js",
+      "sha256": "1b8ed9111418927f8ed1bc4564ea9d529a35b08ea8d3d2459063a65e4ce31d62"
+    },
+    {
+      "path": "scripts/show-relay-status.ts",
+      "sha256": "065a72ca2115c10c35425aaaa8f837873956002340ea99a27ab6f13a356fa60a"
+    },
+    {
+      "path": "src/direction.ts",
+      "sha256": "e885351f34bd7ea3a1fd69a228426d05cce719998cd45d112ef473686b558040"
+    },
+    {
+      "path": "dist/direction.js",
+      "sha256": "0ff20580f1c3c82c0d7336e21428f7b9bce191e65d88f6d7a3b7f2a1c744773d"
     }
   ]
 }
