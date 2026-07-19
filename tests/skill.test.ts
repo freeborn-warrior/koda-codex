@@ -180,6 +180,7 @@ test("the fresh Guide preflight model run is sealed, blind, ephemeral, and read-
   assert.match(runner, /capability: "guide-preflight-fixture-v1"/);
   assert.match(runner, /contractPath = "docs\/guide-preflight-runs\/CONTRACT-02\.md"/);
   assert.match(runner, /"all", "discovery-only", "active-only"/);
+  assert.match(runner, /must wait/);
   assert.match(runner, /Object\.values\(checks\)\.every\(Boolean\)/);
   assert.match(runner, /await mkdir\(destination\);/);
   assert.doesNotMatch(runner, /mkdir\(destination, \{ recursive: true \}\)/);

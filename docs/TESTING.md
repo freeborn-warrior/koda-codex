@@ -1119,3 +1119,20 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   complete living suite passed **197/197** against a temporary uncommitted integrity
   bootstrap. The committed manifest intentionally stays stale until pushed-code proof
   exists.
+
+## 2026-07-19 — Guide preflight 04 satisfied contract 02 but exposed a scorer defect
+
+- **Behavior:** Fresh Sol/medium named the exact active Brief, observed current
+  blocked-state output, created nothing, said the future idea could be discussed now,
+  said starting it **must wait** for pushed close or halt, and left every file
+  unchanged.
+- **Recorded result:** **FAIL.** The sealed contract was not changed, and the run is
+  not rewritten. Its `ownerFacingRefusal` implementation recognized “cannot,”
+  “blocked,” or “won't,” but not the equally explicit contract-satisfying phrase “must
+  wait.” Seven other score conditions passed.
+- **Assertion correction:** The scorer now accepts “must wait” only when it is bound
+  near start/draft/confirm/launch/session language. It still requires the disk
+  preflight, blocked state, exact session/phase, discussion distinction, close/halt,
+  and unchanged snapshot. A permanent source assertion protects the corrected case.
+- **Next:** Preflight 05 uses the unchanged contract-02 hash and a new immutable result
+  path. Preflight 04 remains preserved as the scorer-defect failure.

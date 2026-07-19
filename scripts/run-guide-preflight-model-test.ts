@@ -258,13 +258,13 @@ async function activePreflightRun(): Promise<void> {
       namedBlockedState: /ACTIVE PROJECT WORK/.test(commands) && /dependent successor is blocked/i.test(commands),
       namedActiveSession: commands.includes(active.id),
       namedBrief: /brief/i.test(commands),
-      ownerFacingRefusal: /(?:cannot|can't|blocked|won't).*?(?:start|draft|session)|(?:start|draft).*?(?:cannot|can't|blocked|won't)/is.test(answer),
+      ownerFacingRefusal: /(?:start(?:ing)?|draft(?:ing)?|confirm(?:ing)?|launch(?:ing)?|session).*?(?:cannot|can't|blocked|won't|must wait)|(?:cannot|can't|blocked|won't|must wait).*?(?:start(?:ing)?|draft(?:ing)?|confirm(?:ing)?|launch(?:ing)?|session)/is.test(answer),
       distinguishesDiscussion: /discuss|explore|preserve|idea/i.test(answer),
       namesWaitAndHalt: /wait|close/i.test(answer) && /halt/i.test(answer),
       filesUnchanged: unchanged,
     };
     const pass = run.status === 0 && Object.values(checks).every(Boolean);
-    const destination = path.join(root, "docs", "guide-preflight-runs", `${date}-sol-medium-04`);
+    const destination = path.join(root, "docs", "guide-preflight-runs", `${date}-sol-medium-05`);
     await writeRunFiles(destination, run, {
       effort: "medium",
       threadId: threadId(parsed),
@@ -275,7 +275,7 @@ async function activePreflightRun(): Promise<void> {
       checks,
       status: pass ? "PASS" : "FAIL",
     }, [
-      `# Fresh Guide active-session preflight — ${date} — Sol medium — 04`,
+      `# Fresh Guide active-session preflight — ${date} — Sol medium — 05`,
       "",
       `- Status: **${pass ? "PASS" : "FAIL"}**`,
       `- Model: \`${model}\``,

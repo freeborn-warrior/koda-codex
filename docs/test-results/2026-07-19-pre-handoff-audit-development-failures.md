@@ -87,6 +87,20 @@ and judge checks passed **54/54**, and the complete deterministic suite passed
 commit; the repository must continue to report the changed toolkit as stale until the
 code is pushed and a new post-push transcript can honestly bind it.
 
+## Active Guide preflight 04 — behavior pass, scorer failure
+
+The first run under contract 02 met its owner-facing behavior: no prompt or launch was
+created; the active session and Brief were named; future discussion remained open;
+starting the successor “must wait” for pushed close or halt; and every file stayed
+unchanged. The runner nevertheless recorded FAIL because its refusal regex listed
+“cannot,” “blocked,” and “won't” but omitted “must wait.”
+
+This is the allowed assertion-correction case: evidence shows the scorer encoded the
+contract too narrowly. Contract 02 is unchanged, preflight 04 is unchanged, and no
+condition is removed. The corrected regex accepts “must wait” only next to a
+start/draft/confirm/launch/session action. Preflight 05 receives a new result path and
+must independently pass every score condition.
+
 ## Complete suite — concurrent Git-lock release race
 
 The first complete run after the runner correction passed **194/195**. The failing
