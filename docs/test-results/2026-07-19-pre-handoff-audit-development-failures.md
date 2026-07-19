@@ -24,6 +24,18 @@ but a fresh model must not receive ambient credentials or the parent Codex conte
 The corrected runner uses the same tested environment allowlist as the live relay and
 has a permanent security assertion. Its next attempt uses a new evidence ID.
 
+## Fresh-context attempt 04 — executable resolution after sanitization
+
+The first pushed correction stripped the environment as intended, then tried to spawn
+the bare word `codex` after replacing the ambient `PATH`. The operating system returned
+`ENOENT`; no model task or thread existed, no tool ran, and no model answer was
+produced. The immutable attempt is preserved under
+[`docs/discovery-runs/2026-07-19-fresh-codex-startup-04/`](../discovery-runs/2026-07-19-fresh-codex-startup-04/RESULT.md).
+
+The runner now resolves Codex to a canonical absolute executable using the parent
+shell before applying the child environment allowlist. A permanent assertion requires
+both steps. The next attempt uses another new evidence ID; attempt 04 is not scored.
+
 ## Complete suite — concurrent Git-lock release race
 
 The first complete run after the runner correction passed **194/195**. The failing

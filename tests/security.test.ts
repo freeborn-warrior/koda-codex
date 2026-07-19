@@ -100,6 +100,7 @@ test("SECURITY INTEGRITY SUITE: owner receipt and ruling data never enter child-
 test("SECURITY INTEGRITY SUITE: fresh-model evidence runs strip ambient credentials and parent context identity", async () => {
   const runner = await readFile("scripts/run-guide-preflight-model-test.ts", "utf8");
   assert.match(runner, /import \{ relayCodexEnvironment \} from "\.\.\/src\/relay-environment\.ts"/);
+  assert.match(runner, /const codex = resolveExecutable\(process\.env\.KODA_CODEX_BIN/);
   assert.match(runner, /env: relayCodexEnvironment\(process\.env\)/);
   assert.doesNotMatch(runner, /spawnSync\(codex, args, \{ cwd, encoding:/);
 });

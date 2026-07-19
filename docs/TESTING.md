@@ -1067,3 +1067,15 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Evidence:** Intermediate details are preserved in the
   [pre-handoff development record](test-results/2026-07-19-pre-handoff-audit-development-failures.md).
 - **Verdict:** DEFECT FOUND AND CORRECTED; PUSHED AND FRESH-CONTEXT EVIDENCE PENDING.
+
+## 2026-07-19 — Fresh-context preflight attempt 04 could not resolve Codex
+
+- **Variant:** Requested Sol/low discovery; no model task was created.
+- **What happened:** Credential stripping intentionally replaced the ambient `PATH`,
+  but the runner still passed the bare executable name `codex`. The child spawn
+  returned `ENOENT` before creating a thread. Attempt 04 made zero tool calls and has
+  no model answer; it is an invalid harness attempt, not a skill or Sol result.
+- **Correction:** The runner now resolves Codex to one canonical absolute executable
+  before constructing the allowlisted child environment. Credentials and parent
+  context remain stripped. The failed attempt is immutable and the corrected run uses
+  a new ID.

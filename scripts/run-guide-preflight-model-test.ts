@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
+import { realpathSync } from "node:fs";
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -9,9 +10,21 @@ import { createSession, writeJsonAtomic } from "../src/project.ts";
 import { relayCodexEnvironment } from "../src/relay-environment.ts";
 
 const root = process.cwd();
-const codex = process.env.KODA_CODEX_BIN?.trim() || "codex";
 const date = "2026-07-19";
 const model = "gpt-5.6-sol";
+
+function resolveExecutable(configured: string): string {
+  if (path.isAbsolute(configured)) return realpathSync(configured);
+  const found = spawnSync("/usr/bin/which", [configured], { encoding: "utf8" });
+  if (found.status !== 0 || !(found.stdout ?? "").trim()) {
+    throw new Error(`Fresh-model runner cannot find the Codex executable named ${configured}.`);
+  }
+  return realpathSync((found.stdout ?? "").trim());
+}
+
+// Resolve with the parent shell's PATH before the child receives the strict
+// allowlisted environment. The child gets no ambient credentials or parent ID.
+const codex = resolveExecutable(process.env.KODA_CODEX_BIN?.trim() || "codex");
 
 function runCodex(cwd: string, effort: "low" | "medium", prompt: string, skipGit: boolean) {
   const args = [
@@ -125,7 +138,7 @@ async function discoveryRun(): Promise<void> {
     answer.includes(`Total: ${expected.length}`) &&
     answer.includes(".agents/skills/") &&
     answer.includes("DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY");
-  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-04`);
+  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-05`);
   await writeRunFiles(destination, run, {
     effort: "low",
     threadId: threadId(parsed),
@@ -135,7 +148,7 @@ async function discoveryRun(): Promise<void> {
     toolEventCount: toolEvents.length,
     status: pass ? "PASS" : "FAIL",
   }, [
-    `# Fresh Codex startup discovery — ${date} — Sol low — 04`,
+    `# Fresh Codex startup discovery — ${date} — Sol low — 05`,
     "",
     `- Status: **${pass ? "PASS" : "FAIL"}**`,
     `- Model: \`${model}\``,
