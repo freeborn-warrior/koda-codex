@@ -24,5 +24,8 @@ owner decision.
 
 The prior test's weakness is now explicit: mocked Ghostty acceptance did not prove a
 role process survived startup. Recovery tests now include the actual Producer process
-and a disk readiness handshake. The complete and coverage suites pass 199/199.
-Kristian's next observation is still required before the flow is called human-proved.
+and a disk readiness handshake. The complete and coverage suites pass 199/199. The
+unchanged suite also passed 199/199 after repair commit `9d4eaa7` was pushed, and its
+[durable transcript](../../test-results/2026-07-19-producer-rejoin-pushed.md) is bound
+by toolkit capability `ghostty-partial-recovery-v4`. Kristian's next observation is
+still required before the flow is called human-proved.

@@ -58,6 +58,9 @@ interleaving. It was therefore insufficient.
   requirement.
 - Corrected combined recovery/security run: **59/59**.
 - Complete living suite: **199/199**.
+- Repair commit `9d4eaa7` was pushed before the unchanged complete suite passed
+  **199/199** again. Its [durable transcript](../../test-results/2026-07-19-producer-rejoin-pushed.md)
+  is bound by toolkit capability `ghostty-partial-recovery-v4`.
 
 Kristian has not yet retried the Producer. Human recovery remains unproved until the
-repair is committed, pushed, integrity-bound, and observed in the same open session.
+repair is observed in the same open session.

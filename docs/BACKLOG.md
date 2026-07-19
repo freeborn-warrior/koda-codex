@@ -43,7 +43,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
   Producer rejoins the exact existing formal-review job, Guide offers one missing-role
   recovery, duplicate Reviewer launch refuses, and Guide waits for actual Producer
   readiness instead of treating Ghostty request acceptance as success. Deterministic
-  proof passes 199/199; pushed binding is required before owner retry.
+  pushed-code proof passes 199/199 and is bound as toolkit capability
+  `ghostty-partial-recovery-v4`; owner observation remains required.
 
 - [x] Complete the pre-handoff mechanical, security, package, and first-use UX audit
   before asking Kristian to test again. Four real defects were preserved and fixed:

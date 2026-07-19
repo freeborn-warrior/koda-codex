@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "capability": "ghostty-pre-handoff-v3",
-  "verifiedAt": "2026-07-19T21:53:18.419Z",
-  "repairCommit": "15cbdd385a8fec08b180df9b45b1768fccf97095",
-  "testedCommit": "4e3b7df782e57288fd21b530c5cf1bfc37d7ad23",
-  "testCount": 197,
+  "capability": "ghostty-partial-recovery-v4",
+  "verifiedAt": "2026-07-19T22:21:46.935Z",
+  "repairCommit": "9d4eaa717733fa6f5b7b115ea699cd91043ddbe6",
+  "testedCommit": "9d4eaa717733fa6f5b7b115ea699cd91043ddbe6",
+  "testCount": 199,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-pre-handoff-manifest-pushed.md",
-    "sha256": "410676a468225231796482dc4324c4691bca1465937e3ceb541fc64dbde2c1bb"
+    "path": "docs/test-results/2026-07-19-producer-rejoin-pushed.md",
+    "sha256": "62efc6fb25f00860795f0773e3063f05373955b6676007403174dd7703ea8572"
   },
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "b91279da9875408312bb1662c1983026398921adfe19908cb4ba86de0b0aa946"
+      "sha256": "ca44d3ab159c019da14f5e6e0b5ec5f5c07fd787808521b5be69ef66977d0305"
     },
     {
       "path": "src/relay-environment.ts",
@@ -24,7 +24,7 @@
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "dcfff28e78126a39a1adce6fcd1163c078c853e16542c5fe306ff452b030114f"
+      "sha256": "61dd9ec6eb7ca0fdca97c7c15551cd093d69efb3433bfdf08f4e7515700be416"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
@@ -32,7 +32,7 @@
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "ffdb143ca07f2d631abc0f0ae2ce78d1bcad58a21cca14f409dee500d7c33ee8"
+      "sha256": "2050cff9b65eb41b46df9a833bb626252d65f289bc501fd8796be8191809430e"
     },
     {
       "path": "dist/relay-environment.js",
@@ -60,11 +60,11 @@
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "f111135d592d59d7fa3ce2aee343b1d7e0e5c3749a1ac872083908412a1b3424"
+      "sha256": "a0ccfbc81147fde128a7a8d28f662740c172b859c6d563edd771637b4e269ac7"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "50c379b97d0fe9dbdb6d8a1dcc263dc0fc525bf90a09e1698841226824aa48a8"
+      "sha256": "b5e767549f4f6275c8d056bf15bf845b36d4ffc3c36bebdd0e1aae6d2f3ef182"
     },
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",

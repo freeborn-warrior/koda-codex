@@ -33,6 +33,9 @@ waits, and a duplicate partial recovery refuses.
   live-lock requirement, recorded retry, and duplicate refusal.
 - Focused Guide/relay/security/integrity suite: **59/59**.
 - Complete suite: **199/199**.
+- Pushed-code suite: **199/199** at repair commit `9d4eaa7`; its
+  [durable transcript](../../test-results/2026-07-19-producer-rejoin-pushed.md) is
+  hash-bound by toolkit capability `ghostty-partial-recovery-v4`.
 - Coverage suite: **199/199**, 89.32% lines, 69.05% branches, and 87.43%
   functions overall. The gate engine remains at 97.51% lines, 98.73% branches,
   and 100% functions.

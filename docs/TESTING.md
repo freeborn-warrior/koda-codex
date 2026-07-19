@@ -1231,11 +1231,14 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Corrected results:** Relay window **18/18**; combined Guide, relay, security, and
   integrity **59/59**; complete living suite **199/199**; coverage suite **199/199**
   at **89.32% lines, 69.05% branches, and 87.43% functions** overall.
+- **Pushed-code result:** Repair commit `9d4eaa7` reached `origin/main`, then the
+  unchanged complete suite passed **199/199** with that commit as its recorded base.
+  The [durable transcript](test-results/2026-07-19-producer-rejoin-pushed.md) is
+  hash-bound by toolkit capability `ghostty-partial-recovery-v4`.
 - **Evidence:** [Live incident](verification-runs/2026-07-19-markdown-headings-01/PRODUCER-RECOVERY-INCIDENT.md),
   [security audit 09](security-runs/2026-07-19-partial-recovery-audit-09/RESULT.md),
   and [first-use UX audit 04](quality-runs/2026-07-19-partial-recovery-ux-audit-04/RESULT.md).
-- **Verdict:** DETERMINISTIC REPAIR PASS; PUSHED INTEGRITY BINDING AND OWNER
-  OBSERVATION STILL REQUIRED.
+- **Verdict:** PUSHED DETERMINISTIC REPAIR PASS; OWNER OBSERVATION STILL REQUIRED.
 - **Reports:** [Security audit 08](security-runs/2026-07-19-pre-handoff-audit-08/RESULT.md)
   and [first-use UX audit 03](quality-runs/2026-07-19-first-use-ux-audit-03/RESULT.md).
 - **Verdict:** MECHANICAL, FRESH-CONTEXT, PACKAGE, AND SECURITY PRE-HANDOFF PASS.
