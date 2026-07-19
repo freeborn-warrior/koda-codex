@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "ghostty-owner-ceremony-v2",
-  "verifiedAt": "2026-07-19T21:13:02.142Z",
-  "repairCommit": "d7bd3dc182198e62824a4353f9a369d56b49fad2",
-  "testedCommit": "d7bd3dc182198e62824a4353f9a369d56b49fad2",
-  "testCount": 194,
+  "capability": "ghostty-pre-handoff-v3",
+  "verifiedAt": "2026-07-19T21:41:43.193Z",
+  "repairCommit": "15cbdd385a8fec08b180df9b45b1768fccf97095",
+  "testedCommit": "15cbdd385a8fec08b180df9b45b1768fccf97095",
+  "testCount": 197,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-owner-ceremony-recovery-pushed-final.md",
-    "sha256": "1935c15f974c531d7db9fc66f29fcf17ff474b25822f1741a7d135f2d30f4f7b"
+    "path": "docs/test-results/2026-07-19-pre-handoff-pushed-final.md",
+    "sha256": "1ffa69dd827731d1b95e5ed6bec6dd7ff3c5b50fae6f69b19935b2c7c9da4751"
   },
   "files": [
     {
@@ -60,15 +60,15 @@
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "067233a1cf30a0f7ea1e5522b9dc4fe9f6a40ddfaf0f499666c65e25912d68f9"
+      "sha256": "f111135d592d59d7fa3ce2aee343b1d7e0e5c3749a1ac872083908412a1b3424"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "3f98a31f17ec2cfaf2a057f3151e5da6b482d08a9cecee86f0aaad7a90ecc1f8"
+      "sha256": "50c379b97d0fe9dbdb6d8a1dcc263dc0fc525bf90a09e1698841226824aa48a8"
     },
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",
-      "sha256": "68c96c0e31c36767fb281344863e3073827c5e0691b11dfe3283c1536488bcde"
+      "sha256": "504c30253518546d5dadf7c6e528a3cfc00c997aa483d3d00762f57c3ee24088"
     },
     {
       "path": "src/commands.ts",
@@ -89,6 +89,14 @@
     {
       "path": "dist/direction.js",
       "sha256": "0ff20580f1c3c82c0d7336e21428f7b9bce191e65d88f6d7a3b7f2a1c744773d"
+    },
+    {
+      "path": "src/git-operation-lock.ts",
+      "sha256": "fadc7a449e19e473a8ae27a402cd84af4a83eb77b45af1bc049c38bd656d8506"
+    },
+    {
+      "path": "dist/git-operation-lock.js",
+      "sha256": "600ea5cfcc626d2dfd9a1e1b4c201bbe976cf46d96ea7c67d9fe98730fe669cb"
     }
   ]
 }

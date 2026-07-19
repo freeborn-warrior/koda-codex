@@ -97,6 +97,13 @@ owner contract
 - The first owner-observed three-context launch created distinct persistent Sol Producer and Terra Reviewer contexts and reached formal Brief review, but it is pushed-halted failure evidence rather than a pass. The unsafe launch rendered an ambient credential, and a second race repeated a voided review after halt. Zero acknowledgements and zero phases advanced; the deterministic repair passes 181/181, while a fresh owner-observed Ghostty run remains owed.
 - The first retry draft exposed a second human-experience defect before launch: Guide required Kristian to carry repository paths, commit IDs, test counts, and evidence references from the builder context. The toolkit now validates its release manifest itself, `guide status` reports one verified capability, the session-prompter forbids owner technical relays, and every new confirmation freezes that toolkit proof alongside project truth.
 - The second owner-observed launch passed the repaired window/security boundary: one Reviewer and one Producer opened beside the existing Guide with no extra tabs or environment dump, and the distinct contexts reached an approved Brief. Its acknowledgement UX then failed when an ambiguous Return produced an empty receipt, correctly leaving zero ledger entries but exiting both role processes. The preserved run remains at Brief. Numbered, retryable owner decisions, stdin-only receipt/ruling transport, exact legacy recovery, and a two-choice Guide recovery surface pass a pushed 194-check transcript bound as toolkit capability `ghostty-owner-ceremony-v2`; real recovery and the remaining phases are still owed.
+- The final mechanical pre-handoff audit expanded that proof to 197/197. It found
+  and corrected fresh-model environment inheritance, absolute executable resolution
+  under sanitization, concurrent Git-lock retirement, and disk-token traversal. A
+  fresh Sol/medium Guide now also passes the sealed plural-session contract: future
+  conversation stays open while a dependent start waits for pushed close or halt.
+  Toolkit capability `ghostty-pre-handoff-v3` binds the pushed code and transcript;
+  owner-observed recovery remains the only release blocker in this surface.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.
@@ -125,8 +132,10 @@ owner contract
 - [Guide real-project runtime development failures](test-results/2026-07-18-guide-runtime-development-failures.md)
 - [Receipt acknowledgement UX incident](verification-runs/2026-07-19-markdown-headings-01/RECEIPT-UX-INCIDENT.md)
 - [First-use UX audit](quality-runs/2026-07-19-first-use-ux-audit-02/RESULT.md)
+- [Final pre-handoff first-use UX audit](quality-runs/2026-07-19-first-use-ux-audit-03/RESULT.md)
 - [Owner ceremony development failures](test-results/2026-07-19-owner-ceremony-development-failures.md)
 - [Owner ceremony security audit](security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md)
+- [Final pre-handoff security audit](security-runs/2026-07-19-pre-handoff-audit-08/RESULT.md)
 - [Ghostty launcher development failures](test-results/2026-07-18-ghostty-launcher-development-failures.md)
 - [Ghostty launcher 132-check result](test-results/2026-07-18-ghostty-launcher-final.md)
 - [Ghostty launcher post-push 132-check result](test-results/2026-07-18-ghostty-launcher-pushed-final.md)

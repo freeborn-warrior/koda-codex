@@ -1152,3 +1152,57 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Boundary:** This is one response to one phrasing. It does not prove universal
   classification or Kristian's comprehension in the real Ghostty recovery.
 - **Evidence:** [Fresh plural-session Guide preflight](guide-preflight-runs/2026-07-19-sol-medium-05/RESULT.md).
+
+## 2026-07-19 — Final pre-handoff audit and pushed-code proof
+
+- **Scope:** Complete gate, receipt, stale-review, status-truth, printed-command,
+  Guide, relay, owner-error, interruption, concurrency, security, package, skill,
+  fixture, and submission regression before returning the Ghostty retry to Kristian.
+- **Development failures preserved:** Fresh-context attempt 03 could not write its
+  host database and exposed unsafe ambient environment inheritance. Attempt 04 then
+  could not resolve bare `codex` after sanitization. Preflight 02 stopped on a stale
+  fixture; preflight 03 found a real missing discussion distinction; preflight 04
+  satisfied the sealed contract but exposed an overly narrow scorer. The complete
+  suite also produced a real **194/195** Git-lock cleanup race. None was overwritten
+  or converted into a pass.
+- **Documentation regression:** The first post-audit complete run passed **196/197**.
+  The README correctly promoted the current 197-check and plural-session evidence,
+  while the judge-journey assertion still required the superseded 152-check link.
+  The assertion was updated—not removed—to require both current durable evidence and
+  the current fresh Guide result. Historical evidence remains on disk and linked
+  from the testing history.
+- **Corrections:** Fresh-model children use Koda's allowlisted environment and one
+  pre-resolved executable. Guide keeps future-idea conversation open while dependent
+  starts wait. The scorer accepts contract-equivalent “must wait” only near start
+  language. Git-lock release atomically retires the verified lease, and UUID-only
+  tokens cannot become paths.
+- **Fresh evidence:** Startup 06 rediscovered all ten local skills with zero tools or
+  reads. Sol/medium preflight 05 passed all sealed plural-session conditions and left
+  the fixture unchanged.
+- **Complete result:** The ordinary suite passed **197/197**. The durable pushed-code
+  suite passed **197/197** at base commit `15cbdd3`, with every named result in
+  [the transcript](test-results/2026-07-19-pre-handoff-pushed-final.md). The final
+  coverage suite also passed **197/197** at **89.17% lines, 68.53% branches, and
+  87.02% functions** overall; `gate.ts` remained at 97.51% lines, 98.73% branches,
+  and 100% functions.
+- **Package and repository:** Dependency-free final package dry-run passed (879.5 kB
+  compressed, 4.2 MB unpacked, 755 evidence-inclusive files); the corrected isolated
+  lockfile audit reported zero vulnerabilities; credential-signature and tracked
+  symlink checks found nothing; diff whitespace passed; Git reported no corrupt or
+  missing reachable object, only dangling development objects.
+- **Invalid audit attempt:** One combined package-audit command entered an empty
+  temporary directory before copying this project's manifest. Its pack/copy failed,
+  so the resulting empty-package zero-vulnerability result is explicitly invalid and
+  not counted. The corrected explicit-manifest audit is the result above.
+- **Package measurement retry:** A later display-only parser expected pure JSON, but
+  the successful prepack build printed its notice first, so parsing failed. The
+  corrected size measurement used the already-built output with scripts disabled;
+  the ordinary complete suite separately exercised the real prepack/install path.
+- **Corrected documentation result:** After promoting the current evidence and
+  strengthening the judge assertion, the complete suite returned to **197/197** and
+  the final focused integrity/skill/security/submission slice passed **25/25**.
+- **Reports:** [Security audit 08](security-runs/2026-07-19-pre-handoff-audit-08/RESULT.md)
+  and [first-use UX audit 03](quality-runs/2026-07-19-first-use-ux-audit-03/RESULT.md).
+- **Verdict:** MECHANICAL, FRESH-CONTEXT, PACKAGE, AND SECURITY PRE-HANDOFF PASS.
+  Same-context Ghostty recovery, visual clarity, and the remaining phase decisions
+  are still owner-observed proof; they are not represented as passed.

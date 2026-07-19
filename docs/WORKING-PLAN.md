@@ -22,7 +22,7 @@ Turn the proved two-context session relay into a project-level experience that c
 10. [x] Make the session-prompter preflight every start request and refuse conceptually competing sessions before a draft exists.
 11. [x] Make Ctrl-C a named, fail-closed operational stop: kill the in-flight child, preserve partial evidence, distrust possible handbacks, resume the same context for reconciliation, and refuse context replacement when identity is missing.
 12. [x] Audit the whole product, package, and new interruption surface; consolidate recovery validation, preserve 157/157 deterministic checks with coverage, and publish the current security boundaries.
-13. [ ] Prove the complete three-context experience with Kristian. The first launch is pushed-halted security evidence. The dependent retry `6371ade2-3002-42aa-87ab-a613220b7eab` then proved exactly one clean Reviewer and Producer beside Guide and reached an approved Brief, but its hidden second acknowledgement step caused a recoverable empty-receipt failure. The same session remains at Brief with zero acknowledgements; resume it only after final pushed 194-check toolkit proof, then observe all remaining gates and pushed close.
+13. [ ] Prove the complete three-context experience with Kristian. The first launch is pushed-halted security evidence. The dependent retry `6371ade2-3002-42aa-87ab-a613220b7eab` then proved exactly one clean Reviewer and Producer beside Guide and reached an approved Brief, but its hidden second acknowledgement step caused a recoverable empty-receipt failure. The same session remains at Brief with zero acknowledgements; its 197-check pre-handoff toolkit proof, security audit, and first-use audit are complete, so the next step is owner-observed same-context recovery followed by all remaining gates and pushed close.
 14. [x] Settle the top-level mutation ruling: an active Produce session may not lock the whole project; Guide and unrelated project work may continue changing files.
 15. [x] Implement exact per-workstream write sets, before/after hashes, same-path conflict refusal, exact-path staging, and a short recoverable Git-operation lock; mutation-test attribution, rename/delete, unrelated-dirt close, and dead-lock recovery.
 16. [x] Confirm the project/session model: Produce is one session kind; independent Explore, Research, Architecture, Triage, Produce, and later sibling sessions may be active concurrently.
@@ -30,6 +30,10 @@ Turn the proved two-context session relay into a project-level experience that c
 18. [x] Remove the one-live-runtime preparation limit: enumerate exact runtime IDs, allocate simultaneous session directories atomically, print run-bound commands, serialize short claim/Git ceremonies, and prove two concurrent Producer/Reviewer pairs through pushed close in one project.
 19. [x] Remove the owner-as-courier failure from Guide handover: verify the toolkit's launch contract from its repository-contained manifest, expose one plain capability in status, bind its integrity snapshot at confirmation, and make any later toolkit drift stale without asking Kristian to transport technical evidence.
 20. [x] Make ordinary owner mistakes recoverable: numbered Reviewer choices, explicit receipt-paste disclosure, no-exit retry, resumable stop, confirmed halt, stdin-only sensitive handoff, and one two-choice Guide recovery that preserves both context identities and opens Reviewer before Producer.
+21. [x] Run the final pre-handoff audit: isolate fresh-model children, fix sanitized
+    executable resolution, make Git-lock retirement ownership-safe and
+    traversal-safe, pass 197/197 complete and coverage runs, revalidate Guide in a
+    fresh model, and publish current security/UX boundaries.
 
 ## Submission cut
 

@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved one clean Reviewer plus one clean Producer beside Guide and reached an approved Brief, then exposed an ambiguous receipt interaction. The gate stayed shut with zero acknowledgements. Deterministic numbered retry and one-action Guide recovery pass 194/194; Kristian must still observe recovery and the remaining five phase decisions through pushed close.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved one clean Reviewer plus one clean Producer beside Guide and reached an approved Brief, then exposed an ambiguous receipt interaction. The gate stayed shut with zero acknowledgements. Deterministic numbered retry, one-action Guide recovery, fresh-model isolation, and hardened Git locking pass 197/197; Kristian must still observe recovery and the remaining five phase decisions through pushed close.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
@@ -38,6 +38,14 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Complete the pre-handoff mechanical, security, package, and first-use UX audit
+  before asking Kristian to test again. Four real defects were preserved and fixed:
+  fresh-model environment inheritance, sanitized executable lookup, concurrent
+  Git-lock retirement, and disk-token path traversal. The complete and coverage
+  suites pass 197/197, the corrected package audit reports zero vulnerabilities, and
+  fresh Guide preflight passes the sealed plural-session contract. Human recovery
+  remains deliberately unchecked.
 
 - [x] Revalidate the evolved plural-session Guide in a fresh context. Sol/low
   rediscovered all ten skills with zero tools/reads; after two invalid harness
