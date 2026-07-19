@@ -31,7 +31,7 @@ truth for the exact submission requirements.
 - [x] The one-minute refusal fixture is documented in [DEMO.md](DEMO.md).
 - [x] Package safety, install hooks, dependencies, and model-harness boundaries
   are documented in [SECURITY.md](SECURITY.md).
-- [x] The current full suite passes 204/204 against the pushed owner-surface repair and preserves its [named transcript](test-results/2026-07-19-owner-surface-pushed.md).
+- [x] The current full suite passes 206/206 against the pushed repeatable-recovery repair and preserves its [bound transcript](test-results/2026-07-19-repeatable-recovery-manifest-corrected.md).
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.
 
 ## Submission form

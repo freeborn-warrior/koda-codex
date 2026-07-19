@@ -1,7 +1,7 @@
 # Security audit 11 — repeatable ordered recovery
 
 **Date:** 2026-07-19  
-**Verdict:** DETERMINISTIC SECURITY PASS; PUSHED AND HUMAN PROOF PENDING
+**Verdict:** PUSHED DETERMINISTIC SECURITY PASS; HUMAN PROOF PENDING
 
 ## Scope
 
@@ -40,10 +40,22 @@ approval, phase change, role process, or session was created during this audit.
 - Focused Guide recovery suite: 35/35.
 - Complete deterministic suite: 206/206.
 - Coverage suite: 206/206 at 89.03% lines, 69.12% branches, and 86.46% functions.
-- Diff whitespace check: pass before commit.
+- Bound pushed-code suite: [206/206](../../test-results/2026-07-19-repeatable-recovery-manifest-corrected.md)
+  from repair commit `b9b63eb`, bound as toolkit capability
+  `ghostty-repeatable-recovery-v7`.
+- Final Guide, security, submission, and integrity slice: 49/49.
+- Dependency-free package dry-run with private cache: pass; 932,472 bytes
+  compressed, 4,495,542 bytes unpacked, 770 files, zero bundled dependencies.
+- Credential-signature and committed-symbolic-link checks: pass.
+- Diff whitespace check: pass.
+- Reachable Git object validation: pass; only dangling development objects remain.
 
-The durable pushed-code transcript and final package/repository audit are still to be
-added after the repair commit exists. They must not be claimed early.
+The first manifest regression intentionally remains recorded as a failure: an
+inexact evidence timestamp caused every Guide consumer to refuse, and the submission
+contract still required the superseded README evidence link. The correction copies
+the transcript timestamp byte-for-byte and requires the new transcript plus this
+audit; no recovery or gate assertion was weakened. See the
+[failed run](../../test-results/2026-07-19-repeatable-recovery-manifest-assembly-failure.md).
 
 ## Residual boundaries
 
@@ -58,4 +70,3 @@ added after the repair commit exists. They must not be claimed early.
   The human Ghostty observation is still a separate proof.
 - Direct-child termination is tested; operating-system descendant-tree containment
   remains a documented limit.
-

@@ -1325,6 +1325,30 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   zero advancements. No role was launched and no runtime file was changed.
 - **Evidence:** [Repeatable-recovery UX audit](quality-runs/2026-07-19-repeatable-recovery-ux-audit-06/RESULT.md)
   and [security audit 11](security-runs/2026-07-19-repeatable-recovery-audit-11/RESULT.md).
-- **Pending:** Commit, push, rerun the unchanged suite from the pushed code, bind the
-  transcript into the toolkit manifest, rerun final package/security checks, then
-  ask Kristian for the remaining Ghostty observation.
+- **Pushed-code proof:** Repair commit `b9b63eb` reached `origin/main` before the
+  unchanged complete suite passed **206/206** and wrote the
+  [durable transcript](test-results/2026-07-19-repeatable-recovery-pushed.md).
+  Toolkit capability `ghostty-repeatable-recovery-v7` binds that transcript and the
+  changed recovery surface.
+- **Manifest assembly failure:** The first bound-manifest regression passed
+  **170/206**. Thirty-five Guide/plural-runtime checks correctly refused because the
+  manifest timestamp had been rounded to `23:34:52.000Z` instead of quoting the
+  transcript's exact `23:34:43.046Z`. The judge-document check also refused because
+  its assertion still required the superseded 197-check README link after the README
+  promoted the current 206-check proof. Every named pass and failure is preserved in
+  the [failed transcript](test-results/2026-07-19-repeatable-recovery-manifest-assembly-failure.md).
+  The exact timestamp was copied; the judge contract was strengthened to require the
+  current transcript and current security audit. No product test or gate condition
+  was removed.
+- **Corrected manifest result:** The corrected, unchanged complete suite passed
+  **206/206**. Every named result is preserved in the
+  [bound transcript](test-results/2026-07-19-repeatable-recovery-manifest-corrected.md),
+  which toolkit capability `ghostty-repeatable-recovery-v7` now verifies directly.
+- **Final audit:** Guide/security/submission/integrity slice **49/49**; dependency-free
+  package dry-run passed at 932,472 compressed bytes, 4,495,542 unpacked bytes, 770
+  files, and zero bundled dependencies; credential-signature, committed-symlink,
+  diff-whitespace, and reachable-object checks passed. Git reports only dangling
+  development objects, not corrupt or missing reachable history.
+- **Pending:** Commit and push the manifest, transcripts, corrected judge assertion,
+  and final audit; rerun a small post-push integrity slice; then Kristian's Ghostty
+  observation is the remaining runtime proof.

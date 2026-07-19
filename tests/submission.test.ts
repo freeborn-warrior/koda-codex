@@ -22,7 +22,11 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(readme, /node dist\/cli\.js --help/);
   assert.match(
     readme,
-    /\[post-push 197-check pre-handoff transcript\]\(test-results\/2026-07-19-pre-handoff-pushed-final\.md\)/,
+    /\[bound 206-check transcript\]\(test-results\/2026-07-19-repeatable-recovery-manifest-corrected\.md\)/,
+  );
+  assert.match(
+    readme,
+    /\[repeatable-recovery security audit\]\(security-runs\/2026-07-19-repeatable-recovery-audit-11\/RESULT\.md\)/,
   );
   assert.match(
     readme,

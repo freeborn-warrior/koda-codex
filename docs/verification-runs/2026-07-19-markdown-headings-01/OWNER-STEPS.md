@@ -9,9 +9,10 @@ opened beside the existing Guide, with no extra tabs or environment dump. The ow
 ceremony then failed because Return exposed an undisclosed second receipt step and
 both role processes exited after the empty paste.
 
-## What Kristian should do when the builder says the new proof is pushed
+## What Kristian should do when ready to continue
 
-Keep the Guide conversation if convenient; closed Producer and Reviewer windows do
+The repeatable-recovery repair is pushed and bound by 206/206 checks. Keep the Guide
+conversation if convenient; closed Producer and Reviewer windows do
 not lose the disk-backed session. Do not run a shell command, paste a path, copy a
 receipt into Guide, or create another session.
 

@@ -13,8 +13,9 @@ acknowledgement prompt caused an empty receipt and exited both role processes. T
 gate stayed shut: zero ledger entries and zero advanced phases.
 
 Session `2026-07-19-02` remains safely recoverable with the same review and context
-identities. Do not create another session or manually start either role. The current
-mechanical proof covers the exact recovery shapes that the live attempt exposed:
+identities. Do not create another session or manually start either role. The pushed
+206-check capability `ghostty-repeatable-recovery-v7` covers the exact recovery
+shapes that the live attempt exposed:
 
 - if Reviewer is still running, Koda opens only the missing Producer;
 - if Reviewer also disappeared, Koda restores Reviewer first and opens Producer only

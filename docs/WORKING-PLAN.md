@@ -22,7 +22,7 @@ Turn the proved two-context session relay into a project-level experience that c
 10. [x] Make the session-prompter preflight every start request and refuse conceptually competing sessions before a draft exists.
 11. [x] Make Ctrl-C a named, fail-closed operational stop: kill the in-flight child, preserve partial evidence, distrust possible handbacks, resume the same context for reconciliation, and refuse context replacement when identity is missing.
 12. [x] Audit the whole product, package, and new interruption surface; consolidate recovery validation, preserve 157/157 deterministic checks with coverage, and publish the current security boundaries.
-13. [ ] Prove the complete three-context experience with Kristian. The first launch is pushed-halted security evidence. The dependent retry `6371ade2-3002-42aa-87ab-a613220b7eab` then proved exactly one clean Reviewer and Producer beside Guide and reached an approved Brief, but its hidden second acknowledgement step caused a recoverable empty-receipt failure. The first recovery restored Reviewer but Producer failed to rejoin its existing formal-review job. The session remains at Brief with zero acknowledgements; the expanded recovery and owner-surface cleanup now pass a pushed, integrity-bound 204/204 proof, then owner observation, all remaining gates, and pushed close are still owed.
+13. [ ] Prove the complete three-context experience with Kristian. The first launch is pushed-halted security evidence. The dependent retry `6371ade2-3002-42aa-87ab-a613220b7eab` then proved exactly one clean Reviewer and Producer beside Guide and reached an approved Brief, but its hidden second acknowledgement step caused a recoverable empty-receipt failure. The first recovery restored Reviewer but Producer failed to rejoin its existing formal-review job. The session remains at Brief with zero acknowledgements; ordered and repeatable recovery now passes a pushed, integrity-bound 206/206 proof, then owner observation, all remaining gates, and pushed close are still owed.
 14. [x] Settle the top-level mutation ruling: an active Produce session may not lock the whole project; Guide and unrelated project work may continue changing files.
 15. [x] Implement exact per-workstream write sets, before/after hashes, same-path conflict refusal, exact-path staging, and a short recoverable Git-operation lock; mutation-test attribution, rename/delete, unrelated-dirt close, and dead-lock recovery.
 16. [x] Confirm the project/session model: Produce is one session kind; independent Explore, Research, Architecture, Triage, Produce, and later sibling sessions may be active concurrently.
@@ -43,11 +43,12 @@ Turn the proved two-context session relay into a project-level experience that c
     no raw role commands on the ordinary owner surface. The pushed suite passes
     204/204 under toolkit capability `ghostty-owner-surface-v6`; human
     observation follows.
-24. [ ] Promote repeatable role recovery: restore Reviewer before Producer when both
+24. [x] Promote repeatable role recovery: restore Reviewer before Producer when both
     disappear, recover a later missing role without blind duplication, preserve an
     append-only attempt history, and keep the ordinary owner surface at two Guide
-    choices. The local candidate passes 206/206 plus coverage; pushed binding and
-    Kristian's observation remain.
+    choices. Repair commit `b9b63eb` passes a pushed 206/206 transcript bound as
+    toolkit capability `ghostty-repeatable-recovery-v7`; Kristian's observation
+    remains.
 
 ## Submission cut
 

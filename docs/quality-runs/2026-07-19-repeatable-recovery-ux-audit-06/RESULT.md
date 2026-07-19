@@ -1,7 +1,7 @@
 # First-use UX audit 06 — repeatable window recovery
 
 **Date:** 2026-07-19  
-**Verdict:** DETERMINISTIC FLOW PASS; OWNER OBSERVATION PENDING
+**Verdict:** PUSHED DETERMINISTIC FLOW PASS; OWNER OBSERVATION PENDING
 
 ## Why this audit happened
 
@@ -55,6 +55,9 @@ process does not silently exit into a shell-command scavenger hunt.
 - Focused Guide recovery suite: 35/35.
 - Complete deterministic suite: 206/206.
 - Coverage suite: 206/206 at 89.03% lines, 69.12% branches, and 86.46% functions.
+- Bound pushed-code suite: [206/206](../../test-results/2026-07-19-repeatable-recovery-manifest-corrected.md)
+  from repair commit `b9b63eb`, bound as toolkit capability
+  `ghostty-repeatable-recovery-v7`.
 - The exact live verification project was inspected read-only and remains at Brief
   with zero owner acknowledgements and zero advancements.
 
@@ -63,3 +66,7 @@ recovery, and owner-facing language. They cannot prove that Ghostty displays or
 arranges a window correctly, that macOS shows no surprising permission dialog, or
 that the words feel clear to Kristian. The next owner observation remains required.
 
+The first final-manifest regression failed closed because its timestamp did not
+exactly match the transcript and the judge assertion still named older evidence.
+That failure is [preserved per test](../../test-results/2026-07-19-repeatable-recovery-manifest-assembly-failure.md);
+the corrected contract requires the current 206-check proof and security audit.

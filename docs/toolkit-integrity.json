@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "capability": "ghostty-owner-surface-v6",
-  "verifiedAt": "2026-07-19T22:59:26.529Z",
-  "repairCommit": "9e2f8e4150697bbfd9114c0e178c4c13b007cbd6",
-  "testedCommit": "9e2f8e4150697bbfd9114c0e178c4c13b007cbd6",
-  "testCount": 204,
+  "capability": "ghostty-repeatable-recovery-v7",
+  "verifiedAt": "2026-07-19T23:39:08.022Z",
+  "repairCommit": "b9b63ebd2070dbc4e5e06ebc39d62e7d32800f85",
+  "testedCommit": "b9b63ebd2070dbc4e5e06ebc39d62e7d32800f85",
+  "testCount": 206,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-owner-surface-pushed.md",
-    "sha256": "a7b09457ca7f315303171743cff76e0bf9c5487f58de6aff480248e4137ea25c"
+    "path": "docs/test-results/2026-07-19-repeatable-recovery-manifest-corrected.md",
+    "sha256": "59d5fd8a73766a9ba5fe7ad696de4a71e09ae13447056c38694f4a10b6fcc626"
   },
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "feb88bcfcadd32b4e41691688ba5ba72a2ec91e1b249f168243ac4d69febc0bb"
+      "sha256": "cb99a4af5ab95fcaba0ac1e27ed534e72941196fb4ab74a2ef4b95b1997a8187"
     },
     {
       "path": "src/relay-environment.ts",
@@ -36,7 +36,7 @@
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "3ce2822b361a50251f1763bcabcdbed129621d56d45fd2a2c44dc86b3aea6168"
+      "sha256": "72c852b0f0c85b7e8232bfee9b7992dbf24ad30960bab530cb01dfcd71e44459"
     },
     {
       "path": "dist/relay-environment.js",
@@ -64,11 +64,11 @@
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "a14346c990218e72a14718b57f7aa3c28b967fefebad514bbef34607e18192ab"
+      "sha256": "ebf960237c0c0993e4817e6d0a9c8cb88faced6ca093c8f35fbdf439f415c8d3"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "2b72f61dce6fd715c2fdd300dc11950173d4ac775608751c43d2c34da7bd5c44"
+      "sha256": "3e9dfe04268c42118e4153373afae9e07b4f2fec64f13af0f502906b50d2fbc3"
     },
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",

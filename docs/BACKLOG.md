@@ -6,13 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Promote the both-window and repeatable-recovery repair to pushed toolkit
-  evidence. The candidate restores Reviewer before Producer when both windows are
-  gone, permits a later genuinely missing role to recover again, records attempt
-  history, and keeps Producer closed when Reviewer readiness is mutated. Focused,
-  complete, and coverage runs pass locally at 35/35 and 206/206; pushed proof and
-  Kristian's Ghostty observation remain.
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, role liveness, ordered startup, numbered retry, hidden technical recovery commands, fresh-model isolation, and hardened Git locking now pass a pushed, integrity-bound 204/204 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery, numbered retry, hidden technical commands, fresh-model isolation, and hardened Git locking now pass a pushed, integrity-bound 206/206 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
@@ -44,6 +38,13 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Make a saved owner decision recoverable even if both visible windows disappear,
+  and keep recovery available if a role later disappears again. Reviewer always
+  restores before Producer, readiness failure keeps Producer closed, live roles are
+  never duplicated, and each successful attempt is recorded. Repair commit
+  `b9b63eb` passes the pushed **206/206** transcript bound as toolkit capability
+  `ghostty-repeatable-recovery-v7`; human observation remains required.
 
 - [x] Make visible-role failure recoverable without making the owner a terminal
   operator: Reviewer and Producer hold separate live locks, initial launch waits for
