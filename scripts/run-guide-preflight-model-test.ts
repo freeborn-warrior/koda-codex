@@ -138,7 +138,7 @@ async function discoveryRun(): Promise<void> {
     answer.includes(`Total: ${expected.length}`) &&
     answer.includes(".agents/skills/") &&
     answer.includes("DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY");
-  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-06`);
+  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-07`);
   await writeRunFiles(destination, run, {
     effort: "low",
     threadId: threadId(parsed),
@@ -148,7 +148,7 @@ async function discoveryRun(): Promise<void> {
     toolEventCount: toolEvents.length,
     status: pass ? "PASS" : "FAIL",
   }, [
-    `# Fresh Codex startup discovery — ${date} — Sol low — 06`,
+    `# Fresh Codex startup discovery — ${date} — Sol low — 07`,
     "",
     `- Status: **${pass ? "PASS" : "FAIL"}**`,
     `- Model: \`${model}\``,
@@ -249,9 +249,13 @@ async function activePreflightRun(): Promise<void> {
     const answer = agentText(parsed);
     const commands = commandEvidence(parsed);
     const unchanged = JSON.stringify(before) === JSON.stringify(after);
+    const contractPath = "docs/guide-preflight-runs/CONTRACT-02.md";
+    const contractSha256 = createHash("sha256")
+      .update(await readFile(path.join(root, contractPath)))
+      .digest("hex");
     const checks = {
       statusPreflight: /guide status/.test(commands),
-      namedBlockedState: /NEXT SESSION BLOCKED/.test(commands),
+      namedBlockedState: /ACTIVE PROJECT WORK/.test(commands) && /dependent successor is blocked/i.test(commands),
       namedActiveSession: commands.includes(active.id),
       namedBrief: /brief/i.test(commands),
       ownerFacingRefusal: /(?:cannot|can't|blocked|won't).*?(?:start|draft|session)|(?:start|draft).*?(?:cannot|can't|blocked|won't)/is.test(answer),
@@ -260,16 +264,18 @@ async function activePreflightRun(): Promise<void> {
       filesUnchanged: unchanged,
     };
     const pass = run.status === 0 && Object.values(checks).every(Boolean);
-    const destination = path.join(root, "docs", "guide-preflight-runs", `${date}-sol-medium-03`);
+    const destination = path.join(root, "docs", "guide-preflight-runs", `${date}-sol-medium-04`);
     await writeRunFiles(destination, run, {
       effort: "medium",
       threadId: threadId(parsed),
       prompt,
+      contractPath,
+      contractSha256,
       fixtureSessionId: active.id,
       checks,
       status: pass ? "PASS" : "FAIL",
     }, [
-      `# Fresh Guide active-session preflight — ${date} — Sol medium — 03`,
+      `# Fresh Guide active-session preflight — ${date} — Sol medium — 04`,
       "",
       `- Status: **${pass ? "PASS" : "FAIL"}**`,
       `- Model: \`${model}\``,
@@ -299,6 +305,14 @@ async function activePreflightRun(): Promise<void> {
   }
 }
 
-await discoveryRun();
-await activePreflightRun();
-console.log("Fresh startup discovery and active-session Guide preflight both passed their sealed contracts.");
+const mode = process.argv[2] ?? "all";
+if (!["all", "discovery-only", "active-only"].includes(mode)) {
+  throw new Error("Usage: run-guide-preflight-model-test.ts [all|discovery-only|active-only]");
+}
+if (mode !== "active-only") await discoveryRun();
+if (mode !== "discovery-only") await activePreflightRun();
+console.log(mode === "active-only"
+  ? "Fresh active-session Guide preflight passed its sealed contract."
+  : mode === "discovery-only"
+    ? "Fresh startup discovery passed its sealed contract."
+    : "Fresh startup discovery and active-session Guide preflight both passed their sealed contracts.");

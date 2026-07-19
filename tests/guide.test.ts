@@ -107,6 +107,8 @@ test("GUIDE PREFLIGHT: active work distinguishes blocked successors from explici
   assert.match(status, new RegExp(`Current bounded session: ${active.id} — produce — brief \\(1/6\\)`));
   assert.match(status, /Named condition: Every declared phase has not advanced/);
   assert.match(status, /dependent successor is blocked until every named predecessor has pushed close or halt evidence/);
+  assert.match(status, /Guide may discuss or preserve a future idea now/);
+  assert.match(status, /Starting a dependent successor still waits for pushed close or halt/);
   assert.match(status, /independent sibling may be confirmed only with an explicit --independent classification/);
   assert.match(status, /different kind name alone proves nothing/);
   assert.doesNotMatch(status, /NEXT SESSION BLOCKED — the current project path is still in flight/);

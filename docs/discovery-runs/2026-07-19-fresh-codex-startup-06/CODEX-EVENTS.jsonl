@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019f7c4b-7975-7680-b3a6-50e8f2980e2a"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"1. koda-c-brief\n2. koda-c-close\n3. koda-c-live\n4. koda-c-orient\n5. koda-c-plan\n6. koda-c-produce\n7. koda-c-review\n8. koda-c-session\n9. koda-c-session-prompt\n10. koda-c-summary\n\nTotal: 10\n\nRepository guidance: Keep repository-local skills only under `.agents/skills/`; never install Koda-C skills globally while developing this project.\n\nDISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY."}}
+{"type":"turn.completed","usage":{"input_tokens":13793,"cached_input_tokens":9984,"output_tokens":120,"reasoning_output_tokens":0}}

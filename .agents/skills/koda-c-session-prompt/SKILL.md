@@ -29,6 +29,8 @@ Kristian supplies intent, priorities, constraints, product judgments, and confir
 
 During active sessions, keep project-level conversation open. Draft an additional prompt only after the relationship classification above permits it. A conceptually later idea is a dependent successor and waits; a genuinely independent sibling may proceed. If a thought becomes direction for an active path, preserve Kristian's exact words as `owner-via-guide` waiting evidence through `koda direction wait --session <session-id>`; it may enter Producer input only after that session's next successful gate. Never use pause-inject-resume.
 
+Whenever a dependent successor is refused, give Kristian all three parts in plain language before stopping: no prompt or launch was created; the future idea may still be discussed, explored, or preserved in Guide now; starting it must wait for every named predecessor's pushed close or for an explicit pushed halt. Do not let a technically correct refusal make the ongoing Guide conversation appear closed.
+
 Write one draft under `<parent-of-sessionsDir>/guide/prompts/` with this exact shape:
 
 ```markdown

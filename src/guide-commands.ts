@@ -169,6 +169,7 @@ export async function runGuideCli(
         }
       }
       io.out("A dependent successor is blocked until every named predecessor has pushed close or halt evidence.");
+      io.out("Guide may discuss or preserve a future idea now. Starting a dependent successor still waits for pushed close or halt.");
       if (pending.length === 0) {
         io.out("An independent sibling may be confirmed only with an explicit --independent classification; a different kind name alone proves nothing.");
       } else {

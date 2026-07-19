@@ -1095,3 +1095,27 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Correction:** The fixture now contains a minimal internally hash-bound toolkit
   proof before its snapshot. A permanent contract assertion requires it. Both the
   discovery and active-preflight retry use new immutable IDs.
+
+## 2026-07-19 — Fresh discovery 06 passed; Guide preflight 03 found a conversation miss
+
+- **Discovery:** Sol/low again reported all ten local skills and the placement rule
+  with zero tools or reads. **PASS.**
+- **Active preflight:** With toolkit readiness valid, Sol/medium ran Guide status,
+  classified the request as a dependent successor, named the active session at Brief,
+  refused every mutation, named pushed close or halt, and changed no file. It did not
+  tell the owner that the idea could still be discussed or preserved in Guide now.
+- **Historical-contract mismatch:** The original sealed contract also required the
+  old global header `NEXT SESSION BLOCKED`. The owner later permitted explicitly
+  independent siblings, so the current truthful status says `ACTIVE PROJECT WORK`
+  while separately blocking dependent successors. Contract 01 and this failed run
+  remain unchanged and are not rescored.
+- **Correction and reseal:** Guide status and `koda-c-session-prompt` now explicitly
+  keep future-idea conversation open while refusing its start. A new
+  [plural-session contract](guide-preflight-runs/CONTRACT-02.md) is sealed around the
+  current product semantics. The runner binds its hash and supports an active-only
+  rerun so a passing discovery need not be spent again.
+- **Deterministic validation:** The updated skill passed Codex's package validator;
+  focused Guide, skill, security, toolkit, and judge checks passed **54/54**; the
+  complete living suite passed **197/197** against a temporary uncommitted integrity
+  bootstrap. The committed manifest intentionally stays stale until pushed-code proof
+  exists.

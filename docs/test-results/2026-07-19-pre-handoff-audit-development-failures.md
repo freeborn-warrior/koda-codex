@@ -60,6 +60,33 @@ pattern with hyphens without the argument terminator, so `rg` treated the patter
 an option and ran no scan. The corrected command used `--`; it completed with no
 matching evidence file. No result was inferred from the failed invocation.
 
+## Discovery 06 passed; active Guide preflight 03 exposed a conversation miss
+
+Discovery 06 repeated the complete 10/10, zero-tool, zero-read pass. In the corrected
+fixture, Sol/medium then reached the intended active-session route. It classified the
+request as a dependent successor, named the exact active session and Brief phase,
+refused to create anything, named pushed close or halt, and preserved every file. It
+still omitted one owner-facing requirement: Guide conversation about the future idea
+could continue now even though the session could not start.
+
+The run also failed the original contract's exact `NEXT SESSION BLOCKED` header. That
+header was truthful for the earlier globally serialized product, but Kristian later
+ruled that explicitly independent sibling sessions may coexist. The current CLI
+correctly says `ACTIVE PROJECT WORK` and separately says dependent successors are
+blocked. The old contract and failed run remain immutable; neither is retroactively
+changed or passed.
+
+The product now states the conversational option in both deterministic Guide status
+and the session-prompt skill. Contract 02 is a new pre-run seal for the current plural
+session semantics, and the runner binds its hash. An active-only mode avoids repeating
+the already-passing discovery while retaining new immutable preflight evidence.
+
+The changed skill passed Codex's validator. Focused Guide, skill, security, toolkit,
+and judge checks passed **54/54**, and the complete deterministic suite passed
+**197/197** using a temporary integrity bootstrap. That bootstrap was restored before
+commit; the repository must continue to report the changed toolkit as stale until the
+code is pushed and a new post-push transcript can honestly bind it.
+
 ## Complete suite — concurrent Git-lock release race
 
 The first complete run after the runner correction passed **194/195**. The failing
