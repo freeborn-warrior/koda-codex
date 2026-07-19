@@ -15,7 +15,7 @@ and Guide must have:
 2. shown Kristian that exact prompt in plain language;
 3. received Kristian's explicit confirmation;
 4. committed and pushed the prompt, Guide snapshot, and launch request; and
-5. passed `node dist/cli.js guide verify`.
+5. passed `koda guide verify` through the project's trusted Koda-C package.
 
 If any item is missing, do not improvise a terminal command. Guide fixes or
 names the missing evidence first.
@@ -30,20 +30,34 @@ names the missing evidence first.
 
 ### The one launch action
 
-The intended three-context start now has one opt-in command after Guide has created, confirmed, committed, and pushed a fresh `READY_TO_LAUNCH` prompt:
+Window G is a real interactive Codex Guide, not a shell window pretending to be
+Guide. Start Codex in the target project, let it reconstruct status from disk,
+then speak to it in ordinary language. Kristian should not paste a shell command
+into the Codex conversation.
+
+For the current sealed verification run, the one terminal command that starts
+Window G is recorded in that run's `OWNER-STEPS.md`. It starts Guide only; it does
+not launch the session.
+
+Once Guide reports the exact verified launch ID, Kristian says in Window G:
+
+> Launch that verified session now in Ghostty with the sealed Producer and
+> Reviewer staffing. Do not create or select any other launch.
+
+Guide then invokes the underlying opt-in command after revalidating disk:
 
 ```bash
-node dist/cli.js guide launch --producer-model gpt-5.6-sol --producer-effort medium --reviewer-model gpt-5.6-terra --reviewer-effort medium --open ghostty
+koda guide launch --producer-model gpt-5.6-sol --producer-effort medium --reviewer-model gpt-5.6-terra --reviewer-effort medium --open ghostty
 ```
 
-Guide gives Kristian this exact command only when the five checks above pass.
-Kristian pastes it into Window G and presses Return once. It should leave Guide
-open, then request a labeled Reviewer window first and a labeled Producer window
-second.
+That technical command is evidence and a recovery surface, not an owner
+conversation message. Guide runs it once from the target project. It should leave
+Guide open, then request a labeled Reviewer window first and a labeled Producer
+window second.
 
 After pressing Return:
 
-1. Do not type the command again.
+1. Do not ask Guide to launch again.
 2. Wait for Window B to say `KODA-C REVIEWER WINDOW` and `Owner input: OPEN`.
 3. Wait for Window A to say `KODA-C PRODUCER WINDOW` and `Owner input: CLOSED`.
 4. Leave Window A alone. Watching is safe; typing is not part of the workflow.
@@ -58,7 +72,7 @@ yet been watched by Kristian on screen. If either requested window does not
 appear, do not repeat the launch command. In Window G, paste exactly:
 
 ```bash
-node dist/cli.js guide status
+koda guide status
 ```
 
 Then use only the one recovery command Koda prints. A blind retry refuses because

@@ -832,3 +832,11 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Verification:** `koda guide verify` returned `READY TO LAUNCH` and confirmed prompt, continuity, and prior-session evidence still match owner confirmation.
 - **Boundary:** Runtime preparation and automatic Ghostty opening remain deliberately unstarted. The next step requires Kristian to be present and receive one human action at a time.
 - **Verdict:** GUIDE HANDOVER PASS; OWNER-OBSERVED THREE-WINDOW LAUNCH NEXT.
+
+## 2026-07-19 — Guide-window owner instruction correction
+
+- **Variant:** Installed Codex CLI `0.144.6` help plus owner-instruction review. No Codex task, runtime, session, model turn, or Ghostty role window was started.
+- **Problem found:** The general Ghostty guide correctly required an ongoing conversational Guide, but then told Kristian to paste the underlying shell launch command into Window G. A Codex conversation expects ordinary language, so this recreated the shell-versus-chat ambiguity from the historical two-window test.
+- **Correction:** The current run now gives exactly one terminal command: start interactive Codex in the isolated project with `-C`, Sol, medium effort, and a bounded Guide-only prompt. After disk status appears, Kristian speaks to Guide in plain language; Guide invokes the technical launch command. The owner never assembles a run path or pastes shell into a Codex prompt.
+- **Source boundary:** Installed Codex CLI `0.144.6` locally confirms `-C`, `-m`, `-c`, and an optional starting prompt. Its local model catalog confirms both `gpt-5.6-sol` and `gpt-5.6-terra` support medium effort. The official Codex manual fetch failed because the sandbox could not resolve `developers.openai.com`; no undocumented flag was invented. The exact local command remains subject to owner observation in Ghostty.
+- **Verdict:** INSTRUCTION AMBIGUITY CORRECTED; OWNER STEP 1 READY.
