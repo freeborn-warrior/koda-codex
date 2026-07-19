@@ -2,9 +2,17 @@ import { lstat, mkdir, readdir, readFile, rename, unlink, writeFile } from "node
 import path from "node:path";
 
 
+
+
+
+
+
+
+
 import { assertSafeSessionsDirectory, pathExists, validatePhaseChain } from "./config.js";
 
-const SESSION_PATTERN = /^(\d{4}-\d{2}-\d{2})-(\d{2})$/;
+export const SESSION_PATTERN = /^(\d{4}-\d{2}-\d{2})-(\d{2})$/;
+const SESSION_KIND_PATTERN = /^[a-z][a-z0-9-]{0,31}$/;
 
 export function now()       {
   const override = process.env.KODA_NOW;
@@ -102,13 +110,39 @@ export async function createSession(
   root        ,
   config               ,
   prompt        ,
-  options                                             = {},
+  options
+
+
+
+
+    = {},
 )                                                                  {
   if (prompt.trim() === "") {
     throw new Error("The session prompt must exist and be non-empty.");
   }
   validatePhaseChain(config.phases);
   await assertSafeSessionsDirectory(root, config);
+  const kind = options.kind ?? "produce";
+  if (!SESSION_KIND_PATTERN.test(kind)) {
+    throw new Error("Session kind must start with a lowercase letter and contain only lowercase letters, digits, or hyphens (32 characters maximum).");
+  }
+  const dependencies = options.dependencies ?? [];
+  const dependencyIds = new Set        ();
+  for (const dependency of dependencies) {
+    if (
+      !SESSION_PATTERN.test(dependency.sessionId) ||
+      (dependency.terminal !== "close" && dependency.terminal !== "halt") ||
+      !/^[0-9a-f]{64}$/.test(dependency.evidenceSha256) ||
+      dependencyIds.has(dependency.sessionId)
+    ) {
+      throw new Error("Session dependencies must contain unique session IDs, terminal kinds, and SHA-256 evidence hashes.");
+    }
+    dependencyIds.add(dependency.sessionId);
+  }
+  const launchMode = options.launchMode ?? (dependencies.length > 0 ? "dependent" : "independent");
+  if (launchMode === "dependent" && dependencies.length === 0) {
+    throw new Error("A dependent session must name at least one terminal dependency.");
+  }
 
   const id = await nextSessionId(root, config);
   const directory = sessionRoot(root, config, id);
@@ -122,6 +156,9 @@ export async function createSession(
     phases: config.phases.map((phase) => ({ ...phase })),
     currentPhaseIndex: 0,
     advances: [],
+    kind,
+    launchMode,
+    dependencies: dependencies.map((dependency) => ({ ...dependency })),
     ...(options.entryDirections?.length
       ? { entryDirections: options.entryDirections.map((direction) => ({ ...direction })) }
       : {}),
@@ -160,6 +197,31 @@ export function validateSessionState(value         , expectedId         )       
   }
   if (!Array.isArray(state.advances)) {
     throw new Error("state.json has no advancement history.");
+  }
+  if (state.kind !== undefined && (typeof state.kind !== "string" || !SESSION_KIND_PATTERN.test(state.kind))) {
+    throw new Error("state.json has an invalid session kind.");
+  }
+  if (
+    state.launchMode !== undefined &&
+    state.launchMode !== "independent" && state.launchMode !== "dependent" && state.launchMode !== "continuation"
+  ) {
+    throw new Error("state.json has an invalid session launch mode.");
+  }
+  if (state.dependencies !== undefined) {
+    if (!Array.isArray(state.dependencies)) throw new Error("state.json dependencies must be an array.");
+    const dependencyIds = new Set        ();
+    for (const dependency of state.dependencies) {
+      if (
+        !dependency || typeof dependency.sessionId !== "string" || !SESSION_PATTERN.test(dependency.sessionId) ||
+        (dependency.terminal !== "close" && dependency.terminal !== "halt") ||
+        typeof dependency.evidenceSha256 !== "string" || !/^[0-9a-f]{64}$/.test(dependency.evidenceSha256) ||
+        dependencyIds.has(dependency.sessionId)
+      ) throw new Error("state.json has an invalid or duplicate session dependency.");
+      dependencyIds.add(dependency.sessionId);
+    }
+    if (state.launchMode === "dependent" && state.dependencies.length === 0) {
+      throw new Error("state.json declares a dependent launch without dependencies.");
+    }
   }
   if (state.advances.length !== state.currentPhaseIndex) {
     throw new Error("state.json advancement history does not match the current phase.");
@@ -228,6 +290,17 @@ export async function loadLatestSession(
     throw new Error("No session exists. Start one with `koda session new <prompt-file>`." );
   }
   const directory = sessionRoot(root, config, id);
+  return { id, directory, state: await loadSessionState(directory, id) };
+}
+
+export async function loadSession(
+  root        ,
+  config               ,
+  id        ,
+)                                                                  {
+  if (!SESSION_PATTERN.test(id)) throw new Error(`Invalid session ID: ${id}.`);
+  const directory = sessionRoot(root, config, id);
+  if (!(await pathExists(directory))) throw new Error(`Session not found: ${id}.`);
   return { id, directory, state: await loadSessionState(directory, id) };
 }
 

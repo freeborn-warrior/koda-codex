@@ -33,6 +33,14 @@ export interface DirectionReference {
   sha256: string;
 }
 
+export type SessionLaunchMode = "independent" | "dependent" | "continuation";
+
+export interface SessionDependency {
+  sessionId: string;
+  terminal: "close" | "halt";
+  evidenceSha256: string;
+}
+
 export interface SessionState {
   version: 1;
   id: string;
@@ -41,6 +49,9 @@ export interface SessionState {
   currentPhaseIndex: number;
   advances: AdvanceRecord[];
   entryDirections?: DirectionReference[];
+  kind?: string;
+  launchMode?: SessionLaunchMode;
+  dependencies?: SessionDependency[];
 }
 
 export interface CloseMetadata {

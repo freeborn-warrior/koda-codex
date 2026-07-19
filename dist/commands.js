@@ -30,13 +30,13 @@ import {
   displayPath,
   latestSessionId,
   ledgerPath,
+  listSessionIds,
   loadLatestSession,
-  loadSessionState,
+  loadSession,
   nowIso,
   readRegularText,
   reviewPath,
   saveSessionState,
-  sessionRoot,
   statePath,
   writeJsonAtomic,
   writeTextAtomic,
@@ -49,6 +49,14 @@ import {
   recordApproval,
   sha256,
 } from "./receipt.js";
+
+
+
+
+
+
+
+
 
 
 const packageRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -103,9 +111,86 @@ function flag(args          , name        )          {
   return true;
 }
 
+function repeatedOption(args          , name        )           {
+  const values           = [];
+  while (args.includes(name)) values.push(option(args, name) );
+  return values;
+}
+
 function rejectUnknownOptions(args          )       {
   const unknown = args.find((value) => value.startsWith("--"));
   if (unknown) throw new Error(`Unknown option: ${unknown}`);
+}
+
+
+
+async function terminalEvidence(
+  root        ,
+  session               ,
+)                                                                         {
+  const closure = await evaluateSessionClosure(root, session.directory, session.state);
+  if (closure.closed) {
+    return { terminal: "close", evidenceSha256: sha256(await readRegularText(closePath(session.directory), "close.md")) };
+  }
+  const halt = await evaluateSessionHalt(root, session.directory, session.state);
+  if (halt.halted) {
+    return { terminal: "halt", evidenceSha256: sha256(await readRegularText(haltPath(session.directory), "halt.md")) };
+  }
+  return null;
+}
+
+async function unfinishedSessions(root        , config               )                           {
+  const unfinished                  = [];
+  for (const id of await listSessionIds(root, config)) {
+    const session = await loadSession(root, config, id);
+    if (!(await terminalEvidence(root, session))) unfinished.push(session);
+  }
+  return unfinished;
+}
+
+function requestedSession(args          )                {
+  const fromOption = option(args, "--session");
+  const fromEnvironment = process.env.KODA_SESSION_ID?.trim() || null;
+  if (fromOption && fromEnvironment && fromOption !== fromEnvironment) {
+    throw new Error(`--session ${fromOption} conflicts with KODA_SESSION_ID=${fromEnvironment}.`);
+  }
+  return fromOption ?? fromEnvironment;
+}
+
+async function validateSessionDependencies(root        , config               , session               )                {
+  for (const dependency of session.state.dependencies ?? []) {
+    const source = await loadSession(root, config, dependency.sessionId);
+    const current = await terminalEvidence(root, source);
+    if (!current) throw new Error(`Session ${session.id} dependency ${source.id} is no longer pushed-terminal.`);
+    if (current.terminal !== dependency.terminal || current.evidenceSha256 !== dependency.evidenceSha256) {
+      throw new Error(`Session ${session.id} dependency ${source.id} terminal evidence changed; entry is stale.`);
+    }
+  }
+}
+
+async function selectedSession(
+  root        ,
+  config               ,
+  id               ,
+)                         {
+  if (id) {
+    const selected = await loadSession(root, config, id);
+    await validateSessionDependencies(root, config, selected);
+    return selected;
+  }
+  const unfinished = await unfinishedSessions(root, config);
+  if (unfinished.length > 1) {
+    throw new Error(
+      `More than one session is active; session identity is required:\n- ${unfinished.map((item) => item.id).join("\n- ")}\nRun the command again with --session <session-id>.`,
+    );
+  }
+  const selected = unfinished[0] ?? await loadLatestSession(root, config);
+  await validateSessionDependencies(root, config, selected);
+  return selected;
+}
+
+function sessionCommand(sessionId        , ...parts          )         {
+  return command(...parts, "--session", sessionId);
 }
 
 async function initCommand(args          , cwd        , io       )                {
@@ -146,8 +231,17 @@ async function initCommand(args          , cwd        , io       )              
 }
 
 async function sessionNewCommand(args          , cwd        , io       )                {
+  const kind = option(args, "--kind") ?? "produce";
+  const dependencyIds = repeatedOption(args, "--depends-on")
+    .flatMap((value) => value.split(","))
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const independent = flag(args, "--independent");
   rejectUnknownOptions(args);
-  if (args.length !== 1) throw new Error("Usage: koda session new <prompt-file>");
+  if (args.length !== 1) {
+    throw new Error("Usage: koda session new <prompt-file> [--kind <kind>] [--depends-on <session-id>] [--independent]");
+  }
+  if (new Set(dependencyIds).size !== dependencyIds.length) throw new Error("A session dependency may be named only once.");
 
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
@@ -156,31 +250,67 @@ async function sessionNewCommand(args          , cwd        , io       )        
   const prompt = await readRegularText(promptPath, "The session prompt");
   if (prompt.trim() === "") throw new Error("The session prompt must be non-empty.");
 
-  const previousId = await latestSessionId(root, config);
-  let entryDirections                       = [];
-  let priorHaltId                = null;
-  if (previousId) {
-    const previousDir = sessionRoot(root, config, previousId);
-    const previous = await loadSessionState(previousDir, previousId);
-    const closure = await evaluateSessionClosure(root, previousDir, previous);
-    const halt = await evaluateSessionHalt(root, previousDir, previous);
-    if (!closure.closed && !halt.halted) {
+  const active = await unfinishedSessions(root, config);
+  const activeIds = new Set(active.map((session) => session.id));
+  const activeDependencies = dependencyIds.filter((id) => activeIds.has(id));
+  if (activeDependencies.length > 0) {
+    throw new Error(
+      `A dependent session cannot start until every named dependency has a pushed close or pushed halt:\n- ${activeDependencies.join("\n- ")}`,
+    );
+  }
+  if (active.length > 0 && !independent) {
+    const namedReasons           = [];
+    for (const session of active) {
+      const closure = await evaluateSessionClosure(root, session.directory, session.state);
+      const halt = await evaluateSessionHalt(root, session.directory, session.state);
       const reasons = halt.exists ? halt.reasons : closure.reasons;
-      throw new Error(`Session ${previousId} is neither closed nor pushed-halted:\n- ${reasons.join("\n- ")}`);
+      namedReasons.push(`${session.id}: ${reasons.join("; ")}`);
     }
-    if (halt.halted && halt.metadata) {
-      priorHaltId = halt.metadata.id;
-      entryDirections = await carryPendingDirectionsAfterHalt(previousDir, previous);
-      const requiredIds = [halt.metadata.id, ...entryDirections.map((direction) => direction.id)];
+    throw new Error(
+      `Session ${active.map((session) => session.id).join(", ")} is neither closed nor pushed-halted:\n- ${namedReasons.join("\n- ")}\nIndependent sessions are allowed, but intent must be explicit while other work is active:\n- ${active.map((session) => `${session.id} (${session.state.kind ?? "produce"})`).join("\n- ")}\nUse --independent for a sibling workstream, or wait and use --depends-on after its pushed terminal evidence exists.`,
+    );
+  }
+
+  let dependencySources                  = [];
+  if (dependencyIds.length > 0) {
+    dependencySources = await Promise.all(dependencyIds.map((id) => loadSession(root, config, id)));
+  } else if (!independent && active.length === 0) {
+    const previousId = await latestSessionId(root, config);
+    if (previousId) dependencySources = [await loadSession(root, config, previousId)];
+  }
+
+  const dependencies                      = [];
+  let entryDirections                       = [];
+  const priorHaltIds           = [];
+  for (const source of dependencySources) {
+    const terminal = await terminalEvidence(root, source);
+    if (!terminal) {
+      const closure = await evaluateSessionClosure(root, source.directory, source.state);
+      const halt = await evaluateSessionHalt(root, source.directory, source.state);
+      const reasons = halt.exists ? halt.reasons : closure.reasons;
+      throw new Error(`Session ${source.id} is neither closed nor pushed-halted:\n- ${reasons.join("\n- ")}`);
+    }
+    dependencies.push({ sessionId: source.id, ...terminal });
+    if (terminal.terminal === "halt") {
+      const halt = await evaluateSessionHalt(root, source.directory, source.state);
+      if (!halt.metadata) throw new Error(`Session ${source.id} has invalid halt evidence.`);
+      priorHaltIds.push(halt.metadata.id);
+      const directions = await carryPendingDirectionsAfterHalt(source.directory, source.state);
+      entryDirections.push(...directions);
+      const requiredIds = [halt.metadata.id, ...directions.map((direction) => direction.id)];
       const missing = requiredIds.filter((id) => !prompt.includes(id));
       if (missing.length > 0) {
         throw new Error(`The fresh session prompt must cite the pushed halt and every waiting direction ID:\n- ${missing.join("\n- ")}`);
       }
     } else {
-      entryDirections = await carryDirectionsForNextSession(previousDir, previous);
-      const missing = entryDirections.map((direction) => direction.id).filter((id) => !prompt.includes(id));
+      const directions = await carryDirectionsForNextSession(source.directory, source.state);
+      entryDirections.push(...directions);
+      const missing = directions.map((direction) => direction.id).filter((id) => !prompt.includes(id));
       if (missing.length > 0) {
-        throw new Error(`The new session prompt must cite every direction released at the prior session boundary:\n- ${missing.join("\n- ")}`);
+        const boundary = dependencyIds.length === 0
+          ? "at the prior session boundary"
+          : `by dependency ${source.id}`;
+        throw new Error(`The new session prompt must cite every direction released ${boundary}:\n- ${missing.join("\n- ")}`);
       }
     }
   }
@@ -188,23 +318,31 @@ async function sessionNewCommand(args          , cwd        , io       )        
   const guideLaunch = await hasGuideManifest(root, config)
     ? await verifyGuideLaunch(root, config, promptPath)
     : null;
-  const session = await createSession(root, config, prompt, { entryDirections });
+  const session = await createSession(root, config, prompt, {
+    entryDirections,
+    kind,
+    dependencies,
+    launchMode: dependencies.length > 0 ? (dependencyIds.length > 0 ? "dependent" : "continuation") : "independent",
+  });
   if (guideLaunch) await bindGuideLaunch(root, config, guideLaunch, session.id, session.state);
   io.out(`✓ Opened session ${session.id}`);
+  io.out(`Kind: ${session.state.kind}`);
+  io.out(`Launch: ${session.state.launchMode}`);
+  if (dependencies.length > 0) io.out(`Dependencies: ${dependencies.map((item) => item.sessionId).join(", ")}`);
   io.out(`Prompt: ${displayPath(root, path.join(session.directory, "session-prompt.md"))}`);
   io.out(`Current phase: ${session.state.phases[0].name}`);
   if (entryDirections.length > 0) io.out(`Waiting directions entering Brief: ${entryDirections.length}`);
-  if (priorHaltId) io.out(`Fresh Brief after pushed halt: ${priorHaltId}`);
+  for (const priorHaltId of priorHaltIds) io.out(`Fresh Brief after pushed halt: ${priorHaltId}`);
   io.out(`Write the artifact: ${displayPath(root, artifactPath(session.directory, session.state.phases[0], 0))}`);
 }
 
-function gateNextStep(root        , result            )           {
+function gateNextStep(root        , sessionId        , result            )           {
   const codes = new Set(result.issues.map((item) => item.code));
   if (codes.has("artifact_missing") || codes.has("artifact_empty") || codes.has("artifact_not_regular")) {
     return [`Write a non-empty artifact at: ${displayPath(root, result.artifactPath)}`];
   }
   if (codes.has("review_missing")) {
-    return ["Create the peer-review template:", `  ${command("review", "new", result.phase.name)}`];
+    return ["Create the peer-review template:", `  ${sessionCommand(sessionId, "review", "new", result.phase.name)}`];
   }
   if (
     codes.has("direction_input_missing") ||
@@ -224,41 +362,39 @@ function gateNextStep(root        , result            )           {
     codes.has("verdict_reject") ||
     codes.has("verdict_discuss")
   ) {
-    return ["After resolving the finding, create a fresh review and receipt:", `  ${command("review", "new", result.phase.name)}`];
+    return ["After resolving the finding, create a fresh review and receipt:", `  ${sessionCommand(sessionId, "review", "new", result.phase.name)}`];
   }
   if (codes.has("approval_missing") || codes.has("ledger_missing")) {
     return [
       `Read ${displayPath(root, result.reviewPath)} through its final RECEIPT line.`,
       "Then run this command; it will ask you to quote that line:",
-      `  ${command("approve", result.phase.name, "--approver", "Owner")}`,
+      `  ${sessionCommand(sessionId, "approve", result.phase.name, "--approver", "Owner")}`,
     ];
   }
   return [];
 }
 
-function printClosedGate(root        , result            , io       )       {
+function printClosedGate(root        , sessionId        , result            , io       )       {
   io.out(`GATE CLOSED — ${result.phase.name.toUpperCase()}`);
   for (const finding of result.issues) io.out(`✗ ${finding.message}`);
   io.out("Nothing advanced.");
-  const next = gateNextStep(root, result);
+  const next = gateNextStep(root, sessionId, result);
   if (next.length) {
     io.out("");
     for (const line of next) io.out(line);
   }
 }
 
-async function statusCommand(args          , cwd        , io       )                {
-  rejectUnknownOptions(args);
-  if (args.length !== 0) throw new Error("Usage: koda status");
-  const root = await findProjectRoot(cwd);
-  const config = await readProjectConfig(root);
-  const session = await loadLatestSession(root, config);
+async function printSessionStatus(root        , session               , io       )                {
   const active = currentPhase(session.state);
-
-  io.out(`KODA — ${session.id}`);
+  io.out(`KODA — ${session.id} — ${session.state.kind ?? "produce"}`);
+  io.out(`Launch: ${session.state.launchMode ?? "legacy"}`);
+  if ((session.state.dependencies ?? []).length > 0) {
+    io.out(`Dependencies: ${session.state.dependencies .map((item) => item.sessionId).join(", ")}`);
+  }
   const halt = await evaluateSessionHalt(root, session.directory, session.state);
   if (halt.exists) {
-    io.out(halt.halted ? "SESSION HALTED — fresh Brief may open" : "HALT PREPARED — SESSION NOT YET HALTED");
+    io.out(halt.halted ? "SESSION HALTED — dependent work may open" : "HALT PREPARED — SESSION NOT YET HALTED");
     for (const reason of halt.reasons) io.out(`✗ ${reason}`);
     return;
   }
@@ -281,11 +417,38 @@ async function statusCommand(args          , cwd        , io       )            
   const result = await evaluateGate(session.directory, active.phase, active.index);
   io.out(result.open ? "GATE OPEN — ready to advance" : `GATE CLOSED — ${result.issues.length} requirement(s) missing`);
   for (const finding of result.issues) io.out(`✗ ${finding.message}`);
-  for (const line of gateNextStep(root, result)) io.out(line);
+  for (const line of gateNextStep(root, session.id, result)) io.out(line);
+}
+
+async function statusCommand(args          , cwd        , io       )                {
+  const sessionId = requestedSession(args);
+  rejectUnknownOptions(args);
+  if (args.length !== 0) throw new Error("Usage: koda status [--session <session-id>]");
+  const root = await findProjectRoot(cwd);
+  const config = await readProjectConfig(root);
+  if (sessionId) {
+    await printSessionStatus(root, await selectedSession(root, config, sessionId), io);
+    return;
+  }
+  const unfinished = await unfinishedSessions(root, config);
+  if (unfinished.length <= 1) {
+    const selected = unfinished[0] ?? await loadLatestSession(root, config);
+    await validateSessionDependencies(root, config, selected);
+    await printSessionStatus(root, selected, io);
+    return;
+  }
+  io.out(`KODA PROJECT — ${unfinished.length} ACTIVE SESSIONS`);
+  io.out("Session identity is explicit; use --session <session-id> for any mutation.");
+  for (const session of unfinished) {
+    await validateSessionDependencies(root, config, session);
+    io.out("");
+    await printSessionStatus(root, session, io);
+  }
 }
 
 async function directionWaitCommand(args          , cwd        , io       )                {
   const source = option(args, "--source") ?? "owner-via-guide";
+  const sessionId = requestedSession(args);
   rejectUnknownOptions(args);
   if (args.length !== 2) {
     throw new Error("Usage: koda direction wait <owner-message-file> <classification-file> [--source owner-via-guide|owner-via-reviewer]");
@@ -295,7 +458,7 @@ async function directionWaitCommand(args          , cwd        , io       )     
   }
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
-  const session = await loadLatestSession(root, config);
+  const session = await selectedSession(root, config, sessionId);
   if (await pathExists(haltPath(session.directory))) throw new Error("Session halt is already prepared; no new direction may enter it.");
   await requireAdvancedHistory(session.directory, session.state);
   if (!currentPhase(session.state)) throw new Error("No active phase can receive waiting direction.");
@@ -317,11 +480,12 @@ async function directionWaitCommand(args          , cwd        , io       )     
 }
 
 async function reviewNewCommand(args          , cwd        , io       )                {
+  const sessionId = requestedSession(args);
   rejectUnknownOptions(args);
   if (args.length !== 1) throw new Error("Usage: koda review new <phase>");
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
-  const session = await loadLatestSession(root, config);
+  const session = await selectedSession(root, config, sessionId);
   if (await pathExists(haltPath(session.directory))) throw new Error("Session halt is already prepared; no review may be created.");
   await requireAdvancedHistory(session.directory, session.state);
   const active = currentPhase(session.state);
@@ -339,6 +503,7 @@ async function approveCommand(args          , cwd        , io       )           
   const approver = option(args, "--approver") ?? "Owner";
   let comments = option(args, "--comments");
   let ruling = option(args, "--ruling");
+  const sessionId = requestedSession(args);
   rejectUnknownOptions(args);
   if (args.length < 1 || args.length > 2) {
     throw new Error("Usage: koda approve <phase> [quoted-receipt] [--approver <name>] [--comments <text>] [--ruling <text>]");
@@ -347,7 +512,7 @@ async function approveCommand(args          , cwd        , io       )           
 
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
-  const session = await loadLatestSession(root, config);
+  const session = await selectedSession(root, config, sessionId);
   if (await pathExists(haltPath(session.directory))) throw new Error("Session halt is already prepared; no review may be approved.");
   await requireAdvancedHistory(session.directory, session.state);
   const active = currentPhase(session.state);
@@ -409,19 +574,20 @@ async function approveCommand(args          , cwd        , io       )           
 
   if (parsed.verdict === "APPROVE" || parsed.verdict === "APPROVE WITH COMMENTS") {
     io.out("The verdict permits advancement. Run:");
-    io.out(`  ${command("advance")}`);
+    io.out(`  ${sessionCommand(session.id, "advance")}`);
   } else {
     io.out(`${parsed.verdict} still blocks advancement. Resolve it, then create a fresh review:`);
-    io.out(`  ${command("review", "new", active.phase.name)}`);
+    io.out(`  ${sessionCommand(session.id, "review", "new", active.phase.name)}`);
   }
 }
 
 async function advanceCommand(args          , cwd        , io       )                {
+  const sessionId = requestedSession(args);
   rejectUnknownOptions(args);
   if (args.length !== 0) throw new Error("Usage: koda advance");
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
-  const session = await loadLatestSession(root, config);
+  const session = await selectedSession(root, config, sessionId);
   if (await pathExists(haltPath(session.directory))) throw new Error("Session halt is already prepared; no phase may advance.");
   await requireAdvancedHistory(session.directory, session.state);
   const active = currentPhase(session.state);
@@ -429,7 +595,7 @@ async function advanceCommand(args          , cwd        , io       )           
 
   const result = await evaluateGate(session.directory, active.phase, active.index);
   if (!result.open || !result.review?.metadata || !result.review.receipt) {
-    printClosedGate(root, result, io);
+    printClosedGate(root, session.id, result, io);
     process.exitCode = 2;
     return;
   }
@@ -460,16 +626,17 @@ async function advanceCommand(args          , cwd        , io       )           
     io.out(`Write the artifact: ${displayPath(root, artifactPath(session.directory, next.phase, next.index))}`);
   } else {
     io.out("All phases are complete. Prepare the immutable close artifact:");
-    io.out(`  ${command("session", "close")}`);
+    io.out(`  ${sessionCommand(session.id, "session", "close")}`);
   }
 }
 
 async function sessionCloseCommand(args          , cwd        , io       )                {
+  const sessionId = requestedSession(args);
   rejectUnknownOptions(args);
   if (args.length !== 0) throw new Error("Usage: koda session close");
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
-  const session = await loadLatestSession(root, config);
+  const session = await selectedSession(root, config, sessionId);
   if (await pathExists(haltPath(session.directory))) throw new Error("A halted session cannot run the close ceremony.");
   if (session.state.currentPhaseIndex !== session.state.phases.length) {
     io.out(`SESSION NOT CLOSED — ${session.id}`);
@@ -508,11 +675,12 @@ async function sessionCloseCommand(args          , cwd        , io       )      
 }
 
 async function sessionHaltCommand(args          , cwd        , io       )                {
+  const sessionId = requestedSession(args);
   rejectUnknownOptions(args);
   if (args.length > 1) throw new Error("Usage: koda session halt [owner-direction-file]");
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
-  const session = await loadLatestSession(root, config);
+  const session = await selectedSession(root, config, sessionId);
   const file = haltPath(session.directory);
   if (!(await pathExists(file))) {
     if (args.length !== 1) throw new Error("Usage: koda session halt <owner-direction-file>");
@@ -532,7 +700,7 @@ async function sessionHaltCommand(args          , cwd        , io       )       
     io.out(`  git add ${shellQuote(relativeSession)}`);
     io.out(`  git commit -m ${shellQuote(`halt session ${session.id}`)}`);
     io.out(`  git ${pushArgs.map(shellQuote).join(" ")}`);
-    io.out(`  ${command("session", "halt")}`);
+    io.out(`  ${sessionCommand(session.id, "session", "halt")}`);
     process.exitCode = 2;
     return;
   }
@@ -553,16 +721,16 @@ function help(io       )       {
   io.out("");
   io.out("Commands:");
   io.out("  koda init [directory] [--demo]");
-  io.out("  koda session new <prompt-file>");
+  io.out("  koda session new <prompt-file> [--kind <kind>] [--depends-on <session-id>] [--independent]");
   io.out("  koda guide <status|confirm|cancel|bind|verify|launch>");
   io.out("  koda guide launch ... [--open ghostty]");
-  io.out("  koda status");
-  io.out("  koda review new <phase>");
-  io.out("  koda direction wait <owner-message-file> <classification-file> [--source owner-via-guide|owner-via-reviewer]");
-  io.out("  koda approve <phase> [quoted-receipt] [--approver <name>]");
-  io.out("  koda advance");
-  io.out("  koda session halt [owner-direction-file]");
-  io.out("  koda session close");
+  io.out("  koda status [--session <session-id>]");
+  io.out("  koda review new <phase> [--session <session-id>]");
+  io.out("  koda direction wait <owner-message-file> <classification-file> [--source owner-via-guide|owner-via-reviewer] [--session <session-id>]");
+  io.out("  koda approve <phase> [quoted-receipt] [--approver <name>] [--session <session-id>]");
+  io.out("  koda advance [--session <session-id>]");
+  io.out("  koda session halt [owner-direction-file] [--session <session-id>]");
+  io.out("  koda session close [--session <session-id>]");
 }
 
 export async function runCli(args          , cwd = process.cwd(), io        = defaultIo())                {

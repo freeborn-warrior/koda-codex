@@ -26,7 +26,7 @@ Turn the proved two-context session relay into a project-level experience that c
 14. [x] Settle the top-level mutation ruling: an active Produce session may not lock the whole project; Guide and unrelated project work may continue changing files.
 15. [ ] Implement exact per-workstream write sets, same-path conflict refusal, exact-path staging, and a short recoverable Git-operation lock; mutation-test attribution and crash recovery.
 16. [x] Confirm the project/session model: Produce is one session kind; independent Explore, Research, Architecture, Triage, Produce, and later sibling sessions may be active concurrently.
-17. [ ] Replace global latest-session inference with explicit session identity, kind, dependencies, aggregate project status, and dependency-scoped launch refusal while preserving every existing gate.
+17. [ ] Replace global latest-session inference with explicit session identity, kind, dependencies, aggregate project status, and dependency-scoped launch refusal while preserving every existing gate. The core CLI slice is implemented and passes 159 checks; Guide confirmation/runtime and relay routing still need migration before this is complete.
 
 ## Submission cut
 
@@ -38,7 +38,7 @@ The submission demonstration still needs one strong Produce session moving from 
 - Project and role behavior belongs in repository-local skills and plain files.
 - Owner confirmation remains required at every gate for the current target.
 - No producer input from the owner after session start; owner conversation stays with the persistent reviewer.
-- The current implementation still opens no second formal Koda session while one is active. This is an acknowledged implementation gap: the owner-approved product allows independent sibling sessions and blocks only dependent successors until pushed close or halt.
+- The core CLI now permits an explicitly declared independent sibling session, refuses ambiguous mutation without `--session`, aggregates multiple active sessions, and hash-binds pushed dependencies. Guide confirmation/runtime and the relay supervisor still carry single-session assumptions and remain an acknowledged implementation gap.
 - Every persistent product output stays inside the project repository.
 - Tests are a living product contract and may grow, but must never be weakened to hide failure.
 - Koda-C is the workflow; the CLI and terminal panes are replaceable mechanical surfaces, not the product definition.
