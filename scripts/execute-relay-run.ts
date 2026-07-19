@@ -43,6 +43,20 @@ type RoleRecord = {
   turns: number;
 };
 
+type RelaySignal = "SIGINT" | "SIGTERM";
+
+type ModelTurnInterruption = {
+  version: 1;
+  role: Role;
+  purpose: string;
+  turn: number;
+  signal: RelaySignal;
+  interruptedAt: string;
+  eventFile: string;
+  stderrFile: string;
+  threadId: string | null;
+};
+
 type RunRecord = {
   version: number;
   mode?: "fixture-copy" | "guide-project";
@@ -69,6 +83,7 @@ type RunRecord = {
   archiveCommit?: string;
   lastAction?: string;
   lastError?: string;
+  interruption?: ModelTurnInterruption;
 };
 
 class PausedRun extends Error {}
@@ -77,8 +92,27 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const twoWindow = process.argv.includes("--reviewer-window");
 const requested = process.argv.slice(2).find((argument) => argument !== "--reviewer-window");
 let stopRequested = false;
-process.once("SIGINT", () => { stopRequested = true; });
-process.once("SIGTERM", () => { stopRequested = true; });
+let stopSignal: RelaySignal | null = null;
+let activeModelChild: ReturnType<typeof spawn> | null = null;
+
+function requestStop(signal: RelaySignal): void {
+  const repeated = stopRequested;
+  stopRequested = true;
+  stopSignal ??= signal;
+  if (activeModelChild) {
+    const child = activeModelChild;
+    child.kill(repeated ? "SIGKILL" : "SIGTERM");
+    if (!repeated) {
+      const force = setTimeout(() => {
+        if (activeModelChild === child) child.kill("SIGKILL");
+      }, 2_000);
+      force.unref();
+    }
+  }
+}
+
+process.on("SIGINT", () => { requestStop("SIGINT"); });
+process.on("SIGTERM", () => { requestStop("SIGTERM"); });
 
 const runsRoot = await realpath(process.env.KODA_RELAY_RUNS_ROOT
   ? path.resolve(process.env.KODA_RELAY_RUNS_ROOT)
@@ -121,6 +155,9 @@ if (
 ) {
   throw new Error("Relay RUN.json has invalid paths or turn limit.");
 }
+if (run.interruption && !validModelTurnInterruption(run.interruption)) {
+  throw new Error("Relay RUN.json has invalid interruption evidence.");
+}
 
 const resolved = await resolveRelayRunPaths({ packageRoot: root, configuredRunsRoot: runsRoot, runRoot, run });
 const { project, runtime, cli } = resolved;
@@ -138,6 +175,39 @@ const producerResumeCommand = resolved.mode === "guide-project"
 
 function timestamp(): string {
   return new Date().toISOString();
+}
+
+function baseTurnPurpose(purpose: string): string {
+  let value = purpose;
+  while (/^reconcile interrupted turn \d+: /.test(value)) {
+    value = value.replace(/^reconcile interrupted turn \d+: /, "");
+  }
+  return value;
+}
+
+function validTurnPurpose(role: Role, purpose: string): boolean {
+  const base = baseTurnPurpose(purpose);
+  if (role === "producer") {
+    return base === "open the Koda session" ||
+      base === "prepare immutable session close" ||
+      base === "verify immutable session close" ||
+      /^(produce|revise) [a-z0-9][a-z0-9-]*$/.test(base);
+  }
+  return /^(formal|repair|fresh) review of [a-z0-9][a-z0-9-]*$/.test(base) ||
+    /^answer consultation [a-z0-9][a-z0-9.-]*\.md$/.test(base);
+}
+
+function validModelTurnInterruption(value: ModelTurnInterruption): boolean {
+  if (!["producer", "reviewer"].includes(value.role)) return false;
+  const prefix = value.role === "producer" ? "PRODUCER" : "REVIEWER";
+  return value.version === 1 &&
+    typeof value.purpose === "string" && validTurnPurpose(value.role, value.purpose) &&
+    Number.isInteger(value.turn) && value.turn > 0 &&
+    ["SIGINT", "SIGTERM"].includes(value.signal) &&
+    typeof value.interruptedAt === "string" && !Number.isNaN(Date.parse(value.interruptedAt)) &&
+    new RegExp(`^${prefix}-\\d{2,}-EVENTS\\.jsonl$`).test(value.eventFile) &&
+    new RegExp(`^${prefix}-\\d{2,}-STDERR\\.txt$`).test(value.stderrFile) &&
+    (value.threadId === null || (typeof value.threadId === "string" && value.threadId.trim() !== ""));
 }
 
 async function saveRun(): Promise<void> {
@@ -180,6 +250,7 @@ function eventThreadId(output: string): string | null {
 }
 
 async function modelTurn(role: Role, purpose: string, prompt: string): Promise<void> {
+  if (!validTurnPurpose(role, purpose)) throw new Error(`Relay refused unsafe ${role} turn purpose ${JSON.stringify(purpose)}.`);
   const roleRecord = run[role];
   if (run.producer.turns + run.reviewer.turns >= run.maxTurns) {
     run.status = "PAUSED_MAX_TURNS";
@@ -216,6 +287,7 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
     env: process.env,
     stdio: ["ignore", "pipe", "pipe"],
   });
+  activeModelChild = child;
   let stdout = "";
   let stderr = "";
   const lines = createInterface({ input: child.stdout });
@@ -228,6 +300,8 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
   const exit = await new Promise<number>((resolve, reject) => {
     child.once("error", reject);
     child.once("close", (code) => resolve(code ?? -1));
+  }).finally(() => {
+    if (activeModelChild === child) activeModelChild = null;
   });
   await Promise.all([
     writeTextAtomic(path.join(runRoot, eventFile), stdout),
@@ -240,6 +314,32 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
   if (roleRecord.threadId && observedThread && roleRecord.threadId !== observedThread) {
     run.status = "PAUSED_THREAD_MISMATCH";
     run.lastError = `${role} resumed as ${observedThread}, expected ${roleRecord.threadId}.`;
+    await saveRun();
+    throw new PausedRun(run.lastError);
+  }
+  if (stopRequested) {
+    const signal = stopSignal ?? "SIGTERM";
+    run.interruption = {
+      version: 1,
+      role,
+      purpose,
+      turn,
+      signal,
+      interruptedAt: timestamp(),
+      eventFile,
+      stderrFile,
+      threadId: roleRecord.threadId,
+    };
+    run.status = roleRecord.threadId ? "PAUSED_INTERRUPTED_MODEL_TURN" : "PAUSED_INTERRUPTED_CONTEXT_MISSING";
+    run.lastError = roleRecord.threadId
+      ? `${role} turn ${turn} was interrupted by ${signal}; its partial output is untrusted until the same context reconciles it.`
+      : `${role} turn ${turn} was interrupted by ${signal} before a persistent context identifier was observed; automatic recovery is refused.`;
+    await note(`${role} turn ${turn} interrupted by ${signal}`, [
+      `- Persistent context: ${roleRecord.threadId ? `\`${roleRecord.threadId}\`` : "missing — automatic replacement refused"}`,
+      `- Partial event stream: [${eventFile}](${eventFile})`,
+      `- Partial stderr: [${stderrFile}](${stderrFile})`,
+      "- Any artifact written during this turn remains untrusted until a same-context reconciliation succeeds.",
+    ]);
     await saveRun();
     throw new PausedRun(run.lastError);
   }
@@ -272,6 +372,95 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
     throw new PausedRun(run.lastError);
   }
   await saveRun();
+}
+
+async function recoverInterruptedModelTurn(): Promise<void> {
+  const interrupted = run.interruption;
+  if (!interrupted) return;
+  const roleRecord = run[interrupted.role];
+  if (!interrupted.threadId || !roleRecord.threadId) {
+    run.status = "PAUSED_INTERRUPTED_CONTEXT_MISSING";
+    run.lastError = `${interrupted.role} turn ${interrupted.turn} has no persistent context identifier. Koda will not replace that context automatically.`;
+    await saveRun();
+    throw new PausedRun(run.lastError);
+  }
+  if (roleRecord.threadId !== interrupted.threadId) {
+    run.status = "PAUSED_THREAD_MISMATCH";
+    run.lastError = `Interrupted ${interrupted.role} context ${interrupted.threadId} no longer matches RUN.json context ${roleRecord.threadId}.`;
+    await saveRun();
+    throw new PausedRun(run.lastError);
+  }
+
+  const session = await latest();
+  const originalPurpose = baseTurnPurpose(interrupted.purpose);
+  let recoveryGround: string;
+  if (interrupted.role === "producer" && originalPurpose === "open the Koda session") {
+    recoveryGround = [
+      `Read ${path.join(project, ".agents", "skills", "koda-c-session", "SKILL.md")} completely and explicitly use koda-c-session.`,
+      `The interrupted task was ${JSON.stringify(interrupted.purpose)}.`,
+      `Reconcile the project against ${path.join(project, "owner-prompt.md")}.`,
+      "Treat every file possibly written by the interrupted turn as incomplete evidence. Run the entry checks again and finish or repair exactly the session-opening job; do not open a second session.",
+    ].join(" ");
+  } else if (interrupted.role === "producer" && originalPurpose.includes("session close")) {
+    recoveryGround = [
+      `Read ${path.join(project, ".agents", "skills", "koda-c-close", "SKILL.md")} completely and explicitly use koda-c-close.`,
+      `The interrupted task was ${JSON.stringify(interrupted.purpose)}.`,
+      "Treat close.md and related Git state as potentially incomplete. Re-run close entry checks and reconcile exactly the interrupted close task from disk.",
+      "Do not start another session.",
+    ].join(" ");
+  } else if (!session) {
+    run.status = "PAUSED_INTERRUPTED_STATE_MISSING";
+    run.lastError = `The interrupted ${interrupted.role} task ${JSON.stringify(interrupted.purpose)} has no active session to reconcile.`;
+    await saveRun();
+    throw new PausedRun(run.lastError);
+  } else {
+    const active = currentPhase(session.state);
+    if (active) {
+      const skill = interrupted.role === "producer" ? `koda-c-${active.phase.name}` : "koda-c-review";
+      recoveryGround = [
+        `Read ${path.join(project, ".agents", "skills", skill, "SKILL.md")} completely and explicitly use ${skill}.`,
+        `The interrupted task was ${JSON.stringify(interrupted.purpose)} during the active ${active.phase.name} phase.`,
+        "Treat any artifact, review, or consultation file written during the interrupted turn as incomplete and untrusted.",
+        "Re-run the applicable entry checks from disk, inspect the frozen phase inputs, and finish or replace only that interrupted task's disk handback.",
+        "Do not approve, advance, quote a receipt, or begin another phase.",
+      ].join(" ");
+    } else {
+      recoveryGround = [
+        `Read ${path.join(project, ".agents", "skills", "koda-c-close", "SKILL.md")} completely and explicitly use koda-c-close.`,
+        `The interrupted task was ${JSON.stringify(interrupted.purpose)} after all configured phases advanced.`,
+        "Treat close.md and related Git state as potentially incomplete. Re-run close entry checks and reconcile exactly the interrupted close task from disk.",
+        "Do not start another session.",
+      ].join(" ");
+    }
+  }
+
+  await modelTurn(
+    interrupted.role,
+    `reconcile interrupted turn ${interrupted.turn}: ${interrupted.purpose}`,
+    `Reconcile interrupted turn ${interrupted.turn} in the same persistent ${interrupted.role} context. ${recoveryGround}`,
+  );
+  delete run.interruption;
+  run.status = "RUNNING";
+  run.lastError = undefined;
+  await saveRun();
+  await note(`${interrupted.role} turn ${interrupted.turn} reconciled in the same context`, [
+    `- Persistent context: \`${interrupted.threadId}\``,
+    `- Interrupted evidence: [${interrupted.eventFile}](${interrupted.eventFile})`,
+    "- Normal routing resumed only after the reconciliation turn completed successfully.",
+  ]);
+}
+
+async function pauseAtSafeBoundary(): Promise<void> {
+  if (!stopRequested) return;
+  run.status = "PAUSED_BY_OWNER";
+  run.lastError = `Window A stopped at a safe disk boundary after ${stopSignal ?? "SIGTERM"}; no model turn is in flight.`;
+  await saveRun();
+  await note("Window A stopped at a safe disk boundary", [
+    `- Signal: \`${stopSignal ?? "SIGTERM"}\``,
+    "- No active Codex child remained.",
+    "- Resume by running the exact printed command; routing will be derived again from disk.",
+  ]);
+  throw new PausedRun(run.lastError);
 }
 
 function koda(args: string[], interactive = false): { status: number; stdout: string; stderr: string } {
@@ -938,10 +1127,10 @@ async function finalize(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  if (run.status !== "FINALIZING_GUIDE_RETURN") run.status = "RUNNING";
+  if (!run.interruption && run.status !== "FINALIZING_GUIDE_RETURN") run.status = "RUNNING";
   run.startedAt ??= timestamp();
   run.ownerAcknowledgements ??= 0;
-  run.lastError = undefined;
+  if (!run.interruption) run.lastError = undefined;
   await saveRun();
 
   console.log("KODA-C PRODUCER WINDOW");
@@ -950,9 +1139,12 @@ async function main(): Promise<void> {
   console.log("Owner input: CLOSED — watch here; speak only in the Reviewer window");
   console.log("This context remains the Producer for the complete configured session.");
 
+  await recoverInterruptedModelTurn();
+
   let announcedPhase: string | null = null;
 
   for (;;) {
+    await pauseAtSafeBoundary();
     await recoverCompletedReviewerJob();
     const session = await latest();
     if (!session) {

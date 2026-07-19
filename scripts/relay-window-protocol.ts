@@ -13,6 +13,19 @@ export type ReviewerJobKind = "formal" | "repair" | "fresh" | "consultation" | "
 export type ReviewerJobStatus = "PENDING" | "RUNNING" | "AWAITING_OWNER" | "COMPLETE" | "FAILED";
 export type ReviewerJobCompletion = "ACKNOWLEDGED" | "CONSULTATION_ANSWERED" | "HALTED";
 
+export type ReviewerTurnInterruption = {
+  version: 1;
+  purpose: string;
+  ownerMessage: string | null;
+  jobId: string | null;
+  turn: number;
+  signal: "SIGINT" | "SIGTERM";
+  interruptedAt: string;
+  eventFile: string;
+  stderrFile: string;
+  threadId: string | null;
+};
+
 export type ReviewerJob = {
   version: 1;
   id: string;
@@ -38,6 +51,7 @@ export type ReviewerWindowState = {
   currentJobId: string | null;
   updatedAt: string;
   lastError: string | null;
+  interruption?: ReviewerTurnInterruption | null;
 };
 
 const PHASE = /^[a-z0-9][a-z0-9-]*$/;
@@ -184,6 +198,19 @@ export function reviewerWindowState(input: Omit<ReviewerWindowState, "version" |
 export function validateReviewerWindowState(value: unknown): ReviewerWindowState {
   if (!value || typeof value !== "object") throw new Error("Reviewer window state must be a JSON object.");
   const state = value as Partial<ReviewerWindowState>;
+  const interruption = state.interruption;
+  const validInterruption = interruption === undefined || interruption === null || (
+    interruption.version === 1 &&
+    typeof interruption.purpose === "string" && interruption.purpose.trim() !== "" &&
+    (interruption.ownerMessage === null || typeof interruption.ownerMessage === "string") &&
+    (interruption.jobId === null || (typeof interruption.jobId === "string" && JOB_ID.test(interruption.jobId))) &&
+    Number.isInteger(interruption.turn) && interruption.turn > 0 &&
+    ["SIGINT", "SIGTERM"].includes(interruption.signal) &&
+    typeof interruption.interruptedAt === "string" &&
+    /^REVIEWER-WINDOW-\d{2,}-EVENTS\.jsonl$/.test(interruption.eventFile) &&
+    /^REVIEWER-WINDOW-\d{2,}-STDERR\.txt$/.test(interruption.stderrFile) &&
+    (interruption.threadId === null || typeof interruption.threadId === "string")
+  );
   if (
     state.version !== 1 ||
     !["READY", "WORKING", "AWAITING_OWNER", "FAILED"].includes(String(state.status)) ||
@@ -193,7 +220,8 @@ export function validateReviewerWindowState(value: unknown): ReviewerWindowState
     !Number.isInteger(state.turns) || state.turns! < 0 ||
     !(state.currentJobId === null || typeof state.currentJobId === "string") ||
     typeof state.updatedAt !== "string" ||
-    !(state.lastError === null || typeof state.lastError === "string")
+    !(state.lastError === null || typeof state.lastError === "string") ||
+    !validInterruption
   ) {
     throw new Error("Reviewer window state has invalid fields.");
   }

@@ -18,10 +18,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Add project staffing config after proving cross-model thread continuation: Guide assignment, session-kind reviewer/defaults, and per-phase producer model/effort must resolve independently and snapshot into the session. Use sealed matrix evidence, not skill frontmatter, for recommendations.
 - [ ] Add monotonic owner-attention escalation before any delegated acknowledgement mode: config may authorize routine flow, but `OWNER_ATTENTION_REQUIRED` must always stop at the Guide and no agent may waive stricter configured attention.
 - [ ] Finish the ruled side-by-side runtime beyond the first job relay with always-available owner/reviewer discussion. Preserve the shipped disk-derived turn summaries; never claim hidden chain-of-thought, leak receipts, or let rendered status outrank disk truth.
-- [ ] Add abort/recovery semantics before claiming the producer can run unattended; Ctrl-C must leave named recoverable state.
 
 ## Later, only after target (a) is secure
 
+- [ ] Consider whether the existing disk-separated seats are worth adapting across providers. Codex/Fable mixed staffing is an architectural possibility, not a committed requirement or current scope.
 - [ ] Prove project-level session kinds after the standard Guide handoff: Explore, Research, Architecture, Triage, and Produce share one session/close/receipt discipline while loading kind-specific phases and review criteria.
 - [ ] Evaluate a read-only Guide-side Librarian/recall skill that answers where the project has been, is now, and is heading with citations, without becoming another authority or hidden truth store.
 - [ ] Consider a thin interface over the plain-file CLI contract.
@@ -33,6 +33,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Make process interruption fail closed: Ctrl-C terminates the active model child, preserves partial events, marks possible handbacks untrusted, resumes the same persistent context for reconciliation, returns Reviewer jobs to `PENDING`, and refuses automatic replacement when no context ID exists. Four real-signal cases pass deterministically; owner-observed Ghostty recovery remains owed.
 
 - [x] Make `$koda-c-session-prompt` the sole skill route toward a future session and force a disk preflight before drafting. Active sessions and prepared runtimes print a named `NEXT SESSION BLOCKED` explanation; the honest control permits one draft between sessions, and pushed halt reopens the path (`c94799a`; pushed 151-check deterministic proof).
 - [x] Re-run fresh startup discovery and active refusal against the sealed contract. Sol/low reported all ten Koda-C skills and repository-local placement guidance with zero tools or reads; Sol/medium refused the conceptually-ahead request without changing a file (`bc8f746`; pushed 152-check regression proof). Owner-observed three-window proof remains owed.

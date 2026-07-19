@@ -115,7 +115,8 @@ test("RELAY STATUS TRUTH: corrupt or ambiguous run state refuses instead of gues
   await writeJsonAtomic(runPath, run);
   const corrupt = status(temporary);
   assert.equal(corrupt.status, 1);
-  assert.match(corrupt.stderr, /No relay run exists|RUN\.json is missing, corrupt, or unsafe/);
+  assert.match(corrupt.stderr, /Corrupt or unsafe relay state exists/);
+  assert.doesNotMatch(corrupt.stderr, /No relay run exists/);
 
   await rm(first, { recursive: true, force: true });
   await prepareRun(temporary);

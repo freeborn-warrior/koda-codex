@@ -26,9 +26,55 @@ type RunRecord = {
   lastAction?: string;
   lastError?: string;
   ownerAcknowledgements?: number;
+  interruption?: {
+    version: 1;
+    role: "producer" | "reviewer";
+    purpose: string;
+    turn: number;
+    signal: "SIGINT" | "SIGTERM";
+    interruptedAt: string;
+    eventFile: string;
+    stderrFile: string;
+    threadId: string | null;
+  };
   producer: { model: string; effort: string; threadId: string | null; turns: number };
   reviewer: { model: string; effort: string; threadId: string | null; turns: number };
 };
+
+function baseTurnPurpose(purpose: string): string {
+  let value = purpose;
+  while (/^reconcile interrupted turn \d+: /.test(value)) {
+    value = value.replace(/^reconcile interrupted turn \d+: /, "");
+  }
+  return value;
+}
+
+function validTurnPurpose(role: "producer" | "reviewer", purpose: string): boolean {
+  const base = baseTurnPurpose(purpose);
+  if (role === "producer") {
+    return base === "open the Koda session" ||
+      base === "prepare immutable session close" ||
+      base === "verify immutable session close" ||
+      /^(produce|revise) [a-z0-9][a-z0-9-]*$/.test(base);
+  }
+  return /^(formal|repair|fresh) review of [a-z0-9][a-z0-9-]*$/.test(base) ||
+    /^answer consultation [a-z0-9][a-z0-9.-]*\.md$/.test(base);
+}
+
+function validInterruption(run: RunRecord): boolean {
+  const value = run.interruption;
+  if (value === undefined) return true;
+  if (!["producer", "reviewer"].includes(value.role)) return false;
+  const prefix = value.role === "producer" ? "PRODUCER" : "REVIEWER";
+  return value.version === 1 &&
+    validTurnPurpose(value.role, value.purpose) &&
+    Number.isInteger(value.turn) && value.turn > 0 &&
+    ["SIGINT", "SIGTERM"].includes(value.signal) &&
+    typeof value.interruptedAt === "string" && !Number.isNaN(Date.parse(value.interruptedAt)) &&
+    new RegExp(`^${prefix}-\\d{2,}-EVENTS\\.jsonl$`).test(value.eventFile) &&
+    new RegExp(`^${prefix}-\\d{2,}-STDERR\\.txt$`).test(value.stderrFile) &&
+    (value.threadId === null || (typeof value.threadId === "string" && value.threadId.trim() !== ""));
+}
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const runsRoot = await realpath(process.env.KODA_RELAY_RUNS_ROOT
@@ -56,6 +102,7 @@ async function readRun(candidate: string): Promise<RunRecord | null> {
       run.version !== 1 || typeof run.status !== "string" || typeof run.scenario !== "string" ||
       typeof run.project !== "string" || typeof run.runtime !== "string" || typeof run.cli !== "string" ||
       !validRole(run.producer) || !validRole(run.reviewer) ||
+      !validInterruption(run) ||
       !(run.sessionId === undefined || /^\d{4}-\d{2}-\d{2}-\d{2}$/.test(run.sessionId))
     ) return null;
     return run;
@@ -66,12 +113,15 @@ async function readRun(candidate: string): Promise<RunRecord | null> {
 
 async function discoverRun(): Promise<string> {
   const all: Array<{ root: string; run: RunRecord }> = [];
+  const unsafe: string[] = [];
   for (const entry of await readdir(runsRoot, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const candidate = path.join(runsRoot, entry.name);
     const run = await readRun(candidate);
     if (run) all.push({ root: candidate, run });
+    else unsafe.push(`${entry.name}/RUN.json`);
   }
+  if (unsafe.length > 0) refuse(`Corrupt or unsafe relay state exists at ${unsafe.join(", ")}. Koda will not treat it as absent.`);
   const active = all.filter((item) => item.run.status !== "COMPLETE" && item.run.status !== "HALTED");
   if (active.length > 1) refuse("More than one unfinished run exists. Name the run path explicitly.");
   if (active.length === 1) return active[0].root;
@@ -168,6 +218,8 @@ if (run.status === "COMPLETE" || run.status === "HALTED") {
   console.log(run.status === "COMPLETE"
     ? "None. This relay session is complete."
     : "Return to Guide and start a new session from the pushed halt through a fresh Brief.");
+} else if (run.status === "PAUSED_INTERRUPTED_CONTEXT_MISSING" || run.status === "PAUSED_INTERRUPTED_STATE_MISSING") {
+  console.log("No automatic resume is safe. The interrupted worker or its bound session identity is missing; Koda refuses to replace it by guessing.");
 } else if (job?.status === "FAILED") {
   console.log("Read the named reviewer job error. Do not delete or retry it by guessing.");
 } else if (lock && !lock.alive) {

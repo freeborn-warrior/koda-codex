@@ -139,8 +139,14 @@ core mutation commands simultaneously; the current relay supervisor serializes
 them. A mature two-window interface must add recoverable mutation serialization
 before claiming safe concurrent operation.
 
-Ctrl-C may leave a prepared or paused relay, but its status and thread IDs remain
-on disk for the documented resume path. `FINALIZING_GUIDE_RETURN` stages ignored
+Ctrl-C during a model turn terminates the direct Codex child, force-stops that
+child after two seconds if soft termination is ignored, preserves partial event
+and stderr evidence, and binds the interruption to its observed context ID. Any
+possible handback stays untrusted until that same context completes a
+skill-backed reconciliation. Reviewer jobs return to `PENDING`; missing context
+identity refuses automatic replacement. The direct-child signal is not a
+platform process-tree sandbox, so service-grade orphan cleanup remains a future
+runtime concern. `FINALIZING_GUIDE_RETURN` stages ignored
 evidence before tracked mutation and resumes only when tracked bytes and unrelated
 project state still match. It also binds the exact pushed close commit and refuses
 if project history moves before recovery. Linked runtime records refuse as unsafe

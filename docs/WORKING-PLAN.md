@@ -20,7 +20,8 @@ Turn the proved two-context session relay into a project-level experience that c
 8. [x] Keep the persistent Reviewer conversational between formal handoffs without turning conversation into Producer input; pushed deterministic proof covers captured input, active-direction mutation, and a real pseudo-terminal.
 9. [x] Implement the owner-ruled wait-or-halt boundary: record direction now, release it only through the next gate, and make halt restart from a fresh Brief after pushed immutable evidence.
 10. [x] Make the session-prompter preflight every start request and refuse conceptually competing sessions before a draft exists.
-11. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
+11. [x] Make Ctrl-C a named, fail-closed operational stop: kill the in-flight child, preserve partial evidence, distrust possible handbacks, resume the same context for reconciliation, and refuse context replacement when identity is missing.
+12. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
 
 ## Submission cut
 
@@ -35,6 +36,7 @@ The product needs one strong standard session moving from durable Guide state in
 - No new session while the previous session lacks immutable pushed close or explicit pushed halt.
 - Every persistent product output stays inside the project repository.
 - Tests are a living product contract and may grow, but must never be weakened to hide failure.
+- Koda-C is the workflow; the CLI and terminal panes are replaceable mechanical surfaces, not the product definition.
 
 ## Proof still owed
 

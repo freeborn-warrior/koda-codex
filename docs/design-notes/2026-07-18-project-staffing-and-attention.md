@@ -1,7 +1,7 @@
 # Project staffing and owner-attention design
 
 **Date:** 2026-07-18
-**Status:** Owner direction recorded; schema and cross-model continuation still to be proved
+**Status:** Owner direction recorded; schema and cross-model continuation still to be proved; cross-provider use is a possibility, not a requirement
 
 ## The org-chart metaphor
 
@@ -14,6 +14,8 @@ Koda-C should treat model assignment as staffing:
 
 There is no product reason every producer phase must use the same model. The first relay used one producer model and one reviewer model because that was the smallest runtime proof. It is not the intended limit.
 
+The separation may also make provider-independent staffing possible without redesigning the gates. A hypothetical session could use Codex as Producer and Fable as Reviewer, reverse those assignments, or use other compatible runtimes because each seat already owns a separate context and communicates through disk. Kristian identified this as a consequence of the approach, not as something Koda-C must or should support. Today's runner launches Codex and stores Codex thread IDs only; no provider-adapter commitment is part of the current roadmap.
+
 The leading staffing precedence is:
 
 1. Guide assignment;
@@ -22,6 +24,8 @@ The leading staffing precedence is:
 4. an explicit owner-confirmed launch override.
 
 The supervisor must resolve this hierarchy before launch and snapshot the result into session evidence. A later config edit must not silently restaff an active session. Every model turn and durable artifact should record the model and effort actually used, not merely the configured intention.
+
+If cross-provider staffing is ever chosen, its schema would need to snapshot the runtime adapter and provider-specific context identity without pretending those identifiers are interchangeable. The likely invariant interface is smaller: start or resume one isolated role context, stream owner-readable activity, close conversational input where required, return an explicit persistent identity, and leave every actionable handback on disk. This paragraph records design leverage, not a product requirement.
 
 ## Skill metadata is not the org chart
 

@@ -38,6 +38,9 @@ type RunRecord = {
 };
 
 class OwnerPaused extends Error {}
+class ReviewerTurnInterrupted extends Error {}
+
+type RelaySignal = "SIGINT" | "SIGTERM";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const runsRoot = await realpath(process.env.KODA_RELAY_RUNS_ROOT
@@ -46,9 +49,28 @@ const runsRoot = await realpath(process.env.KODA_RELAY_RUNS_ROOT
 const recoverStaleLock = process.argv.includes("--recover-stale-lock");
 const requested = process.argv.slice(2).find((argument) => argument !== "--recover-stale-lock");
 let stopping = false;
+let stopSignal: RelaySignal | null = null;
+let activeModelChild: ReturnType<typeof spawn> | null = null;
 let testDiscussionConsumed = false;
-process.once("SIGINT", () => { stopping = true; });
-process.once("SIGTERM", () => { stopping = true; });
+
+function requestStop(signal: RelaySignal): void {
+  const repeated = stopping;
+  stopping = true;
+  stopSignal ??= signal;
+  if (activeModelChild) {
+    const child = activeModelChild;
+    child.kill(repeated ? "SIGKILL" : "SIGTERM");
+    if (!repeated) {
+      const force = setTimeout(() => {
+        if (activeModelChild === child) child.kill("SIGKILL");
+      }, 2_000);
+      force.unref();
+    }
+  }
+}
+
+process.on("SIGINT", () => { requestStop("SIGINT"); });
+process.on("SIGTERM", () => { requestStop("SIGTERM"); });
 
 function refuse(message: string): never {
   console.error(`REVIEWER WINDOW REFUSED — ${message}`);
@@ -153,7 +175,7 @@ function threadIdFromEvents(output: string): string | null {
   return null;
 }
 
-async function modelTurn(purpose: string, prompt: string): Promise<string> {
+async function modelTurn(purpose: string, prompt: string, ownerMessage: string | null = null): Promise<string> {
   const turn = state.turns + 1;
   state = reviewerWindowState({ ...state, status: "WORKING", turns: turn, lastError: null });
   await writeReviewerWindowState(runRoot, state);
@@ -176,6 +198,7 @@ async function modelTurn(purpose: string, prompt: string): Promise<string> {
     env: process.env,
     stdio: ["ignore", "pipe", "pipe"],
   });
+  activeModelChild = child;
   let stdout = "";
   let stderr = "";
   let lastAgentMessage = "";
@@ -197,6 +220,8 @@ async function modelTurn(purpose: string, prompt: string): Promise<string> {
   const exit = await new Promise<number>((resolve, reject) => {
     child.once("error", reject);
     child.once("close", (code) => resolve(code ?? -1));
+  }).finally(() => {
+    if (activeModelChild === child) activeModelChild = null;
   });
 
   const prefix = `REVIEWER-WINDOW-${String(turn).padStart(2, "0")}`;
@@ -206,8 +231,35 @@ async function modelTurn(purpose: string, prompt: string): Promise<string> {
   ]);
   const observed = threadIdFromEvents(stdout);
   if (!state.threadId && observed) state.threadId = observed;
-  if (!state.threadId) throw new Error("The reviewer turn emitted no persistent context identifier.");
   if (observed && observed !== state.threadId) throw new Error(`Reviewer context changed from ${state.threadId} to ${observed}.`);
+  if (stopping) {
+    const signal = stopSignal ?? "SIGTERM";
+    state = reviewerWindowState({
+      ...state,
+      status: state.threadId ? "READY" : "FAILED",
+      lastError: state.threadId
+        ? `Reviewer turn ${turn} was interrupted by ${signal}; partial output is untrusted until this context reconciles it.`
+        : `Reviewer turn ${turn} was interrupted by ${signal} before a persistent context identifier was observed.`,
+      interruption: {
+        version: 1,
+        purpose,
+        ownerMessage,
+        jobId: state.currentJobId,
+        turn,
+        signal,
+        interruptedAt: new Date().toISOString(),
+        eventFile: `${prefix}-EVENTS.jsonl`,
+        stderrFile: `${prefix}-STDERR.txt`,
+        threadId: state.threadId,
+      },
+    });
+    await writeReviewerWindowState(runRoot, state);
+    if (!state.threadId) {
+      throw new Error(`${state.lastError} Koda will not replace the reviewer context automatically.`);
+    }
+    throw new ReviewerTurnInterrupted(state.lastError ?? "Reviewer turn interrupted.");
+  }
+  if (!state.threadId) throw new Error("The reviewer turn emitted no persistent context identifier.");
   if (exit !== 0) throw new Error(`Reviewer turn ${turn} exited ${exit}. See ${prefix}-STDERR.txt.`);
   state = reviewerWindowState({ ...state, status: "READY", lastError: null });
   await writeReviewerWindowState(runRoot, state);
@@ -463,7 +515,23 @@ async function processJob(job: ReviewerJob): Promise<void> {
     await writeReviewerJob(runRoot, job);
     state = reviewerWindowState({ ...state, status: "WORKING", currentJobId: job.id, lastError: null });
     await writeReviewerWindowState(runRoot, state);
-    await modelTurn(job.purpose, job.prompt);
+    const interrupted = state.interruption;
+    if (interrupted && interrupted.jobId !== job.id) {
+      throw new Error(`Reviewer interruption belongs to job ${interrupted.jobId ?? "none"}, not ${job.id}.`);
+    }
+    await modelTurn(
+      interrupted ? `reconcile interrupted turn ${interrupted.turn}: ${job.purpose}` : job.purpose,
+      interrupted ? [
+        job.prompt,
+        "The previous attempt was interrupted by the owner.",
+        "Treat any expected output file as incomplete and untrusted; inspect and replace or complete it from the original evidence before handing it back.",
+        "Resume this exact job in the same reviewer context. Do not approve, advance, or quote a receipt.",
+      ].join(" ") : job.prompt,
+    );
+    if (interrupted) {
+      state = reviewerWindowState({ ...state, status: "READY", lastError: null, interruption: null });
+      await writeReviewerWindowState(runRoot, state);
+    }
   }
 
   const output = await expectedFile(job);
@@ -484,14 +552,7 @@ async function processJob(job: ReviewerJob): Promise<void> {
   await writeReviewerWindowState(runRoot, state);
 }
 
-async function holdOwnerConversation(question: string): Promise<void> {
-  const response = await modelTurn("owner conversation while Producer works", [
-    `Read ${path.join(project, ".agents", "skills", "koda-c-review", "SKILL.md")} completely and explicitly use koda-c-review in owner-conversation mode.`,
-    `The owner's exact message is ${JSON.stringify(question)}.`,
-    "Answer at the owner's altitude from the active session files and cited evidence. Distinguish disk fact from inference.",
-    "Do not edit any file, create a review or handback, run Koda, approve, advance, quote a receipt, or claim the Producer received this conversation.",
-    "Use the skill's exact boundary marker if the message is project-level Guide scope or actionable direction for the active session.",
-  ].join(" "));
+async function recordOwnerConversationResponse(question: string, response: string): Promise<void> {
   if (response.trimStart().startsWith(WAITING_DIRECTION_PREFIX)) {
     const config = await readProjectConfig(project);
     const session = await loadLatestSession(project, config);
@@ -516,6 +577,45 @@ async function holdOwnerConversation(question: string): Promise<void> {
   }
 }
 
+async function holdOwnerConversation(question: string): Promise<void> {
+  const response = await modelTurn("owner conversation while Producer works", ownerConversationPrompt(question), question);
+  await recordOwnerConversationResponse(question, response);
+}
+
+function ownerConversationPrompt(question: string): string {
+  return [
+    `Read ${path.join(project, ".agents", "skills", "koda-c-review", "SKILL.md")} completely and explicitly use koda-c-review in owner-conversation mode.`,
+    `The owner's exact message is ${JSON.stringify(question)}.`,
+    "Answer at the owner's altitude from the active session files and cited evidence. Distinguish disk fact from inference.",
+    "Do not edit any file, create a review or handback, run Koda, approve, advance, quote a receipt, or claim the Producer received this conversation.",
+    "Use the skill's exact boundary marker if the message is project-level Guide scope or actionable direction for the active session.",
+  ].join(" ");
+}
+
+async function recoverInterruptedOwnerConversation(): Promise<void> {
+  const interrupted = state.interruption;
+  if (!interrupted || interrupted.jobId !== null) return;
+  if (!interrupted.threadId || !state.threadId) {
+    throw new Error("The interrupted reviewer conversation has no persistent context identifier; automatic context replacement is refused.");
+  }
+  if (!interrupted.ownerMessage) {
+    throw new Error("The interrupted reviewer conversation has no bound owner message; Koda cannot reconstruct it safely.");
+  }
+  console.log(`\nREVIEWER RECOVERY — resuming interrupted conversation turn ${interrupted.turn} in the same context.`);
+  const response = await modelTurn(
+    `reconcile interrupted turn ${interrupted.turn}: ${interrupted.purpose}`,
+    [
+      ownerConversationPrompt(interrupted.ownerMessage),
+      "The previous attempt was interrupted by the owner. Resume this exact owner conversation in the same reviewer context.",
+      "Re-read current disk state before answering. Do not infer that any partial response or file handback completed.",
+    ].join(" "),
+    interrupted.ownerMessage,
+  );
+  state = reviewerWindowState({ ...state, status: "READY", lastError: null, interruption: null });
+  await writeReviewerWindowState(runRoot, state);
+  await recordOwnerConversationResponse(interrupted.ownerMessage, response);
+}
+
 console.log("KODA-C REVIEWER WINDOW");
 console.log(`Reviewer: ${state.model} / ${state.effort}`);
 console.log(`Relay: ${path.basename(runRoot)}`);
@@ -526,8 +626,10 @@ console.log("Waiting for the producer in Window A…");
 if (ownerConsole) process.stdout.write("reviewer> ");
 
 try {
+  const recoveredConfiguredConversation = state.interruption?.jobId === null;
+  await recoverInterruptedOwnerConversation();
   let announcedWaiting = true;
-  let testIdleConversationConsumed = false;
+  let testIdleConversationConsumed = recoveredConfiguredConversation;
   while (!stopping) {
     const run = await readRun();
     if (run.status === "COMPLETE" || run.status === "HALTED") {
@@ -567,6 +669,19 @@ try {
       if (process.env.KODA_RELAY_REVIEWER_ONCE === "1") break;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      if (error instanceof ReviewerTurnInterrupted) {
+        job.status = "PENDING";
+        job.error = message;
+        job.completion = null;
+        await writeReviewerJob(runRoot, job);
+        state = reviewerWindowState({ ...state, status: "READY", currentJobId: job.id, lastError: message });
+        await writeReviewerWindowState(runRoot, state);
+        console.error(`\nREVIEWER INTERRUPTED SAFELY — ${message}`);
+        console.error("The job returned to PENDING; its partial handback is untrusted.");
+        console.error(`Resume the same reviewer context with: ${reviewerResumeCommand}`);
+        process.exitCode = 2;
+        break;
+      }
       if (error instanceof OwnerPaused) {
         job.status = "AWAITING_OWNER";
         await writeReviewerJob(runRoot, job);
@@ -588,6 +703,20 @@ try {
       break;
     }
   }
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  state = reviewerWindowState({
+    ...state,
+    status: error instanceof ReviewerTurnInterrupted ? "READY" : "FAILED",
+    currentJobId: null,
+    lastError: message,
+  });
+  await writeReviewerWindowState(runRoot, state);
+  console.error(error instanceof ReviewerTurnInterrupted
+    ? `\nREVIEWER INTERRUPTED SAFELY — ${message}`
+    : `\nREVIEWER PAUSED — ${message}`);
+  console.error(`Resume with: ${reviewerResumeCommand}`);
+  process.exitCode = error instanceof ReviewerTurnInterrupted ? 2 : 1;
 } finally {
   ownerConsole?.close();
   await releaseLock();

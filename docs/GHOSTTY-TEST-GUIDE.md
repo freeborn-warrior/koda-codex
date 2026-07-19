@@ -89,7 +89,7 @@ The two commands discover rather than guess. They refuse if more than one unfini
 
 ## Stopping and resuming
 
-Ctrl-C preserves the run, reviewer job, context IDs, and last action. A completed Window B job is consumed idempotently on Window A resume, with acknowledgement count re-derived from the ledger. The current slice still names a reviewer process that stopped mid-model-turn as requiring explicit recovery rather than guessing whether the turn completed. Stronger guided recovery is backlog work.
+Ctrl-C preserves the run, reviewer job, context IDs, last action, and partial event evidence. If a model turn was active, Koda terminates that child, marks any possible handback untrusted, and records the exact interruption. On restart it resumes the same context for a reconciliation turn before normal routing. Window B returns an interrupted job to `PENDING`; owner conversation resumes from the saved owner message. If no context ID was observed, Koda refuses to invent a replacement. A completed Window B job is still consumed idempotently on Window A resume, with acknowledgement count re-derived from the ledger.
 
 To resume Window A:
 
@@ -130,7 +130,7 @@ Normal success exists only when Window A prints `RELAY COMPLETE` and Window B pr
 
 This slice proves the automatic producer-to-reviewer wake-up, one persistent Window B reviewer, a terminal-backed conversation prompt while Producer works, same-window review explanations and exact receipt acknowledgement, an owner-ruling loop for in-phase consultations, and readable progress derived from actual Codex events. The historical manual route remains a repository relay harness around the bounded `software-clean` scenario; the newer Guide launcher connects the same runtime to a real project but still needs owner-observed proof.
 
-Ordinary explanation between handoffs is deliberately non-mutating. Product decisions entered through `DISCUSS` or consultation prompts are disk-backed; new direction is also disk-backed immediately but waits for the next gate. Pause-inject-resume does not exist. Notification transport, remote control, a polished split-pane interface, and broader crash recovery remain later layers.
+Ordinary explanation between handoffs is deliberately non-mutating. Product decisions entered through `DISCUSS` or consultation prompts are disk-backed; new direction is also disk-backed immediately but waits for the next gate. Process recovery never injects new direction, so pause-inject-resume still does not exist. Notification transport, remote control, a polished split-pane interface, and service-grade process-tree supervision remain later layers.
 
 ## Safety boundaries
 
