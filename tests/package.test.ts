@@ -39,7 +39,7 @@ test("PACKAGED NPX SUITE: the documented local npx command does not mutate its c
     env: { ...process.env, npm_config_cache: cache },
   });
   assert.equal(executed.status, 0, executed.stderr);
-  assert.match(executed.stdout, /Koda — phase gates with proof the review was read/);
+  assert.match(executed.stdout, /Koda — a disk-backed workflow where review proof controls advancement/);
   assert.deepEqual(await binarySnapshot(project), before,
     "npx changed the content or executable state of the checked-out binary");
 });
@@ -79,7 +79,7 @@ test("PACKAGED NPX SUITE: a real tarball installs and runs the plain-JavaScript 
     env: environment,
   });
   assert.equal(executed.status, 0, executed.stderr);
-  assert.match(executed.stdout, /Koda — phase gates with proof the review was read/);
+  assert.match(executed.stdout, /Koda — a disk-backed workflow where review proof controls advancement/);
   assert.match(executed.stdout, /koda advance/);
 
   const guideHelp = spawnSync("npm", [

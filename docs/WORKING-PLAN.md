@@ -21,7 +21,9 @@ Turn the proved two-context session relay into a project-level experience that c
 9. [x] Implement the owner-ruled wait-or-halt boundary: record direction now, release it only through the next gate, and make halt restart from a fresh Brief after pushed immutable evidence.
 10. [x] Make the session-prompter preflight every start request and refuse conceptually competing sessions before a draft exists.
 11. [x] Make Ctrl-C a named, fail-closed operational stop: kill the in-flight child, preserve partial evidence, distrust possible handbacks, resume the same context for reconciliation, and refuse context replacement when identity is missing.
-12. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
+12. [x] Audit the whole product, package, and new interruption surface; consolidate recovery validation, preserve 157/157 deterministic checks with coverage, and publish the current security boundaries.
+13. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test, under the current documented single-writer project boundary.
+14. [ ] Settle mutation provenance with Kristian before claiming Guide/owner tracked-file edits are safe during an active relay; then mutation-test the chosen lease/manifest contract.
 
 ## Submission cut
 
@@ -41,4 +43,6 @@ The product needs one strong standard session moving from durable Guide state in
 ## Proof still owed
 
 - One owner-observed Guide confirmation arranging the complete three-context experience while preserving two independent session contexts.
+- One owner decision on active-session mutation provenance before simultaneous tracked-file editing is part of the safe claim.
 - Cross-model continuation evidence before the org-chart staffing design becomes executable per-phase config.
+- Cross-provider staffing remains only a possible consequence of disk-separated seats, not required proof or a current commitment.

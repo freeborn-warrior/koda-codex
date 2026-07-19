@@ -123,6 +123,17 @@ core close and halt commands only print Git instructions; the explicitly started
 supervisor and explicit Reviewer halt ceremony execute their documented commits and pushes. Inspect unfamiliar
 repository hooks and remotes before starting a real-project relay.
 
+The real-project relay currently starts from a clean pushed checkout but its
+pre-close output commit stages every changed non-ignored path with `git add -A`.
+That captures a Producer whose output paths are not known in advance, but it also
+means an unrelated owner or Guide edit made after launch could enter the same
+commit. Until Koda has either an exclusive project mutation lease, an exact
+produced-output manifest, or both, keep Guide conversation read-only with respect
+to tracked project files during an active relay and do not manually edit the
+checkout. Waiting direction written through the trusted Reviewer path remains
+part of the session evidence. This is a named current integrity boundary, not a
+safe simultaneous-editing claim.
+
 The Ghostty adapter is deliberately opt-in. It records launch intent before the
 first GUI request and refuses automatic opening for an existing runtime, even if
 only one prior request appeared to succeed. It passes only the current `PATH` and
@@ -155,10 +166,11 @@ look cleaner.
 
 ## Current audit result
 
-The dated local audit checks package lifecycle metadata, dependency absence,
+The dated local audits check package lifecycle metadata, dependency absence,
 tracked symbolic links, common committed credential signatures, destructive
 call sites, real package contents, and the then-current functional/security suite.
-The result and limitations live in
-[`security-runs/2026-07-18-local-audit-01/RESULT.md`](security-runs/2026-07-18-local-audit-01/RESULT.md).
+The latest whole-product result and the earlier hardening baseline live in
+[`security-runs/2026-07-19-whole-product-audit-02/RESULT.md`](security-runs/2026-07-19-whole-product-audit-02/RESULT.md)
+and [`security-runs/2026-07-18-local-audit-01/RESULT.md`](security-runs/2026-07-18-local-audit-01/RESULT.md).
 Later evidence classes retain their own adversarial checks in the current full
 suite; the latest named transcript is linked from the README.

@@ -24,6 +24,13 @@ import {
 import { readApprovalEntries, sha256 } from "../src/receipt.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
+  baseTurnPurpose,
+  validTurnPurpose,
+  validateModelTurnInterruption,
+  type ModelTurnInterruption,
+  type RelaySignal,
+} from "./relay-interruption.ts";
+import {
   REVIEWER_LOCK_DIR,
   newReviewerJob,
   readReviewerJob,
@@ -41,20 +48,6 @@ type RoleRecord = {
   effort: string;
   threadId: string | null;
   turns: number;
-};
-
-type RelaySignal = "SIGINT" | "SIGTERM";
-
-type ModelTurnInterruption = {
-  version: 1;
-  role: Role;
-  purpose: string;
-  turn: number;
-  signal: RelaySignal;
-  interruptedAt: string;
-  eventFile: string;
-  stderrFile: string;
-  threadId: string | null;
 };
 
 type RunRecord = {
@@ -155,8 +148,12 @@ if (
 ) {
   throw new Error("Relay RUN.json has invalid paths or turn limit.");
 }
-if (run.interruption && !validModelTurnInterruption(run.interruption)) {
-  throw new Error("Relay RUN.json has invalid interruption evidence.");
+if (run.interruption) {
+  try {
+    run.interruption = validateModelTurnInterruption(run.interruption);
+  } catch (error) {
+    throw new Error(`Relay RUN.json has invalid interruption evidence: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 const resolved = await resolveRelayRunPaths({ packageRoot: root, configuredRunsRoot: runsRoot, runRoot, run });
@@ -175,39 +172,6 @@ const producerResumeCommand = resolved.mode === "guide-project"
 
 function timestamp(): string {
   return new Date().toISOString();
-}
-
-function baseTurnPurpose(purpose: string): string {
-  let value = purpose;
-  while (/^reconcile interrupted turn \d+: /.test(value)) {
-    value = value.replace(/^reconcile interrupted turn \d+: /, "");
-  }
-  return value;
-}
-
-function validTurnPurpose(role: Role, purpose: string): boolean {
-  const base = baseTurnPurpose(purpose);
-  if (role === "producer") {
-    return base === "open the Koda session" ||
-      base === "prepare immutable session close" ||
-      base === "verify immutable session close" ||
-      /^(produce|revise) [a-z0-9][a-z0-9-]*$/.test(base);
-  }
-  return /^(formal|repair|fresh) review of [a-z0-9][a-z0-9-]*$/.test(base) ||
-    /^answer consultation [a-z0-9][a-z0-9.-]*\.md$/.test(base);
-}
-
-function validModelTurnInterruption(value: ModelTurnInterruption): boolean {
-  if (!["producer", "reviewer"].includes(value.role)) return false;
-  const prefix = value.role === "producer" ? "PRODUCER" : "REVIEWER";
-  return value.version === 1 &&
-    typeof value.purpose === "string" && validTurnPurpose(value.role, value.purpose) &&
-    Number.isInteger(value.turn) && value.turn > 0 &&
-    ["SIGINT", "SIGTERM"].includes(value.signal) &&
-    typeof value.interruptedAt === "string" && !Number.isNaN(Date.parse(value.interruptedAt)) &&
-    new RegExp(`^${prefix}-\\d{2,}-EVENTS\\.jsonl$`).test(value.eventFile) &&
-    new RegExp(`^${prefix}-\\d{2,}-STDERR\\.txt$`).test(value.stderrFile) &&
-    (value.threadId === null || (typeof value.threadId === "string" && value.threadId.trim() !== ""));
 }
 
 async function saveRun(): Promise<void> {

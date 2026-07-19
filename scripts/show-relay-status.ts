@@ -8,6 +8,7 @@ import { pathExists, readProjectConfig } from "../src/config.ts";
 import { pendingDirectionsForActivePhase, readWaitingDirections } from "../src/direction.ts";
 import { currentPhase, loadSessionState, sessionRoot } from "../src/project.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
+import { validateModelTurnInterruption, type ModelTurnInterruption } from "./relay-interruption.ts";
 import {
   readReviewerJob,
   readReviewerWindowState,
@@ -26,54 +27,20 @@ type RunRecord = {
   lastAction?: string;
   lastError?: string;
   ownerAcknowledgements?: number;
-  interruption?: {
-    version: 1;
-    role: "producer" | "reviewer";
-    purpose: string;
-    turn: number;
-    signal: "SIGINT" | "SIGTERM";
-    interruptedAt: string;
-    eventFile: string;
-    stderrFile: string;
-    threadId: string | null;
-  };
+  interruption?: ModelTurnInterruption;
   producer: { model: string; effort: string; threadId: string | null; turns: number };
   reviewer: { model: string; effort: string; threadId: string | null; turns: number };
 };
 
-function baseTurnPurpose(purpose: string): string {
-  let value = purpose;
-  while (/^reconcile interrupted turn \d+: /.test(value)) {
-    value = value.replace(/^reconcile interrupted turn \d+: /, "");
-  }
-  return value;
-}
-
-function validTurnPurpose(role: "producer" | "reviewer", purpose: string): boolean {
-  const base = baseTurnPurpose(purpose);
-  if (role === "producer") {
-    return base === "open the Koda session" ||
-      base === "prepare immutable session close" ||
-      base === "verify immutable session close" ||
-      /^(produce|revise) [a-z0-9][a-z0-9-]*$/.test(base);
-  }
-  return /^(formal|repair|fresh) review of [a-z0-9][a-z0-9-]*$/.test(base) ||
-    /^answer consultation [a-z0-9][a-z0-9.-]*\.md$/.test(base);
-}
-
 function validInterruption(run: RunRecord): boolean {
   const value = run.interruption;
   if (value === undefined) return true;
-  if (!["producer", "reviewer"].includes(value.role)) return false;
-  const prefix = value.role === "producer" ? "PRODUCER" : "REVIEWER";
-  return value.version === 1 &&
-    validTurnPurpose(value.role, value.purpose) &&
-    Number.isInteger(value.turn) && value.turn > 0 &&
-    ["SIGINT", "SIGTERM"].includes(value.signal) &&
-    typeof value.interruptedAt === "string" && !Number.isNaN(Date.parse(value.interruptedAt)) &&
-    new RegExp(`^${prefix}-\\d{2,}-EVENTS\\.jsonl$`).test(value.eventFile) &&
-    new RegExp(`^${prefix}-\\d{2,}-STDERR\\.txt$`).test(value.stderrFile) &&
-    (value.threadId === null || (typeof value.threadId === "string" && value.threadId.trim() !== ""));
+  try {
+    validateModelTurnInterruption(value);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));

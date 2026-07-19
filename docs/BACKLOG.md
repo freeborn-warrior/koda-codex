@@ -18,6 +18,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Add project staffing config after proving cross-model thread continuation: Guide assignment, session-kind reviewer/defaults, and per-phase producer model/effort must resolve independently and snapshot into the session. Use sealed matrix evidence, not skill frontmatter, for recommendations.
 - [ ] Add monotonic owner-attention escalation before any delegated acknowledgement mode: config may authorize routine flow, but `OWNER_ATTENTION_REQUIRED` must always stop at the Guide and no agent may waive stricter configured attention.
 - [ ] Finish the ruled side-by-side runtime beyond the first job relay with always-available owner/reviewer discussion. Preserve the shipped disk-derived turn summaries; never claim hidden chain-of-thought, leak receipts, or let rendered status outrank disk truth.
+- [ ] Decide and implement real-project mutation provenance before claiming simultaneous Guide edits are safe. The current pre-close relay uses `git add -A`; launch begins clean, but an unrelated owner/Guide edit made during the session could be swept into the Producer commit. Choose an exclusive mutation lease, an exact produced-output manifest, or a compatible combination, then mutation-test contamination and crash recovery.
 
 ## Later, only after target (a) is secure
 
@@ -27,7 +28,6 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Consider a thin interface over the plain-file CLI contract.
 - [ ] Consider an RLM-style evidence query layer only after a guide-context fixture proves ordinary file search, summaries, and compaction are insufficient.
 - [ ] Add machine-readable status for future interfaces after the human CLI contract is stable.
-- [ ] Add safe mutation serialization if real two-window use shows simultaneous write races.
 - [ ] Consider a clean-boundary Koda-C self-hosting session only as later validation; do not let it displace the producer/reviewer relay work.
 - [ ] Package Koda-C as an installable plugin only after repo-local skill discovery and the core relay are proved; evaluate trusted hooks without making the CLI depend on them.
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.

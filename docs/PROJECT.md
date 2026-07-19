@@ -6,6 +6,8 @@
 
 Koda-C is a small, headless CLI over plain files. It prevents a project phase from advancing until a non-empty artifact, independent review, allowed verdict, unique review receipt, and the owner's exact receipt quote all agree on disk.
 
+Koda-C is the workflow; the CLI is its current mechanical surface. The product is the movement of separate contexts, frozen inputs, artifacts, review, owner engagement, gates, session closure, and project continuity—not a wrapper around a model command.
+
 The discipline is domain-general: the produced thing may be code, prose, research, design, or another artifact. The CLI is the contract; interfaces and agent tasks sit above it.
 
 The product originates in Kristian's repeated real workflow across C++, Swift, and Rust projects: session prompt → brief → orient → plan → produce → live → summary → push, with every phase handed to a separate reviewer chat. Koda-C automates and hardens that relay so phase depth survives without manual copy-paste.
@@ -135,6 +137,10 @@ owner contract
 - [Process interruption recovery design](design-notes/2026-07-19-interruption-recovery.md)
 - [Interruption recovery development failures](test-results/2026-07-19-interruption-recovery-development-failures.md)
 - [Interruption recovery complete-suite result](test-results/2026-07-19-interruption-recovery-final.md)
+- [Interruption recovery post-push 156-check result](test-results/2026-07-19-interruption-recovery-pushed-final.md)
+- [Whole-product 157-check coverage result](test-results/2026-07-19-whole-product-audit-final.md)
+- [Whole-product audit development failure](test-results/2026-07-19-whole-product-audit-development-failures.md)
+- [Whole-product quality audit](quality-runs/2026-07-19-whole-product-01/RESULT.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
 - [Always-open Reviewer 135-check result](test-results/2026-07-19-reviewer-open-conversation-final.md)
 - [Always-open Reviewer post-push 135-check result](test-results/2026-07-19-reviewer-open-conversation-pushed-final.md)
@@ -155,6 +161,7 @@ owner contract
 - [Fresh public-checkout local npx proof](package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md)
 - [Safety and threat boundaries](SECURITY.md)
 - [Dated local safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md)
+- [Whole-product security audit](security-runs/2026-07-19-whole-product-audit-02/RESULT.md)
 - [Under-three-minute recording script](VIDEO-SCRIPT.md)
 - [Live-rules submission checklist](SUBMISSION-CHECKLIST.md)
 - Git history on `main` contains honest pushed milestones.

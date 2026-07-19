@@ -549,7 +549,7 @@ async function sessionHaltCommand(args          , cwd        , io       )       
 }
 
 function help(io       )       {
-  io.out("Koda — phase gates with proof the review was read");
+  io.out("Koda — a disk-backed workflow where review proof controls advancement");
   io.out("");
   io.out("Commands:");
   io.out("  koda init [directory] [--demo]");

@@ -15,6 +15,7 @@ import {
   readReviewerWindowState,
   writeReviewerJob,
 } from "../scripts/relay-window-protocol.ts";
+import { validateModelTurnInterruption } from "../scripts/relay-interruption.ts";
 
 type ProcessResult = { status: number; stdout: string; stderr: string };
 
@@ -70,6 +71,25 @@ async function waitFor(check: () => Promise<boolean>, label: string, timeout = 8
   }
   throw new Error(`Timed out waiting for ${label}.`);
 }
+
+test("INTERRUPTION SCHEMA: role, purpose, time, and evidence filenames remain one shared fail-closed contract", () => {
+  const valid = {
+    version: 1 as const,
+    role: "producer" as const,
+    purpose: "reconcile interrupted turn 2: reconcile interrupted turn 1: produce brief",
+    turn: 3,
+    signal: "SIGINT" as const,
+    interruptedAt: "2026-07-19T12:00:00.000Z",
+    eventFile: "PRODUCER-03-EVENTS.jsonl",
+    stderrFile: "PRODUCER-03-STDERR.txt",
+    threadId: "019f0000-0000-7000-8000-000000000700",
+  };
+  assert.equal(validateModelTurnInterruption(valid), valid);
+  assert.throws(() => validateModelTurnInterruption({ ...valid, purpose: "trust whatever partial output exists" }), /invalid or unsafe/);
+  assert.throws(() => validateModelTurnInterruption({ ...valid, eventFile: "REVIEWER-03-EVENTS.jsonl" }), /invalid or unsafe/);
+  assert.throws(() => validateModelTurnInterruption({ ...valid, interruptedAt: "sometime later" }), /invalid or unsafe/);
+  assert.throws(() => validateModelTurnInterruption({ ...valid, interruptedAt: "July 19, 2026" }), /invalid or unsafe/);
+});
 
 test("INTERRUPTION RECOVERY: Ctrl-C kills Producer, distrusts partial artifact, and resumes the same context", async (t) => {
   const prepared = await prepareRun("koda-producer-interrupt-");

@@ -2,11 +2,11 @@
 
 > “I design workflows. I don't write code. I gave my development discipline to Codex in one document. It built a toolkit where nothing advances without written proof the review was read.”
 
-Koda-C is a small, headless phase gate over plain files. It refuses to advance work until the current artifact exists, an independent review exists, the verdict permits advancement, and the owner quotes that review's unique closing receipt into the approval ledger.
+Koda-C is a small, headless workflow over plain files. Its mechanical gate refuses to advance work until the current artifact exists, an independent review exists, the verdict permits advancement, and the owner quotes that review's unique closing receipt into the approval ledger.
 
 The naming is deliberate: **Koda-C** is the product, `koda` is its CLI command, and `koda-codex` is this lowercase repository/package slug for the Codex-built competition implementation.
 
-No UI, daemon, database, or hidden conversational state. The files are the truth.
+No UI, daemon, database, or conversational memory treated as authority. The files are the truth.
 
 This repository is the competition entry and the meta-harness, not a universal ready-made project persona. Koda-C keeps the proof mechanism stable; each project is expected to keep purpose-specific `AGENTS.md`, producer skills, shared-reviewer criteria, evidence shapes, and verification commands in its own repository. A novel-writing project and a Rust project can use the same gate without pretending their work or review standards are interchangeable.
 
@@ -15,7 +15,7 @@ This repository is the competition entry and the meta-harness, not a universal r
 1. **Run without rebuilding:** `node dist/cli.js --help`.
 2. **See the refusal:** follow the [one-minute fixture](DEMO.md#one-minute-mechanical-proof).
 3. **Inspect the real relay:** the [genuine six-phase result](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md) records distinct persistent producer/reviewer contexts, an unplanned Summary REVISE, seven owner acknowledgements, and pushed close.
-4. **Check the claims:** the [152-check fresh Guide preflight transcript](test-results/2026-07-19-guide-preflight-fresh-model-final.md), [model matrix](MODEL-TEST-MATRIX.md), [fresh ten-skill discovery proof](discovery-runs/2026-07-19-fresh-codex-startup-02/RESULT.md), [fresh active-session refusal](guide-preflight-runs/2026-07-19-sol-medium-01/RESULT.md), and [safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md) are committed evidence.
+4. **Check the claims:** the [157-check whole-product transcript](test-results/2026-07-19-whole-product-audit-final.md), [152-check fresh Guide preflight transcript](test-results/2026-07-19-guide-preflight-fresh-model-final.md), [model matrix](MODEL-TEST-MATRIX.md), [fresh ten-skill discovery proof](discovery-runs/2026-07-19-fresh-codex-startup-02/RESULT.md), [fresh active-session refusal](guide-preflight-runs/2026-07-19-sol-medium-01/RESULT.md), and [latest safety audit](security-runs/2026-07-19-whole-product-audit-02/RESULT.md) are committed evidence.
 
 Tested here on macOS 26.5.1 arm64 with Node.js 26.0.0 and Apple Git 2.50.1. The core requires Node.js 22.18+ and Git; other platforms are not claimed as tested. The current reviewer window uses macOS `less` and `pbcopy` for the owner-reading ceremony.
 

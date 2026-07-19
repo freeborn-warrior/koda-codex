@@ -7,7 +7,7 @@ import test from "node:test";
 test("JUDGE JOURNEY SUITE: the committed binary runs without rebuilding", () => {
   const result = spawnSync(process.execPath, ["dist/cli.js", "--help"], { encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Koda — phase gates with proof the review was read/);
+  assert.match(result.stdout, /Koda — a disk-backed workflow where review proof controls advancement/);
   assert.match(result.stdout, /koda session close/);
   assert.match(result.stdout, /--open ghostty/);
 });
