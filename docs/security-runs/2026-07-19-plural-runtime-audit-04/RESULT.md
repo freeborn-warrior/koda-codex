@@ -57,4 +57,5 @@ to upstream, so a sibling's temporary local-ahead state cannot falsify it.
 
 Plural local runtimes are mechanically supported for trusted cooperative project
 work. Do not claim hostile-writer isolation, cross-machine locking, hook
-sandboxing, provider independence, or owner-observed multi-window usability.
+sandboxing, provider independence, or owner-observed multi-window usability. The
+complete unchanged suite passed 177/177 again after commit `f2b1356` was pushed.

@@ -151,6 +151,7 @@ owner contract
 - [Plural session runtime design](design-notes/2026-07-19-plural-session-runtimes.md)
 - [Plural runtime development failures](test-results/2026-07-19-plural-runtime-development-failures.md)
 - [Plural runtime 177-check result](test-results/2026-07-19-plural-runtime-final.md)
+- [Plural runtime post-push 177-check result](test-results/2026-07-19-plural-runtime-pushed-final.md)
 - [Plural runtime security audit](security-runs/2026-07-19-plural-runtime-audit-04/RESULT.md)
 - [Whole-product quality audit](quality-runs/2026-07-19-whole-product-01/RESULT.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
