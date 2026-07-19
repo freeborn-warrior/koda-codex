@@ -9,7 +9,7 @@ Translate the owner's session contract into a precise brief. Hand the completed 
 
 ## ENTRY CHECK
 
-1. Locate `koda.config.json`, the latest session folder, and `state.json`. Refuse if any is missing or invalid.
+1. Locate `koda.config.json`, require the supervisor-bound `KODA_SESSION_ID`, and load only that session folder and `state.json`. Refuse missing, invalid, terminal, or ambiguous identity; never infer the latest session.
 2. Require `state.json.phases[currentPhaseIndex].name` to equal `brief`. Refuse and name the actual current phase otherwise.
 3. Require a non-empty `session-prompt.md`. Read it as the owner contract; do not substitute chat memory.
 4. When `currentPhaseIndex > 0`, derive the prior phase from `state.json`, then verify its non-empty artifact, active review, exact receipt entry in `approvals.md`, and matching `advances` record. Refuse on the first missing proof.
@@ -62,4 +62,4 @@ When input is needed mid-phase, read and follow the [in-phase consultation proto
 
 Before stopping, verify from disk that the brief exists, is non-empty, cites the prompt and every entry direction ID, states scope and checkable success, resolves required input, and names `koda-c-review` as its immediate receiver. Leave `currentPhaseIndex` unchanged. Do not create or edit a review, quote a receipt, write an approval, or run `koda advance`.
 
-Run `koda status`; the phase must remain `brief` and the gate must remain closed pending independent review proof. Report the artifact path and hand it to `koda-c-review`.
+Run `koda status --session <session-id>`; the phase must remain `brief` and the gate must remain closed pending independent review proof. Report the artifact path and hand it to `koda-c-review`.

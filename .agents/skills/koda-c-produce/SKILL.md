@@ -9,7 +9,7 @@ Make the session's real output—code, prose, design, research, or another decla
 
 ## ENTRY CHECK
 
-1. Locate `koda.config.json`, the latest session, and `state.json`. Refuse if any is missing or invalid.
+1. Locate `koda.config.json`, require the supervisor-bound `KODA_SESSION_ID`, and load only that session and `state.json`. Refuse missing, invalid, terminal, or ambiguous identity; never infer the latest session.
 2. Require the current phase name to equal `produce`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its non-empty artifact, definitive review, exact ledger receipt, and matching advancement record.
 4. Read only the approved artifacts and cited files needed to produce the declared output. Refuse if the intended deliverable, boundaries, or proof are not checkable.
@@ -57,4 +57,4 @@ When input is needed, read and follow the [in-phase consultation protocol](../..
 
 Verify that every claimed output exists, every claimed check was actually run, and the manifest cites the real files plus every released direction ID. Leave `currentPhaseIndex` unchanged. Do not create a review, ledger entry, receipt, or advancement, and do not perform work belonging to another declared phase.
 
-Run `koda status`; the phase must remain `produce` and the gate must remain closed pending independent review proof. Report the manifest and output paths, then hand them to `koda-c-review`.
+Run `koda status --session <session-id>`; the phase must remain `produce` and the gate must remain closed pending independent review proof. Report the manifest and output paths, then hand them to `koda-c-review`.

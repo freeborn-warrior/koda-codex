@@ -9,7 +9,7 @@ Act as a bounded in-phase evidence adviser, the independent receiver of a comple
 
 ## ENTRY CHECK
 
-1. Locate `koda.config.json`, the latest session's `state.json`, and its current phase. Refuse if the user's named phase differs from disk.
+1. Locate `koda.config.json`, require the reviewer job's bound session ID (also supplied as `KODA_SESSION_ID`), and load only that session's `state.json` and current phase. Refuse missing, terminal, ambiguous, or mismatched identity; never infer the latest session.
 2. Require the user to name exactly one mode: **in-phase consultation**, with a request path; **formal review**; **owner explanation**, with the active review path and owner's question; or **owner conversation**, with the owner's exact active-session message. Refuse an ambiguous request instead of inferring mode.
 3. When `currentPhaseIndex > 0`, derive the prior phase from `state.json` and verify its artifact, definitive review, exact ledger receipt, and advancement record.
 4. For consultation mode, read the [in-phase consultation protocol](../../../docs/IN-PHASE-CONSULTATION.md) completely. Require a non-empty request under the current session's `consultations/<NN>-<phase>/`, addressed to `reviewer`, and read only it and its cited evidence.
@@ -31,9 +31,9 @@ Do not choose a verdict, run `koda review new`, generate or quote a receipt, edi
 
 1. Verify every material claim against cited files. Distinguish observed fact, inference, and unsupported assertion.
 2. Choose one verdict using the rules below.
-3. Run `koda review new <phase>` to generate protected metadata and a unique receipt.
+3. Run `koda review new <phase> --session <session-id>` to generate protected metadata and a unique receipt.
 4. Replace the template findings. Preserve the `KODA_REVIEW` metadata line exactly, keep `VERDICT: ...` first, and keep the generated `RECEIPT: ...` as the final non-empty line.
-5. Run `koda status`. Repair metadata, artifact-hash, uniqueness, or receipt problems before reporting.
+5. Run `koda status --session <session-id>`. Repair metadata, artifact-hash, uniqueness, or receipt problems before reporting.
 
 ### Owner-explanation mode
 

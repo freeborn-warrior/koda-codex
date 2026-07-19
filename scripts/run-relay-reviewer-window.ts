@@ -12,7 +12,7 @@ import { pathExists, readProjectConfig } from "../src/config.ts";
 import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
 import { pushCommandArgs } from "../src/git.ts";
 import { evaluateSessionHalt, prepareHaltArtifact } from "../src/halt.ts";
-import { currentPhase, displayPath, loadLatestSession, writeTextAtomic } from "../src/project.ts";
+import { currentPhase, displayPath, loadSession, writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
@@ -34,6 +34,7 @@ type RunRecord = {
   project: string;
   runtime: string;
   cli: string;
+  sessionId?: string;
   reviewer: { model: string; effort: string; threadId: string | null; turns: number };
 };
 
@@ -109,6 +110,7 @@ async function readRun(): Promise<RunRecord> {
     typeof value.project !== "string" ||
     typeof value.runtime !== "string" ||
     typeof value.cli !== "string" ||
+    !(value.sessionId === undefined || typeof value.sessionId === "string") ||
     !value.reviewer ||
     typeof value.reviewer.model !== "string" ||
     typeof value.reviewer.effort !== "string" ||
@@ -129,6 +131,13 @@ const { project, cli } = resolved;
 const reviewerResumeCommand = resolved.mode === "guide-project"
   ? formatRelayCommand(path.join(root, "scripts", "run-relay-reviewer-window.ts"), runRoot)
   : "npm run relay:reviewer";
+
+async function activeSession() {
+  const run = await readRun();
+  if (!run.sessionId) throw new Error("The relay has not bound a session ID yet.");
+  const config = await readProjectConfig(project);
+  return loadSession(project, config, run.sessionId);
+}
 
 const releaseLock = await acquireReviewerWindow(runRoot, { recoverStale: recoverStaleLock })
   .catch((error) => refuse(error instanceof Error ? error.message : String(error)));
@@ -191,11 +200,12 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
   const args = state.threadId
     ? [...base, "resume", ...common, state.threadId, prompt]
     : [...base, ...common, "--color", "never", "-s", "workspace-write", prompt];
+  const activeRun = await readRun();
 
   console.log(`\nREVIEWER ${turn} — ${purpose}`);
   const child = spawn(process.env.KODA_CODEX_BIN ?? "codex", args, {
     cwd: project,
-    env: process.env,
+    env: { ...process.env, ...(activeRun.sessionId ? { KODA_SESSION_ID: activeRun.sessionId } : {}) },
     stdio: ["ignore", "pipe", "pipe"],
   });
   activeModelChild = child;
@@ -303,8 +313,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   const before = await readFile(review, "utf8");
   const parsed = parseReview(before);
   if (!parsed.verdict || !parsed.receipt || !parsed.metadata) throw new Error("The reviewer did not leave a valid definitive review.");
-  const progressConfig = await readProjectConfig(project);
-  const progressSession = await loadLatestSession(project, progressConfig);
+  const progressSession = await activeSession();
   const active = currentPhase(progressSession.state);
 
   job.status = "AWAITING_OWNER";
@@ -334,8 +343,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   const haltSession = async (ownerDirectionInput: string) => {
     const ownerDirection = ownerDirectionInput.trim();
     if (!ownerDirection) throw new Error("A halt needs the owner's exact direction for the fresh Brief.");
-    const config = await readProjectConfig(project);
-    const session = await loadLatestSession(project, config);
+    const session = await activeSession();
     const pushArgs = pushCommandArgs(project);
     if (!pushArgs) throw new Error("Configure a Git remote and named branch before halting this session.");
     const stagedBefore = spawnSync("git", ["diff", "--cached", "--name-only"], { cwd: project, encoding: "utf8" });
@@ -379,8 +387,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: null });
     await writeReviewerWindowState(runRoot, state);
     if (response.trimStart().startsWith(WAITING_DIRECTION_PREFIX)) {
-      const config = await readProjectConfig(project);
-      const session = await loadLatestSession(project, config);
+      const session = await activeSession();
       const created = await createWaitingDirection({
         sessionDir: session.directory,
         state: session.state,
@@ -467,13 +474,13 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     : undefined;
   const approved = withOwnerConsolePaused(() => spawnSync(
     process.execPath,
-    [cli, "approve", job.phase, "--approver", "Kristian"],
+    [cli, "approve", job.phase, "--approver", "Kristian", "--session", progressSession.id],
     {
       cwd: project,
       ...(testReceiptInput === undefined
         ? { stdio: "inherit" as const }
         : { input: `${testReceiptInput}\n`, encoding: "utf8" as const }),
-      env: { ...process.env, KODA_COMMAND: `${process.execPath} ${cli}` },
+      env: { ...process.env, KODA_COMMAND: `${process.execPath} ${cli}`, KODA_SESSION_ID: progressSession.id },
     },
   ));
   if (approved.status !== 0) throw new Error(`Owner acknowledgement exited ${approved.status ?? -1}.`);
@@ -554,8 +561,7 @@ async function processJob(job: ReviewerJob): Promise<void> {
 
 async function recordOwnerConversationResponse(question: string, response: string): Promise<void> {
   if (response.trimStart().startsWith(WAITING_DIRECTION_PREFIX)) {
-    const config = await readProjectConfig(project);
-    const session = await loadLatestSession(project, config);
+    const session = await activeSession();
     const created = await createWaitingDirection({
       sessionDir: session.directory,
       state: session.state,

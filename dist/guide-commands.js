@@ -16,7 +16,7 @@ import { currentGuideRuntime, prepareGuideRuntime } from "./guide-runtime.js";
 import { requestGhosttyWindows,                           } from "./ghostty.js";
 import { evaluateSessionClosure } from "./close.js";
 import { evaluateSessionHalt } from "./halt.js";
-import { currentPhase, displayPath, latestSessionId, loadSessionState, sessionRoot } from "./project.js";
+import { currentPhase, displayPath, latestSessionId, listSessionIds, loadSessionState, sessionRoot } from "./project.js";
 
 
 
@@ -38,6 +38,19 @@ function option(args          , name        )                {
   return value;
 }
 
+function flag(args          , name        )          {
+  const index = args.indexOf(name);
+  if (index === -1) return false;
+  args.splice(index, 1);
+  return true;
+}
+
+function repeatedOption(args          , name        )           {
+  const values           = [];
+  while (args.includes(name)) values.push(option(args, name) );
+  return values;
+}
+
 function rejectUnknownOptions(args          )       {
   const unknown = args.find((value) => value.startsWith("--"));
   if (unknown) throw new Error(`Unknown option: ${unknown}`);
@@ -48,7 +61,7 @@ function help(io            )       {
   io.out("");
   io.out("Commands:");
   io.out("  koda guide status");
-  io.out("  koda guide confirm <prompt-file> --owner <name>");
+  io.out("  koda guide confirm <prompt-file> --owner <name> [--kind <kind>] [--depends-on <session-id>] [--independent]");
   io.out("  koda guide cancel <launch-id> --owner <name> --reason <text>");
   io.out("  koda guide bind <launch-id> <session-id>");
   io.out("  koda guide verify");
@@ -75,28 +88,30 @@ export async function runGuideCli(
     const pending = await pendingGuideLaunches(root, config);
     const runtime = await currentGuideRuntime(root);
     const latestId = await latestSessionId(root, config);
-    let blockedSession
+    const activeSessions
 
 
 
 
-             = null;
-    if (latestId) {
-      const directory = sessionRoot(root, config, latestId);
-      const state = await loadSessionState(directory, latestId);
+
+       = [];
+    for (const sessionId of await listSessionIds(root, config)) {
+      const directory = sessionRoot(root, config, sessionId);
+      const state = await loadSessionState(directory, sessionId);
       const closure = await evaluateSessionClosure(root, directory, state);
       if (!closure.closed) {
         const halt = await evaluateSessionHalt(root, directory, state);
         if (!halt.halted) {
           const active = currentPhase(state);
-          blockedSession = {
-            id: latestId,
+          activeSessions.push({
+            id: sessionId,
+            kind: state.kind ?? "produce",
             phase: active ? active.phase.name : "close ceremony",
             progress: active
               ? `${active.index + 1}/${state.phases.length}`
               : `${state.phases.length}/${state.phases.length}`,
             reason: (halt.exists ? halt.reasons : closure.reasons)[0] ?? "pushed terminal evidence is missing",
-          };
+          });
         }
       }
     }
@@ -107,16 +122,22 @@ export async function runGuideCli(
     io.out("Active-session questions belong in Reviewer; Guide direction cannot inject the active phase.");
     io.out(`Manifest: ${displayPath(root, guideManifestPath(root, config))}`);
     io.out(`Project: ${manifest.project} — ${continuity.length} continuity file(s)`);
-    if (blockedSession || runtimeActive) {
-      io.out("NEXT SESSION BLOCKED — the current project path is still in flight.");
-      if (blockedSession) {
-        io.out(`Current bounded session: ${blockedSession.id} — ${blockedSession.phase} (${blockedSession.progress})`);
-        io.out(`Named condition: ${blockedSession.reason}`);
-      } else if (runtime) {
+    if (activeSessions.length > 0 || runtimeActive) {
+      io.out(`ACTIVE PROJECT WORK — ${activeSessions.length} bounded session(s).`);
+      for (const session of activeSessions) {
+        io.out(`Current bounded session: ${session.id} — ${session.kind} — ${session.phase} (${session.progress})`);
+        io.out(`Named condition: ${session.reason}`);
+      }
+      if (runtimeActive && runtime && activeSessions.length === 0) {
         io.out(`Current bound launch: ${runtime.run.launchId} — ${runtime.run.status}`);
       }
-      io.out("You may discuss and preserve a future idea, but do not draft, confirm, or launch a competing session.");
-      io.out("Allowed transitions: wait for immutable pushed close, or explicitly halt and push halt.md.");
+      io.out("A dependent successor is blocked until every named predecessor has pushed close or halt evidence.");
+      if (pending.length === 0) {
+        io.out("An independent sibling may be confirmed only with an explicit --independent classification; a different kind name alone proves nothing.");
+      } else {
+        io.out("The current READY_TO_LAUNCH request must bind or be cancelled before another confirmation is created.");
+        io.out(`READY TO LAUNCH — ${pending[0] .id}`);
+      }
     } else if (pending.length === 0) {
       io.out("BETWEEN SESSIONS — Guide discussion or one next-session draft may continue.");
     } else if (pending.length === 1) {
@@ -160,10 +181,27 @@ export async function runGuideCli(
 
   if (verb === "confirm") {
     const owner = option(rest, "--owner");
+    const kind = option(rest, "--kind") ?? "produce";
+    const dependencySessionIds = repeatedOption(rest, "--depends-on")
+      .flatMap((value) => value.split(","))
+      .map((value) => value.trim())
+      .filter(Boolean);
+    const independent = flag(rest, "--independent");
     rejectUnknownOptions(rest);
-    if (rest.length !== 1 || !owner) throw new Error("Usage: koda guide confirm <prompt-file> --owner <name>");
-    const result = await confirmGuideLaunch(root, config, path.resolve(cwd, rest[0] ), owner);
+    if (rest.length !== 1 || !owner) {
+      throw new Error("Usage: koda guide confirm <prompt-file> --owner <name> [--kind <kind>] [--depends-on <session-id>] [--independent]");
+    }
+    const result = await confirmGuideLaunch(root, config, path.resolve(cwd, rest[0] ), owner, {
+      kind,
+      independent,
+      dependencySessionIds,
+    });
     io.out(`READY TO LAUNCH — ${result.launch.id}`);
+    io.out(`✓ Session kind: ${result.launch.sessionKind}`);
+    io.out(`✓ Launch mode: ${result.launch.launchMode}`);
+    if (result.launch.dependencies.length > 0) {
+      io.out(`✓ Dependencies: ${result.launch.dependencies.map((item) => item.sessionId).join(", ")}`);
+    }
     io.out(`✓ Owner confirmation bound prompt SHA-256 ${result.launch.promptSha256}`);
     io.out(`✓ Bound ${result.launch.continuity.length} project continuity file(s).`);
     io.out(`Launch request: ${displayPath(root, result.file)}`);

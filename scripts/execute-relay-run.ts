@@ -14,7 +14,8 @@ import {
   artifactPath,
   currentPhase,
   latestSessionId,
-  loadSessionState,
+  listSessionIds,
+  loadSession,
   readNonEmpty,
   reviewPath,
   sessionRoot,
@@ -65,6 +66,9 @@ type RunRecord = {
   maxTurns: number;
   launchId?: string;
   prompt?: string;
+  sessionKind?: string;
+  launchMode?: "independent" | "dependent" | "continuation";
+  dependencySessionIds?: string[];
   archive?: string;
   guideReturn?: string;
   startedAt?: string;
@@ -248,7 +252,7 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
 
   const child = spawn(process.env.KODA_CODEX_BIN ?? "codex", args, {
     cwd: project,
-    env: process.env,
+    env: { ...process.env, ...(run.sessionId ? { KODA_SESSION_ID: run.sessionId } : {}) },
     stdio: ["ignore", "pipe", "pipe"],
   });
   activeModelChild = child;
@@ -428,18 +432,23 @@ async function pauseAtSafeBoundary(): Promise<void> {
 }
 
 function koda(args: string[], interactive = false): { status: number; stdout: string; stderr: string } {
+  const environment = {
+    ...process.env,
+    KODA_COMMAND: `${process.execPath} ${run.cli}`,
+    ...(run.sessionId ? { KODA_SESSION_ID: run.sessionId } : {}),
+  };
   if (interactive) {
     const result = spawnSync(process.execPath, [run.cli, ...args], {
       cwd: project,
       stdio: "inherit",
-      env: { ...process.env, KODA_COMMAND: `${process.execPath} ${run.cli}` },
+      env: environment,
     });
     return { status: result.status ?? -1, stdout: "", stderr: String(result.error ?? "") };
   }
   const result = spawnSync(process.execPath, [run.cli, ...args], {
     cwd: project,
     encoding: "utf8",
-    env: { ...process.env, KODA_COMMAND: `${process.execPath} ${run.cli}` },
+    env: environment,
   });
   return {
     status: result.status ?? -1,
@@ -450,10 +459,22 @@ function koda(args: string[], interactive = false): { status: number; stdout: st
 
 async function latest() {
   const config = await readProjectConfig(project);
+  if (run.sessionId) return loadSession(project, config, run.sessionId);
+  const ids = await listSessionIds(project, config);
+  if (run.launchId) {
+    const matches: string[] = [];
+    for (const id of ids) {
+      const binding = path.join(sessionRoot(project, config, id), "guide-launch.json");
+      if (!(await pathExists(binding))) continue;
+      const value = JSON.parse(await readFile(binding, "utf8")) as { launchId?: string };
+      if (value.launchId === run.launchId) matches.push(id);
+    }
+    if (matches.length > 1) throw new Error(`Guide launch ${run.launchId} is bound to more than one session.`);
+    return matches.length === 1 ? loadSession(project, config, matches[0]!) : null;
+  }
+  if (ids.length === 0) return null;
   const id = await latestSessionId(project, config);
-  if (!id) return null;
-  const directory = sessionRoot(project, config, id);
-  return { id, directory, state: await loadSessionState(directory, id) };
+  return id ? loadSession(project, config, id) : null;
 }
 
 async function outstandingConsultation(
@@ -590,15 +611,24 @@ async function dispatchReviewerWindowJob(
 async function openSession(): Promise<void> {
   const ownerPrompt = path.resolve(project, run.prompt ?? "owner-prompt.md");
   if (!ownerPrompt.startsWith(`${project}${path.sep}`)) throw new Error("Relay session prompt escapes the project.");
+  const config = await readProjectConfig(project);
+  const before = new Set(await listSessionIds(project, config));
+  const openArgs = ["session", "new", ownerPrompt, "--kind", run.sessionKind ?? "produce"];
+  if (run.launchMode === "independent") openArgs.push("--independent");
+  for (const dependency of run.dependencySessionIds ?? []) openArgs.push("--depends-on", dependency);
   await modelTurn("producer", "open the Koda session", [
     `Read ${producerSkill("session")} completely and explicitly use koda-c-session.`,
     `The owner-authored prompt is ${ownerPrompt}.`,
     `Use node ${run.cli} wherever the skill says koda.`,
+    `The exact owner-confirmed open command is: node ${run.cli} ${openArgs.map((item) => JSON.stringify(item)).join(" ")}. Use these kind and dependency options unchanged.`,
     "You are the non-interactive producer. Do not ask or address the owner, create a phase artifact, review, approval, or advancement.",
     "Verify the disk-backed handover and stop.",
   ].join(" "));
-  const session = await latest();
-  if (!session) throw new Error("The producer turn completed without opening a session.");
+  const opened = (await listSessionIds(project, config)).filter((id) => !before.has(id));
+  if (opened.length !== 1) {
+    throw new Error(`The producer turn must open exactly one new bound session; observed ${opened.length}.`);
+  }
+  const session = await loadSession(project, config, opened[0]!);
   run.sessionId = session.id;
   await saveRun();
 }

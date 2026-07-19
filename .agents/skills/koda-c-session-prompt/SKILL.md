@@ -1,6 +1,6 @@
 ---
 name: koda-c-session-prompt
-description: Turn Guide requests into one bounded, owner-confirmed Koda session prompt, or refuse while another session is active. Use for next-session intent in Guide, never Producer or Reviewer.
+description: Turn Guide requests into one bounded, owner-confirmed Koda session prompt. Use in Guide to classify independent siblings versus dependency-blocked successors; never use in Producer or Reviewer.
 ---
 
 # Koda-C Session Prompt
@@ -10,18 +10,22 @@ Hold the project-level perspective across many bounded sessions. Reconstruct tha
 ## ENTRY CHECK
 
 1. Locate the project root and read `koda.config.json`. Refuse if it is missing, invalid, or points outside the repository.
-2. Before drafting, editing, confirming, or launching in response to any next-session intent, run `koda guide status`. Never rely on chat memory. If it reports `NEXT SESSION BLOCKED`, say immediately that another session cannot start, name the current session or bound launch and state, and create no prompt. The owner may explore the future idea, but the only active-path transitions are to wait for immutable pushed close or explicitly halt through the owner-facing Reviewer and push `halt.md`.
-3. Require the Guide manifest at `<parent-of-sessionsDir>/guide/project.json`. It must name the project and list the project-specific continuity files the Guide steers—for example `docs/PROJECT.md`, `docs/BACKLOG.md`, and `docs/WORKING-PLAN.md`. Refuse missing, empty, duplicate, linked, or outside-project files.
-4. Derive session history from the configured sessions directory. Never trust a cached session count or chat claim. If a latest session exists, require exactly one immutable pushed terminal artifact: `close.md` after every phase advanced, or `halt.md` while a phase remained in flight. Refuse an active, merely prepared, uncommitted, unpushed, or ambiguous session.
-5. After close, read the prompt, Summary or final artifact, reviews needed to understand material changes, `close.md`, and every direction released by the final advancement. After halt, read the prompt, `halt.md`, state, and every waiting direction from the voided phase; do not treat partial phase work as approved. Reconcile the continuity files from this evidence before drafting another prompt.
-6. Refuse if a prompt is already `READY_TO_LAUNCH`, launch evidence is corrupt or ambiguous, or project truth cannot be derived.
-7. Use the Guide conversation for owner exploration and decisions. Ordinary discussion may update continuity files between sessions, but conversation-only facts are never project truth.
+2. Before drafting, editing, confirming, or launching in response to any session intent, run `koda guide status`. Never rely on chat memory. Read every active session ID, kind, phase, and named terminal condition.
+3. Classify the proposed session relationship before writing a prompt. Never infer independence from a different kind label:
+   - **Dependent successor:** name every predecessor session ID. If any is active or lacks pushed close/halt evidence, refuse before drafting and name it.
+   - **Independent sibling:** require an explicit owner/Guide ruling that its result does not depend on active work. Use `--independent`; do not silently omit dependencies.
+   - **Ambiguous:** ask Kristian in Guide. Create no prompt or launch evidence until he settles the relationship.
+   A currently `READY_TO_LAUNCH` request must bind or be cancelled before another confirmation.
+4. Require the Guide manifest at `<parent-of-sessionsDir>/guide/project.json`. It must name the project and list the project-specific continuity files the Guide steers—for example `docs/PROJECT.md`, `docs/BACKLOG.md`, and `docs/WORKING-PLAN.md`. Refuse missing, empty, duplicate, linked, or outside-project files.
+5. Derive session history from the configured sessions directory. For each named dependency, require exactly one immutable pushed terminal artifact: `close.md` after every phase advanced, or `halt.md` while a phase remained in flight. Refuse merely prepared, uncommitted, unpushed, changed, missing, or ambiguous evidence.
+6. For each dependency, read its prompt, terminal artifact, Summary or final approved artifact, and every direction released at its final boundary. After halt, read state and every waiting direction from the voided phase; do not treat partial phase work as approved. An independent sibling has no phase-input dependency on active sessions, but the Guide still reads project continuity files to avoid product-level contradiction.
+7. Refuse corrupt or ambiguous launch evidence or project truth. Use the Guide conversation for owner exploration and decisions. Conversation-only facts are never project truth.
 
 ## ITS OWN JOB
 
 Work with Kristian in the Guide context to choose the next useful bounded step in the evolving project. The Guide may challenge, explore, reprioritize, and update its continuity files before proposing a session.
 
-During an active session, keep project-level conversation open but do not perform the drafting job below. A conceptually later or separate idea does not create a parallel lane. If it becomes actionable direction for the active path, preserve Kristian's exact words as `owner-via-guide` waiting evidence through `koda direction wait`; it may enter Producer input only after the next successful gate. Never use pause-inject-resume.
+During active sessions, keep project-level conversation open. Draft an additional prompt only after the relationship classification above permits it. A conceptually later idea is a dependent successor and waits; a genuinely independent sibling may proceed. If a thought becomes direction for an active path, preserve Kristian's exact words as `owner-via-guide` waiting evidence through `koda direction wait --session <session-id>`; it may enter Producer input only after that session's next successful gate. Never use pause-inject-resume.
 
 Write one draft under `<parent-of-sessionsDir>/guide/prompts/` with this exact shape:
 
@@ -50,6 +54,9 @@ Write one draft under `<parent-of-sessionsDir>/guide/prompts/` with this exact s
 - Deliberately not carried: <specific item, or none>
 
 ## Relay handover
+- Session kind: <produce, explore, research, architecture, triage, or another configured/project-defined kind>
+- Launch relationship: <independent sibling, continuation, or dependent successor>
+- Dependencies: <session IDs, or none only for explicit independence / first session>
 - Configured receiver: <first phase name from koda.config.json>
 - Ground prepared: <continuity files and evidence the receiver may rely on>
 - Open items: <none, or an owner question that must be resolved before confirmation>
@@ -57,13 +64,15 @@ Write one draft under `<parent-of-sessionsDir>/guide/prompts/` with this exact s
 
 Show the owner a plain-language proposal covering goal, why now, scope, exclusions, proof, settled decisions, and unresolved questions. Revise the draft through Guide conversation. Drafting never opens a session.
 
-Only after Kristian explicitly confirms that exact draft for launch, run:
+Only after Kristian explicitly confirms that exact draft and its relationship, run exactly one matching form:
 
 ```text
-koda guide confirm <prompt-file> --owner Kristian
+koda guide confirm <prompt-file> --owner Kristian --kind <kind>
+koda guide confirm <prompt-file> --owner Kristian --kind <kind> --independent
+koda guide confirm <prompt-file> --owner Kristian --kind <kind> --depends-on <session-id> [--depends-on <session-id> ...]
 ```
 
-The command binds the prompt hash, current continuity-file hashes, prior pushed close or halt, prior carry-forward evidence, owner identity, and confirmation time into one `READY_TO_LAUNCH` request. The exact prompt must cite every direction released across the prior session boundary; after halt it must also cite the halt ID. A changed prompt or steering file invalidates the confirmation. Record an immutable cancellation with `koda guide cancel <launch-id> --owner Kristian --reason <text>`, commit and push it, then discuss, revise, and explicitly confirm again rather than treating old approval as permission or deleting evidence.
+Use the first form only for the first session or ordinary continuation when no sibling is active. The command binds kind, relationship, dependency terminal hashes, prompt hash, continuity hashes, owner identity, and confirmation time into one `READY_TO_LAUNCH` request. The prompt must cite every direction released by its dependencies and every halt ID. Changed evidence invalidates confirmation. Cancel immutably with `koda guide cancel <launch-id> --owner Kristian --reason <text>`, commit and push, then revise and confirm again.
 
 ## HANDOVER OBLIGATION
 
@@ -72,10 +81,11 @@ Before stopping, require all of these on disk:
 - the project manifest names every steering file used by the Guide;
 - project document, backlog, working plan, and other configured continuity files reflect the latest pushed session and any settled between-session decisions;
 - the prompt contains every required section and names the configured first phase;
+- the prompt and launch request agree on session kind, relationship, and every dependency ID;
 - no unresolved owner question remains hidden inside `Open items: none`;
 - exactly one immutable launch request says `READY_TO_LAUNCH` and hashes the confirmed prompt and continuity snapshot;
 - `koda guide verify` succeeds after the prompt, continuity files, manifest, and launch request are committed and pushed.
 
 Hand the verified request to the trusted supervisor. Do not run `koda session new`, launch producer or reviewer contexts, create phase evidence, or become an in-session authority. The supervisor re-verifies the request and starts the two separate contexts; `koda-c-session` consumes the confirmed prompt and saves the resulting session ID in that session's `guide-launch.json`. If interruption occurs after session creation but before binding, the supervisor must run `koda guide bind <launch-id> <session-id>`; it may not open another session or invent a binding.
 
-Once the session begins, the Guide remains available for project-level conversation but cannot steer the frozen active phase. Repeat the disk preflight before answering any later request to start, draft, confirm, or launch another session. Kristian speaks about the session only with the persistent reviewer while the producer remains visible and input-closed. After immutable close or explicit pushed halt, control returns to the Guide, which reads the terminal evidence and moves the project steering files forward before proposing another session.
+Once a session begins, Guide remains available for project-level conversation but cannot steer any frozen active phase. Repeat the disk preflight and relationship classification for every later session request. Kristian speaks about an active session only with its persistent reviewer while its producer remains visible and input-closed. Each pushed close or halt returns terminal evidence to Guide; it does not force unrelated siblings to stop.

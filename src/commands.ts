@@ -318,11 +318,25 @@ async function sessionNewCommand(args: string[], cwd: string, io: CliIo): Promis
   const guideLaunch = await hasGuideManifest(root, config)
     ? await verifyGuideLaunch(root, config, promptPath)
     : null;
+  const launchMode = dependencies.length > 0 ? (dependencyIds.length > 0 ? "dependent" : "continuation") : "independent";
+  if (
+    guideLaunch && (
+      guideLaunch.sessionKind !== kind || guideLaunch.launchMode !== launchMode ||
+      guideLaunch.dependencies.length !== dependencies.length ||
+      guideLaunch.dependencies.some((dependency, index) => {
+        const actual = dependencies[index];
+        return !actual || dependency.sessionId !== actual.sessionId || dependency.terminal !== actual.terminal ||
+          dependency.evidence.sha256 !== actual.evidenceSha256;
+      })
+    )
+  ) {
+    throw new Error("The requested session kind, launch mode, or dependencies do not match the owner-confirmed Guide launch.");
+  }
   const session = await createSession(root, config, prompt, {
     entryDirections,
     kind,
     dependencies,
-    launchMode: dependencies.length > 0 ? (dependencyIds.length > 0 ? "dependent" : "continuation") : "independent",
+    launchMode,
   });
   if (guideLaunch) await bindGuideLaunch(root, config, guideLaunch, session.id, session.state);
   io.out(`✓ Opened session ${session.id}`);

@@ -62,6 +62,18 @@ test("producer phase skills hand only to the one shared reviewer", async () => {
   }
 });
 
+test("concurrent relay skills require bound session identity instead of latest-session guessing", async () => {
+  for (const name of [...producerPhases.map((phase) => `koda-c-${phase}`), "koda-c-review", "koda-c-close"]) {
+    const skill = await readFile(path.join(".agents", "skills", name, "SKILL.md"), "utf8");
+    assert.match(skill, /KODA_SESSION_ID/, `${name} must require the supervisor-bound identity`);
+    assert.match(skill, /never infer the latest session/i, `${name} must refuse recency-based selection`);
+    assert.match(skill, /--session <session-id>/, `${name} must pass explicit identity to Koda commands`);
+  }
+  const session = await readFile(".agents/skills/koda-c-session/SKILL.md", "utf8");
+  assert.match(session, /owner-confirmed Guide launch.*session kind, launch mode, and dependency IDs/is);
+  assert.match(session, /Never infer independence because a kind name differs/i);
+});
+
 test("the shared reviewer keeps all phase criteria in one place", async () => {
   const review = await readFile(".agents/skills/koda-c-review/SKILL.md", "utf8");
   for (const phase of ["Brief", "Orient", "Plan", "Produce", "Live", "Summary", "Custom phases"]) {
@@ -114,10 +126,12 @@ test("session open and close remain ceremonies outside producer phase routing", 
   ]);
   assert.match(prompt, /project-level perspective across many bounded sessions/i);
   assert.match(prompt, /Before drafting, editing, confirming, or launching.*run `koda guide status`/is);
-  assert.match(prompt, /If it reports `NEXT SESSION BLOCKED`.*create no prompt/is);
-  assert.match(prompt, /conceptually later or separate idea does not create a parallel lane/i);
-  assert.match(prompt, /owner-via-guide.*`koda direction wait`/is);
-  assert.match(prompt, /Repeat the disk preflight.*start, draft, confirm, or launch another session/is);
+  assert.match(prompt, /Dependent successor:.*If any is active or lacks pushed close\/halt evidence, refuse before drafting/is);
+  assert.match(prompt, /Independent sibling:.*explicit owner\/Guide ruling.*`--independent`/is);
+  assert.match(prompt, /Never infer independence from a different kind label/i);
+  assert.match(prompt, /conceptually later idea is a dependent successor and waits; a genuinely independent sibling may proceed/i);
+  assert.match(prompt, /owner-via-guide.*`koda direction wait --session <session-id>`/is);
+  assert.match(prompt, /Repeat the disk preflight and relationship classification for every later session request/is);
   assert.match(prompt, /`koda guide verify` succeeds.*committed and pushed/is);
   assert.match(prompt, /Do not run `koda session new`/);
   assert.match(session, /currentPhaseIndex: 0/);

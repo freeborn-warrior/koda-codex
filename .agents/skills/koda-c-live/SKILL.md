@@ -9,7 +9,7 @@ Run or exercise the real produced thing and record what actually happens. Hand t
 
 ## ENTRY CHECK
 
-1. Locate `koda.config.json`, the latest session, and `state.json`. Refuse if any is missing or invalid.
+1. Locate `koda.config.json`, require the supervisor-bound `KODA_SESSION_ID`, and load only that session and `state.json`. Refuse missing, invalid, terminal, or ambiguous identity; never infer the latest session.
 2. Require the current phase name to equal `live`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its artifact, definitive review, exact ledger receipt, and advancement record.
 4. Require the produced output and the approved evidence manifest to exist at their cited paths. Refuse rather than substitute a mock unless the approved scope explicitly calls for one.
@@ -59,4 +59,4 @@ When input is needed, read and follow the [in-phase consultation protocol](../..
 
 Verify that every reported result was observed, every released direction ID is cited, failures remain visible, raw evidence exists where cited, and required input is resolved. Leave `currentPhaseIndex` unchanged and create no review, approval, receipt, advancement, repair, or summary.
 
-Run `koda status`; the phase must remain `live` and the gate must remain closed pending independent review proof. Report the artifact path and hand it to `koda-c-review`.
+Run `koda status --session <session-id>`; the phase must remain `live` and the gate must remain closed pending independent review proof. Report the artifact path and hand it to `koda-c-review`.

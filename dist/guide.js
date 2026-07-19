@@ -2,11 +2,11 @@ import { randomUUID } from "node:crypto";
 import { lstat, mkdir, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 
-import { evaluateSessionClosure } from "./close.js";
+import { closePath, evaluateSessionClosure } from "./close.js";
 import { pathExists } from "./config.js";
 import { carryDirectionsForNextSession, carryPendingDirectionsAfterHalt } from "./direction.js";
 import { checkGitFilesPushed } from "./git.js";
-import { evaluateSessionHalt } from "./halt.js";
+import { evaluateSessionHalt, haltPath } from "./halt.js";
 import {
   displayPath,
   latestSessionId,
@@ -15,6 +15,7 @@ import {
   nowIso,
   readRegularText,
   sessionRoot,
+  SESSION_PATTERN,
   writeJsonAtomic,
 } from "./project.js";
 import { sha256 } from "./receipt.js";
@@ -30,6 +31,22 @@ const REQUIRED_PROMPT_HEADINGS = [
   "## Prior session carry-forward",
   "## Relay handover",
 ];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -204,7 +221,10 @@ function parseLaunch(value         , source        )                     {
     !(item.previousCarryForward === null || typeof item.previousCarryForward === "object") ||
     typeof item.confirmedBy !== "string" ||
     item.confirmedBy.trim() === "" ||
-    typeof item.confirmedAt !== "string"
+    typeof item.confirmedAt !== "string" ||
+    (item.sessionKind !== undefined && (typeof item.sessionKind !== "string" || !/^[a-z][a-z0-9-]{0,31}$/.test(item.sessionKind))) ||
+    (item.launchMode !== undefined && item.launchMode !== "independent" && item.launchMode !== "dependent" && item.launchMode !== "continuation") ||
+    (item.dependencies !== undefined && !Array.isArray(item.dependencies))
   ) throw new Error(`${source} has invalid READY_TO_LAUNCH data.`);
   assertRelativeProjectPath(item.prompt, `${source} prompt`);
   assertRelativeProjectPath(item.manifest.path, `${source} manifest`);
@@ -234,6 +254,28 @@ function parseLaunch(value         , source        )                     {
     assertRelativeProjectPath(evidence.path, `${source} continuity evidence`);
     if (!hashPattern.test(evidence.sha256)) throw new Error(`${source} has invalid continuity SHA-256 evidence.`);
   }
+  const dependencies = item.dependencies ?? [];
+  const dependencyIds = new Set        ();
+  for (const dependency of dependencies) {
+    if (
+      !dependency || typeof dependency.sessionId !== "string" || !SESSION_PATTERN.test(dependency.sessionId) ||
+      (dependency.terminal !== "close" && dependency.terminal !== "halt") ||
+      !dependency.evidence || typeof dependency.evidence.path !== "string" || typeof dependency.evidence.sha256 !== "string" ||
+      !dependency.carryForward || typeof dependency.carryForward.path !== "string" || typeof dependency.carryForward.sha256 !== "string" ||
+      dependencyIds.has(dependency.sessionId) ||
+      !hashPattern.test(dependency.evidence.sha256) || !hashPattern.test(dependency.carryForward.sha256)
+    ) throw new Error(`${source} has invalid or duplicate dependency evidence.`);
+    assertRelativeProjectPath(dependency.evidence.path, `${source} dependency terminal evidence`);
+    assertRelativeProjectPath(dependency.carryForward.path, `${source} dependency carry-forward evidence`);
+    dependencyIds.add(dependency.sessionId);
+  }
+  const launchMode = item.launchMode ?? (item.previousSessionId ? "continuation" : "independent");
+  if (launchMode === "dependent" && dependencies.length === 0) {
+    throw new Error(`${source} declares a dependent launch without dependencies.`);
+  }
+  item.sessionKind ??= "produce";
+  item.launchMode = launchMode;
+  item.dependencies = dependencies;
   return item                      ;
 }
 
@@ -379,12 +421,16 @@ export async function cancelGuideLaunch(
   return file;
 }
 
-async function previousSessionEvidence(
+
+
+
+
+
+async function sessionBoundaryEvidence(
   root        ,
   config               ,
-)                                                                                                                                            {
-  const id = await latestSessionId(root, config);
-  if (!id) return { previousSessionId: null, previousCloseSha256: null, previousCarryForward: null, requiredPromptIds: [] };
+  id        ,
+)                                   {
   const directory = sessionRoot(root, config, id);
   const state = await loadSessionState(directory, id);
   const closure = await evaluateSessionClosure(root, directory, state);
@@ -398,9 +444,7 @@ async function previousSessionEvidence(
     const haltEvidence = await hashProjectFile(root, haltRelative, "Previous immutable halt");
     const directions = await carryPendingDirectionsAfterHalt(directory, state);
     return {
-      previousSessionId: id,
-      previousCloseSha256: haltEvidence.sha256,
-      previousCarryForward: haltEvidence,
+      dependency: { sessionId: id, terminal: "halt", evidence: haltEvidence, carryForward: haltEvidence },
       requiredPromptIds: [halt.metadata.id, ...directions.map((direction) => direction.id)],
     };
   }
@@ -415,11 +459,51 @@ async function previousSessionEvidence(
     path.join(directory, "phases", `${String(carryIndex + 1).padStart(2, "0")}-${carryPhase.name}.md`),
   ).split(path.sep).join("/");
   return {
-    previousSessionId: id,
-    previousCloseSha256: previousClose.sha256,
-    previousCarryForward: await hashProjectFile(root, carryRelative, "Previous carry-forward artifact"),
+    dependency: {
+      sessionId: id,
+      terminal: "close",
+      evidence: previousClose,
+      carryForward: await hashProjectFile(root, carryRelative, "Previous carry-forward artifact"),
+    },
     requiredPromptIds: (await carryDirectionsForNextSession(directory, state)).map((direction) => direction.id),
   };
+}
+
+async function previousSessionEvidence(
+  root        ,
+  config               ,
+)                                                                                                                                                                                      {
+  const id = await latestSessionId(root, config);
+  if (!id) {
+    return {
+      previousSessionId: null,
+      previousCloseSha256: null,
+      previousCarryForward: null,
+      requiredPromptIds: [],
+      dependency: null,
+    };
+  }
+  const boundary = await sessionBoundaryEvidence(root, config, id);
+  return {
+    previousSessionId: id,
+    previousCloseSha256: boundary.dependency.evidence.sha256,
+    previousCarryForward: boundary.dependency.carryForward,
+    requiredPromptIds: boundary.requiredPromptIds,
+    dependency: boundary.dependency,
+  };
+}
+
+async function activeSessionIds(root        , config               )                    {
+  const active           = [];
+  for (const id of await listSessionIds(root, config)) {
+    const directory = sessionRoot(root, config, id);
+    const state = await loadSessionState(directory, id);
+    const closure = await evaluateSessionClosure(root, directory, state);
+    if (closure.closed) continue;
+    const halt = await evaluateSessionHalt(root, directory, state);
+    if (!halt.halted) active.push(id);
+  }
+  return active;
 }
 
 function validatePromptShape(content        )       {
@@ -452,6 +536,7 @@ export async function confirmGuideLaunch(
   config               ,
   promptFile        ,
   confirmedBy        ,
+  options                     = {},
 )                                                        {
   if (confirmedBy.trim() === "" || /[\r\n]/.test(confirmedBy)) {
     throw new Error("The confirming owner must be a non-empty single line.");
@@ -461,12 +546,64 @@ export async function confirmGuideLaunch(
   const pending = await pendingGuideLaunches(root, config);
   if (pending.length) throw new Error(`Launch ${pending[0] .id} is already READY_TO_LAUNCH; bind or resolve it first.`);
   const prompt = await validatePromptLocation(root, config, promptFile);
-  const previous = await previousSessionEvidence(root, config);
-  const missingPriorIds = previous.requiredPromptIds.filter((id) => !prompt.content.includes(id));
-  if (missingPriorIds.length > 0) {
-    throw new Error(`The Guide prompt must cite every direction released at the prior session boundary (and the halt ID after halt):\n- ${missingPriorIds.join("\n- ")}`);
+  const sessionKind = options.kind ?? "produce";
+  if (!/^[a-z][a-z0-9-]{0,31}$/.test(sessionKind)) {
+    throw new Error("Session kind must start with a lowercase letter and contain only lowercase letters, digits, or hyphens (32 characters maximum).");
   }
-  const { requiredPromptIds: _requiredPromptIds, ...previousLaunchEvidence } = previous;
+  const dependencySessionIds = options.dependencySessionIds ?? [];
+  if (new Set(dependencySessionIds).size !== dependencySessionIds.length) {
+    throw new Error("A Guide launch dependency may be named only once.");
+  }
+  const activeIds = await activeSessionIds(root, config);
+  const activeDependencies = dependencySessionIds.filter((id) => activeIds.includes(id));
+  if (activeDependencies.length > 0) {
+    throw new Error(`A dependent Guide launch must wait for pushed close or halt:\n- ${activeDependencies.join("\n- ")}`);
+  }
+  if (activeIds.length > 0 && !options.independent) {
+    const reasons           = [];
+    for (const id of activeIds) {
+      const directory = sessionRoot(root, config, id);
+      const state = await loadSessionState(directory, id);
+      const closure = await evaluateSessionClosure(root, directory, state);
+      const halt = await evaluateSessionHalt(root, directory, state);
+      reasons.push(...(halt.exists ? halt.reasons : closure.reasons));
+    }
+    throw new Error(
+      `Session ${activeIds.join(", ")} is neither closed nor pushed-halted:\n- ${reasons.join("\n- ")}\nUse --independent only for an evidenced sibling, or wait and use --depends-on after its pushed terminal evidence exists.`,
+    );
+  }
+
+  let previousLaunchEvidence                                                                                                 = {
+    previousSessionId: null,
+    previousCloseSha256: null,
+    previousCarryForward: null,
+  };
+  let dependencies                          = [];
+  let requiredPromptIds           = [];
+  let launchMode                    = "independent";
+  if (dependencySessionIds.length > 0) {
+    const boundaries = await Promise.all(dependencySessionIds.map((id) => sessionBoundaryEvidence(root, config, id)));
+    dependencies = boundaries.map((item) => item.dependency);
+    requiredPromptIds = boundaries.flatMap((item) => item.requiredPromptIds);
+    launchMode = "dependent";
+  } else if (!options.independent) {
+    const previous = await previousSessionEvidence(root, config);
+    previousLaunchEvidence = {
+      previousSessionId: previous.previousSessionId,
+      previousCloseSha256: previous.previousCloseSha256,
+      previousCarryForward: previous.previousCarryForward,
+    };
+    dependencies = previous.dependency ? [previous.dependency] : [];
+    requiredPromptIds = previous.requiredPromptIds;
+    launchMode = previous.previousSessionId ? "continuation" : "independent";
+  }
+  const missingPriorIds = requiredPromptIds.filter((id) => !prompt.content.includes(id));
+  if (missingPriorIds.length > 0) {
+    const source = launchMode === "continuation"
+      ? "at the prior session boundary"
+      : "by its dependencies";
+    throw new Error(`The Guide prompt must cite every direction released ${source} (and every halt ID):\n- ${missingPriorIds.join("\n- ")}`);
+  }
   const launch                     = {
     version: 1,
     id: randomUUID(),
@@ -480,6 +617,9 @@ export async function confirmGuideLaunch(
     ),
     continuity: await snapshotContinuity(root, manifest),
     ...previousLaunchEvidence,
+    sessionKind,
+    launchMode,
+    dependencies,
     confirmedBy: confirmedBy.trim(),
     confirmedAt: nowIso(),
   };
@@ -523,17 +663,35 @@ export async function verifyGuideLaunch(
     const [expected, actual] = await Promise.all([realpath(expectedPromptFile), realpath(promptFile)]);
     if (expected !== actual) throw new Error("This prompt is not the owner-confirmed READY_TO_LAUNCH prompt.");
   }
-  const currentPrevious = await previousSessionEvidence(root, config);
-  const missingPriorIds = currentPrevious.requiredPromptIds.filter((id) => !prompt.content.includes(id));
+  const currentDependencies = await Promise.all(
+    launch.dependencies.map((dependency) => sessionBoundaryEvidence(root, config, dependency.sessionId)),
+  );
+  const missingPriorIds = currentDependencies
+    .flatMap((item) => item.requiredPromptIds)
+    .filter((id) => !prompt.content.includes(id));
   if (missingPriorIds.length > 0) {
-    throw new Error(`The confirmed Guide prompt no longer cites required prior-boundary direction evidence:\n- ${missingPriorIds.join("\n- ")}`);
+    throw new Error(`The confirmed Guide prompt no longer cites required dependency direction evidence:\n- ${missingPriorIds.join("\n- ")}`);
   }
-  if (
-    currentPrevious.previousSessionId !== launch.previousSessionId ||
-    currentPrevious.previousCloseSha256 !== launch.previousCloseSha256 ||
-    currentPrevious.previousCarryForward?.path !== launch.previousCarryForward?.path ||
-    currentPrevious.previousCarryForward?.sha256 !== launch.previousCarryForward?.sha256
-  ) throw new Error("The prior-session evidence changed after owner confirmation; the launch is stale.");
+  for (const [index, current] of currentDependencies.entries()) {
+    const expected = launch.dependencies[index] ;
+    if (
+      current.dependency.sessionId !== expected.sessionId ||
+      current.dependency.terminal !== expected.terminal ||
+      current.dependency.evidence.path !== expected.evidence.path ||
+      current.dependency.evidence.sha256 !== expected.evidence.sha256 ||
+      current.dependency.carryForward.path !== expected.carryForward.path ||
+      current.dependency.carryForward.sha256 !== expected.carryForward.sha256
+    ) throw new Error(`Dependency ${expected.sessionId} evidence changed after owner confirmation; the launch is stale.`);
+  }
+  if (launch.launchMode === "continuation") {
+    const expected = launch.dependencies[0] ?? null;
+    if (
+      !expected || launch.previousSessionId !== expected.sessionId ||
+      launch.previousCloseSha256 !== expected.evidence.sha256 ||
+      launch.previousCarryForward?.path !== expected.carryForward.path ||
+      launch.previousCarryForward?.sha256 !== expected.carryForward.sha256
+    ) throw new Error("The prior-session continuity evidence is internally inconsistent.");
+  }
   const launchRelative = path.relative(
     root,
     path.join(guideLaunchesDir(root, config), `${launch.id}.json`),
@@ -542,6 +700,7 @@ export async function verifyGuideLaunch(
     launch.manifest.path,
     launch.prompt,
     ...launch.continuity.map((item) => item.path),
+    ...launch.dependencies.flatMap((item) => [item.evidence.path, item.carryForward.path]),
     launchRelative,
   ]);
   if (!git.closed) throw new Error(`The confirmed Guide handover is not committed and pushed:\n- ${git.reasons.join("\n- ")}`);
@@ -563,6 +722,19 @@ export async function bindGuideLaunch(
   }
   if (new Date(state.createdAt).valueOf() < new Date(launch.confirmedAt).valueOf()) {
     throw new Error("The session predates the Guide launch confirmation.");
+  }
+  const stateDependencies = state.dependencies ?? [];
+  if (
+    (state.kind ?? "produce") !== launch.sessionKind ||
+    (state.launchMode ?? (launch.previousSessionId ? "continuation" : "independent")) !== launch.launchMode ||
+    stateDependencies.length !== launch.dependencies.length ||
+    stateDependencies.some((dependency, index) => {
+      const expected = launch.dependencies[index];
+      return !expected || dependency.sessionId !== expected.sessionId || dependency.terminal !== expected.terminal ||
+        dependency.evidenceSha256 !== expected.evidence.sha256;
+    })
+  ) {
+    throw new Error("The opened session kind, launch mode, or dependencies do not match the owner-confirmed Guide launch.");
   }
   const file = path.join(sessionRoot(root, config, sessionId), "guide-launch.json");
   if (await pathExists(file)) throw new Error(`Guide launch ${launch.id} is already bound.`);

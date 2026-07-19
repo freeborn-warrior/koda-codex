@@ -9,7 +9,7 @@ Summarize what the session files prove. Hand the summary to the shared reviewer.
 
 ## ENTRY CHECK
 
-1. Locate `koda.config.json`, the latest session, and `state.json`. Refuse if any is missing or invalid.
+1. Locate `koda.config.json`, require the supervisor-bound `KODA_SESSION_ID`, and load only that session and `state.json`. Refuse missing, invalid, terminal, or ambiguous identity; never infer the latest session.
 2. Require the current phase name to equal `summary`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its artifact, definitive review, exact ledger receipt, and advancement record.
 4. Read the session prompt, advanced phase artifacts, their active reviews, approval entries, and cited live evidence from disk. Refuse stale conversational summaries.
@@ -57,4 +57,4 @@ When input is needed, read and follow the [in-phase consultation protocol](../..
 
 Verify every claim against cited files, cite every released direction ID, record every skip, keep closure explicitly pending, and resolve required input. Leave `currentPhaseIndex` unchanged and create no review, approval, receipt, advancement, commit, push, or close artifact.
 
-Run `koda status`; the phase must remain `summary` and the gate must remain closed pending independent review proof. Report the summary path and hand it to `koda-c-review`.
+Run `koda status --session <session-id>`; the phase must remain `summary` and the gate must remain closed pending independent review proof. Report the summary path and hand it to `koda-c-review`.

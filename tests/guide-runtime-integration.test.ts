@@ -9,7 +9,7 @@ import { DEFAULT_CONFIG } from "../src/config.ts";
 import { runGuideCli } from "../src/guide-commands.ts";
 import { confirmGuideLaunch } from "../src/guide.ts";
 import { prepareGuideRuntime } from "../src/guide-runtime.ts";
-import { writeJsonAtomic } from "../src/project.ts";
+import { createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
 
 const sessionPrompt = [
   "# Session prompt",
@@ -37,6 +37,9 @@ const sessionPrompt = [
   "- Deliberately not carried: none",
   "",
   "## Relay handover",
+  "- Session kind: explore",
+  "- Launch relationship: independent sibling",
+  "- Dependencies: none",
   "- Configured receiver: brief",
   "- Ground prepared: project continuity and this confirmed prompt",
   "- Open items: none",
@@ -49,7 +52,7 @@ function git(cwd: string, args: string[]): string {
   return result.stdout.trim();
 }
 
-test("GUIDE REAL-PROJECT RELAY: two processes return pushed close evidence without replacing Git", async (t) => {
+test("GUIDE REAL-PROJECT RELAY: an independent sibling uses two bound contexts and returns pushed close", async (t) => {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-guide-real-relay-"));
   t.after(() => rm(temporary, { recursive: true, force: true }));
   const project = path.join(temporary, "project");
@@ -93,11 +96,19 @@ test("GUIDE REAL-PROJECT RELAY: two processes return pushed close evidence witho
   git(project, ["commit", "-m", "chore: prepare real Guide relay project"]);
   git(project, ["push", "-u", "origin", "main"]);
 
-  const confirmed = await confirmGuideLaunch(project, { ...DEFAULT_CONFIG, phases: DEFAULT_CONFIG.phases.slice(0, 1) }, promptFile, "Kristian");
+  const relayConfig = { ...DEFAULT_CONFIG, phases: DEFAULT_CONFIG.phases.slice(0, 1) };
+  const existing = await createSession(project, relayConfig, sessionPrompt, { kind: "produce" });
+  git(project, ["add", "-A"]);
+  git(project, ["commit", "-m", "session: preserve active Produce sibling"]);
+  git(project, ["push"]);
+  const confirmed = await confirmGuideLaunch(project, relayConfig, promptFile, "Kristian", {
+    kind: "explore",
+    independent: true,
+  });
   git(project, ["add", "-A"]);
   git(project, ["commit", "-m", "guide: confirm one-phase real-project session"]);
   git(project, ["push"]);
-  const prepared = await prepareGuideRuntime(project, { ...DEFAULT_CONFIG, phases: DEFAULT_CONFIG.phases.slice(0, 1) }, {
+  const prepared = await prepareGuideRuntime(project, relayConfig, {
     producerModel: "gpt-5.6-sol",
     producerEffort: "medium",
     reviewerModel: "gpt-5.6-terra",
@@ -118,7 +129,13 @@ test("GUIDE REAL-PROJECT RELAY: two processes return pushed close evidence witho
     "const sessionsRoot = path.join(process.cwd(), 'docs', 'sessions');",
     "const latest = () => readdirSync(sessionsRoot).sort().at(-1);",
     "let role = 'producer';",
-    "if (prompt.includes('explicitly use koda-c-session')) { call(['session', 'new', process.env.KODA_TEST_PROMPT]); }",
+    "if (prompt.includes('explicitly use koda-c-session')) {",
+    "  const kind = /\\\"--kind\\\" \\\"([^\\\"]+)\\\"/.exec(prompt)?.[1] ?? 'produce';",
+    "  const open = ['session', 'new', process.env.KODA_TEST_PROMPT, '--kind', kind];",
+    "  if (prompt.includes('\\\"--independent\\\"')) open.push('--independent');",
+    "  for (const match of prompt.matchAll(/\\\"--depends-on\\\" \\\"([^\\\"]+)\\\"/g)) open.push('--depends-on', match[1]);",
+    "  call(open);",
+    "}",
     "else if (prompt.includes('formal-review mode')) {",
     "  role = 'reviewer';",
     "  call(['review', 'new', 'brief']);",
@@ -229,6 +246,12 @@ test("GUIDE REAL-PROJECT RELAY: two processes return pushed close evidence witho
   assert.equal(run.launchId, confirmed.launch.id);
   assert.notEqual(run.producer.threadId, run.reviewer.threadId);
   assert.notEqual(run.finalCommit, run.archiveCommit);
+  assert.notEqual(run.sessionId, existing.id);
+  const existingState = await loadSessionState(existing.directory, existing.id);
+  assert.equal(existingState.currentPhaseIndex, 0);
+  const completedState = await loadSessionState(path.join(project, "docs", "sessions", run.sessionId), run.sessionId);
+  assert.equal(completedState.kind, "explore");
+  assert.equal(completedState.launchMode, "independent");
   const guideReturnFile = path.join(project, run.guideReturn);
   const guideReturn = JSON.parse(await readFile(guideReturnFile, "utf8"));
   assert.equal(guideReturn.status, "CLOSED_SESSION_RETURNED");

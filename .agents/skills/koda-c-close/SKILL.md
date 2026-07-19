@@ -9,7 +9,7 @@ Perform the session-close ceremony outside the configurable phase chain. Git mus
 
 ## ENTRY CHECK
 
-1. Locate `koda.config.json`, the latest session, and `state.json`. Refuse if missing or invalid.
+1. Locate `koda.config.json`, require the supervisor-bound `KODA_SESSION_ID`, and load only that session and `state.json`. Refuse missing, invalid, active-phase, or ambiguous identity; never infer the latest session.
 2. Refuse if `halt.md` exists. Halt and close are mutually exclusive terminal ceremonies.
 3. Require `currentPhaseIndex` and the advancement history to equal the declared phase count. Refuse if any phase remains active.
 4. Verify the final advancement names the final configured phase and binds its review ID and receipt.
@@ -36,7 +36,7 @@ Before the final stop, require all of these proofs:
 - the entire session folder is tracked and clean;
 - the close commit is present on the configured pushed upstream;
 - `koda session close` reports `SESSION CLOSED`;
-- `koda status` independently derives `SESSION CLOSED`.
+- `koda status --session <session-id>` independently derives `SESSION CLOSED`.
 
 Do not create a new session. Report the closed session ID, close artifact path, commit ID, branch, and pushed upstream. A later `koda-c-session` run may begin only after these proofs remain true.
 

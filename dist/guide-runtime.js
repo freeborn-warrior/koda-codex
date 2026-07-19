@@ -68,6 +68,9 @@ const SAFE_ROLE_VALUE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 
 
+
+
+
 function git(root        , args          )                                                  {
   const result = spawnSync("git", args, { cwd: root, encoding: "utf8" });
   return {
@@ -157,6 +160,9 @@ function runtimeRecord(value         , source        )                     {
     !validRole(item.producer) || !validRole(item.reviewer) ||
     item.project !== "../../.." || item.runtime !== "." ||
     typeof item.cli !== "string" || typeof item.prompt !== "string" ||
+    !(item.sessionKind === undefined || (typeof item.sessionKind === "string" && /^[a-z][a-z0-9-]{0,31}$/.test(item.sessionKind))) ||
+    !(item.launchMode === undefined || item.launchMode === "independent" || item.launchMode === "dependent" || item.launchMode === "continuation") ||
+    !(item.dependencySessionIds === undefined || (Array.isArray(item.dependencySessionIds) && item.dependencySessionIds.every((id) => typeof id === "string"))) ||
     typeof item.archive !== "string" || typeof item.guideReturn !== "string" ||
     typeof item.initialCommit !== "string" || !/^[a-f0-9]{40,64}$/.test(item.initialCommit) ||
     !validTerminalLaunch ||
@@ -303,6 +309,9 @@ export async function prepareGuideRuntime(
     runtime: ".",
     cli,
     prompt: launch.prompt,
+    sessionKind: launch.sessionKind,
+    launchMode: launch.launchMode,
+    dependencySessionIds: launch.dependencies.map((item) => item.sessionId),
     archive: `docs/guide/runs/${launch.id}`,
     guideReturn: `docs/guide/returns/${launch.id}.json`,
     initialCommit: head.stdout,

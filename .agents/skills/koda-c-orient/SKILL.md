@@ -9,7 +9,7 @@ Map what is true on disk before anyone plans. Hand the evidence map to the share
 
 ## ENTRY CHECK
 
-1. Locate `koda.config.json`, the latest session, and `state.json`. Refuse if any is missing or invalid.
+1. Locate `koda.config.json`, require the supervisor-bound `KODA_SESSION_ID`, and load only that session and `state.json`. Refuse missing, invalid, terminal, or ambiguous identity; never infer the latest session.
 2. Require the current phase name to equal `orient`. Refuse and name the actual phase otherwise.
 3. Require a non-empty session prompt and the current phase's declared input files.
 4. Derive the prior phase from `state.json`; verify its non-empty artifact, definitive review, exact receipt in `approvals.md`, and matching advancement record. Never infer approval from prose.
@@ -55,4 +55,4 @@ Do not turn findings into a plan. When input is needed, read and follow the [in-
 
 Verify that every material claim and released direction ID is cited, every unavailable fact is explicit, required input is resolved, and `koda-c-review` is the immediate receiver. Leave `currentPhaseIndex` unchanged and create no review, approval, receipt, or advancement.
 
-Run `koda status`; the phase must remain `orient` and the gate must remain closed pending independent review proof. Report the artifact path and hand it to `koda-c-review`; the gate selects what follows.
+Run `koda status --session <session-id>`; the phase must remain `orient` and the gate must remain closed pending independent review proof. Report the artifact path and hand it to `koda-c-review`; the gate selects what follows.

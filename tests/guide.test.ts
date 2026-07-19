@@ -96,18 +96,67 @@ test("GUIDE ENTRY: an active prior session refuses a new launch request and name
   );
 });
 
-test("GUIDE PREFLIGHT: an active session blocks a conceptually competing session before drafting", async (t) => {
+test("GUIDE PREFLIGHT: active work distinguishes blocked successors from explicit independent siblings", async (t) => {
   const h = await guideHarness(t);
   const active = await createSession(h.root, DEFAULT_CONFIG, prompt);
   const output: string[] = [];
   await runGuideCli(["status"], h.root, { out(message) { output.push(message); } });
   const status = output.join("\n");
-  assert.match(status, /NEXT SESSION BLOCKED — the current project path is still in flight/);
-  assert.match(status, new RegExp(`Current bounded session: ${active.id} — brief \\(1/6\\)`));
+  assert.match(status, /ACTIVE PROJECT WORK — 1 bounded session/);
+  assert.match(status, new RegExp(`Current bounded session: ${active.id} — produce — brief \\(1/6\\)`));
   assert.match(status, /Named condition: Every declared phase has not advanced/);
-  assert.match(status, /discuss and preserve a future idea, but do not draft, confirm, or launch a competing session/);
-  assert.match(status, /wait for immutable pushed close, or explicitly halt and push halt\.md/);
+  assert.match(status, /dependent successor is blocked until every named predecessor has pushed close or halt evidence/);
+  assert.match(status, /independent sibling may be confirmed only with an explicit --independent classification/);
+  assert.match(status, /different kind name alone proves nothing/);
+  assert.doesNotMatch(status, /NEXT SESSION BLOCKED — the current project path is still in flight/);
   assert.doesNotMatch(status, /one next-session draft may continue/);
+});
+
+test("GUIDE INDEPENDENT CONTROL: an active Produce session permits an owner-classified Explore sibling", async (t) => {
+  const h = await guideHarness(t);
+  await createSession(h.root, DEFAULT_CONFIG, prompt, { kind: "produce" });
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian", {
+    kind: "explore",
+    independent: true,
+  });
+  assert.equal(confirmed.launch.sessionKind, "explore");
+  assert.equal(confirmed.launch.launchMode, "independent");
+  assert.deepEqual(confirmed.launch.dependencies, []);
+  assert.equal(confirmed.launch.previousSessionId, null);
+});
+
+test("GUIDE INDEPENDENT BINDING: confirmed kind and independence open exactly one matching sibling", async (t) => {
+  const h = await guideHarness(t, true);
+  const first = await createSession(h.root, DEFAULT_CONFIG, prompt, { kind: "produce" });
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian", {
+    kind: "explore",
+    independent: true,
+  });
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm independent Explore sibling"]);
+  h.git(h.root, ["push"]);
+
+  await assert.rejects(
+    runCli(["session", "new", h.promptFile, "--kind", "produce", "--independent"], h.root, {
+      out() {}, error() {}, async prompt() { return ""; },
+    }),
+    /do not match the owner-confirmed Guide launch/,
+  );
+  assert.deepEqual((await readdir(path.join(h.root, "docs", "sessions"))).sort(), [first.id]);
+
+  const output: string[] = [];
+  await runCli(["session", "new", h.promptFile, "--kind", "explore", "--independent"], h.root, {
+    out(message) { output.push(message); }, error() {}, async prompt() { return ""; },
+  });
+  assert.match(output.join("\n"), /Kind: explore/);
+  assert.match(output.join("\n"), /Launch: independent/);
+  const ids = (await readdir(path.join(h.root, "docs", "sessions"))).sort();
+  assert.equal(ids.length, 2);
+  const state = await loadSessionState(path.join(h.root, "docs", "sessions", ids[1]!), ids[1]);
+  assert.equal(state.kind, "explore");
+  assert.equal(state.launchMode, "independent");
+  const binding = JSON.parse(await readFile(path.join(h.root, "docs", "sessions", ids[1]!, "guide-launch.json"), "utf8"));
+  assert.equal(binding.launchId, confirmed.launch.id);
 });
 
 test("GUIDE PREFLIGHT CONTROL: a project with no active session permits exactly one draft", async (t) => {
@@ -369,8 +418,9 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   await runGuideCli(["status"], h.root, { out(message) { guideStatus.push(message); } });
   assert.match(guideStatus.join("\n"), /Owner input: OPEN — project-level conversation belongs in this Guide context/);
   assert.match(guideStatus.join("\n"), /Guide direction cannot inject the active phase/);
-  assert.match(guideStatus.join("\n"), /NEXT SESSION BLOCKED — the current project path is still in flight/);
-  assert.match(guideStatus.join("\n"), /do not draft, confirm, or launch a competing session/);
+  assert.match(guideStatus.join("\n"), /ACTIVE PROJECT WORK — 0 bounded session/);
+  assert.match(guideStatus.join("\n"), /Current bound launch: .* — PAUSED_BY_OWNER/);
+  assert.match(guideStatus.join("\n"), /current READY_TO_LAUNCH request must bind or be cancelled before another confirmation/);
   assert.match(guideStatus.join("\n"), new RegExp(`ACTIVE SESSION RUNTIME — ${confirmed.launch.id}`));
   assert.match(guideStatus.join("\n"), /State: PAUSED_BY_OWNER/);
   assert.match(guideStatus.join("\n"), /Window B — reviewer \/ owner:[\s\S]*Window A — producer:[\s\S]*Read-only detail:/);

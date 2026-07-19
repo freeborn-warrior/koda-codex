@@ -80,19 +80,19 @@ After the exact receipt is recorded, the same command reports `GATE OPEN — BRI
 ```text
 koda init [directory] [--demo]
 koda guide status
-koda guide confirm <prompt-file> --owner <name>
+koda guide confirm <prompt-file> --owner <name> [--kind <kind>] [--depends-on <session-id>] [--independent]
 koda guide cancel <launch-id> --owner <name> --reason <text>
 koda guide bind <launch-id> <session-id>
 koda guide verify
 koda guide launch --producer-model <model> --producer-effort <effort> --reviewer-model <model> --reviewer-effort <effort> [--open ghostty]
-koda session new <prompt-file>
-koda status
-koda review new <phase>
-koda direction wait <owner-message-file> <classification-file> [--source owner-via-guide|owner-via-reviewer]
-koda approve <phase> [quoted-receipt] [--approver <name>]
-koda advance
-koda session halt [owner-direction-file]
-koda session close
+koda session new <prompt-file> [--kind <kind>] [--depends-on <session-id>] [--independent]
+koda status [--session <session-id>]
+koda review new <phase> [--session <session-id>]
+koda direction wait <owner-message-file> <classification-file> [--source owner-via-guide|owner-via-reviewer] [--session <session-id>]
+koda approve <phase> [quoted-receipt] [--approver <name>] [--session <session-id>]
+koda advance [--session <session-id>]
+koda session halt [owner-direction-file] [--session <session-id>]
+koda session close [--session <session-id>]
 ```
 
 The CLI generates artifact hashes, review IDs, receipts, structured approval entries, advancement history, and immutable close metadata. All remain readable Markdown or JSON.
@@ -101,17 +101,17 @@ The CLI generates artifact hashes, review IDs, receipts, structured approval ent
 
 All skills live inside this repository under Codex's discoverable `.agents/skills/` path:
 
-- `koda-c-session-prompt` is the sole Guide skill route toward a bounded session. Its current implementation refuses before drafting if any session or prepared launch is in flight; the owner-confirmed project model now requires that preflight to block dependent successors and conflicts while permitting evidenced independent sibling session kinds.
+- `koda-c-session-prompt` is the sole Guide skill route toward a bounded session. It classifies the request from disk: dependent successors wait for pushed terminal evidence, explicit independent siblings may proceed, and a different kind label alone never proves independence.
 - `koda-c-session` opens from an owner contract and prior pushed summary.
 - `koda-c-brief`, `koda-c-orient`, `koda-c-plan`, `koda-c-produce`, `koda-c-live`, and `koda-c-summary` are producer relay legs.
 - `koda-c-review` is the only formal reviewer skill; its per-phase criteria never drift into copies.
 - `koda-c-close` performs the prepare → Git → verify ceremony outside the phase chain.
 
-A [fresh ephemeral Codex startup proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md) discovered the original nine session-runtime skills and root project guidance without any tool call or repository read. The current [ten-skill startup proof](discovery-runs/2026-07-19-fresh-codex-startup-02/RESULT.md) independently includes the Guide-side session-prompter under the same zero-tool, zero-read rule. Its separate [active-session run](guide-preflight-runs/2026-07-19-sol-medium-01/RESULT.md) shows fresh Sol/medium loading the skill, checking disk, refusing a conceptually competing session before drafting, and changing no fixture file.
+A [fresh ephemeral Codex startup proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md) discovered the original nine session-runtime skills and root project guidance without any tool call or repository read. The current [ten-skill startup proof](discovery-runs/2026-07-19-fresh-codex-startup-02/RESULT.md) independently includes the Guide-side session-prompter under the same zero-tool, zero-read rule. Its historical [active-session run](guide-preflight-runs/2026-07-19-sol-medium-01/RESULT.md) shows fresh Sol/medium correctly refusing one conceptually dependent successor before drafting. The later owner ruling broadened the product to explicit independent siblings; deterministic tests now cover that classification, while a fresh-model repeat of the broader skill remains owed.
 
-Between sessions, the Guide reconstructs the project from its configured steering files, prior pushed close or halt, and carry-forward evidence. `$koda-c-session-prompt` is the only owner-facing start ceremony. Its first action is `koda guide status`: an active session or prepared launch prints `NEXT SESSION BLOCKED`, names the current path, and creates no prompt—even when the idea is conceptually ahead. Guide may continue discussing or preserve the idea as waiting direction, but only pushed close or explicit pushed halt frees the next session. After halt the new prompt must cite the halt ID and every waiting direction ID before a fresh Brief can open. Explicit owner confirmation writes one `READY_TO_LAUNCH` request binding the prompt, Guide manifest, steering snapshot, and prior-session evidence; edits make it stale, and cancellation is an immutable pushed artifact rather than deletion. A project with a Guide manifest cannot open a session from an unconfirmed prompt. `koda guide launch` then binds explicit producer/reviewer assignments into ignored `.koda/` runtime and prints exact Window B, Window A, and status commands. On macOS, explicit `--open ghostty` requests labeled Reviewer and Producer windows in that order while the existing Guide conversation stays open. It records the request before opening either window, refuses duplicate automatic opening, and retains the exact manual commands as recovery. After pushed close, the runtime returns a tracked archive and machine-readable handback under `docs/guide/`. The [Guide continuity protocol](GUIDE-CONTINUITY.md) documents the mechanics and limits.
+Guide reconstructs the project from configured steering files and disk-backed session evidence. `$koda-c-session-prompt` is the only owner-facing start ceremony. `koda guide status` lists every active session with kind, phase, and named terminal condition. A dependent successor creates no prompt until all named predecessors have pushed close or halt; an explicitly owner-classified independent sibling may be confirmed with `--independent`. Confirmation binds kind, relationship, prompt, steering snapshot, and dependency terminal hashes. Changed evidence makes the launch stale; cancellation is immutable pushed evidence. A project with a Guide manifest cannot open from an unconfirmed or mismatched prompt. `koda guide launch` binds producer/reviewer assignments and the confirmed session identity into ignored `.koda/` runtime. The supervisor exports `KODA_SESSION_ID`, and every producer/reviewer skill and CLI mutation targets that ID. A deterministic real-project relay proves an independent Explore session can complete through pushed close while an active Produce sibling remains untouched. One runtime still owns the opt-in Ghostty window pair at a time; simultaneous live runtime pairs and overlapping writes wait for the write-set/lock milestone. The [Guide continuity protocol](GUIDE-CONTINUITY.md) documents the mechanics and limits.
 
-That paragraph describes the shipped serialized reference path, not the completed project model. Produce is one session kind beneath Guide, alongside Explore, Research, Architecture, Triage, and later kinds. Independent sibling sessions may be active together; only dependent successors must wait for pushed terminal evidence. Implementing that owner ruling requires explicit session IDs, dependency-aware preflight, aggregate project status, attributable write sets, and conflict refusal. See the [concurrent project/session ruling](design-notes/2026-07-19-concurrent-project-work-owner-ruling.md).
+Produce is one session kind beneath Guide, alongside Explore, Research, Architecture, Triage, and later kinds. The shipped core now records explicit IDs, kinds, relationships, dependency hashes, aggregate active status, and end-to-end relay binding. The unfinished half is concurrent mutation attribution: exact write sets, same-path conflict refusal, exact staging, and a short Git-operation lock. See the [concurrent project/session ruling](design-notes/2026-07-19-concurrent-project-work-owner-ruling.md).
 
 Every producer skill has three hard sections: ENTRY CHECK, ITS OWN JOB, and HANDOVER OBLIGATION. It refuses when required disk evidence is absent, writes only its own artifact, then hands to the shared reviewer without self-reviewing or advancing.
 
