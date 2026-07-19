@@ -1,6 +1,6 @@
 # Koda-C visible backlog
 
-**Last updated:** 2026-07-18
+**Last updated:** 2026-07-19
 
 This is the on-disk working queue for the build. A checked item means its evidence exists in committed project files; conversation-only completion does not count.
 
@@ -10,10 +10,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Owner-test the new one-action Ghostty adapter against a genuine Guide-confirmed session. Deterministic tests prove labeled Reviewer-first/Producer-second requests, no shell evaluation, partial-open recovery, and duplicate refusal; they do not prove macOS displayed the windows.
 - [ ] Make the CLI ceremony legible without reading implementation logs: permanent context labels, owner-input state, phase progress and artifact/handover summaries, conversational reviewer notifications, one named reason per refusal, and one safe recovery action. Never present hidden chain-of-thought as product output.
 - [ ] Design and test an explicit Guide-to-Reviewer transfer for a project-level decision that must affect an already active session. Conversation or steering-file mutation alone must never alter the confirmed session snapshot.
+- [ ] Keep the Reviewer conversational while Producer works: a real terminal prompt resumes the same persistent context, safe answers mutate no project file, project-scope thoughts return to Guide, and active direction is named but remains unsent. Deterministic tests pass; commit, push, and owner-observed proof are still pending.
 
 ## Next
 
-- [ ] Keep the reviewer conversational while the producer is working, not only at formal review and consultation handoffs. Any actionable result must still use the shipped bound owner-handback protocol.
 - [ ] Finish submission-critical proof and polish only after the product runtime above is honest: final hygiene, owner recording, and external submission.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.

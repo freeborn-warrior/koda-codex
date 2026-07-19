@@ -49,6 +49,8 @@ npm run relay:reviewer
 
 Leave this running too. It discovers the same run and waits. When Window A posts a handover, Window B automatically resumes the same persistent reviewer context. There is no phase-specific command to copy.
 
+While Window A is working, Window B shows `reviewer> `. Type an active-session question there and press Return. The same Reviewer context answers from current disk evidence, then returns to the prompt. This conversation changes no project file and is never treated as Producer input. A project-level thought is marked for Guide. Possible direction that would alter active work is marked `OWNER DIRECTION — NOT SENT`; it does not pause or steer Producer because Koda-C does not yet have the distinct owner-approved idle-transfer artifact.
+
 For a formal review, Window B shows the reviewer progress and then says `REVIEW READY`. It asks you to press Return, opens the complete review, and waits while you read it:
 
 1. Read the verdict and every finding.
@@ -121,9 +123,9 @@ Success exists only when Window A prints `RELAY COMPLETE` and Window B prints `S
 
 ## Current honest boundary
 
-This slice proves the automatic producer-to-reviewer wake-up, one persistent Window B reviewer, same-window review explanations and exact receipt acknowledgement, an owner-ruling loop for in-phase consultations, and readable progress derived from actual Codex events. It is still a repository relay harness around the bounded `software-clean` scenario—not yet the general project launcher or the Guide-started experience.
+This slice proves the automatic producer-to-reviewer wake-up, one persistent Window B reviewer, a terminal-backed conversation prompt while Producer works, same-window review explanations and exact receipt acknowledgement, an owner-ruling loop for in-phase consultations, and readable progress derived from actual Codex events. The historical manual route remains a repository relay harness around the bounded `software-clean` scenario; the newer Guide launcher connects the same runtime to a real project but still needs owner-observed proof.
 
-Window B now offers explanation conversation and confirmed owner-direction handbacks at a formal decision point, but not yet an always-open conversation while the producer is working. Product decisions entered through `DISCUSS`, consultation prompts, or explicitly sent owner handbacks are disk-backed. Notification transport, remote control, a polished split-pane interface, and complete abort recovery remain later layers.
+Conversation between handoffs is deliberately non-mutating. Product decisions entered through `DISCUSS`, consultation prompts, or explicitly sent review-time owner handbacks are disk-backed. Idle active-session direction and Guide-to-Reviewer direction remain unsent until their transfer protocol is owner-approved. Notification transport, remote control, a polished split-pane interface, and complete abort recovery remain later layers.
 
 ## Safety boundaries
 

@@ -1,6 +1,6 @@
 # Koda-C working plan
 
-**Last updated:** 2026-07-18
+**Last updated:** 2026-07-19
 
 This file records the current engineering direction above individual implementation steps. `PROJECT.md` explains what Koda-C is, `BACKLOG.md` tracks the visible work/evidence queue, and this plan states the sequence currently being pursued. Conversation may change the plan, but the change is not durable until this file moves with it.
 
@@ -17,7 +17,8 @@ Turn the proved two-context session relay into a project-level experience that c
 5. [x] Mutate every new refusal condition, record the results, and keep prior tests intact.
 6. [x] Prove the Guide-to-session transition against a real Git project with separate deterministic processes, injected return-stage interruption, pushed close, pushed Guide return, and unchanged repository identity.
 7. [x] Add one opt-in macOS Ghostty action that requests the two labeled session contexts while preserving exact manual recovery commands.
-8. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
+8. [ ] Keep the persistent Reviewer conversational between formal handoffs without turning conversation into Producer input. Implementation and focused deterministic proof are complete; durable full-suite evidence and push remain.
+9. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
 
 ## Submission cut
 

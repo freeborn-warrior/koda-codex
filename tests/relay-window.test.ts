@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { readProjectConfig } from "../src/config.ts";
+import { pathExists, readProjectConfig } from "../src/config.ts";
 import { artifactPath, createSession, reviewPath, writeJsonAtomic } from "../src/project.ts";
 import { createFreshReview, readApprovalEntries } from "../src/receipt.ts";
 import { createOwnerHandback, parseOwnerHandback, pendingOwnerHandbacks } from "../scripts/owner-handback.ts";
@@ -100,6 +100,84 @@ async function preparedAcknowledgementRun(
   return { temporary, runRoot, project, phase, session, review, executed, clipboard };
 }
 
+async function preparedIdleConversationRun(response: string, options: { throughTty?: boolean } = {}) {
+  const temporary = await mkdtemp(path.join(tmpdir(), "koda-reviewer-conversation-"));
+  const prepared = spawnSync(process.execPath, [
+    "scripts/prepare-relay-run.ts",
+    "software-clean",
+    "gpt-5.6-sol",
+    "medium",
+    "gpt-5.6-terra",
+    "medium",
+  ], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    env: { ...process.env, KODA_RELAY_RUNS_ROOT: temporary },
+  });
+  assert.equal(prepared.status, 0, prepared.stderr);
+  const runRoot = path.join(temporary, (await readdir(temporary))[0]);
+  const project = path.join(runRoot, "project");
+  const config = await readProjectConfig(project);
+  const prompt = await readFile(path.join(project, "owner-prompt.md"), "utf8");
+  const session = await createSession(project, config, prompt);
+  const runPath = path.join(runRoot, "RUN.json");
+  const run = JSON.parse(await readFile(runPath, "utf8"));
+  run.status = "RUNNING";
+  run.sessionId = session.id;
+  await writeJsonAtomic(runPath, run);
+  const projectStatusBefore = spawnSync("git", ["status", "--porcelain", "--untracked-files=all"], {
+    cwd: project,
+    encoding: "utf8",
+  }).stdout;
+  const fakeCodex = path.join(temporary, "fake-idle-reviewer.mjs");
+  await writeFile(fakeCodex, [
+    "#!/usr/bin/env node",
+    "const prompt = process.argv.at(-1) ?? '';",
+    "if (!prompt.includes('owner-conversation mode')) { process.stderr.write('missing owner-conversation mode'); process.exit(1); }",
+    "console.log(JSON.stringify({ type: 'thread.started', thread_id: '019f0000-0000-7000-8000-000000000099' }));",
+    `console.log(JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: ${JSON.stringify(response)} } }));`,
+    "console.log(JSON.stringify({ type: 'turn.completed' }));",
+  ].join("\n"), "utf8");
+  await chmod(fakeCodex, 0o755);
+  const environment = {
+    ...process.env,
+    KODA_RELAY_RUNS_ROOT: temporary,
+    KODA_RELAY_REVIEWER_ONCE: "1",
+    ...(!options.throughTty
+      ? { KODA_RELAY_TEST_IDLE_CONVERSATION: "What should I understand about the active Brief?" }
+      : {}),
+    KODA_CODEX_BIN: fakeCodex,
+    ...(options.throughTty
+      ? {
+          KODA_TEST_NODE: process.execPath,
+          KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
+        }
+      : {}),
+  };
+  const expectProgram = [
+    "set timeout 10",
+    "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT)",
+    "expect \"reviewer> \"",
+    "send -- \"What should I understand about the active Brief?\\r\"",
+    "expect eof",
+    "set result [wait]",
+    "exit [lindex $result 3]",
+  ].join("\n");
+  const executed = spawnSync(options.throughTty ? "/usr/bin/expect" : process.execPath, options.throughTty
+    ? ["-c", expectProgram]
+    : ["scripts/run-relay-reviewer-window.ts"], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 10_000,
+    env: environment,
+  });
+  const projectStatusAfter = spawnSync("git", ["status", "--porcelain", "--untracked-files=all"], {
+    cwd: project,
+    encoding: "utf8",
+  }).stdout;
+  return { temporary, runRoot, project, session, executed, projectStatusBefore, projectStatusAfter };
+}
+
 test("TWO-WINDOW PROTOCOL: reviewer jobs are bounded and duplicate reviewer windows refuse", async (t) => {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-window-protocol-"));
   t.after(() => rm(temporary, { recursive: true, force: true }));
@@ -147,6 +225,39 @@ test("TWO-WINDOW VISIBILITY: progress is readable without exposing review receip
   assert.equal(rendered, "REVIEWER UPDATE\nReview complete.");
   assert.equal(redactRelayOutput(`Review complete; ${receipt}`), "Review complete; [receipt redacted]");
   assert.equal(renderCodexEvent(JSON.stringify({ type: "turn.completed" }), "PRODUCER"), "PRODUCER TURN COMPLETE");
+});
+
+test("REVIEWER OPEN CONVERSATION: an idle owner question resumes the Reviewer but changes no project file", async (t) => {
+  const result = await preparedIdleConversationRun("The current disk evidence proves only that Brief is active; Producer has not handed it over yet.");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  assert.match(result.executed.stdout, /owner conversation while Producer works/);
+  assert.match(result.executed.stdout, /REVIEWER CONVERSATION COMPLETE — no producer handback was created/);
+  assert.equal(result.projectStatusAfter, result.projectStatusBefore);
+  assert.equal((await readReviewerWindowState(result.runRoot))?.threadId, "019f0000-0000-7000-8000-000000000099");
+  assert.equal(await pathExists(path.join(result.session.directory, "owner-handbacks")), false);
+});
+
+test("REVIEWER OPEN CONVERSATION MUTATION: active direction is named but never becomes a chat-only handback", async (t) => {
+  const result = await preparedIdleConversationRun("OWNER DIRECTION — ACTIVE SESSION TRANSFER REQUIRED\nChange the output format now.");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  assert.match(result.executed.stdout, /OWNER DIRECTION — NOT SENT/);
+  assert.match(result.executed.stdout, /conversation changed no file and reached no Producer/);
+  assert.equal(result.projectStatusAfter, result.projectStatusBefore);
+  assert.equal(await pathExists(path.join(result.session.directory, "owner-handbacks")), false);
+});
+
+test("REVIEWER OPEN CONVERSATION TTY: a real terminal line reaches the idle Reviewer prompt", {
+  skip: process.platform !== "darwin",
+}, async (t) => {
+  const result = await preparedIdleConversationRun("The Reviewer received the terminal question and changed no file.", { throughTty: true });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  assert.match(result.executed.stdout, /reviewer> /);
+  assert.match(result.executed.stdout, /owner conversation while Producer works/);
+  assert.match(result.executed.stdout, /REVIEWER CONVERSATION COMPLETE — no producer handback was created/);
+  assert.equal(result.projectStatusAfter, result.projectStatusBefore);
 });
 
 test("TWO-WINDOW RECEIPT: exact owner quote is recorded from Window B", async (t) => {

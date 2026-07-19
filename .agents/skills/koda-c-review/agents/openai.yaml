@@ -1,4 +1,4 @@
 interface:
   display_name: "Koda-C Review"
-  short_description: "Review evidence, consult, and explain findings"
-  default_prompt: "Use $koda-c-review to review the current artifact, answer its consultation, or explain its active review in the explicitly named mode."
+  short_description: "Review, consult, explain, and discuss sessions"
+  default_prompt: "Use $koda-c-review in the explicitly named mode to review, consult, explain an active review, or discuss the active session without bypassing disk handoffs."

@@ -178,7 +178,8 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(protocol, /persistent producer/);
   assert.match(protocol, /persistent reviewer/);
   assert.match(protocol, /first owner-facing slice/);
-  assert.match(protocol, /not yet conversational while the producer is working/);
+  assert.match(protocol, /always-open `reviewer> ` prompt/);
+  assert.match(protocol, /No chat line becomes producer evidence/);
   assert.match(protocol, /explicitly send new direction as a bound owner handback/);
   assert.match(ghostty, /npm run relay:producer\n/);
   assert.match(ghostty, /npm run relay:reviewer\n/);

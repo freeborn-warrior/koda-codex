@@ -118,6 +118,21 @@ if (state.model !== initialRun.reviewer.model || state.effort !== initialRun.rev
 }
 await writeReviewerWindowState(runRoot, state);
 
+const ownerConversationQueue: string[] = [];
+let ownerPromptWaiter: ((line: string) => void) | null = null;
+const ownerConsole = process.stdin.isTTY
+  ? createInterface({ input: process.stdin, output: process.stdout, terminal: true })
+  : null;
+ownerConsole?.on("line", (line) => {
+  if (ownerPromptWaiter) {
+    const resolve = ownerPromptWaiter;
+    ownerPromptWaiter = null;
+    resolve(line);
+  } else {
+    ownerConversationQueue.push(line);
+  }
+});
+
 function threadIdFromEvents(output: string): string | null {
   for (const line of output.split(/\r?\n/)) {
     if (!line.trim()) continue;
@@ -193,11 +208,25 @@ async function modelTurn(purpose: string, prompt: string): Promise<string> {
 }
 
 async function promptOwner(message: string): Promise<string> {
+  if (ownerConsole) {
+    if (ownerPromptWaiter) throw new Error("The reviewer console already has an owner prompt open.");
+    process.stdout.write(message);
+    return new Promise((resolve) => { ownerPromptWaiter = resolve; });
+  }
   const terminal = createPrompt({ input: process.stdin, output: process.stdout });
   try {
     return await terminal.question(message);
   } finally {
     terminal.close();
+  }
+}
+
+function withOwnerConsolePaused<T>(operation: () => T): T {
+  ownerConsole?.pause();
+  try {
+    return operation();
+  } finally {
+    ownerConsole?.resume();
   }
 }
 
@@ -232,7 +261,11 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   };
   const openReview = async () => {
     if (!testMode) await promptOwner("Press Return to open the complete review. ");
-    const pager = spawnSync(process.env.KODA_RELAY_REVIEW_PAGER ?? "less", [review], { stdio: "inherit" });
+    const pager = withOwnerConsolePaused(() => spawnSync(
+      process.env.KODA_RELAY_REVIEW_PAGER ?? "less",
+      [review],
+      { stdio: "inherit" },
+    ));
     if (pager.status !== 0) throw new Error(`The review reader exited ${pager.status ?? -1}; nothing was acknowledged.`);
     await requireUnchangedReview();
   };
@@ -350,13 +383,17 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
         ? await readFile(process.env.KODA_RELAY_TEST_RECEIPT_INPUT_FILE, "utf8")
         : process.env.KODA_RELAY_TEST_RECEIPT_INPUT)
     : undefined;
-  const approved = spawnSync(process.execPath, [cli, "approve", job.phase, "--approver", "Kristian"], {
-    cwd: project,
-    ...(testReceiptInput === undefined
-      ? { stdio: "inherit" as const }
-      : { input: `${testReceiptInput}\n`, encoding: "utf8" as const }),
-    env: { ...process.env, KODA_COMMAND: `${process.execPath} ${cli}` },
-  });
+  const approved = withOwnerConsolePaused(() => spawnSync(
+    process.execPath,
+    [cli, "approve", job.phase, "--approver", "Kristian"],
+    {
+      cwd: project,
+      ...(testReceiptInput === undefined
+        ? { stdio: "inherit" as const }
+        : { input: `${testReceiptInput}\n`, encoding: "utf8" as const }),
+      env: { ...process.env, KODA_COMMAND: `${process.execPath} ${cli}` },
+    },
+  ));
   if (approved.status !== 0) throw new Error(`Owner acknowledgement exited ${approved.status ?? -1}.`);
   job.completion = job.handbackPath ? "OWNER_HANDBACK" : "ACKNOWLEDGED";
   console.log("ACKNOWLEDGED — Window A will now derive the route from disk.");
@@ -417,13 +454,36 @@ async function processJob(job: ReviewerJob): Promise<void> {
   await writeReviewerWindowState(runRoot, state);
 }
 
+async function holdOwnerConversation(question: string): Promise<void> {
+  const response = await modelTurn("owner conversation while Producer works", [
+    `Read ${path.join(project, ".agents", "skills", "koda-c-review", "SKILL.md")} completely and explicitly use koda-c-review in owner-conversation mode.`,
+    `The owner's exact message is ${JSON.stringify(question)}.`,
+    "Answer at the owner's altitude from the active session files and cited evidence. Distinguish disk fact from inference.",
+    "Do not edit any file, create a review or handback, run Koda, approve, advance, quote a receipt, or claim the Producer received this conversation.",
+    "Use the skill's exact boundary marker if the message is project-level Guide scope or actionable direction for the active session.",
+  ].join(" "));
+  if (response.trimStart().startsWith("OWNER DIRECTION — ACTIVE SESSION TRANSFER REQUIRED")) {
+    console.log("\nOWNER DIRECTION — NOT SENT");
+    console.log("The Reviewer identified possible active-session direction, but this conversation changed no file and reached no Producer.");
+    console.log("Koda-C does not yet have an owner-approved idle transfer artifact. The current session keeps its confirmed course.");
+  } else if (response.trimStart().startsWith("GUIDE CONVERSATION — PROJECT SCOPE")) {
+    console.log("\nGUIDE SCOPE — continue this project-level thought in the Guide conversation.");
+    console.log("Nothing from this Reviewer conversation changed the active session.");
+  } else {
+    console.log("\nREVIEWER CONVERSATION COMPLETE — no producer handback was created.");
+  }
+}
+
 console.log("KODA-C REVIEWER WINDOW");
 console.log(`Reviewer: ${state.model} / ${state.effort}`);
-console.log("This window owns the reviewer context and all owner interaction. Leave it open.");
+console.log("This window owns the active-session Reviewer context. Leave it open.");
+console.log("You may type an active-session question while Producer works; conversation alone never becomes Producer input.");
 console.log("Waiting for the producer in Window A…");
+if (ownerConsole) process.stdout.write("reviewer> ");
 
 try {
   let announcedWaiting = true;
+  let testIdleConversationConsumed = false;
   while (!stopping) {
     const run = await readRun();
     if (run.status === "COMPLETE") {
@@ -432,13 +492,29 @@ try {
     }
     const job = await readReviewerJob(runRoot);
     if (!job || job.status === "COMPLETE") {
+      const configuredTestQuestion = !testIdleConversationConsumed
+        ? process.env.KODA_RELAY_TEST_IDLE_CONVERSATION?.trim()
+        : undefined;
+      const ownerQuestion = configuredTestQuestion || ownerConversationQueue.shift();
+      if (ownerQuestion) {
+        testIdleConversationConsumed = Boolean(configuredTestQuestion) || testIdleConversationConsumed;
+        announcedWaiting = false;
+        await holdOwnerConversation(ownerQuestion);
+        if (process.env.KODA_RELAY_REVIEWER_ONCE === "1") break;
+        console.log("\nWaiting for the next producer handover…");
+        if (ownerConsole) process.stdout.write("reviewer> ");
+        announcedWaiting = true;
+        continue;
+      }
       if (!announcedWaiting) {
         console.log("\nWaiting for the next producer handover…");
+        if (ownerConsole) process.stdout.write("reviewer> ");
         announcedWaiting = true;
       }
       await new Promise((resolve) => setTimeout(resolve, 350));
       continue;
     }
+    if (announcedWaiting && ownerConsole) process.stdout.write("\n");
     announcedWaiting = false;
     try {
       await processJob(job);
@@ -467,6 +543,7 @@ try {
     }
   }
 } finally {
+  ownerConsole?.close();
   await releaseLock();
 }
 

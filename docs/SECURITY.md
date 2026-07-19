@@ -95,6 +95,15 @@ their root and phase directory must be real directories resolving beneath that
 session, and every handback must be a regular file. A linked parent directory
 cannot redirect even the initial atomic write.
 
+The persistent Reviewer accepts owner conversation between formal handoffs, but
+that path is read-only with respect to project evidence. The question resumes the
+same reviewer context, the raw model event remains inside ignored run state, and
+no artifact, review, approval, consultation, or owner handback is created. A model
+marker is classification, not authority: project scope returns to Guide, while
+possible active-session direction is printed as `OWNER DIRECTION — NOT SENT` and
+does not reach Producer. Only a separately validated disk artifact may cross that
+boundary.
+
 Run those scripts only against a run folder created by `relay:prepare` or a
 pushed `koda guide launch` in a trusted project. Do not execute a modified
 `RUN.json` received from someone else. Codex subprocesses inherit the launcher's environment because they
