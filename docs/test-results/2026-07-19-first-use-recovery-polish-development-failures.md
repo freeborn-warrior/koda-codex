@@ -86,4 +86,6 @@ the stack—Producer rejoin—not a loss of project-level Guide truth.
 
 Pushed-code proof is deliberately separate: repair commit `153814a` reached
 `origin/main` before the unchanged **204/204** suite produced the
-[durable transcript](2026-07-19-first-use-recovery-polish-pushed.md).
+[recovery transcript](2026-07-19-first-use-recovery-polish-pushed.md). The later
+owner-surface cleanup at `9e2f8e4` produced a second pushed
+[204/204 transcript](2026-07-19-owner-surface-pushed.md).

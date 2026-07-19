@@ -1292,4 +1292,9 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   recovery-command wording. The first focused run correctly refused **0/6** on the
   stale v5 integrity hash; after a local hash bootstrap it passed **6/6**, and the
   complete suite passed **204/204**.
+- **Owner-surface pushed proof:** Commit `9e2f8e4` reached `origin/main` before the
+  unchanged suite passed **204/204** and wrote the
+  [owner-surface transcript](test-results/2026-07-19-owner-surface-pushed.md).
+  Toolkit capability `ghostty-owner-surface-v6` binds it and the changed launch
+  surface.
 - **Verdict:** PUSHED MECHANICS AND SECURITY PASS; HUMAN RECOVERY REMAINS.

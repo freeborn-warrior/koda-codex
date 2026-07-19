@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, role liveness, ordered startup, numbered retry, fresh-model isolation, and hardened Git locking now pass a pushed, integrity-bound 204/204 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, role liveness, ordered startup, numbered retry, hidden technical recovery commands, fresh-model isolation, and hardened Git locking now pass a pushed, integrity-bound 204/204 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
@@ -45,6 +45,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
   and reader/clipboard/halt mistakes stay at numbered choices. Repair commit
   `153814a` passes the pushed **204/204** transcript and is bound as toolkit
   capability `ghostty-first-use-recovery-v5`. Human observation is still required.
+
+- [x] Remove the remaining raw `koda guide status` and “recovery commands” hints
+  from low-level duplicate/recovery failures. Existing mutation tests now forbid
+  those phrases and require an owner-facing return to Guide. Commit `9e2f8e4` passes
+  the pushed **204/204** transcript bound as `ghostty-owner-surface-v6`.
 
 - [x] Repair the live partial-recovery interleaving without bypassing the job guard:
   Producer rejoins the exact existing formal-review job, Guide offers one missing-role

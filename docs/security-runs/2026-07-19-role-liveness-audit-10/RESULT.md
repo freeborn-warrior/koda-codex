@@ -47,5 +47,7 @@ cannot suppress macOS or Codex host permission prompts. Those remain explicit hu
 observations, while the gate and role identity continue to fail closed.
 
 See the [development record](../../test-results/2026-07-19-first-use-recovery-polish-development-failures.md).
-The [pushed 204-check transcript](../../test-results/2026-07-19-first-use-recovery-polish-pushed.md)
-is hash-bound by toolkit capability `ghostty-first-use-recovery-v5`.
+The original [recovery transcript](../../test-results/2026-07-19-first-use-recovery-polish-pushed.md)
+and current [owner-surface transcript](../../test-results/2026-07-19-owner-surface-pushed.md)
+both pass **204/204**. The current hash-bound toolkit capability is
+`ghostty-owner-surface-v6`.

@@ -55,8 +55,10 @@ pseudo-terminals, process locks, malformed paths, launch-order mutations, and re
 single/plural Guide integrations. The corrected coverage suite also passes
 **204/204**.
 
-The [durable transcript](../../test-results/2026-07-19-first-use-recovery-polish-pushed.md)
-is hash-bound by toolkit capability `ghostty-first-use-recovery-v5`.
+The original [recovery transcript](../../test-results/2026-07-19-first-use-recovery-polish-pushed.md)
+and the later [owner-surface transcript](../../test-results/2026-07-19-owner-surface-pushed.md)
+both pass **204/204**. The latter is the current hash-bound toolkit capability
+`ghostty-owner-surface-v6`.
 
 These checks cannot prove that Ghostty's actual window arrangement, macOS permission
 dialogs, font size, or wording feel clear to a person. Kristian's preserved live
