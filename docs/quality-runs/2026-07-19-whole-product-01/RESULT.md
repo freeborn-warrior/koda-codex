@@ -32,6 +32,8 @@ but non-canonical date as well as unsafe purpose and mismatched evidence files.
 - Git diff whitespace checks and repository object verification passed.
 - The final durable coverage run is preserved in
   [`../../test-results/2026-07-19-whole-product-audit-final.md`](../../test-results/2026-07-19-whole-product-audit-final.md).
+- The unchanged pushed milestone passed 157/157 again at `ee94d2d`; every name is
+  preserved in [`../../test-results/2026-07-19-whole-product-audit-pushed-final.md`](../../test-results/2026-07-19-whole-product-audit-pushed-final.md).
 
 The first package inspection against the machine's default npm cache failed with
 an `EPERM` ownership error under the user's global `.npm` directory. Koda did not
