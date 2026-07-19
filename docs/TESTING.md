@@ -1136,3 +1136,19 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   and unchanged snapshot. A permanent source assertion protects the corrected case.
 - **Next:** Preflight 05 uses the unchanged contract-02 hash and a new immutable result
   path. Preflight 04 remains preserved as the scorer-defect failure.
+
+## 2026-07-19 — Guide preflight 05 passed contract 02
+
+- **Variant:** Fresh ephemeral `gpt-5.6-sol`, medium effort, read-only sandbox,
+  sanitized environment, active-only run.
+- **Seal:** Contract 02, the changed skill/status, fixture, runner, and corrected scorer
+  were committed before this run. The result binds contract SHA-256
+  `96d4d40cb88f0f62a8f224eb298431880309d3ef79730cb932ca94ba531103d6`.
+- **Result:** **PASS.** The Guide ran disk status, observed `ACTIVE PROJECT WORK` and
+  the dependent-successor block, named session `2026-07-19-01` at Brief 1/6, created
+  nothing, kept discussion/exploration/preservation open, and said starting must wait
+  for immutable pushed close or explicit pushed halt. The complete fixture snapshot
+  was unchanged.
+- **Boundary:** This is one response to one phrasing. It does not prove universal
+  classification or Kristian's comprehension in the real Ghostty recovery.
+- **Evidence:** [Fresh plural-session Guide preflight](guide-preflight-runs/2026-07-19-sol-medium-05/RESULT.md).

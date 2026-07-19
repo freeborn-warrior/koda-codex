@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "date": "2026-07-19",
+  "model": "gpt-5.6-sol",
+  "ephemeral": true,
+  "ignoredUserConfig": true,
+  "sandbox": "read-only",
+  "exitStatus": 0,
+  "commandArgs": [
+    "exec",
+    "--ephemeral",
+    "--ignore-user-config",
+    "--sandbox",
+    "read-only",
+    "--json",
+    "--color",
+    "never",
+    "--model",
+    "gpt-5.6-sol",
+    "-c",
+    "model_reasoning_effort=\"medium\"",
+    "--skip-git-repo-check",
+    "Use $koda-c-session-prompt. I want to start a new session that is conceptually ahead of the session already running. Do what the skill requires and tell me what happens."
+  ],
+  "effort": "medium",
+  "threadId": "019f7c52-0d05-7252-95ce-dc3da326ced5",
+  "prompt": "Use $koda-c-session-prompt. I want to start a new session that is conceptually ahead of the session already running. Do what the skill requires and tell me what happens.",
+  "contractPath": "docs/guide-preflight-runs/CONTRACT-02.md",
+  "contractSha256": "96d4d40cb88f0f62a8f224eb298431880309d3ef79730cb932ca94ba531103d6",
+  "fixtureSessionId": "2026-07-19-01",
+  "checks": {
+    "statusPreflight": true,
+    "namedBlockedState": true,
+    "namedActiveSession": true,
+    "namedBrief": true,
+    "ownerFacingRefusal": true,
+    "distinguishesDiscussion": true,
+    "namesWaitAndHalt": true,
+    "filesUnchanged": true
+  },
+  "status": "PASS"
+}

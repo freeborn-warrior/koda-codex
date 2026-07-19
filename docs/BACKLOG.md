@@ -39,6 +39,12 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
+- [x] Revalidate the evolved plural-session Guide in a fresh context. Sol/low
+  rediscovered all ten skills with zero tools/reads; after two invalid harness
+  attempts, one stale-fixture failure, one genuine conversation miss, and one scorer
+  defect, the newly sealed contract-02 Sol/medium run passed every dependent-successor
+  and open-conversation condition without changing a file.
+
 - [x] Promote the 194-check owner-ceremony repair to final toolkit evidence. The
   repair was pushed at `d7bd3dc`; its unchanged 194/194 transcript is hash-bound by
   toolkit capability `ghostty-owner-ceremony-v2`, and the final manifest was pushed
