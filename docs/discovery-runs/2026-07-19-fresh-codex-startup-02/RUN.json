@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "date": "2026-07-19",
+  "model": "gpt-5.6-sol",
+  "ephemeral": true,
+  "ignoredUserConfig": true,
+  "sandbox": "read-only",
+  "exitStatus": 0,
+  "commandArgs": [
+    "exec",
+    "--ephemeral",
+    "--ignore-user-config",
+    "--sandbox",
+    "read-only",
+    "--json",
+    "--color",
+    "never",
+    "--model",
+    "gpt-5.6-sol",
+    "-c",
+    "model_reasoning_effort=\"low\"",
+    "Do not call any tool and do not read any repository file. From startup context already supplied to this fresh task only, report: (1) every available skill whose name starts with koda-c-, exactly as listed; (2) the total number; (3) one repository guidance rule about where project skills must live. If startup context lacks an item, say unavailable instead of searching. Finish with DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY."
+  ],
+  "effort": "low",
+  "threadId": "019f78f9-091c-7031-b97a-660df32f78cd",
+  "prompt": "Do not call any tool and do not read any repository file. From startup context already supplied to this fresh task only, report: (1) every available skill whose name starts with koda-c-, exactly as listed; (2) the total number; (3) one repository guidance rule about where project skills must live. If startup context lacks an item, say unavailable instead of searching. Finish with DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY.",
+  "expectedSkills": [
+    "koda-c-brief",
+    "koda-c-close",
+    "koda-c-live",
+    "koda-c-orient",
+    "koda-c-plan",
+    "koda-c-produce",
+    "koda-c-review",
+    "koda-c-session",
+    "koda-c-session-prompt",
+    "koda-c-summary"
+  ],
+  "discoveredSkills": [
+    "koda-c-brief",
+    "koda-c-close",
+    "koda-c-live",
+    "koda-c-orient",
+    "koda-c-plan",
+    "koda-c-produce",
+    "koda-c-review",
+    "koda-c-session",
+    "koda-c-session-prompt",
+    "koda-c-summary"
+  ],
+  "toolEventCount": 0,
+  "status": "PASS"
+}

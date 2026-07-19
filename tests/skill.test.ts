@@ -198,3 +198,45 @@ test("historical fresh Codex startup discovered the original nine local skills a
   assert.match(result, /Tool calls: none/);
   assert.match(result, /Repository file reads: none/);
 });
+
+test("fresh Codex discovers all ten current skills and the active Guide preflight refuses without mutation", async () => {
+  const discoveryRoot = "docs/discovery-runs/2026-07-19-fresh-codex-startup-02";
+  const preflightRoot = "docs/guide-preflight-runs/2026-07-19-sol-medium-01";
+  const [discoveryRunText, discoveryEventsText, discoveryResult, preflightRunText, preflightEvents, preflightResult] = await Promise.all([
+    readFile(path.join(discoveryRoot, "RUN.json"), "utf8"),
+    readFile(path.join(discoveryRoot, "CODEX-EVENTS.jsonl"), "utf8"),
+    readFile(path.join(discoveryRoot, "RESULT.md"), "utf8"),
+    readFile(path.join(preflightRoot, "RUN.json"), "utf8"),
+    readFile(path.join(preflightRoot, "CODEX-EVENTS.jsonl"), "utf8"),
+    readFile(path.join(preflightRoot, "RESULT.md"), "utf8"),
+  ]);
+  const discovery = JSON.parse(discoveryRunText) as {
+    status: string;
+    expectedSkills: string[];
+    discoveredSkills: string[];
+    toolEventCount: number;
+  };
+  assert.equal(discovery.status, "PASS");
+  assert.equal(discovery.toolEventCount, 0);
+  assert.equal(discovery.expectedSkills.length, 10);
+  assert.deepEqual(discovery.discoveredSkills, discovery.expectedSkills);
+  assert.match(discoveryEventsText, /DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY/);
+  assert.doesNotMatch(discoveryEventsText, /"type":"command_execution"/);
+  assert.match(discoveryResult, /Koda-C skills discovered from startup context: 10 of 10/);
+
+  const preflight = JSON.parse(preflightRunText) as {
+    status: string;
+    prompt: string;
+    checks: Record<string, boolean>;
+  };
+  assert.equal(preflight.status, "PASS");
+  assert.match(preflight.prompt, /conceptually ahead/);
+  assert.ok(Object.values(preflight.checks).every(Boolean));
+  assert.match(preflightEvents, /koda-c-session-prompt\/SKILL\.md/);
+  assert.match(preflightEvents, /node dist\/cli\.js guide status/);
+  assert.match(preflightEvents, /NEXT SESSION BLOCKED/);
+  assert.match(preflightEvents, /Current bounded session: 2026-07-19-01 — brief \(1\/6\)/);
+  assert.match(preflightResult, /Fixture files unchanged: PASS/);
+  assert.match(preflightResult, /created no prompt/i);
+  assert.match(preflightResult, /proves neither universal natural-language classification nor owner usability in Ghostty/i);
+});

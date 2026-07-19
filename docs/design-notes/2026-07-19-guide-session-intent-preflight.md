@@ -1,7 +1,7 @@
 # Guide session-intent preflight
 
 **Date:** 2026-07-19
-**Status:** Deterministic contract implemented; fresh live-model behavior and owner-observed three-window proof pending
+**Status:** Deterministic and fresh Sol/medium behavior proved; owner-observed three-window proof pending
 
 ## Owner ruling
 
@@ -38,4 +38,6 @@ The permanent tests include both refusal and temperament controls:
 - no other repository skill contains the Guide confirmation route;
 - the complete inherited suite remains intact.
 
-These deterministic checks prove the files and commands expose the right truth. They do not prove that every possible natural-language phrase will trigger the skill in every model, or that the terminal experience is clear to Kristian. Those require fresh live-context and owner-observed tests.
+These deterministic checks prove the files and commands expose the right truth. A sealed fresh Sol/medium task then received the ordinary “conceptually ahead” request, loaded the skill, ran Guide status, refused before drafting, named the active Brief and both terminal routes, and changed no fixture byte. The raw evidence lives under `docs/guide-preflight-runs/2026-07-19-sol-medium-01/`.
+
+That one run does not prove that every possible natural-language phrase will trigger the skill in every model, or that the terminal experience is clear to Kristian. Owner-observed three-window testing remains required.

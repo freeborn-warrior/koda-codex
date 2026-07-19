@@ -74,7 +74,8 @@ owner contract
 - Immutable close-artifact hashing plus Git-derived commit/push verification.
 - Repository-local Koda-C skills: seven producer relay legs, one shared reviewer, and one close ceremony.
 - A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda session.
-- A preserved fresh ephemeral Codex startup proves all nine local skills and root guidance are injected before any tool call or repository read.
+- A preserved historical fresh ephemeral Codex startup proves the original nine session-runtime skills and root guidance were injected before any tool call or repository read.
+- A second fresh ephemeral startup proof covers the current ten-skill set, including `koda-c-session-prompt`, with zero tools or repository reads. A separate sealed Sol/medium task exercised that skill against an active Brief and refused before drafting without changing fixture bytes.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.
 - Five sealed reviewer fixtures: the original hard-number capability check and honest control, plus an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap.
 - A completed seventeen-run model ledger: six original comparable runs, two Luna baseline repetitions, and nine new-fixture medium runs. All sealed score cells passed; Sol was operationally most consistent, while Terra recovered from path errors and Luna more often needed gate repair or skipped safe checks.
@@ -126,6 +127,9 @@ owner contract
 - [Guide session-intent preflight ruling](design-notes/2026-07-19-guide-session-intent-preflight.md)
 - [Guide session-intent preflight development failures](test-results/2026-07-19-guide-session-intent-preflight-development-failures.md)
 - [Guide session-intent preflight 151-check result](test-results/2026-07-19-guide-session-intent-preflight-final.md)
+- [Fresh ten-skill startup discovery](discovery-runs/2026-07-19-fresh-codex-startup-02/RESULT.md)
+- [Fresh active-session Guide refusal](guide-preflight-runs/2026-07-19-sol-medium-01/RESULT.md)
+- [Fresh Guide preflight 152-check result](test-results/2026-07-19-guide-preflight-fresh-model-final.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
 - [Always-open Reviewer 135-check result](test-results/2026-07-19-reviewer-open-conversation-final.md)
 - [Always-open Reviewer post-push 135-check result](test-results/2026-07-19-reviewer-open-conversation-pushed-final.md)

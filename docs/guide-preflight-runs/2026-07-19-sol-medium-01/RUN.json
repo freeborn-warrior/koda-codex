@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "date": "2026-07-19",
+  "model": "gpt-5.6-sol",
+  "ephemeral": true,
+  "ignoredUserConfig": true,
+  "sandbox": "read-only",
+  "exitStatus": 0,
+  "commandArgs": [
+    "exec",
+    "--ephemeral",
+    "--ignore-user-config",
+    "--sandbox",
+    "read-only",
+    "--json",
+    "--color",
+    "never",
+    "--model",
+    "gpt-5.6-sol",
+    "-c",
+    "model_reasoning_effort=\"medium\"",
+    "--skip-git-repo-check",
+    "Use $koda-c-session-prompt. I want to start a new session that is conceptually ahead of the session already running. Do what the skill requires and tell me what happens."
+  ],
+  "effort": "medium",
+  "threadId": "019f78f9-1e4a-7b92-af52-914819fade5d",
+  "prompt": "Use $koda-c-session-prompt. I want to start a new session that is conceptually ahead of the session already running. Do what the skill requires and tell me what happens.",
+  "fixtureSessionId": "2026-07-19-01",
+  "checks": {
+    "statusPreflight": true,
+    "namedBlockedState": true,
+    "namedActiveSession": true,
+    "namedBrief": true,
+    "ownerFacingRefusal": true,
+    "distinguishesDiscussion": true,
+    "namesWaitAndHalt": true,
+    "filesUnchanged": true
+  },
+  "status": "PASS"
+}

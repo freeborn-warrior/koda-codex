@@ -38,6 +38,5 @@ The product needs one strong standard session moving from durable Guide state in
 
 ## Proof still owed
 
-- Fresh Codex discovery of the new repository-local session-prompt skill.
 - One owner-observed Guide confirmation arranging the complete three-context experience while preserving two independent session contexts.
 - Cross-model continuation evidence before the org-chart staffing design becomes executable per-phase config.
