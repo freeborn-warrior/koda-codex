@@ -117,6 +117,9 @@ const producerCommand = resolved.mode === "guide-project"
 const reviewerState = await readReviewerWindowState(runRoot);
 const job = await readReviewerJob(runRoot);
 const lock = await reviewerWindowLockStatus(runRoot);
+const retryableReceiptAttempt = job?.status === "FAILED" &&
+  job.error === "Owner acknowledgement exited 1." &&
+  job.completion === null;
 
 let phase = "Session not opened";
 let directionCount = 0;
@@ -187,6 +190,10 @@ if (run.status === "COMPLETE" || run.status === "HALTED") {
     : "Return to Guide and start a new session from the pushed halt through a fresh Brief.");
 } else if (run.status === "PAUSED_INTERRUPTED_CONTEXT_MISSING" || run.status === "PAUSED_INTERRUPTED_STATE_MISSING") {
   console.log("No automatic resume is safe. The interrupted worker or its bound session identity is missing; Koda refuses to replace it by guessing.");
+} else if (retryableReceiptAttempt) {
+  console.log("The last receipt entry did not match. Nothing advanced and no ledger entry was written.");
+  console.log("Return to Guide and say: Recover this session.");
+  console.log("Guide will verify and reopen the same review; do not paste a technical command.");
 } else if (job?.status === "FAILED") {
   console.log("Read the named reviewer job error. Do not delete or retry it by guessing.");
 } else if (lock && !lock.alive) {

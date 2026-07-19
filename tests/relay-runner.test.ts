@@ -182,8 +182,12 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(reviewerWindow, /This context remains the Reviewer for the complete session/);
   assert.match(reviewerWindow, /stdio: \["ignore", "pipe", "pipe"\]/);
   assert.match(reviewerWindow, /parseReview\(before\)/);
-  assert.match(reviewerWindow, /"approve", job\.phase, "--approver", "Kristian"/);
-  assert.match(reviewerWindow, /The exact receipt is copied/);
+  assert.match(reviewerWindow, /receiptInput\.trim\(\) !== parsed\.receipt\.trim\(\)/);
+  assert.match(reviewerWindow, /approvalArgs = \[cli, "approve", job\.phase, "--approver", "Kristian"/);
+  assert.match(reviewerWindow, /input: `\$\{approvalInput\.join\("\\n"\)\}\\n`/);
+  assert.match(reviewerWindow, /WHAT WOULD YOU LIKE TO DO\?/);
+  assert.match(reviewerWindow, /NOT ACKNOWLEDGED.*gate is still closed/);
+  assert.match(reviewerWindow, /The exact receipt is already copied/);
   assert.match(reviewerWindow, /owner-explanation mode/);
   assert.match(reviewerWindow, /WAITING_DIRECTION_PREFIX/);
   assert.match(reviewerWindow, /createWaitingDirection/);

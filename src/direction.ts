@@ -235,9 +235,20 @@ export async function readWaitingDirections(sessionDir: string): Promise<Waiting
   if (!resolvedDirectory.startsWith(`${resolvedSession}${path.sep}`)) {
     throw new Error("Waiting direction root resolves outside the active session.");
   }
+  let names: string[] = [];
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    names = (await readdir(directory)).sort();
+    const unexpected = names.filter((name) => !FILE.test(name));
+    const unsafe = unexpected.find((name) => !/^\d{2}-wait\.md\.tmp-\d+-[a-f0-9]+$/.test(name));
+    if (unsafe) throw new Error(`Unexpected waiting direction entry: ${unsafe}.`);
+    if (unexpected.length === 0) break;
+    if (attempt === 49) {
+      throw new Error(`Atomic waiting direction write did not settle: ${unexpected.join(", ")}.`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
   const results: WaitingDirection[] = [];
-  for (const name of (await readdir(directory)).sort()) {
-    if (!FILE.test(name)) throw new Error(`Unexpected waiting direction entry: ${name}.`);
+  for (const name of names) {
     const file = path.join(directory, name);
     if (!(await lstat(file)).isFile()) throw new Error(`Waiting direction must be a regular file: ${file}.`);
     const content = await readFile(file, "utf8");

@@ -88,6 +88,15 @@ test("SECURITY INTEGRITY SUITE: relay roles and model children never inherit amb
   });
 });
 
+test("SECURITY INTEGRITY SUITE: owner receipt and ruling data never enter child-process arguments or environment", async () => {
+  const reviewerWindow = await readFile("scripts/run-relay-reviewer-window.ts", "utf8");
+  assert.match(reviewerWindow, /const approvalInput = \[receiptInput\.trim\(\)\]/);
+  assert.match(reviewerWindow, /input: `\$\{approvalInput\.join\("\\n"\)\}\\n`/);
+  assert.doesNotMatch(reviewerWindow, /approvalArgs[^\n]*receiptInput/);
+  assert.doesNotMatch(reviewerWindow, /approvalArgs\.push\("--(?:comments|ruling)"/);
+  assert.doesNotMatch(reviewerWindow, /KODA_(?!RELAY_TEST_)[A-Z_]*(?:RECEIPT|RULING|COMMENTS)[A-Z_]*/);
+});
+
 test("SECURITY INTEGRITY SUITE: the executable Ghostty role launcher starts one child with a clean environment", async () => {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-clean-launcher-"));
   try {

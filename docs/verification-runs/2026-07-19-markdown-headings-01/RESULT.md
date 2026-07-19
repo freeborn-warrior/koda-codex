@@ -59,3 +59,22 @@ The exact draft is [archived here](RETRY-SESSION-PROMPT-DRAFT.md), and
 `RETRY-DRAFT-HISTORY.bundle` preserves its complete restorable project history.
 This is preparation evidence, not owner confirmation. No new launch request,
 runtime, session, model context, review, receipt, or acknowledgement exists.
+
+## Second attempt — clean launch, recoverable owner-ceremony failure
+
+Kristian later confirmed dependent retry launch
+`6371ade2-3002-42aa-87ab-a613220b7eab`. Ghostty opened exactly one Reviewer and one
+Producer beside the existing Guide. No unintended tab, environment output, Node
+prompt, or loose command error appeared. The Sol/medium Producer and distinct
+Terra/medium Reviewer reached an APPROVE Brief review in session `2026-07-19-02`.
+
+The acknowledgement instructions were still not fit for a first-time human. Return
+appeared to mean acknowledge, but it actually exposed a second receipt-paste prompt.
+Kristian pressed Return, the empty receipt correctly failed literal matching, and
+both role processes exited. The phase remains Brief, the ledger has zero entries, and
+nothing advanced. The artifact, review, and both context identities remain preserved.
+
+The [receipt UX incident](RECEIPT-UX-INCIDENT.md) records the failure without the
+receipt or any secret. Numbered, retryable decisions and one-action same-context Guide
+recovery now pass deterministically. This attempt remains paused—not a pass—until
+Kristian observes recovery and completes the session through pushed close.

@@ -968,3 +968,55 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   fresh owner-observed retry remains the release-blocking human test.
 - **Verdict:** OWNER COURIER REMOVED AND POST-PUSH VERIFIED; HUMAN GHOSTTY RETRY
   REMAINS.
+
+## 2026-07-19 — Clean Ghostty retry and owner-ceremony recovery
+
+- **Live variant:** Existing persistent Guide; one Sol/medium Producer; one distinct
+  Terra/medium Reviewer; Ghostty on macOS; dependent retry launch
+  `6371ade2-3002-42aa-87ab-a613220b7eab`; session `2026-07-19-02`.
+- **Launcher result:** The repaired private-launcher boundary passed its first owner
+  observation. Exactly one Reviewer and one Producer opened beside Guide. No extra
+  tabs, environment dump, Node prompt, direct-execution error, or repeated permission
+  cascade appeared.
+- **Reached:** Producer completed Brief; Reviewer produced an APPROVE review. Distinct
+  persistent context IDs were recorded. No expected verdict or revision was planted.
+- **Live UX failure:** The prompt implied Return acknowledged the review, then exposed
+  a hidden receipt-paste step. Kristian reasonably pressed Return. Literal matching
+  refused the empty value, wrote zero ledger entries, and advanced zero phases, but
+  both role processes exited and the idle Guide received no automatic notification.
+  The run is paused at Brief, not passed. The sanitized record is
+  [RECEIPT-UX-INCIDENT.md](verification-runs/2026-07-19-markdown-headings-01/RECEIPT-UX-INCIDENT.md).
+- **Repair:** Review-reader instructions now explain Return, `(END)`, and `q` before
+  opening. The Reviewer uses numbered acknowledge/ask/reread/stop/halt choices,
+  discloses the paste action, retries invalid or empty input without exiting, preserves
+  stop as `AWAITING_OWNER`, and double-confirms halt. Receipt, comments, and rulings
+  reach `koda approve` over stdin rather than process arguments or environment.
+- **Recovery:** The exact historical failure reopens the same review and context.
+  Guide binds the current toolkit, opens Reviewer first, waits for its live
+  `AWAITING_OWNER` point, then opens Producer. Duplicate, live, corrupt, or different
+  failure states refuse. Owner-facing Guide status prints only `1` reopen / `2` not
+  now and no role command.
+- **Concurrency defect found:** A full run observed Koda's atomic waiting-direction
+  temporary file before rename. Only the exact Koda filename now receives a bounded
+  retry; unknown or persistent entries still refuse. This repaired the race without
+  weakening containment or corruption tests.
+- **Failure ledger:** All intermediate results—28/56, 55/56, two 190/191 runs,
+  integrity refusals, one zero-test wrong-directory invocation, validator permission,
+  npm cache, and no-lock audit behavior—are preserved in
+  [the development record](test-results/2026-07-19-owner-ceremony-development-failures.md).
+- **Focused results:** Corrected Guide/relay/skill sets passed 66/66. Expanded
+  first-use and leak checks passed 73/73. The final focused owner-facing status set
+  passed 63/63.
+- **Complete result:** The ordinary suite passed **194/194**. The coverage suite
+  passed **194/194** at 89.34% lines, 68.52% branches, and 86.97% functions.
+- **Package/security checks:** Isolated `npm pack --dry-run` passed; an isolated
+  dependency-free npm audit reported zero vulnerabilities; skill validation passed;
+  diff whitespace passed; reachable Git history passed with only dangling
+  development objects. See the [security audit](security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md)
+  and [first-use audit](quality-runs/2026-07-19-first-use-ux-audit-02/RESULT.md).
+- **Honest boundary:** A terminal process cannot inject a notification into an idle
+  Guide chat. Guide reconstructs current state from disk when Kristian speaks. Actual
+  Ghostty recovery, its host permission, visual clarity, and the remaining five phase
+  decisions are still human proof.
+- **Verdict:** LOCAL MECHANICS AND SECURITY PASS; PUSHED TOOLKIT PROOF AND HUMAN
+  RECOVERY REMAIN.

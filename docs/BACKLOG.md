@@ -6,8 +6,9 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] **Release blocker:** close the Ghostty launch integrity incident with a fresh owner-observed run. The deterministic repair is complete: single-token private role launchers, clean child environments, immutable launcher checks, halt-first routing, and 181/181 durable proof now pass. Real Ghostty window count, permission behavior, and human clarity must still pass before the incident closes.
-- [ ] Repeat the owner-observed three-window run only after the release blocker above is closed. The fresh prompt must carry halt `c9743416-67dc-45bd-b7f0-4de56c6bb300`; do not reuse the voided Brief or its receipt.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved one clean Reviewer plus one clean Producer beside Guide and reached an approved Brief, then exposed an ambiguous receipt interaction. The gate stayed shut with zero acknowledgements. Deterministic numbered retry and one-action Guide recovery pass 194/194; Kristian must still observe recovery and the remaining five phase decisions through pushed close.
+- [ ] Resume the preserved `2026-07-19-02` session only after the owner-ceremony repair has final pushed toolkit proof. Reopen the same contexts and same unacknowledged review through Guide; do not create a third attempt or manually run either role.
+- [ ] Promote the 194-check owner-ceremony repair to final toolkit evidence and push it. The implementation, complete suite, coverage suite, first-use audit, and security audit pass locally; this remains unchecked until the post-push transcript and integrity manifest agree.
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
 - [ ] Owner-test the repaired one-action Ghostty adapter against a genuine Guide-confirmed session. The original callback-only adapter test was insufficient and encoded the unsafe multi-token launch; never reinstate that claim.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
@@ -35,6 +36,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Repair ordinary owner mistakes without weakening the receipt gate: numbered choices, disclosed paste step, invalid/empty input retry, stop-for-now state, double-confirmed halt, stdin-only receipt/ruling transport, exact historical recovery, Reviewer-first reopening, duplicate refusal, and a Guide surface with only `1` reopen / `2` not now.
 
 - [x] Remove Kristian as the technical transfer bridge between builder and Guide. `koda guide status` now verifies a repository-contained toolkit integrity manifest, the session-prompter forbids asking the owner to carry commands/paths/hashes/commits/test counts/receipts, and new launch confirmations bind the verified toolkit snapshot so later changes make the request stale. The unconfirmed retry draft was normalized back to a capability name instead of owner-relayed internals.
 

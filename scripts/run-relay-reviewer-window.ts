@@ -334,7 +334,12 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     }
   };
   const openReview = async () => {
-    if (!testMode) await promptOwner("Press Return to open the complete review. ");
+    if (!testMode) {
+      console.log("\nREAD THE COMPLETE REVIEW");
+      console.log("Press Return to open it. Scroll as needed; when you reach (END), press q to return here.");
+      console.log("Nothing advances while the review is open.");
+      await promptOwner("Press Return to read the review: ");
+    }
     const pager = withOwnerConsolePaused(() => spawnSync(
       process.env.KODA_RELAY_REVIEW_PAGER ?? "less",
       [review],
@@ -419,7 +424,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   console.log("This is your decision point in Window B. The producer is waiting in Window A.");
   console.log(`Review: ${path.relative(project, review)}`);
   console.log(`Binding: artifact SHA-256 ${parsed.metadata.artifactSha256.slice(0, 12)}…; review ID ${parsed.metadata.id}`);
-  console.log("Control: Kristian may read, discuss, reread, halt, stop, or acknowledge. Nothing has advanced.");
+  console.log("Nothing has advanced. The numbered choices and their consequences appear after you read.");
   await openReview();
 
   const configuredTestQuestion = testMode ? process.env.KODA_RELAY_TEST_DISCUSSION_QUESTION?.trim() : undefined;
@@ -435,63 +440,136 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     await haltSession(testHaltDirection);
     return;
   }
-  if (!testMode) {
-    for (;;) {
-      const choice = (await promptOwner("Press Return to acknowledge, d to discuss, r to reread, h to halt, or p to stop the relay: ")).trim().toLowerCase();
-      if (choice === "" || choice === "a") break;
-      if (choice === "r") {
-        await openReview();
-        continue;
-      }
-      if (choice === "d") {
-        const question = (await promptOwner("Your question for the reviewer: ")).trim();
+  const testClipboard = process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CLIPBOARD_FILE;
+  let receiptCopied = false;
+  let acknowledgementSelected = testMode;
+  for (;;) {
+    if (!testMode && !acknowledgementSelected) {
+      const permitted = parsed.verdict === "APPROVE" || parsed.verdict === "APPROVE WITH COMMENTS";
+      console.log("\nWHAT WOULD YOU LIKE TO DO?");
+      console.log(`1. Acknowledge this review — ${permitted ? "Koda will recheck the gate and continue if every condition passes." : `${parsed.verdict} keeps the gate closed and returns the work through its required route.`}`);
+      console.log("2. Ask the Reviewer a question — nothing advances.");
+      console.log("3. Read the complete review again — nothing advances.");
+      console.log("4. Stop for now — preserve everything so this session can resume later.");
+      console.log("5. Halt this session — permanently end this attempt and require a fresh Brief.");
+      const choice = (await promptOwner("Choose 1, 2, 3, 4, or 5: ")).trim();
+      if (choice === "2") {
+        const question = (await promptOwner("Type your question for the Reviewer, then press Return: ")).trim();
         if (!question) {
-          console.log("No question entered; the producer remains paused.");
+          console.log("No question was entered. Nothing changed.");
           continue;
         }
         await discuss(question);
         continue;
       }
-      if (choice === "h") {
-        const ownerDirection = await promptOwner("Direction that the fresh Brief must carry: ");
+      if (choice === "3") {
+        await openReview();
+        continue;
+      }
+      if (choice === "4") throw new OwnerPaused("Kristian chose to stop for now; the review remains ready and unacknowledged.");
+      if (choice === "5") {
+        console.log("HALT ENDS THIS SESSION ATTEMPT. No phase from it will count; later work must start from a fresh Brief.");
+        const ownerDirection = await promptOwner("Type the direction the fresh Brief must carry, or press Return to go back: ");
         if (!ownerDirection.trim()) {
-          console.log("No direction entered; halt was not prepared.");
+          console.log("Halt was not prepared. Nothing changed.");
+          continue;
+        }
+        const confirmation = (await promptOwner("Type HALT to confirm, or press Return to go back: ")).trim();
+        if (confirmation !== "HALT") {
+          console.log("Halt was not confirmed. Nothing changed.");
           continue;
         }
         await haltSession(ownerDirection);
         return;
       }
-      if (choice === "p") throw new OwnerPaused("Kristian paused at the reviewer decision point.");
-      console.log("Choose Return, d, r, h, or p.");
+      if (choice !== "1") {
+        console.log("Nothing changed. Choose one of the numbered options.");
+        continue;
+      }
+      acknowledgementSelected = true;
     }
-  }
 
-  const testClipboard = process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CLIPBOARD_FILE;
-  if (testClipboard) {
-    await writeFile(testClipboard, parsed.receipt, "utf8");
-  } else {
-    const copied = spawnSync("pbcopy", [], { input: parsed.receipt, encoding: "utf8" });
-    if (copied.status !== 0) throw new Error("macOS could not copy the receipt; nothing was acknowledged.");
+    if (!receiptCopied) {
+      if (testClipboard) {
+        await writeFile(testClipboard, parsed.receipt, "utf8");
+      } else {
+        const copied = spawnSync("pbcopy", [], { input: parsed.receipt, encoding: "utf8" });
+        if (copied.status !== 0) throw new Error("macOS could not copy the receipt; nothing was acknowledged.");
+      }
+      receiptCopied = true;
+    }
+    if (!testMode) {
+      console.log("\nFINAL ACKNOWLEDGEMENT — ONE KEYBOARD ACTION");
+      console.log("The exact receipt is already copied. Press Command-V, then press Return.");
+      console.log("This does not bypass the gate: Koda will re-read the artifact, review, verdict, and receipt from disk.");
+      console.log("Type 0 instead to return to the numbered choices. A wrong or empty paste changes nothing and stays here.");
+    }
+    const receiptInput = testMode
+      ? (process.env.KODA_RELAY_TEST_RECEIPT_INPUT_FILE
+          ? await readFile(process.env.KODA_RELAY_TEST_RECEIPT_INPUT_FILE, "utf8")
+          : process.env.KODA_RELAY_TEST_RECEIPT_INPUT ?? "")
+      : await promptOwner("Press Command-V, then Return: ");
+    if (!testMode && receiptInput.trim() === "0") {
+      acknowledgementSelected = false;
+      continue;
+    }
+    if (receiptInput.trim() !== parsed.receipt.trim()) {
+      console.log("NOT ACKNOWLEDGED — that paste does not match this review's receipt. Nothing changed and the gate is still closed.");
+      if (testMode) throw new OwnerPaused("The receipt did not match; the review remains ready for another owner attempt.");
+      console.log("1. Try pasting the copied receipt again.");
+      console.log("2. Return to the full review choices.");
+      console.log("3. Stop for now and preserve this decision point.");
+      const retryChoice = (await promptOwner("Choose 1, 2, or 3: ")).trim();
+      if (retryChoice === "1") continue;
+      if (retryChoice === "2") {
+        acknowledgementSelected = false;
+        continue;
+      }
+      if (retryChoice === "3") throw new OwnerPaused("Kristian chose to stop after an unmatched receipt; the review remains ready and unacknowledged.");
+      console.log("Nothing changed. Returning to the full review choices.");
+      acknowledgementSelected = false;
+      continue;
+    }
+
+    const approvalArgs = [cli, "approve", job.phase, "--approver", "Kristian", "--session", progressSession.id];
+    const approvalInput = [receiptInput.trim()];
+    if (parsed.verdict === "APPROVE WITH COMMENTS") {
+      const comments = testMode
+        ? process.env.KODA_RELAY_TEST_APPROVAL_COMMENTS ?? "Owner acknowledged the review comments."
+        : (await promptOwner("Type the comments to preserve in the ledger, then press Return: ")).trim();
+      if (!comments) {
+        console.log("NOT ACKNOWLEDGED — comments are required for APPROVE WITH COMMENTS. Nothing changed.");
+        if (testMode) throw new OwnerPaused("Approval comments were empty; the review remains ready for another owner attempt.");
+        continue;
+      }
+      approvalInput.push(comments);
+    }
+    if (parsed.verdict === "DISCUSS") {
+      const ruling = testMode
+        ? process.env.KODA_RELAY_TEST_OWNER_RULING ?? "Owner requests a fresh review after this discussion."
+        : (await promptOwner("Type your product ruling for the ledger, then press Return: ")).trim();
+      if (!ruling) {
+        console.log("NOT ACKNOWLEDGED — DISCUSS requires your ruling. Nothing changed.");
+        if (testMode) throw new OwnerPaused("The owner ruling was empty; the review remains ready for another owner attempt.");
+        continue;
+      }
+      approvalInput.push(ruling);
+    }
+    const approved = withOwnerConsolePaused(() => spawnSync(
+      process.execPath,
+      approvalArgs,
+      {
+        cwd: project,
+        encoding: "utf8",
+        input: `${approvalInput.join("\n")}\n`,
+        env: { ...process.env, KODA_COMMAND: `${process.execPath} ${cli}`, KODA_SESSION_ID: progressSession.id },
+      },
+    ));
+    if (approved.status !== 0) {
+      throw new Error(`Koda refused owner acknowledgement after the exact receipt matched: ${(approved.stderr || approved.stdout || `exit ${approved.status ?? -1}`).trim()}`);
+    }
+    break;
   }
-  console.log("The exact receipt is copied. Koda will ask for it here in Window B.");
-  console.log("Press Command-V, then Return. For DISCUSS or APPROVE WITH COMMENTS, answer Koda's next question too.");
-  const testReceiptInput = testMode
-    ? (process.env.KODA_RELAY_TEST_RECEIPT_INPUT_FILE
-        ? await readFile(process.env.KODA_RELAY_TEST_RECEIPT_INPUT_FILE, "utf8")
-        : process.env.KODA_RELAY_TEST_RECEIPT_INPUT)
-    : undefined;
-  const approved = withOwnerConsolePaused(() => spawnSync(
-    process.execPath,
-    [cli, "approve", job.phase, "--approver", "Kristian", "--session", progressSession.id],
-    {
-      cwd: project,
-      ...(testReceiptInput === undefined
-        ? { stdio: "inherit" as const }
-        : { input: `${testReceiptInput}\n`, encoding: "utf8" as const }),
-      env: { ...process.env, KODA_COMMAND: `${process.execPath} ${cli}`, KODA_SESSION_ID: progressSession.id },
-    },
-  ));
-  if (approved.status !== 0) throw new Error(`Owner acknowledgement exited ${approved.status ?? -1}.`);
   job.completion = "ACKNOWLEDGED";
   console.log("ACKNOWLEDGED — Window A will now derive the route from disk.");
   console.log(`REVIEWER HANDOVER — ${job.phase.toUpperCase()} — ${job.completion}`);
@@ -523,7 +601,18 @@ async function completeConsultation(job: ReviewerJob, response: string): Promise
 
 async function processJob(job: ReviewerJob): Promise<void> {
   if (job.status === "RUNNING") throw new Error("A prior reviewer process stopped mid-turn. The job is preserved; explicit recovery is required.");
-  if (job.status === "FAILED") throw new Error(job.error ?? "The reviewer job previously failed.");
+  if (job.status === "FAILED") {
+    if (job.error === "Owner acknowledgement exited 1." && job.completion === null) {
+      console.log("\nREVIEWER RECOVERY — the earlier receipt attempt changed nothing. Reopening the same bound review for Kristian.");
+      job.status = "AWAITING_OWNER";
+      job.error = null;
+      await writeReviewerJob(runRoot, job);
+      state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: null });
+      await writeReviewerWindowState(runRoot, state);
+    } else {
+      throw new Error(job.error ?? "The reviewer job previously failed.");
+    }
+  }
 
   if (job.status === "PENDING" && job.kind !== "acknowledge") {
     job.status = "RUNNING";

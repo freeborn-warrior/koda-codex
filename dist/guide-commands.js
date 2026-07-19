@@ -12,8 +12,8 @@ import {
   snapshotContinuity,
   verifyGuideLaunch,
 } from "./guide.js";
-import { listGuideRuntimes, prepareGuideRuntime } from "./guide-runtime.js";
-import { requestGhosttyWindows,                           } from "./ghostty.js";
+import { currentGuideRuntime, listGuideRuntimes, prepareGuideRuntime } from "./guide-runtime.js";
+import { requestGhosttyRecoveryWindows, requestGhosttyWindows,                           } from "./ghostty.js";
 import { evaluateSessionClosure } from "./close.js";
 import { evaluateSessionHalt } from "./halt.js";
 import { currentPhase, displayPath, latestSessionId, listSessionIds, loadSessionState, sessionRoot } from "./project.js";
@@ -28,8 +28,16 @@ import { verifyToolkitIntegrity } from "./toolkit-integrity.js";
 
 
 
+
+
+
+
+
 const defaultIo             = { out: (message) => console.log(message) };
-const defaultDependencies                       = { openGhostty: requestGhosttyWindows };
+const defaultDependencies                       = {
+  openGhostty: requestGhosttyWindows,
+  recoverGhostty: requestGhosttyRecoveryWindows,
+};
 
 function option(args          , name        )                {
   const index = args.indexOf(name);
@@ -69,6 +77,7 @@ function help(io            )       {
   io.out("  koda guide bind <launch-id> <session-id>");
   io.out("  koda guide verify");
   io.out("  koda guide launch --producer-model <model> --producer-effort <effort> --reviewer-model <model> --reviewer-effort <effort> [--open ghostty]");
+  io.out("  koda guide recover --open ghostty");
 }
 
 export async function runGuideCli(
@@ -198,6 +207,15 @@ export async function runGuideCli(
           io.out("The prior session ended through pushed halt. Reconcile it and confirm a fresh Brief before launching again.");
         }
       } else {
+        if (runtime.run.status === "PAUSED_REVIEWER_FAILURE" && runtime.run.lastError === "Owner acknowledgement exited 1.") {
+          io.out("OWNER INPUT WAS NOT RECORDED — the receipt did not match. Nothing advanced and the gate remains closed.");
+          io.out("");
+          io.out("SESSION RECOVERY READY");
+          io.out("1. Reopen this session — Koda will restore the same Reviewer and Producer contexts at the same unacknowledged review. Codex may ask permission for one local launcher command.");
+          io.out("2. Not now — keep the session safely paused. Nothing will advance.");
+          io.out("Choose in the Guide conversation. Do not paste or reconstruct a technical command.");
+          continue;
+        }
         io.out("Window B — reviewer / owner:");
         io.out(runtime.reviewerCommand);
         io.out("Window A — producer:");
@@ -269,6 +287,28 @@ export async function runGuideCli(
     io.out(`READY TO LAUNCH — ${launch.id}`);
     io.out(`Prompt: ${launch.prompt}`);
     io.out("✓ Prompt, project continuity, and prior-session evidence still match owner confirmation.");
+    io.out("");
+    io.out("READY TO LAUNCH — OWNER CHOICE");
+    io.out("1. Launch this session now — Codex may ask permission for one local launcher command; approving it opens exactly one Reviewer and one Producer window.");
+    io.out("2. Not now — keep this launch ready without opening windows.");
+    io.out("Choose in the Guide conversation; do not paste or reconstruct a technical command.");
+    return;
+  }
+
+  if (verb === "recover") {
+    const openTerminal = option(rest, "--open");
+    rejectUnknownOptions(rest);
+    if (rest.length || openTerminal !== "ghostty") throw new Error("Usage: koda guide recover --open ghostty");
+    const runtime = await currentGuideRuntime(root);
+    if (!runtime) throw new Error("No Guide runtime exists to recover.");
+    const toolkit = await verifyToolkitIntegrity();
+    const requests = await (dependencies.recoverGhostty ?? requestGhosttyRecoveryWindows)(root, runtime, toolkit);
+    io.out(`SESSION RECOVERY REQUESTED — ${runtime.run.launchId}`);
+    io.out("✓ The same Reviewer context will reopen at the unacknowledged review.");
+    io.out("✓ Producer opens only after Reviewer reaches the owner decision point.");
+    io.out(`✓ ${requests[0] .title} requested first.`);
+    io.out(`✓ ${requests[1] .title} requested second.`);
+    io.out("No receipt was recorded and no phase advanced during recovery.");
     return;
   }
 

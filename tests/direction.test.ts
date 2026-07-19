@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
@@ -150,6 +150,33 @@ test("WAIT DIRECTION MUTATION: changed prose and symbolic-link evidence refuse b
   await rm(direction.path);
   await symlink(path.join(h.session.directory, "session-prompt.md"), direction.path);
   await assert.rejects(readWaitingDirections(h.session.directory), /must be a regular file/);
+});
+
+test("WAIT DIRECTION ATOMIC READ: Koda retries its transient file but persistent or unknown entries still refuse", async (t) => {
+  const h = await projectHarness(t, 1);
+  const direction = await createWaitingDirection({
+    sessionDir: h.session.directory,
+    state: h.session.state,
+    source: "owner-via-reviewer",
+    ownerStatement: "Preserve this direction across the atomic read.",
+    classification: `${WAITING_DIRECTION_PREFIX}\nRelease only at the next gate.`,
+  });
+  const temporary = `${direction.path}.tmp-99999-deadbeef`;
+  await rename(direction.path, temporary);
+  const restoration = new Promise<void>((resolve, reject) => {
+    setTimeout(() => { rename(temporary, direction.path).then(() => resolve(), reject); }, 20);
+  });
+  assert.equal((await readWaitingDirections(h.session.directory)).length, 1);
+  await restoration;
+
+  await writeFile(temporary, direction.content, "utf8");
+  await assert.rejects(
+    readWaitingDirections(h.session.directory),
+    /Atomic waiting direction write did not settle: 01-wait\.md\.tmp-99999-deadbeef/,
+  );
+  await rm(temporary);
+  await writeFile(path.join(h.session.directory, "directions", "unexpected.txt"), "not Koda evidence\n", "utf8");
+  await assert.rejects(readWaitingDirections(h.session.directory), /Unexpected waiting direction entry: unexpected\.txt/);
 });
 
 test("WAIT DIRECTION CONTAINMENT: a linked direction directory cannot redirect writes", async (t) => {

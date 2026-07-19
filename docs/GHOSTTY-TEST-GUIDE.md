@@ -1,22 +1,21 @@
 # Koda-C terminal testing in Ghostty
 
-## Current status — first live attempt halted; repaired path awaits a fresh run
+## Current status — clean retry paused at a recoverable Brief decision
 
 This is the route Kristian will use. It is written for someone who should not
 need to understand shell state, environment variables, run directories, or
 process locks.
 
-The first live attempt is over and must not be resumed. It created real Guide,
-Producer, and Reviewer contexts, then exposed a serious launcher flaw: unintended
-tabs, repeated permissions, an environment dump containing an ambient credential,
-and a stale review prompt after pushed halt. Kristian halted before acknowledging
-anything; zero phases advanced. The [sanitized incident](security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md)
-records that failure without storing the credential, receipt, or screenshots.
+The first live attempt is pushed-halted security evidence. A dependent retry then
+opened exactly one Reviewer and one Producer beside the persistent Guide and reached
+an approved Brief without extra tabs or environment output. Its ambiguous
+acknowledgement prompt caused an empty receipt and exited both role processes. The
+gate stayed shut: zero ledger entries and zero advanced phases.
 
-The repaired adapter now passes deterministic focused 44/44 and complete
-181/181 checks. A successful fresh human run is still required. Until a new prompt
-and launch are prepared, Kristian should keep only the existing Guide window open
-and idle. He should not run a command or ask Guide to resume the halted attempt.
+Session `2026-07-19-02` remains safely recoverable with the same review and context
+identities. Do not create another session or manually start either role. Until the
+194-check repair is committed, pushed, and post-push verified, Kristian should do
+nothing in Producer or Reviewer. See the [sanitized receipt UX incident](verification-runs/2026-07-19-markdown-headings-01/RECEIPT-UX-INCIDENT.md).
 
 ### Before Kristian types anything
 
@@ -40,7 +39,7 @@ names the missing evidence first.
   bounded session, reviews, questions, and product decisions.
 - **Window A — Producer:** opened by Koda. Kristian watches but never types here.
 
-### The one launch action
+### The one launch or recovery action
 
 Window G is a real interactive Codex Guide, not a shell window pretending to be
 Guide. Start Codex in the target project, let it reconstruct status from disk,
@@ -52,21 +51,14 @@ Window G is recorded in that run's `OWNER-STEPS.md`. It starts Guide only; it do
 not launch the session. The current halted run's owner steps intentionally contain
 no launch command.
 
-Once Guide reports the exact verified launch ID, Kristian says in Window G:
+Once Guide verifies a fresh launch, it shows `1` launch / `2` not now. Once Guide
+detects the exact recoverable receipt failure, it shows `1` reopen / `2` not now.
+Kristian presses or types only the number. Guide invokes the bound technical action;
+Kristian never pastes a command, path, launch ID, receipt, commit, or test count.
 
-> Launch that verified session now in Ghostty with the sealed Producer and
-> Reviewer staffing. Do not create or select any other launch.
-
-Guide then invokes the underlying opt-in command after revalidating disk:
-
-```bash
-koda guide launch --producer-model gpt-5.6-sol --producer-effort medium --reviewer-model gpt-5.6-terra --reviewer-effort medium --open ghostty
-```
-
-That technical command is evidence and a recovery surface, not an owner
-conversation message. Guide runs it once from the target project. It should leave
-Guide open, then request a labeled Reviewer window first and a labeled Producer
-window second.
+Codex may display one host permission asking whether to run Koda's local launcher.
+Choosing yes should leave Guide open, request one labeled Reviewer first, wait for its
+decision point, and then request one labeled Producer.
 
 After a fresh launch request:
 
@@ -94,13 +86,13 @@ may run the read-only command:
 koda guide status
 ```
 
-Then use only the one recovery command Koda prints. A blind retry refuses because
-one window may already exist.
+Guide will show the applicable numbered recovery choice. A blind retry refuses
+because one window may already exist.
 
 ### What Kristian does after both windows appear
 
 Nothing is required while Producer is working. When Reviewer needs Kristian,
-Window B presents the review or question and explains the available keys. The
+Window B presents the review or question and explains the numbered choices. The
 detailed receipt ceremony is documented below, but the human rule is simple:
 
 1. read what Window B opens;
@@ -160,18 +152,18 @@ For a formal review, Window B shows the reviewer progress and then says `REVIEW 
 2. Press Space to move down when needed.
 3. Read through the final receipt line.
 4. Press `q` when finished.
-5. Back in Window B, choose what you need:
-   - press Return to acknowledge;
-   - type `d` to ask the same reviewer a question about the review;
-   - type `r` to reread the complete review;
-   - type `h` to halt the whole session attempt and enter the fresh-Brief direction;
-   - type `p` to stop the relay safely without changing phase inputs.
+5. Back in Window B, choose the displayed number:
+   - `1` acknowledges after one disclosed receipt-paste step;
+   - `2` asks the same Reviewer a question;
+   - `3` rereads the complete review;
+   - `4` stops for now while preserving the decision point;
+   - `5` begins permanent halt, which still requires direction and `HALT` confirmation.
 6. Explanation questions resume the same reviewer context, alter no files, and return to this menu. Ask as many as needed.
 7. If discussion introduces new product direction, Window B records it immediately and says `DIRECTION RECORDED — WAITING FOR GATE`. Acknowledging the review still judges the unchanged artifact against its frozen entry contract. There is no send-now or same-phase revision choice.
-8. When you acknowledge, the exact receipt is on the macOS clipboard. Press Command–V and Return when Koda asks in this same window.
+8. When you choose `1`, Koda says the exact receipt is on the macOS clipboard before it asks for input. Press Command–V and Return in this same window. A wrong or empty paste changes nothing and offers numbered retry choices; it does not end the process.
 9. If Koda asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
 
-The reviewer console never prints the receipt into its readable progress stream, and Kristian's acknowledgement input is never sent as a model message. The raw reviewer event evidence may contain the generated receipt because the reviewer creates and validates the review that contains it; the receipt is not treated as a secret. A changed review or wrong quote refuses, writes no approval, and leaves a named failed job on disk. After a valid acknowledgement, Window A re-reads the gate and automatically advances, revises, or requests a fresh review according to the verdict.
+The reviewer console never prints the receipt into its readable progress stream, and Kristian's acknowledgement input is never sent as a model message or child-process argument. The raw reviewer event evidence may contain the generated receipt because the reviewer creates and validates the review that contains it; the receipt is not treated as a secret. A changed review or wrong quote refuses and writes no approval. After a valid acknowledgement, Window A re-reads the gate and automatically advances, revises, or requests a fresh review according to the verdict.
 
 Window B prints a disk-derived `REVIEWER HANDOVER` after a consultation answer or acknowledgement. It names the response, review, or waiting-direction path and says that Window A regains control; the gate still decides the route.
 

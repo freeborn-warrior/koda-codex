@@ -91,7 +91,9 @@ through a local Git object database.
 The receipt proves that the unique review phrase entered the decision record. It
 does not prove comprehension. The receipt is evidence, not a secret; the macOS
 reader copies it to the system clipboard, where other local applications may be
-able to observe it.
+able to observe it. The Reviewer passes the owner's pasted receipt and any comments
+or ruling to the deterministic CLI over stdin. They do not enter model chat, child
+process arguments, production environment variables, or durable event logs.
 
 `SKILL.md` narrows role behavior but is not a permission boundary. Markdown,
 source files, and prompts can contain prompt-injection instructions. Use Codex's
@@ -175,6 +177,14 @@ prepared and names `koda guide status` as manual recovery. Same-user replacement
 between the final content check and external execution remains a local TOCTOU
 boundary, not hostile-writer isolation.
 
+The visible owner-receipt recovery is deliberately narrower than general process
+restart. It accepts only the exact legacy `PAUSED_REVIEWER_FAILURE` and failed job
+shape produced by the observed empty-receipt incident, requires the earlier visible
+launch and a stopped Reviewer, and writes one `RECOVERY.json` binding the current
+verified toolkit before opening anything. Reviewer opens first; Producer opens only
+after the same job reaches `AWAITING_OWNER` under a live Reviewer lock. Any different,
+linked, corrupt, live, or duplicate state refuses rather than guessing.
+
 ## Concurrency and recovery
 
 Atomic file replacement prevents partial JSON or ledger writes. Session-directory
@@ -236,4 +246,7 @@ and the whole-product repair delta is audited in
 The Guide/toolkit handover delta and its remaining local-trust boundary are
 audited in
 [`security-runs/2026-07-19-guide-toolkit-binding-audit-06/RESULT.md`](security-runs/2026-07-19-guide-toolkit-binding-audit-06/RESULT.md).
+The numbered owner ceremony, stdin-only receipt transport, and exact visible recovery
+are audited in
+[`security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md`](security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md).
 The latest named full-suite transcript is linked from the README.

@@ -1,36 +1,35 @@
-# Owner steps — three-window verification
+# Owner steps — preserved three-window retry
 
-**Current state:** the failed attempt is finished and pushed-halted. A fresh retry
-prompt is now drafted and pushed, but it is not owner-confirmed and no launch
-request or terminal window has been created.
+**Current state:** session `2026-07-19-02` is safely paused at its first Brief review.
+The Brief and APPROVE review exist, but the approval ledger has zero entries and no
+phase advanced. The same Producer and Reviewer context identities remain bound.
 
-The first live launch reached a real Brief and formal review, but the terminal
-adapter created unintended tabs and exposed an ambient credential. Kristian used
-the Reviewer-side halt. Halt `c9743416-67dc-45bd-b7f0-4de56c6bb300` is pushed at
-verification-project commit `ba22bfe`; zero phases advanced and zero owner
-acknowledgements exist.
+The launch itself passed the repaired window boundary: one Reviewer and one Producer
+opened beside the existing Guide, with no extra tabs or environment dump. The owner
+ceremony then failed because Return exposed an undisclosed second receipt step and
+both role processes exited after the empty paste.
 
 ## What Kristian should do now
 
-Nothing in Producer or Reviewer. Those windows remain closed. Keep the existing
-Guide open; it is safe because Guide is between sessions and the halted session is
-visible from disk.
+Nothing yet. Keep the Guide conversation if convenient; closed Producer and Reviewer
+windows do not lose the disk-backed session. Do not run a shell command, paste a path,
+copy a receipt into Guide, or create another session.
 
-Do not reuse the old launch command, Brief, review, or receipt. Do not ask Guide
-to resume this session.
+The builder must first commit, push, and post-push verify the numbered retry and
+recovery repair. When that is complete, speak naturally in Guide:
 
-When ready to review the retry, speak naturally in Guide:
+> What is the current session state?
 
-> Show me the proposed retry session in ordinary language. Do not confirm or
-> launch anything yet.
+Guide will reconstruct disk truth and show exactly:
 
-Guide must discover the technical proof itself. Kristian must never paste a
-command, path, commit, hash, test count, receipt, or evidence location from
-another context. Only after the plain-language proposal is acceptable should
-Kristian explicitly confirm it. Launch remains a later, separate owner action
-given one step at a time.
+1. reopen the same session;
+2. not now.
 
-See the [halted result](RESULT.md) and the sanitized
-[security incident](../../security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md).
-The exact unconfirmed retry is archived as
-[RETRY-SESSION-PROMPT-DRAFT.md](RETRY-SESSION-PROMPT-DRAFT.md).
+If Kristian chooses 1, Codex may ask permission for one local launcher command. After
+approval, Koda must open Reviewer first at the same unacknowledged review, then
+Producer. No role command, runtime path, receipt, commit, or test count should be
+copied by Kristian.
+
+See the [receipt UX incident](RECEIPT-UX-INCIDENT.md), the
+[first-use audit](../../quality-runs/2026-07-19-first-use-ux-audit-02/RESULT.md), and
+the [security audit](../../security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md).

@@ -3,9 +3,10 @@ import { chmod, lstat, readFile, realpath, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-import type { PreparedGuideRuntime } from "./guide-runtime.ts";
+import type { GuideRuntimeView, PreparedGuideRuntime } from "./guide-runtime.ts";
 import { nowIso, writeJsonAtomic } from "./project.ts";
 import { relayRoleEnvironment } from "./relay-environment.ts";
+import type { ToolkitIntegritySnapshot } from "./toolkit-integrity.ts";
 
 export interface GhosttyWindowRequest {
   role: "reviewer" | "producer";
@@ -22,6 +23,7 @@ export interface GhosttyLaunchDependencies {
   platform?: string;
   codexExecutable?: string;
   open?: (args: string[], cwd: string) => GhosttyOpenResult;
+  waitForRecoveredReviewer?: (runRoot: string) => Promise<boolean>;
 }
 
 function packageRoot(): string {
@@ -147,6 +149,129 @@ export async function ghosttyWindowRequests(
       launcher: producerLauncher,
     }),
   ];
+}
+
+type ReceiptRecoveryJob = {
+  version: 1;
+  status: "FAILED" | "AWAITING_OWNER";
+  error: string | null;
+  completion: null;
+};
+
+async function receiptRecoveryJob(runRoot: string): Promise<ReceiptRecoveryJob> {
+  const file = path.join(runRoot, "REVIEWER-JOB.json");
+  const metadata = await lstat(file).catch(() => null);
+  if (!metadata || !metadata.isFile() || metadata.isSymbolicLink()) {
+    throw new Error("Receipt recovery requires a real REVIEWER-JOB.json file.");
+  }
+  let value: unknown;
+  try {
+    value = JSON.parse(await readFile(file, "utf8"));
+  } catch {
+    throw new Error("Receipt recovery requires valid reviewer-job JSON.");
+  }
+  if (!value || typeof value !== "object") throw new Error("Receipt recovery found invalid reviewer-job data.");
+  const job = value as Partial<ReceiptRecoveryJob>;
+  const retryableLegacyFailure = job.status === "FAILED" && job.error === "Owner acknowledgement exited 1.";
+  const retryableCurrentState = job.status === "AWAITING_OWNER" && job.error === null;
+  if (job.version !== 1 || job.completion !== null || (!retryableLegacyFailure && !retryableCurrentState)) {
+    throw new Error("This Reviewer state is not a retryable owner-receipt attempt. Koda refuses to guess.");
+  }
+  return job as ReceiptRecoveryJob;
+}
+
+function processAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === "EPERM";
+  }
+}
+
+async function reviewerLockAlive(runRoot: string): Promise<boolean> {
+  const lock = path.join(runRoot, ".reviewer-window.lock");
+  const metadata = await lstat(lock).catch(() => null);
+  if (!metadata) return false;
+  if (!metadata.isDirectory() || metadata.isSymbolicLink()) throw new Error("Reviewer recovery lock is unsafe.");
+  const ownerFile = path.join(lock, "OWNER.json");
+  const ownerMetadata = await lstat(ownerFile).catch(() => null);
+  if (!ownerMetadata || !ownerMetadata.isFile() || ownerMetadata.isSymbolicLink()) {
+    throw new Error("Reviewer recovery lock owner is unsafe.");
+  }
+  const owner = JSON.parse(await readFile(ownerFile, "utf8")) as { version?: number; pid?: number };
+  if (owner.version !== 1 || !Number.isInteger(owner.pid) || owner.pid! < 1) {
+    throw new Error("Reviewer recovery lock owner is invalid.");
+  }
+  return processAlive(owner.pid!);
+}
+
+async function waitForRecoveredReviewer(runRoot: string): Promise<boolean> {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (await reviewerLockAlive(runRoot)) {
+      const job = await receiptRecoveryJob(runRoot).catch(() => null);
+      if (job?.status === "AWAITING_OWNER") return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return false;
+}
+
+export async function requestGhosttyRecoveryWindows(
+  project: string,
+  runtime: GuideRuntimeView,
+  toolkit: ToolkitIntegritySnapshot,
+  dependencies: GhosttyLaunchDependencies = {},
+): Promise<GhosttyWindowRequest[]> {
+  const recoveryFile = path.join(runtime.runRoot, "RECOVERY.json");
+  if (await lstat(recoveryFile).then(() => true).catch(() => false)) {
+    throw new Error("A visible recovery was already requested. Run koda guide status instead of opening duplicate windows.");
+  }
+  if (runtime.run.status !== "PAUSED_REVIEWER_FAILURE" || runtime.run.lastError !== "Owner acknowledgement exited 1.") {
+    throw new Error("Automatic recovery is limited to the named owner-receipt failure. Run koda guide status for other states.");
+  }
+  if (!runtime.run.terminalLaunch) throw new Error("No prior visible launch exists to recover.");
+  if (await reviewerLockAlive(runtime.runRoot)) {
+    throw new Error("The Reviewer window is already running; automatic recovery refuses a duplicate.");
+  }
+  await receiptRecoveryJob(runtime.runRoot);
+
+  const prepared = {
+    ...runtime,
+    launch: { id: runtime.run.launchId },
+  } as PreparedGuideRuntime;
+  const requests = await ghosttyWindowRequests(project, prepared, dependencies);
+  await writeJsonAtomic(recoveryFile, {
+    version: 1,
+    reason: "owner-receipt-input-retry",
+    priorError: runtime.run.lastError,
+    requestedAt: nowIso(),
+    toolkit,
+  });
+  runtime.run.lastAction = "recover visible Reviewer and Producer after retryable owner receipt input";
+  runtime.run.lastError = undefined;
+  await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+
+  const open = dependencies.open ?? defaultOpen;
+  const reviewer = open(requests[0]!.args, project);
+  if (reviewer.status !== 0) {
+    runtime.run.lastError = `Ghostty refused the recovered Reviewer window${reviewer.stderr ? `: ${reviewer.stderr}` : "."}`;
+    await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+    throw new Error(`${runtime.run.lastError} The Producer was not opened.`);
+  }
+  const reviewerReady = await (dependencies.waitForRecoveredReviewer ?? waitForRecoveredReviewer)(runtime.runRoot);
+  if (!reviewerReady) {
+    runtime.run.lastError = "Recovered Reviewer did not reach its owner decision point; the Producer was not opened.";
+    await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+    throw new Error(runtime.run.lastError);
+  }
+  const producer = open(requests[1]!.args, project);
+  if (producer.status !== 0) {
+    runtime.run.lastError = `Ghostty refused the recovered Producer window${producer.stderr ? `: ${producer.stderr}` : "."}`;
+    await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+    throw new Error(runtime.run.lastError);
+  }
+  return requests;
 }
 
 function defaultOpen(args: string[], cwd: string): GhosttyOpenResult {

@@ -137,6 +137,11 @@ test("session open and close remain ceremonies outside producer phase routing", 
   assert.match(prompt, /verified toolkit capability and integrity-manifest hash/is);
   assert.match(prompt, /no toolkit-owned technical prerequisite has been mislabeled as an owner question/is);
   assert.match(prompt, /`koda guide verify` succeeds.*committed and pushed/is);
+  assert.match(prompt, /READY TO LAUNCH[\s\S]*1\. Launch this session now[\s\S]*2\. Not now/is);
+  assert.match(prompt, /Treat `1` as explicit launch authority.*Treat `2` as no mutation/is);
+  assert.match(prompt, /SESSION RECOVERY READY/);
+  assert.match(prompt, /koda guide recover --open ghostty/);
+  assert.match(prompt, /Never ask Kristian to paste the recovery command/);
   assert.match(prompt, /Do not run `koda session new`/);
   assert.match(session, /currentPhaseIndex: 0/);
   assert.match(session, /first phase.*state\.json/i);

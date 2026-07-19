@@ -762,6 +762,7 @@ function help(io: CliIo): void {
   io.out("  koda session new <prompt-file> [--kind <kind>] [--depends-on <session-id>] [--independent]");
   io.out("  koda guide <status|claim|confirm|cancel|bind|verify|launch>");
   io.out("  koda guide launch ... [--open ghostty]");
+  io.out("  koda guide recover --open ghostty");
   io.out("  koda status [--session <session-id>]");
   io.out("  koda review new <phase> [--session <session-id>]");
   io.out("  koda direction wait <owner-message-file> <classification-file> [--source owner-via-guide|owner-via-reviewer] [--session <session-id>]");

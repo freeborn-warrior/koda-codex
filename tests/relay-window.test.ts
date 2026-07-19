@@ -301,15 +301,34 @@ test("TWO-WINDOW RECEIPT: exact owner quote is recorded from Window B", async (t
   assert.equal(approvals[0].approver, "Kristian");
 });
 
-test("TWO-WINDOW RECEIPT MUTATION: a wrong quote refuses and names the preserved failed job", async (t) => {
+test("TWO-WINDOW RECEIPT MUTATION: a wrong quote refuses, names the condition, and remains retryable", async (t) => {
   const result = await preparedAcknowledgementRun("wrong");
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
-  assert.equal(result.executed.status, 1, result.executed.stderr);
-  assert.match(result.executed.stderr, /REVIEWER PAUSED — Owner acknowledgement exited 1/);
+  assert.equal(result.executed.status, 2, result.executed.stderr);
+  assert.match(result.executed.stdout, /NOT ACKNOWLEDGED — that paste does not match this review's receipt/);
+  assert.match(result.executed.stderr, /REVIEWER PAUSED SAFELY — The receipt did not match/);
   const job = await readReviewerJob(result.runRoot);
-  assert.equal(job?.status, "FAILED");
-  assert.match(job?.error ?? "", /Owner acknowledgement exited 1/);
+  assert.equal(job?.status, "AWAITING_OWNER");
+  assert.equal(job?.error, null);
   assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
+
+  const retried = spawnSync(process.execPath, ["scripts/run-relay-reviewer-window.ts", result.runRoot], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
+      KODA_RELAY_REVIEWER_ONCE: "1",
+      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
+      KODA_RELAY_TEST_CLIPBOARD_FILE: result.clipboard,
+      KODA_RELAY_TEST_CONFIRM_READ: "1",
+      KODA_RELAY_TEST_RECEIPT_INPUT: result.review.metadata.receipt,
+    },
+  });
+  assert.equal(retried.status, 0, retried.stderr);
+  assert.match(retried.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
+  assert.equal((await readReviewerJob(result.runRoot))?.status, "COMPLETE");
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
 });
 
 test("WAIT AT FORMAL REVIEW: new direction is recorded immediately but does not revise the reviewed artifact", async (t) => {
@@ -337,13 +356,172 @@ test("WAIT RECEIPT BINDING: a recorded direction survives a wrong receipt but no
     discussionResponse: "OWNER DIRECTION — WAIT FOR GATE\nAdd a second output format after this Brief boundary.",
   });
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
-  assert.equal(result.executed.status, 1, result.executed.stderr);
+  assert.equal(result.executed.status, 2, result.executed.stderr);
   const job = await readReviewerJob(result.runRoot);
-  assert.equal(job?.status, "FAILED");
+  assert.equal(job?.status, "AWAITING_OWNER");
   assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
   assert.equal((await readWaitingDirections(result.session.directory)).length, 1);
   assert.equal((await pendingDirectionsForActivePhase(result.session.directory, result.session.state)).length, 1);
   assert.equal(result.session.state.currentPhaseIndex, 0);
+});
+
+test("TWO-WINDOW RECEIPT RECOVERY: the live legacy acknowledgement failure reopens the same review and context", async (t) => {
+  const result = await preparedAcknowledgementRun("wrong");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  const failed = await readReviewerJob(result.runRoot);
+  assert.ok(failed);
+  failed.status = "FAILED";
+  failed.error = "Owner acknowledgement exited 1.";
+  await writeReviewerJob(result.runRoot, failed);
+
+  const status = spawnSync(process.execPath, ["scripts/show-relay-status.ts", result.runRoot], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    env: { ...process.env, KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot) },
+  });
+  assert.equal(status.status, 0, status.stderr);
+  assert.match(status.stdout, /last receipt entry did not match\. Nothing advanced and no ledger entry was written/);
+  assert.match(status.stdout, /Return to Guide and say: Recover this session/);
+  assert.match(status.stdout, /do not paste a technical command/);
+
+  const recovered = spawnSync(process.execPath, ["scripts/run-relay-reviewer-window.ts", result.runRoot], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
+      KODA_RELAY_REVIEWER_ONCE: "1",
+      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
+      KODA_RELAY_TEST_CLIPBOARD_FILE: result.clipboard,
+      KODA_RELAY_TEST_CONFIRM_READ: "1",
+      KODA_RELAY_TEST_RECEIPT_INPUT: result.review.metadata.receipt,
+    },
+  });
+  assert.equal(recovered.status, 0, recovered.stderr);
+  assert.match(recovered.stdout, /REVIEWER RECOVERY — the earlier receipt attempt changed nothing/);
+  assert.match(recovered.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
+  const state = await readReviewerWindowState(result.runRoot);
+  assert.equal(state?.threadId, "019f0000-0000-7000-8000-000000000001");
+  assert.equal((await readReviewerJob(result.runRoot))?.status, "COMPLETE");
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
+});
+
+test("TWO-WINDOW OWNER CEREMONY TTY: numbered choices disclose the receipt step before acknowledgement", {
+  skip: process.platform !== "darwin",
+}, async (t) => {
+  const result = await preparedAcknowledgementRun("wrong");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  const expectProgram = [
+    "set timeout 10",
+    "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT) $env(KODA_TEST_RUN_ROOT)",
+    "expect \"Press Return to read the review: \"",
+    "send -- \"\\r\"",
+    "expect \"Choose 1, 2, 3, 4, or 5: \"",
+    "send -- \"9\\r\"",
+    "expect \"Nothing changed. Choose one of the numbered options.\"",
+    "expect \"Choose 1, 2, 3, 4, or 5: \"",
+    "send -- \"2\\r\"",
+    "expect \"Type your question for the Reviewer, then press Return: \"",
+    "send -- \"\\r\"",
+    "expect \"No question was entered. Nothing changed.\"",
+    "expect \"Choose 1, 2, 3, 4, or 5: \"",
+    "send -- \"3\\r\"",
+    "expect \"Press Return to read the review: \"",
+    "send -- \"\\r\"",
+    "expect \"Choose 1, 2, 3, 4, or 5: \"",
+    "send -- \"5\\r\"",
+    "expect \"Type the direction the fresh Brief must carry, or press Return to go back: \"",
+    "send -- \"\\r\"",
+    "expect \"Halt was not prepared. Nothing changed.\"",
+    "expect \"Choose 1, 2, 3, 4, or 5: \"",
+    "send -- \"5\\r\"",
+    "expect \"Type the direction the fresh Brief must carry, or press Return to go back: \"",
+    "send -- \"Carry this only if I confirm.\\r\"",
+    "expect \"Type HALT to confirm, or press Return to go back: \"",
+    "send -- \"no\\r\"",
+    "expect \"Halt was not confirmed. Nothing changed.\"",
+    "expect \"Choose 1, 2, 3, 4, or 5: \"",
+    "send -- \"1\\r\"",
+    "expect \"Press Command-V, then Return: \"",
+    "send -- \"\\r\"",
+    "expect \"NOT ACKNOWLEDGED — that paste does not match this review's receipt\"",
+    "expect \"Choose 1, 2, or 3: \"",
+    "send -- \"1\\r\"",
+    "expect \"Press Command-V, then Return: \"",
+    "send -- \"$env(KODA_TEST_RECEIPT)\\r\"",
+    "expect eof",
+    "set result [wait]",
+    "exit [lindex $result 3]",
+  ].join("\n");
+  const executed = spawnSync("/usr/bin/expect", ["-c", expectProgram], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 15_000,
+    env: {
+      ...process.env,
+      KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
+      KODA_RELAY_REVIEWER_ONCE: "1",
+      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
+      KODA_RELAY_TEST_CLIPBOARD_FILE: result.clipboard,
+      KODA_TEST_NODE: process.execPath,
+      KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
+      KODA_TEST_RUN_ROOT: result.runRoot,
+      KODA_TEST_RECEIPT: result.review.metadata.receipt,
+    },
+  });
+  assert.equal(executed.status, 0, `${executed.stdout}\n${executed.stderr}`);
+  assert.match(executed.stdout, /WHAT WOULD YOU LIKE TO DO\?/);
+  assert.match(executed.stdout, /1\. Acknowledge this review/);
+  assert.match(executed.stdout, /5\. Halt this session — permanently end this attempt/);
+  assert.match(executed.stdout, /Nothing changed\. Choose one of the numbered options/);
+  assert.match(executed.stdout, /No question was entered\. Nothing changed/);
+  assert.match(executed.stdout, /Halt was not prepared\. Nothing changed/);
+  assert.match(executed.stdout, /Halt was not confirmed\. Nothing changed/);
+  assert.match(executed.stdout, /FINAL ACKNOWLEDGEMENT — ONE KEYBOARD ACTION/);
+  assert.match(executed.stdout, /NOT ACKNOWLEDGED — that paste does not match this review's receipt/);
+  assert.match(executed.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
+  assert.equal((await readReviewerJob(result.runRoot))?.status, "COMPLETE");
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
+});
+
+test("TWO-WINDOW OWNER CEREMONY TTY: stop for now preserves an explicit resumable decision point", {
+  skip: process.platform !== "darwin",
+}, async (t) => {
+  const result = await preparedAcknowledgementRun("wrong");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  const expectProgram = [
+    "set timeout 10",
+    "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT) $env(KODA_TEST_RUN_ROOT)",
+    "expect \"Press Return to read the review: \"",
+    "send -- \"\\r\"",
+    "expect \"Choose 1, 2, 3, 4, or 5: \"",
+    "send -- \"4\\r\"",
+    "expect \"REVIEWER PAUSED SAFELY\"",
+    "expect eof",
+    "set result [wait]",
+    "exit [expr {[lindex $result 3] == 2 ? 0 : 1}]",
+  ].join("\n");
+  const executed = spawnSync("/usr/bin/expect", ["-c", expectProgram], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 15_000,
+    env: {
+      ...process.env,
+      KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
+      KODA_RELAY_REVIEWER_ONCE: "1",
+      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
+      KODA_RELAY_TEST_CLIPBOARD_FILE: result.clipboard,
+      KODA_TEST_NODE: process.execPath,
+      KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
+      KODA_TEST_RUN_ROOT: result.runRoot,
+    },
+  });
+  assert.equal(executed.status, 0, `${executed.stdout}\n${executed.stderr}`);
+  assert.match(executed.stdout, /stop for now; the review remains ready and unacknowledged/);
+  const job = await readReviewerJob(result.runRoot);
+  assert.equal(job?.status, "AWAITING_OWNER");
+  assert.equal(job?.completion, null);
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
 });
 
 test("WAIT CONTRACT MIGRATION: the superseded same-phase handback marker refuses by name", async (t) => {

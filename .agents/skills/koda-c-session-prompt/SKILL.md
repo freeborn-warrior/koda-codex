@@ -89,6 +89,19 @@ Before stopping, require all of these on disk:
 - exactly one immutable launch request says `READY_TO_LAUNCH` and hashes the confirmed prompt, continuity snapshot, and verified toolkit contract;
 - `koda guide verify` succeeds after the prompt, continuity files, manifest, and launch request are committed and pushed.
 
-Hand the verified request to the trusted supervisor. Do not run `koda session new`, launch producer or reviewer contexts, create phase evidence, or become an in-session authority. The supervisor re-verifies the request and starts the two separate contexts; `koda-c-session` consumes the confirmed prompt and saves the resulting session ID in that session's `guide-launch.json`. If interruption occurs after session creation but before binding, the supervisor must run `koda guide bind <launch-id> <session-id>`; it may not open another session or invent a binding.
+After verification, present exactly this plain owner choice and wait for the number:
+
+```text
+READY TO LAUNCH
+
+1. Launch this session now — Codex may ask permission for one local launcher command; approving it opens exactly one Reviewer window and one Producer window.
+2. Not now — keep the verified launch ready and open no windows.
+```
+
+Do not ask Kristian to restate the launch request or paste a command. Treat `1` as explicit launch authority for the already verified request only. Treat `2` as no mutation: leave the request ready. Cancellation remains a separate explicit Guide conversation because it invalidates the prepared request.
+
+On choice `1`, invoke only the configured trusted `koda guide launch` supervisor route for that verified request. Do not run `koda session new`, manually start either role command, create phase evidence, or become an in-session authority. The supervisor re-verifies the request and starts the two separate contexts; `koda-c-session` consumes the confirmed prompt and saves the resulting session ID in that session's `guide-launch.json`. If interruption occurs after session creation but before binding, the supervisor must run `koda guide bind <launch-id> <session-id>`; it may not open another session or invent a binding.
+
+If `koda guide status` reports `SESSION RECOVERY READY`, present its two numbered choices unchanged and wait. On choice `1`, invoke only `koda guide recover --open ghostty`; on choice `2`, make no change. Never ask Kristian to paste the recovery command, role commands, runtime path, receipt, or prior error. This route is permitted only for Koda's mechanically named, unchanged owner-receipt failure; every other failure remains fail-closed for diagnosis.
 
 Once a session begins, Guide remains available for project-level conversation but cannot steer any frozen active phase. Repeat the disk preflight and relationship classification for every later session request. Kristian speaks about an active session only with its persistent reviewer while its producer remains visible and input-closed. Each pushed close or halt returns terminal evidence to Guide; it does not force unrelated siblings to stop.

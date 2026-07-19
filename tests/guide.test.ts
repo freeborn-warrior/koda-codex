@@ -15,7 +15,7 @@ import {
   verifyGuideLaunch,
 } from "../src/guide.ts";
 import { currentGuideRuntime, listGuideRuntimes, prepareGuideRuntime } from "../src/guide-runtime.ts";
-import { ghosttyWindowRequests, requestGhosttyWindows } from "../src/ghostty.ts";
+import { ghosttyWindowRequests, requestGhosttyRecoveryWindows, requestGhosttyWindows } from "../src/ghostty.ts";
 import { prepareHaltArtifact } from "../src/halt.ts";
 import { createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
 import { temporaryRoot } from "./helpers.ts";
@@ -259,6 +259,21 @@ test("GUIDE CONFIRMATION: one request binds prompt, manifest, continuity, and ow
   assert.equal(result.launch.prompt, "docs/guide/prompts/next-session.md");
   assert.equal(result.launch.manifest.path, "docs/guide/project.json");
   assert.deepEqual((await readdir(guideLaunchesDir(h.root, DEFAULT_CONFIG))).sort(), [`${result.launch.id}.json`]);
+});
+
+test("GUIDE VERIFIED HANDOVER: the owner receives a complete numbered launch choice", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm numbered launch fixture"]);
+  h.git(h.root, ["push"]);
+  const output: string[] = [];
+  await runGuideCli(["verify"], h.root, { out(message) { output.push(message); } });
+  const rendered = output.join("\n");
+  assert.match(rendered, /READY TO LAUNCH — OWNER CHOICE/);
+  assert.match(rendered, /1\. Launch this session now.*one local launcher command.*one Reviewer and one Producer window/);
+  assert.match(rendered, /2\. Not now — keep this launch ready without opening windows/);
+  assert.match(rendered, /do not paste or reconstruct a technical command/);
 });
 
 test("GUIDE MUTATION: changing only a continuity file makes confirmation stale", async (t) => {
@@ -699,4 +714,83 @@ test("GUIDE GHOSTTY MUTATION: a failed Producer request refuses duplicate automa
   assert.match(status.join("\n"), /Window B — reviewer \/ owner:[\s\S]*Window A — producer:[\s\S]*Read-only detail:/);
   await assert.rejects(requestGhosttyWindows(h.root, { ...prepared, reused: true }), /refuses to create duplicate Producer or Reviewer processes/);
   assert.equal(opened.length, 2);
+});
+
+test("GUIDE GHOSTTY OWNER-ERROR RECOVERY: one action reopens Reviewer first and Producer only after it is ready", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm receipt recovery fixture"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  await requestGhosttyWindows(h.root, prepared, {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open() { return { status: 0, stderr: "" }; },
+  });
+  prepared.run.status = "PAUSED_REVIEWER_FAILURE";
+  prepared.run.lastError = "Owner acknowledgement exited 1.";
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+  await writeJsonAtomic(path.join(prepared.runRoot, "REVIEWER-JOB.json"), {
+    version: 1,
+    id: "11111111-1111-4111-8111-111111111111",
+    kind: "formal",
+    phase: "brief",
+    purpose: "formal review of brief",
+    prompt: "Use the shared reviewer skill.",
+    expectedPath: "docs/sessions/2026-07-19-01/reviews/01-brief-review.md",
+    status: "FAILED",
+    createdAt: new Date(0).toISOString(),
+    updatedAt: new Date(0).toISOString(),
+    error: "Owner acknowledgement exited 1.",
+    completion: null,
+  });
+
+  const recoveryStatus: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { recoveryStatus.push(message); } });
+  const ownerView = recoveryStatus.join("\n");
+  assert.match(ownerView, /SESSION RECOVERY READY/);
+  assert.match(ownerView, /1\. Reopen this session.*same Reviewer and Producer contexts/);
+  assert.match(ownerView, /2\. Not now — keep the session safely paused/);
+  assert.match(ownerView, /Do not paste or reconstruct a technical command/);
+  assert.doesNotMatch(ownerView, /run-relay-reviewer-window|execute-relay-run/);
+
+  const opened: string[] = [];
+  const output: string[] = [];
+  await runGuideCli(["recover", "--open", "ghostty"], h.root, { out(message) { output.push(message); } }, {
+    async openGhostty() { throw new Error("ordinary launch must not run during recovery"); },
+    async recoverGhostty(project, runtime, toolkit) {
+      return requestGhosttyRecoveryWindows(project, runtime, toolkit, {
+        platform: "darwin",
+        codexExecutable: process.execPath,
+        open(args) {
+          opened.push(args.find((item) => item.startsWith("--title=")) ?? "missing title");
+          return { status: 0, stderr: "" };
+        },
+        async waitForRecoveredReviewer() {
+          assert.equal(opened.length, 1, "Producer must wait until the recovered Reviewer is ready");
+          return true;
+        },
+      });
+    },
+  });
+  assert.equal(opened.length, 2);
+  assert.match(opened[0]!, /Reviewer/);
+  assert.match(opened[1]!, /Producer/);
+  assert.match(output.join("\n"), /SESSION RECOVERY REQUESTED/);
+  assert.match(output.join("\n"), /same Reviewer context will reopen/);
+  const recovery = JSON.parse(await readFile(path.join(prepared.runRoot, "RECOVERY.json"), "utf8"));
+  assert.equal(recovery.reason, "owner-receipt-input-retry");
+  assert.equal(recovery.toolkit.version, 1);
+  assert.equal(recovery.toolkit.testCount, (await verifyToolkitIntegrity()).testCount);
+
+  await assert.rejects(
+    runGuideCli(["recover", "--open", "ghostty"], h.root, { out() {} }),
+    /visible recovery was already requested/,
+  );
 });
