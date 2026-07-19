@@ -1024,5 +1024,46 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   Guide chat. Guide reconstructs current state from disk when Kristian speaks. Actual
   Ghostty recovery, its host permission, visual clarity, and the remaining five phase
   decisions are still human proof.
-- **Verdict:** LOCAL MECHANICS AND SECURITY PASS; PUSHED TOOLKIT PROOF AND HUMAN
-  RECOVERY REMAIN.
+- **Verdict:** LOCAL MECHANICS, SECURITY, AND PUSHED TOOLKIT PROOF PASS; HUMAN
+  RECOVERY REMAINS.
+
+## 2026-07-19 — Fresh-context preflight attempt 03 refused by its host
+
+- **Variant:** Requested Sol/low fresh startup discovery; the model never started.
+- **What:** Re-run the sealed fresh startup discovery before the active-session Guide
+  preflight, without overwriting either prior proof.
+- **What happened:** Codex exited before creating a task because this builder's
+  restricted host could not write its own state database or initialize its in-process
+  app-server client. The run made zero tool calls, returned no model answer, and
+  discovered zero skills. It is preserved as
+  [startup attempt 03](discovery-runs/2026-07-19-fresh-codex-startup-03/RESULT.md),
+  but it is an **invalid environment attempt**, not a Sol failure or a Koda-C result.
+  The active-session preflight correctly did not run after its prerequisite failed.
+- **Security finding:** Inspection of the runner found that fresh model children
+  inherited the builder's ambient environment. No credential value appears in the
+  preserved output, but the boundary was unsafe. The runner now uses Koda-C's tested
+  allowlist so credentials, unrelated project variables, `NODE_OPTIONS`, and the
+  parent Codex context identity do not enter either fresh task. A permanent security
+  assertion protects that route.
+- **Next evidence:** The corrected discovery uses a new immutable attempt ID and must
+  run with ordinary host access. Attempt 03 will not be deleted, rewritten, or scored.
+
+## 2026-07-19 — Pre-handoff concurrency defect and correction
+
+- **Variant:** Not applicable; deterministic Node.js and four-process relay tests.
+- **What:** Run the complete living suite after securing the fresh-context runner.
+- **Failure:** **194/195** passed. The real plural-runtime integration exposed an
+  `ENOTEMPTY` race when one Git-lock owner removed its public directory while a waiting
+  owner acquired that same path. No gate advanced falsely, but one Producer paused
+  with a technical error.
+- **Correction:** Lock release now atomically retires the verified old directory
+  before deleting its exact evidence. The previous owner can no longer delete a new
+  lease, and unexpected retired files refuse recursive cleanup.
+- **Mutations:** One new test deterministically retires owner A, acquires owner B,
+  then finishes A's cleanup and proves B still owns the public lock. A second proves
+  a corrupt disk token cannot become a path or alter an outside file. The focused
+  work-set and plural integration passed **18/18**; the corrected complete suite
+  passed **197/197**.
+- **Evidence:** Intermediate details are preserved in the
+  [pre-handoff development record](test-results/2026-07-19-pre-handoff-audit-development-failures.md).
+- **Verdict:** DEFECT FOUND AND CORRECTED; PUSHED AND FRESH-CONTEXT EVIDENCE PENDING.

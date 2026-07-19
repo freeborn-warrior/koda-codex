@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { lstat, mkdir, readFile, realpath, rename, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, realpath, rename, rm, rmdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { pathExists } from "./config.ts";
@@ -59,7 +59,8 @@ function parseLock(content: string): LockRecord {
   }
   const item = value as Partial<LockRecord>;
   if (
-    item.version !== 1 || typeof item.token !== "string" || item.token === "" ||
+    item.version !== 1 || typeof item.token !== "string" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.token) ||
     !Number.isInteger(item.pid) || (item.pid ?? 0) < 1 ||
     typeof item.owner !== "string" || item.owner.trim() === "" ||
     typeof item.operation !== "string" || item.operation.trim() === "" ||
@@ -90,6 +91,65 @@ async function assertLockArea(root: string): Promise<string> {
     throw new Error("The Git-operation lock parent resolves outside the direct project-local .koda directory.");
   }
   return resolvedArea;
+}
+
+export interface RetiredGitOperationLock {
+  cleanup(): Promise<void>;
+}
+
+/**
+ * Atomically moves one verified lock owner out of the acquisition path before
+ * deleting its files. A waiting contender may then acquire `git-operation.lock`
+ * without the retiring owner accidentally deleting the new lease.
+ */
+export async function retireGitOperationLock(
+  root: string,
+  expectedToken: string,
+): Promise<RetiredGitOperationLock | null> {
+  const area = await assertLockArea(root);
+  const lock = path.join(area, path.basename(GIT_OPERATION_LOCK));
+  const recordFile = path.join(lock, "LOCK.json");
+  let current: LockRecord;
+  try {
+    current = parseLock(await readFile(recordFile, "utf8"));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT" && !(await pathExists(lock))) return null;
+    throw error;
+  }
+  if (current.token !== expectedToken) {
+    throw new Error("The Git-operation lock changed owners before release.");
+  }
+
+  const retired = path.join(area, `${path.basename(GIT_OPERATION_LOCK)}.${expectedToken}.retired`);
+  try {
+    await rename(lock, retired);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
+  const retiredRecord = path.join(retired, "LOCK.json");
+  const moved = parseLock(await readFile(retiredRecord, "utf8"));
+  if (moved.token !== expectedToken) {
+    throw new Error("The retired Git-operation lock does not match its verified owner.");
+  }
+  return {
+    cleanup: async () => {
+      if (!(await pathExists(retired))) return;
+      const finalRecord = parseLock(await readFile(retiredRecord, "utf8"));
+      if (finalRecord.token !== expectedToken) {
+        throw new Error("The retired Git-operation lock changed before cleanup.");
+      }
+      await unlink(retiredRecord);
+      try {
+        await rmdir(retired);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOTEMPTY") {
+          throw new Error("The retired Git-operation lock contains unexpected files; refuse recursive deletion.");
+        }
+        throw error;
+      }
+    },
+  };
 }
 
 export async function acquireGitOperationLock(
@@ -125,12 +185,8 @@ export async function acquireGitOperationLock(
       return {
         token: record.token,
         release: async () => {
-          if (!(await pathExists(recordFile))) return;
-          const current = parseLock(await readFile(recordFile, "utf8"));
-          if (current.token !== record.token) {
-            throw new Error("The Git-operation lock changed owners before release.");
-          }
-          await rm(lock, { recursive: true });
+          const retired = await retireGitOperationLock(root, record.token);
+          await retired?.cleanup();
         },
       };
     } catch (error) {
@@ -176,12 +232,15 @@ export async function acquireGitOperationLock(
         throw new Error(`A stale Git-operation lock cannot recover while the shared index contains staged paths: ${staged.join(", ")}.`);
       }
       if (recoveredStale) throw new Error("Unable to acquire the Git-operation lock after stale-lock recovery.");
+      let retired: RetiredGitOperationLock | null;
       try {
-        await rm(lock, { recursive: true });
+        retired = await retireGitOperationLock(root, current.token);
       } catch (recoveryError) {
-        if ((recoveryError as NodeJS.ErrnoException).code === "ENOENT") continue;
+        if ((recoveryError as Error).message === "The Git-operation lock changed owners before release.") continue;
         throw recoveryError;
       }
+      if (!retired) continue;
+      await retired.cleanup();
       recoveredStale = true;
     }
   }

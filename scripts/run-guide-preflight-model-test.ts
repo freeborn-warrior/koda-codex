@@ -6,6 +6,7 @@ import path from "node:path";
 
 import { DEFAULT_CONFIG } from "../src/config.ts";
 import { createSession, writeJsonAtomic } from "../src/project.ts";
+import { relayCodexEnvironment } from "../src/relay-environment.ts";
 
 const root = process.cwd();
 const codex = process.env.KODA_CODEX_BIN?.trim() || "codex";
@@ -25,7 +26,12 @@ function runCodex(cwd: string, effort: "low" | "medium", prompt: string, skipGit
     ...(skipGit ? ["--skip-git-repo-check"] : []),
     prompt,
   ];
-  const result = spawnSync(codex, args, { cwd, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  const result = spawnSync(codex, args, {
+    cwd,
+    encoding: "utf8",
+    env: relayCodexEnvironment(process.env),
+    maxBuffer: 32 * 1024 * 1024,
+  });
   return {
     args,
     status: result.status ?? -1,
@@ -119,7 +125,7 @@ async function discoveryRun(): Promise<void> {
     answer.includes(`Total: ${expected.length}`) &&
     answer.includes(".agents/skills/") &&
     answer.includes("DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY");
-  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-03`);
+  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-04`);
   await writeRunFiles(destination, run, {
     effort: "low",
     threadId: threadId(parsed),
@@ -129,7 +135,7 @@ async function discoveryRun(): Promise<void> {
     toolEventCount: toolEvents.length,
     status: pass ? "PASS" : "FAIL",
   }, [
-    `# Fresh Codex startup discovery — ${date} — Sol low — 03`,
+    `# Fresh Codex startup discovery — ${date} — Sol low — 04`,
     "",
     `- Status: **${pass ? "PASS" : "FAIL"}**`,
     `- Model: \`${model}\``,

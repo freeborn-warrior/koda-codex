@@ -97,6 +97,13 @@ test("SECURITY INTEGRITY SUITE: owner receipt and ruling data never enter child-
   assert.doesNotMatch(reviewerWindow, /KODA_(?!RELAY_TEST_)[A-Z_]*(?:RECEIPT|RULING|COMMENTS)[A-Z_]*/);
 });
 
+test("SECURITY INTEGRITY SUITE: fresh-model evidence runs strip ambient credentials and parent context identity", async () => {
+  const runner = await readFile("scripts/run-guide-preflight-model-test.ts", "utf8");
+  assert.match(runner, /import \{ relayCodexEnvironment \} from "\.\.\/src\/relay-environment\.ts"/);
+  assert.match(runner, /env: relayCodexEnvironment\(process\.env\)/);
+  assert.doesNotMatch(runner, /spawnSync\(codex, args, \{ cwd, encoding:/);
+});
+
 test("SECURITY INTEGRITY SUITE: the executable Ghostty role launcher starts one child with a clean environment", async () => {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-clean-launcher-"));
   try {

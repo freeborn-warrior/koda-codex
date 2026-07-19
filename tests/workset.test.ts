@@ -10,6 +10,7 @@ import {
   acquireGitOperationLock,
   GIT_OPERATION_LOCK,
   inspectExistingGitOperationLock,
+  retireGitOperationLock,
 } from "../src/git-operation-lock.ts";
 import { createSession, writeJsonAtomic } from "../src/project.ts";
 import { changedProjectPaths, claimGuidePaths, claimSessionPaths, ownedSessionPaths, reconcileSessionWorkSet, stagedProjectPaths, validateSessionWorktree, verifySessionWorkSetObservations, verifyStagedSessionClaims } from "../src/workset.ts";
@@ -235,7 +236,7 @@ test("GIT LOCK: live owner refuses, stale lock recovers only with an empty index
   await mkdir(lock, { recursive: true });
   await writeFile(path.join(lock, "LOCK.json"), `${JSON.stringify({
     version: 1,
-    token: "stale",
+    token: "10000000-0000-4000-8000-000000000001",
     pid: 99999999,
     owner: "crashed-session",
     operation: "commit",
@@ -247,7 +248,7 @@ test("GIT LOCK: live owner refuses, stale lock recovers only with an empty index
   await mkdir(lock, { recursive: true });
   await writeFile(path.join(lock, "LOCK.json"), `${JSON.stringify({
     version: 1,
-    token: "stale-2",
+    token: "10000000-0000-4000-8000-000000000002",
     pid: 99999999,
     owner: "crashed-session",
     operation: "commit",
@@ -294,6 +295,30 @@ test("GIT LOCK SERIALIZATION MUTATION: release between inspection steps retries 
   await recovered.release();
 });
 
+test("GIT LOCK RELEASE MUTATION: a new owner acquired during cleanup is never deleted by the retiring owner", async (t) => {
+  const h = await harness(t);
+  const first = await acquireGitOperationLock(h.root, "session-a", "commit", {
+    stagedPaths: () => stagedProjectPaths(h.root),
+  });
+
+  // Recreate the old implementation's vulnerable timing deterministically:
+  // detach A, acquire B at the public lock path, then finish A's cleanup.
+  const retired = await retireGitOperationLock(h.root, first.token);
+  assert.ok(retired);
+  const second = await acquireGitOperationLock(h.root, "session-b", "commit", {
+    stagedPaths: () => stagedProjectPaths(h.root),
+  });
+  await retired.cleanup();
+
+  await assert.rejects(
+    acquireGitOperationLock(h.root, "session-c", "commit", {
+      stagedPaths: () => stagedProjectPaths(h.root),
+    }),
+    /locked by session-b/,
+  );
+  await second.release();
+});
+
 test("GIT LOCK CONTAINMENT: linked .koda cannot redirect lock evidence", async (t) => {
   const h = await harness(t);
   const area = path.join(h.root, ".koda");
@@ -306,4 +331,28 @@ test("GIT LOCK CONTAINMENT: linked .koda cannot redirect lock evidence", async (
     /lock parent must be a real project-local directory.*symbolic links are refused/,
   );
   assert.deepEqual(await import("node:fs/promises").then(({ readdir }) => readdir(redirect)), []);
+});
+
+test("GIT LOCK CONTAINMENT MUTATION: a disk-supplied token cannot become a retired path", async (t) => {
+  const h = await harness(t);
+  const lock = path.join(h.root, GIT_OPERATION_LOCK);
+  const outside = path.join(h.root, "outside-marker.txt");
+  await writeFile(outside, "preserve\n", "utf8");
+  await mkdir(lock, { recursive: true });
+  await writeFile(path.join(lock, "LOCK.json"), `${JSON.stringify({
+    version: 1,
+    token: "../../outside-marker.txt",
+    pid: 99999999,
+    owner: "corrupt-owner",
+    operation: "commit",
+    acquiredAt: new Date().toISOString(),
+  })}\n`, "utf8");
+
+  await assert.rejects(
+    acquireGitOperationLock(h.root, "session-a", "commit", {
+      stagedPaths: () => stagedProjectPaths(h.root),
+    }),
+    /Git-operation lock is corrupt/,
+  );
+  assert.equal(await readFile(outside, "utf8"), "preserve\n");
 });

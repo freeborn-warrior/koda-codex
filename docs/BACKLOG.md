@@ -7,8 +7,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
 ## In progress
 
 - [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved one clean Reviewer plus one clean Producer beside Guide and reached an approved Brief, then exposed an ambiguous receipt interaction. The gate stayed shut with zero acknowledgements. Deterministic numbered retry and one-action Guide recovery pass 194/194; Kristian must still observe recovery and the remaining five phase decisions through pushed close.
-- [ ] Resume the preserved `2026-07-19-02` session only after the owner-ceremony repair has final pushed toolkit proof. Reopen the same contexts and same unacknowledged review through Guide; do not create a third attempt or manually run either role.
-- [ ] Promote the 194-check owner-ceremony repair to final toolkit evidence and push it. The implementation, complete suite, coverage suite, first-use audit, and security audit pass locally; this remains unchecked until the post-push transcript and integrity manifest agree.
+- [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
+  quality and security audit is pushed. Reopen the same contexts and same
+  unacknowledged review through Guide; do not create a third attempt or manually run
+  either role.
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
 - [ ] Owner-test the repaired one-action Ghostty adapter against a genuine Guide-confirmed session. The original callback-only adapter test was insufficient and encoded the unsafe multi-token launch; never reinstate that claim.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
@@ -36,6 +38,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Promote the 194-check owner-ceremony repair to final toolkit evidence. The
+  repair was pushed at `d7bd3dc`; its unchanged 194/194 transcript is hash-bound by
+  toolkit capability `ghostty-owner-ceremony-v2`, and the final manifest was pushed
+  at `cc00c7c`.
 
 - [x] Repair ordinary owner mistakes without weakening the receipt gate: numbered choices, disclosed paste step, invalid/empty input retry, stop-for-now state, double-confirmed halt, stdin-only receipt/ruling transport, exact historical recovery, Reviewer-first reopening, duplicate refusal, and a Guide surface with only `1` reopen / `2` not now.
 
