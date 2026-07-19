@@ -65,7 +65,7 @@ test("WRITE SET CONCURRENCY: simultaneous same-path claims cannot both succeed",
   ]);
   assert.equal(attempts.filter((item) => item.status === "fulfilled").length, 1);
   assert.equal(attempts.filter((item) => item.status === "rejected").length, 1);
-  assert.match(String((attempts.find((item) => item.status === "rejected") as PromiseRejectedResult).reason), /Git operation is locked by claim:/);
+  assert.match(String((attempts.find((item) => item.status === "rejected") as PromiseRejectedResult).reason), /overlaps active session/);
   const winner = attempts[0]!.status === "fulfilled" ? h.first.id : h.second.id;
   const loser = winner === h.first.id ? h.second.id : h.first.id;
   await assert.rejects(
@@ -239,6 +239,19 @@ test("GIT LOCK: live owner refuses, stale lock recovers only with an empty index
     acquireGitOperationLock(h.root, "session-b", "commit", { stagedPaths: () => stagedProjectPaths(h.root) }),
     /shared index contains staged paths: koda\.config\.json/,
   );
+});
+
+test("GIT LOCK SERIALIZATION: relay callers may wait for a live short ceremony", async (t) => {
+  const h = await harness(t);
+  const first = await acquireGitOperationLock(h.root, "session-a", "commit", { stagedPaths: () => stagedProjectPaths(h.root) });
+  const waiting = acquireGitOperationLock(h.root, "session-b", "commit", {
+    stagedPaths: () => stagedProjectPaths(h.root),
+    waitMs: 2_000,
+  });
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  await first.release();
+  const second = await waiting;
+  await second.release();
 });
 
 test("GIT LOCK CONTAINMENT: linked .koda cannot redirect lock evidence", async (t) => {

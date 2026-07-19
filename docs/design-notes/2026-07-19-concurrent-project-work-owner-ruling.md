@@ -1,7 +1,7 @@
 # Concurrent project work and Git provenance — owner ruling
 
 **Date:** 2026-07-19  
-**Status:** Owner-set product model; write-set and Git-lock mechanics implemented and mutation-tested; plural live runtimes pending
+**Status:** Owner-set product model; write-set, Git-lock, and plural runtime mechanics implemented and mutation-tested; owner-observed multi-runtime use pending
 
 ## Owner ruling
 
@@ -61,13 +61,14 @@ dependency-scoped:
   whose claimed independence is contradicted by its prompt or file claims.
 
 The CLI, Guide confirmation, skills, and relay now implement explicit session
-identity, kinds, terminal dependencies, aggregate session status, and exact
-session/Guide write claims. Session claims bind before and post-work SHA-256,
-overlapping active claims refuse, unclaimed mutation refuses, and the relay stages
-only owned paths under a short recoverable Git-operation lock. The remaining
-global serialization is narrower: Guide runtime discovery and preparation still
-admit one live Producer/Reviewer pair even though multiple session records and
-non-conflicting shared-worktree writes are now safe.
+identity, kinds, terminal dependencies, aggregate session/runtime status, and
+exact session/Guide write claims. Session claims bind before and post-work
+SHA-256, overlapping active claims refuse, unclaimed mutation refuses, and the
+relay stages only owned paths under a short recoverable Git-operation lock.
+Several launch-ID runtimes may coexist, each with one persistent Producer and
+Reviewer pair. Simultaneous session directory allocation is atomic, generic
+runtime selection refuses ambiguity, and exact run-root commands keep each
+process pair bound to its own session.
 
 ## Tests required before the new Git claim ships
 
@@ -88,9 +89,10 @@ non-conflicting shared-worktree writes are now safe.
 - aggregate status names every active session, kind, dependency, phase, contexts,
   write claims, and next safe action without guessing a default.
 
-All write-attribution bullets above now have deterministic coverage, except that
-runtime status does not yet aggregate multiple live context pairs because plural
-runtime preparation has not shipped. Kristian's visible Guide-edit-during-session
-proof also remains a human test. Same-user processes can still bypass Koda and edit
+All write-attribution and plural-runtime bullets above now have deterministic
+coverage, including a four-process real-Git run of two session pairs through
+distinct receipts, pushed closes, and Guide returns. Kristian's visible
+Guide-edit-during-session and multi-pair Ghostty proofs remain human tests.
+Same-user processes can still bypass Koda and edit
 a claimed path during a model turn; the post-work hash catches later mutation but
 cannot authenticate who authored bytes observed within that turn.

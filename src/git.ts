@@ -9,6 +9,7 @@ export interface ClosureCheck {
 
 export function checkGitFilesPushed(projectRoot: string, projectRelativeFiles: string[]): ClosureCheck {
   const reasons: string[] = [];
+  const repositoryFiles: string[] = [];
   const top = git(projectRoot, ["rev-parse", "--show-toplevel"]);
   if (!top.ok) return { closed: false, reasons: ["The project is not inside a Git repository."] };
 
@@ -24,6 +25,7 @@ export function checkGitFilesPushed(projectRoot: string, projectRelativeFiles: s
       reasons.push(`Guide launch evidence is outside the Git repository: ${file}.`);
       continue;
     }
+    repositoryFiles.push(relative);
     if (!git(projectRoot, ["ls-files", "--error-unmatch", "--", relative]).ok) {
       reasons.push(`Guide launch evidence is not committed: ${file}.`);
       continue;
@@ -35,8 +37,8 @@ export function checkGitFilesPushed(projectRoot: string, projectRelativeFiles: s
   const upstream = git(projectRoot, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
   if (!upstream.ok) reasons.push("The current branch has no pushed upstream branch.");
   else {
-    const ahead = git(projectRoot, ["rev-list", "--count", "@{u}..HEAD"]);
-    if (!ahead.ok || ahead.stdout !== "0") reasons.push("The Guide launch commit has not been pushed.");
+    const differs = git(projectRoot, ["diff", "--quiet", "@{u}", "--", ...repositoryFiles]);
+    if (!differs.ok) reasons.push("The Guide launch evidence has not been pushed.");
   }
   return { closed: reasons.length === 0, reasons };
 }
@@ -54,7 +56,7 @@ export function pushCommandArgs(projectRoot: string): string[] | null {
 }
 
 function git(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr: string } {
-  const result = spawnSync("git", args, { cwd, encoding: "utf8" });
+  const result = spawnSync("git", args, { cwd, encoding: "utf8", env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" } });
   return {
     ok: result.status === 0,
     stdout: (result.stdout ?? "").trim(),
@@ -121,8 +123,8 @@ export function checkGitClosure(projectRoot: string, sessionDir: string, phasesC
   if (!upstream.ok) {
     reasons.push("The current branch has no pushed upstream branch.");
   } else {
-    const ahead = git(projectRoot, ["rev-list", "--count", "@{u}..HEAD"]);
-    if (!ahead.ok || ahead.stdout !== "0") reasons.push("The session commit has not been pushed.");
+    const differs = git(projectRoot, ["diff", "--quiet", "@{u}", "--", relativeSession]);
+    if (!differs.ok) reasons.push("The session evidence has not been pushed.");
   }
 
   return { closed: reasons.length === 0, reasons };

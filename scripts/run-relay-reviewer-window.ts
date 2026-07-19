@@ -348,25 +348,27 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     const session = await activeSession();
     const pushArgs = pushCommandArgs(project);
     if (!pushArgs) throw new Error("Configure a Git remote and named branch before halting this session.");
-    const aheadBefore = spawnSync("git", ["rev-list", "--count", "@{u}..HEAD"], { cwd: project, encoding: "utf8" });
-    if (aheadBefore.status !== 0 || aheadBefore.stdout.trim() !== "0") {
-      throw new Error("Halt refused because the current branch already has unpushed commits.");
-    }
+    const gitEnvironment = { ...process.env, GIT_OPTIONAL_LOCKS: "0" };
     const prepared = await prepareHaltArtifact(session.directory, session.state, ownerDirection);
     const relativeSession = displayPath(project, session.directory);
     const lease = await acquireGitOperationLock(project, session.id, "immutable halt exact-path commit and push", {
       stagedPaths: () => stagedProjectPaths(project),
+      waitMs: 30_000,
     });
     try {
       if (stagedProjectPaths(project).length > 0) throw new Error("Halt refused because unrelated staged changes already exist.");
-      const addResult = withOwnerConsolePaused(() => spawnSync("git", ["add", "--", relativeSession], { cwd: project, encoding: "utf8" }));
+      const aheadBefore = spawnSync("git", ["rev-list", "--count", "@{u}..HEAD"], { cwd: project, encoding: "utf8", env: gitEnvironment });
+      if (aheadBefore.status !== 0 || aheadBefore.stdout.trim() !== "0") {
+        throw new Error("Halt refused because the current branch already has unpushed commits.");
+      }
+      const addResult = withOwnerConsolePaused(() => spawnSync("git", ["add", "--", relativeSession], { cwd: project, encoding: "utf8", env: gitEnvironment }));
       if (addResult.status !== 0) throw new Error(`Halt Git step failed: git add -- ${relativeSession}\n${addResult.stderr}`);
       const stagedPaths = stagedProjectPaths(project);
       if (stagedPaths.length === 0 || stagedPaths.some((file) => file !== relativeSession && !file.startsWith(`${relativeSession}/`))) {
         throw new Error("Halt refused because Git staging contains missing or unrelated paths.");
       }
       for (const args of [["commit", "-m", `halt session ${session.id}`], pushArgs]) {
-        const result = withOwnerConsolePaused(() => spawnSync("git", args, { cwd: project, encoding: "utf8" }));
+        const result = withOwnerConsolePaused(() => spawnSync("git", args, { cwd: project, encoding: "utf8", env: gitEnvironment }));
         if (result.status !== 0) throw new Error(`Halt Git step failed: git ${args.join(" ")}\n${result.stderr}`);
       }
     } finally {

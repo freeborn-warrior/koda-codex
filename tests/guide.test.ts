@@ -14,7 +14,7 @@ import {
   guideLaunchesDir,
   verifyGuideLaunch,
 } from "../src/guide.ts";
-import { prepareGuideRuntime } from "../src/guide-runtime.ts";
+import { currentGuideRuntime, listGuideRuntimes, prepareGuideRuntime } from "../src/guide-runtime.ts";
 import { requestGhosttyWindows } from "../src/ghostty.ts";
 import { prepareHaltArtifact } from "../src/halt.ts";
 import { createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
@@ -441,7 +441,7 @@ test("GUIDE RUNTIME MUTATION: an unignored runtime refuses by name", async (t) =
   }), /refuses until \.koda\/ is ignored by Git/);
 });
 
-test("GUIDE RUNTIME MUTATION: another unfinished runtime blocks a new session", async (t) => {
+test("GUIDE RUNTIME PLURALITY: unfinished runtimes coexist and status names each one", async (t) => {
   const h = await guideHarness(t, true);
   await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
   h.git(h.root, ["add", "-A"]);
@@ -457,12 +457,22 @@ test("GUIDE RUNTIME MUTATION: another unfinished runtime blocks a new session", 
   const otherRoot = path.join(h.root, ".koda", "runs", otherId);
   await mkdir(otherRoot);
   await writeJsonAtomic(path.join(otherRoot, "RUN.json"), { ...prepared.run, launchId: otherId });
-  await assert.rejects(prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+  const reused = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
     producerModel: "gpt-5.6-sol",
     producerEffort: "medium",
     reviewerModel: "gpt-5.6-terra",
     reviewerEffort: "medium",
-  }), new RegExp(`Guide runtime ${otherId} is still PREPARED; a new session cannot start`));
+  });
+  assert.equal(reused.reused, true);
+  const runtimes = await listGuideRuntimes(h.root);
+  assert.deepEqual(runtimes.map(({ run }) => run.launchId).sort(), [prepared.run.launchId, otherId].sort());
+  await assert.rejects(currentGuideRuntime(h.root), /select one by launch ID instead of guessing/);
+  assert.equal((await currentGuideRuntime(h.root, otherId))?.run.launchId, otherId);
+  const status: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { status.push(message); } });
+  assert.match(status.join("\n"), new RegExp(`ACTIVE SESSION RUNTIME — ${prepared.run.launchId}`));
+  assert.match(status.join("\n"), new RegExp(`ACTIVE SESSION RUNTIME — ${otherId}`));
+  assert.match(status.join("\n"), /session not opened/i);
 });
 
 test("GUIDE RUNTIME MUTATION: a linked RUN.json refuses as unsafe state", async (t) => {
@@ -536,7 +546,7 @@ test("GUIDE RUNTIME STATUS TRUTH: a forged HALTED label refuses without pushed h
   await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), { ...prepared.run, status: "HALTED" });
   await assert.rejects(
     runGuideCli(["status"], h.root, { out() {} }),
-    /Guide runtime claims HALTED but no session exists/,
+    /claims HALTED but no bound session exists/,
   );
 });
 

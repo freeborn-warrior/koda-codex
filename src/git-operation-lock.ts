@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { lstat, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, realpath, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { pathExists } from "./config.ts";
@@ -75,24 +75,32 @@ export async function acquireGitOperationLock(
   root: string,
   owner: string,
   operation: string,
-  options: { stagedPaths?: () => string[] } = {},
+  options: { stagedPaths?: () => string[]; waitMs?: number } = {},
 ): Promise<GitOperationLease> {
+  if (options.waitMs !== undefined && (!Number.isInteger(options.waitMs) || options.waitMs < 0 || options.waitMs > 60_000)) {
+    throw new Error("Git-operation lock waitMs must be an integer from 0 through 60000.");
+  }
   const area = await assertLockArea(root);
   const lock = path.join(area, path.basename(GIT_OPERATION_LOCK));
   const recordFile = path.join(lock, "LOCK.json");
+  const deadline = Date.now() + (options.waitMs ?? 0);
+  let recoveredStale = false;
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (;;) {
+    const token = randomUUID();
+    const pending = path.join(area, `${path.basename(GIT_OPERATION_LOCK)}.${token}.pending`);
     try {
-      await mkdir(lock);
       const record: LockRecord = {
         version: 1,
-        token: randomUUID(),
+        token,
         pid: process.pid,
         owner,
         operation,
         acquiredAt: new Date().toISOString(),
       };
-      await writeFile(recordFile, `${JSON.stringify(record, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
+      await mkdir(pending);
+      await writeFile(path.join(pending, "LOCK.json"), `${JSON.stringify(record, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
+      await rename(pending, lock);
       return {
         token: record.token,
         release: async () => {
@@ -105,25 +113,42 @@ export async function acquireGitOperationLock(
         },
       };
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-      const lockMetadata = await lstat(lock);
+      await rm(pending, { recursive: true, force: true });
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== "EEXIST" && code !== "ENOTEMPTY") throw error;
+      let lockMetadata;
+      try {
+        lockMetadata = await lstat(lock);
+      } catch (inspectionError) {
+        if ((inspectionError as NodeJS.ErrnoException).code === "ENOENT") continue;
+        throw inspectionError;
+      }
       if (!lockMetadata.isDirectory() || path.dirname(await realpath(lock)) !== area) {
         throw new Error("The Git-operation lock must be a real direct child of project-local .koda; symbolic links are refused.");
       }
-      if (!(await pathExists(recordFile))) {
-        throw new Error("The Git-operation lock exists without readable owner evidence; refuse automatic recovery.");
-      }
+      if (!(await pathExists(recordFile))) throw new Error("The Git-operation lock exists without readable owner evidence; refuse automatic recovery.");
       if (!(await lstat(recordFile)).isFile()) throw new Error("The Git-operation lock evidence must be a regular file.");
-      const current = parseLock(await readFile(recordFile, "utf8"));
+      let current: LockRecord;
+      try {
+        current = parseLock(await readFile(recordFile, "utf8"));
+      } catch (inspectionError) {
+        if ((inspectionError as NodeJS.ErrnoException).code === "ENOENT" && !(await pathExists(lock))) continue;
+        throw inspectionError;
+      }
       if (processIsAlive(current.pid)) {
+        if (Date.now() < deadline) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          continue;
+        }
         throw new Error(`Git operation is locked by ${current.owner}: ${current.operation} (pid ${current.pid}).`);
       }
       const staged = options.stagedPaths?.() ?? [];
       if (staged.length > 0) {
         throw new Error(`A stale Git-operation lock cannot recover while the shared index contains staged paths: ${staged.join(", ")}.`);
       }
+      if (recoveredStale) throw new Error("Unable to acquire the Git-operation lock after stale-lock recovery.");
       await rm(lock, { recursive: true });
+      recoveredStale = true;
     }
   }
-  throw new Error("Unable to acquire the Git-operation lock after stale-lock recovery.");
 }

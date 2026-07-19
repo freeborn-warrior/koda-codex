@@ -16,6 +16,22 @@ function run(root: string, args: string[]) {
   return spawnSync(process.execPath, [cli, ...args], { cwd: root, encoding: "utf8" });
 }
 
+test("CONCURRENT SESSION ALLOCATION: simultaneous starts receive distinct disk identities", async (t) => {
+  const root = await temporaryRoot(t, "koda-concurrent-allocation-");
+  await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
+  await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
+
+  const [first, second] = await Promise.all([
+    createSession(root, DEFAULT_CONFIG, "# First simultaneous session\n", { kind: "produce" }),
+    createSession(root, DEFAULT_CONFIG, "# Second simultaneous session\n", { kind: "explore" }),
+  ]);
+
+  assert.notEqual(first.id, second.id);
+  assert.deepEqual([first.id, second.id].sort().map((id) => id.slice(-2)), ["01", "02"]);
+  assert.match(await readFile(path.join(first.directory, "session-prompt.md"), "utf8"), /First simultaneous session/);
+  assert.match(await readFile(path.join(second.directory, "session-prompt.md"), "utf8"), /Second simultaneous session/);
+});
+
 test("CONCURRENT SESSION MUTATION: independence is explicit and ambiguous mutation refuses", async (t) => {
   const root = await temporaryRoot(t, "koda-concurrent-");
   await writeJsonAtomic(path.join(root, "koda.config.json"), { ...DEFAULT_CONFIG, phases: DEFAULT_CONFIG.phases.slice(0, 1) });

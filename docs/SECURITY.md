@@ -47,8 +47,10 @@ ordinary files inside the session; symbolic links and special files refuse.
 
 Close now checks both halves of the promise: every session file is in the digest,
 and every one is tracked by Git. An ignored file cannot create a locally complete
-but remotely incomplete session. The session must also be clean, committed, on a
-named branch with an upstream, and zero commits ahead of that upstream.
+but remotely incomplete session. The session must also be clean and committed on
+a branch with an upstream, and its exact session tree plus every claimed external
+output must match that upstream. Unrelated sibling commits may be locally ahead
+without falsifying this session's pushed evidence.
 
 ## What Koda protects against
 
@@ -153,15 +155,22 @@ leaves the runtime prepared and names `koda guide status` as manual recovery.
 
 ## Concurrency and recovery
 
-Atomic file replacement prevents partial JSON or ledger writes, and run-folder
-preparation uses an atomic create so competing preparations refuse instead of
-sharing a folder. `.koda/git-operation.lock/LOCK.json` serializes only relay-owned
-stage/commit/push ceremonies. A live owner refuses by name. A dead owner is
-recovered automatically only when the shared index is empty; staged crash residue
-refuses rather than guessing which operation owns it. Ordinary non-conflicting
-file work continues outside the lock. Core mutation commands still rely on atomic
-files rather than one global transaction, so callers must not concurrently mutate
-the same session evidence.
+Atomic file replacement prevents partial JSON or ledger writes. Session-directory
+allocation and run-folder preparation use atomic creates, so simultaneous starts
+receive distinct identities and competing preparation cannot share a folder.
+Runtime discovery enumerates exact launch IDs; generic selection refuses when
+several unfinished runs would make the target ambiguous. A real four-process test
+drives two independent Producer/Reviewer pairs through separate receipts, pushed
+closes, and Guide returns in one project.
+
+`.koda/git-operation.lock/LOCK.json` serializes only relay-owned stage/commit/push
+ceremonies. Live relay callers wait for a bounded 30 seconds so a sibling's short
+Git operation can finish; other callers refuse immediately by default. A dead
+owner is recovered automatically only when the shared index is empty; staged
+crash residue refuses rather than guessing which operation owns it. Ordinary
+non-conflicting file work continues outside the lock. Core mutation commands
+still rely on atomic files rather than one global transaction, so callers must
+not concurrently mutate the same session evidence.
 
 Ctrl-C during a model turn terminates the direct Codex child, force-stops that
 child after two seconds if soft termination is ignored, preserves partial event
@@ -189,4 +198,6 @@ Later evidence classes retain their own adversarial checks in the current full
 suite. The exact concurrent-write audit, including independent immutable-close
 verification of claimed external outputs, lives in
 [`security-runs/2026-07-19-concurrent-mutation-audit-03/RESULT.md`](security-runs/2026-07-19-concurrent-mutation-audit-03/RESULT.md);
-the latest named full-suite transcript is linked from the README.
+the plural-runtime follow-up lives in
+[`security-runs/2026-07-19-plural-runtime-audit-04/RESULT.md`](security-runs/2026-07-19-plural-runtime-audit-04/RESULT.md).
+The latest named full-suite transcript is linked from the README.

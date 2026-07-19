@@ -106,6 +106,9 @@ test("a completed session is closed only after its state is committed and pushed
 
   execFileSync("git", ["add", "--", "src/output.js"], { cwd: root });
   execFileSync("git", ["commit", "-m", "commit claimed session output"], { cwd: root });
+  const outputLocalOnly = await evaluateSessionClosure(root, session.directory, session.state);
+  assert.equal(outputLocalOnly.closed, false);
+  assert(outputLocalOnly.reasons.includes("Claimed session output has not been pushed: src/output.js."));
   execFileSync("git", ["push"], { cwd: root });
   assert.deepEqual(await evaluateSessionClosure(root, session.directory, session.state), { closed: true, reasons: [] });
   await writeFile(path.join(root, "guide-notes.md"), "Unrelated Guide work may remain dirty.\n", "utf8");
@@ -113,6 +116,13 @@ test("a completed session is closed only after its state is committed and pushed
     await evaluateSessionClosure(root, session.directory, session.state),
     { closed: true, reasons: [] },
     "unrelated project dirt must not falsify a pushed session close",
+  );
+  execFileSync("git", ["add", "--", "guide-notes.md"], { cwd: root });
+  execFileSync("git", ["commit", "-m", "guide: keep unrelated local work ahead"], { cwd: root });
+  assert.deepEqual(
+    await evaluateSessionClosure(root, session.directory, session.state),
+    { closed: true, reasons: [] },
+    "an unrelated local commit must not falsify session-specific pushed evidence",
   );
   const afterPush = spawnSync(process.execPath, [cli, "session", "new", nextPrompt], { cwd: root, encoding: "utf8" });
   assert.equal(afterPush.status, 0, afterPush.stderr);

@@ -12,7 +12,7 @@ import {
   snapshotContinuity,
   verifyGuideLaunch,
 } from "./guide.ts";
-import { currentGuideRuntime, prepareGuideRuntime } from "./guide-runtime.ts";
+import { listGuideRuntimes, prepareGuideRuntime } from "./guide-runtime.ts";
 import { requestGhosttyWindows, type GhosttyWindowRequest } from "./ghostty.ts";
 import { evaluateSessionClosure } from "./close.ts";
 import { evaluateSessionHalt } from "./halt.ts";
@@ -105,7 +105,7 @@ export async function runGuideCli(
     const guideWorkSet = await loadGuideWorkSet(root, config);
     await requireGuideCancellationsPushed(root, config);
     const pending = await pendingGuideLaunches(root, config);
-    const runtime = await currentGuideRuntime(root);
+    const runtimes = await listGuideRuntimes(root);
     const latestId = await latestSessionId(root, config);
     const activeSessions: Array<{
       id: string;
@@ -135,7 +135,8 @@ export async function runGuideCli(
       }
     }
     if (pending.length > 1) throw new Error(`${pending.length} prompts claim READY_TO_LAUNCH; Guide state is ambiguous.`);
-    const runtimeActive = Boolean(runtime && runtime.run.status !== "COMPLETE" && runtime.run.status !== "HALTED");
+    const activeRuntimes = runtimes.filter(({ run }) => run.status !== "COMPLETE" && run.status !== "HALTED");
+    const runtimeActive = activeRuntimes.length > 0;
     io.out(`KODA GUIDE — ${latestId ?? "no sessions yet"}`);
     io.out("Owner input: OPEN — project-level conversation belongs in this Guide context.");
     io.out("Active-session questions belong in Reviewer; Guide direction cannot inject the active phase.");
@@ -149,8 +150,10 @@ export async function runGuideCli(
         io.out(`Current bounded session: ${session.id} — ${session.kind} — ${session.phase} (${session.progress})`);
         io.out(`Named condition: ${session.reason}`);
       }
-      if (runtimeActive && runtime && activeSessions.length === 0) {
-        io.out(`Current bound launch: ${runtime.run.launchId} — ${runtime.run.status}`);
+      if (runtimeActive && activeSessions.length === 0) {
+        for (const runtime of activeRuntimes) {
+          io.out(`Current bound launch: ${runtime.run.launchId} — ${runtime.run.status} — session ${runtime.run.sessionId ?? "not opened"}`);
+        }
       }
       io.out("A dependent successor is blocked until every named predecessor has pushed close or halt evidence.");
       if (pending.length === 0) {
@@ -164,18 +167,20 @@ export async function runGuideCli(
     } else if (pending.length === 1) {
       io.out(`READY TO LAUNCH — ${pending[0]!.id}`);
     }
-    if (runtime) {
+    const displayedRuntimes = activeRuntimes.length > 0 ? activeRuntimes : runtimes.slice(-1);
+    for (const runtime of displayedRuntimes) {
       if (runtime.run.status === "HALTED") {
-        const sessionId = await latestSessionId(root, config);
-        if (!sessionId) throw new Error("Guide runtime claims HALTED but no session exists.");
+        const sessionId = runtime.run.sessionId;
+        if (!sessionId) throw new Error(`Guide runtime ${runtime.run.launchId} claims HALTED but no bound session exists.`);
         const directory = sessionRoot(root, config, sessionId);
         const state = await loadSessionState(directory, sessionId);
         const halt = await evaluateSessionHalt(root, directory, state);
-        if (!halt.halted) throw new Error(`Guide runtime claims HALTED without pushed halt evidence:\n- ${halt.reasons.join("\n- ")}`);
+        if (!halt.halted) throw new Error(`Guide runtime ${runtime.run.launchId} claims HALTED without pushed halt evidence:\n- ${halt.reasons.join("\n- ")}`);
       }
       io.out("");
       const terminal = runtime.run.status === "COMPLETE" || runtime.run.status === "HALTED";
       io.out(`${terminal ? "LAST SESSION RUNTIME" : "ACTIVE SESSION RUNTIME"} — ${runtime.run.launchId}`);
+      io.out(`Session: ${runtime.run.sessionId ?? "not opened"}`);
       io.out(`State: ${runtime.run.status}`);
       if (runtime.run.terminalLaunch) {
         io.out(`Visible launch: ${runtime.run.terminalLaunch.adapter} requested at ${runtime.run.terminalLaunch.requestedAt}`);

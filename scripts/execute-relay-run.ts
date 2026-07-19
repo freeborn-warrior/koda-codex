@@ -205,6 +205,7 @@ function git(args: string[], accepted = [0]): { status: number; stdout: string; 
     cwd: project,
     encoding: "utf8",
     maxBuffer: 20 * 1024 * 1024,
+    env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
   });
   const status = result.status ?? -1;
   if (!accepted.includes(status)) {
@@ -630,7 +631,6 @@ async function openSession(): Promise<void> {
   const ownerPrompt = path.resolve(project, run.prompt ?? "owner-prompt.md");
   if (!ownerPrompt.startsWith(`${project}${path.sep}`)) throw new Error("Relay session prompt escapes the project.");
   const config = await readProjectConfig(project);
-  const before = new Set(await listSessionIds(project, config));
   const openArgs = ["session", "new", ownerPrompt, "--kind", run.sessionKind ?? "produce"];
   if (run.launchMode === "independent") openArgs.push("--independent");
   for (const dependency of run.dependencySessionIds ?? []) openArgs.push("--depends-on", dependency);
@@ -642,11 +642,8 @@ async function openSession(): Promise<void> {
     "You are the non-interactive producer. Do not ask or address the owner, create a phase artifact, review, approval, or advancement.",
     "Verify the disk-backed handover and stop.",
   ].join(" "));
-  const opened = (await listSessionIds(project, config)).filter((id) => !before.has(id));
-  if (opened.length !== 1) {
-    throw new Error(`The producer turn must open exactly one new bound session; observed ${opened.length}.`);
-  }
-  const session = await loadSession(project, config, opened[0]!);
+  const session = await latest();
+  if (!session) throw new Error(`The producer turn did not create the one session bound to Guide launch ${run.launchId ?? "unknown"}.`);
   run.sessionId = session.id;
   await claimSessionPaths(project, config, session.id, [path.relative(project, session.directory)]);
   await reconcileSessionWorkSet(project, config, session.id);
@@ -781,10 +778,13 @@ async function commitProducedOutput(): Promise<void> {
   const owned = await ownedSessionPaths(project, config, run.sessionId);
   const lease = await acquireGitOperationLock(project, run.sessionId, "pre-close exact-path commit and push", {
     stagedPaths: () => stagedProjectPaths(project),
+    waitMs: 30_000,
   });
   try {
     const alreadyStaged = stagedProjectPaths(project);
     if (alreadyStaged.length > 0) throw new Error(`Shared Git index is not empty before session commit: ${alreadyStaged.join(", ")}.`);
+    const aheadBefore = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
+    if (aheadBefore !== "0") throw new Error("Session commit refuses because the branch already contains unpushed commits.");
     await verifySessionWorkSetObservations(project, config, run.sessionId);
     git(["add", "--", ...owned]);
     await verifyStagedSessionClaims(project, config, run.sessionId);
@@ -832,10 +832,13 @@ async function closeSession(): Promise<void> {
 
   const lease = await acquireGitOperationLock(project, session.id, "immutable close exact-path commit and push", {
     stagedPaths: () => stagedProjectPaths(project),
+    waitMs: 30_000,
   });
   try {
     const alreadyStaged = stagedProjectPaths(project);
     if (alreadyStaged.length > 0) throw new Error(`Shared Git index is not empty before close commit: ${alreadyStaged.join(", ")}.`);
+    const aheadBefore = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
+    if (aheadBefore !== "0") throw new Error("Close commit refuses because the branch already contains unpushed commits.");
     if (pending !== "") git(["add", "--", relativeClose]);
     const staged = stagedProjectPaths(project);
     if (pending !== "" && (staged.length !== 1 || staged[0] !== relativeClose)) {
@@ -1019,12 +1022,16 @@ async function finishGuideReturn(stage: string): Promise<void> {
     await cp(stageReturn, guideReturnTarget, { errorOnExist: true });
   }
 
+  let archiveCommit = "";
   const lease = await acquireGitOperationLock(project, `guide:${run.launchId}`, "exact-path Guide return commit and push", {
     stagedPaths: () => stagedProjectPaths(project),
+    waitMs: 30_000,
   });
   try {
     const alreadyStaged = stagedProjectPaths(project);
     if (alreadyStaged.length > 0) throw new Error(`Shared Git index is not empty before Guide return: ${alreadyStaged.join(", ")}.`);
+    const aheadBefore = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
+    if (aheadBefore !== "0") throw new Error("Guide return refuses because the branch already contains unpushed commits.");
     git(["add", "--", archiveRelative, guideReturnRelative]);
     const staged = stagedProjectPaths(project);
     if (staged.some((name) => name !== guideReturnRelative && !name.startsWith(`${archiveRelative}/`))) {
@@ -1033,6 +1040,10 @@ async function finishGuideReturn(stage: string): Promise<void> {
     if (staged.length > 0) git(["commit", "-m", `guide: return closed session ${run.sessionId}`]);
     const ahead = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
     if (ahead !== "0") git(["push"]);
+    archiveCommit = git(["log", "-1", "--format=%H", "--", archiveRelative, guideReturnRelative]).stdout.trim();
+    if (!/^[a-f0-9]{40,64}$/.test(archiveCommit)) throw new Error("Guide return has no exact committed Git identity.");
+    const pushed = git(["merge-base", "--is-ancestor", archiveCommit, "@{u}"], [0, 1]);
+    if (pushed.status !== 0) throw new Error("Guide return commit has not been pushed.");
   } finally {
     await lease.release();
   }
@@ -1040,7 +1051,7 @@ async function finishGuideReturn(stage: string): Promise<void> {
   if (remainingReturn !== "") throw new Error(`Guide return paths remain uncommitted: ${remainingReturn}`);
   run.status = "COMPLETE";
   run.completedAt = timestamp();
-  run.archiveCommit = git(["rev-parse", "HEAD"]).stdout.trim();
+  run.archiveCommit = archiveCommit;
   run.lastAction = "closed session evidence returned to Guide and pushed";
   run.lastError = undefined;
   await saveRun();
@@ -1075,7 +1086,9 @@ async function finalize(): Promise<void> {
   const ownedStatus = git(["status", "--porcelain", "--untracked-files=all", "--", ...owned]).stdout.trim();
   if (ownedStatus !== "") throw new Error(`Closed session still has uncommitted owned paths: ${ownedStatus}`);
   const status = git(["status", "--porcelain", "--untracked-files=all"]).stdout.trim();
-  const head = git(["rev-parse", "HEAD"]).stdout.trim();
+  const sessionRelative = path.relative(project, session.directory).split(path.sep).join("/");
+  const head = git(["log", "-1", "--format=%H", "--", sessionRelative]).stdout.trim();
+  if (!/^[a-f0-9]{40,64}$/.test(head)) throw new Error("Closed session has no exact committed Git identity.");
   const branch = git(["branch", "--show-current"]).stdout.trim();
   const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]).stdout.trim();
   const ahead = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();

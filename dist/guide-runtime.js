@@ -71,8 +71,9 @@ const SAFE_ROLE_VALUE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 
 
+
 function git(root        , args          )                                                  {
-  const result = spawnSync("git", args, { cwd: root, encoding: "utf8" });
+  const result = spawnSync("git", args, { cwd: root, encoding: "utf8", env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" } });
   return {
     ok: result.status === 0,
     stdout: (result.stdout ?? "").trim(),
@@ -163,6 +164,7 @@ function runtimeRecord(value         , source        )                     {
     !(item.sessionKind === undefined || (typeof item.sessionKind === "string" && /^[a-z][a-z0-9-]{0,31}$/.test(item.sessionKind))) ||
     !(item.launchMode === undefined || item.launchMode === "independent" || item.launchMode === "dependent" || item.launchMode === "continuation") ||
     !(item.dependencySessionIds === undefined || (Array.isArray(item.dependencySessionIds) && item.dependencySessionIds.every((id) => typeof id === "string"))) ||
+    !(item.sessionId === undefined || /^\d{4}-\d{2}-\d{2}-\d{2}$/.test(item.sessionId)) ||
     typeof item.archive !== "string" || typeof item.guideReturn !== "string" ||
     typeof item.initialCommit !== "string" || !/^[a-f0-9]{40,64}$/.test(item.initialCommit) ||
     !validTerminalLaunch ||
@@ -201,7 +203,8 @@ async function assertRuntimeAreaSafe(root        )                  {
   return runs;
 }
 
-async function assertNoOtherActiveRun(runsRoot        , launchId        )                {
+async function readRuntimeRecords(runsRoot        )                                                               {
+  const records                                                      = [];
   for (const entry of await readdir(runsRoot, { withFileTypes: true })) {
     if (!entry.isDirectory()) throw new Error(`Guide runtime state is unsafe: ${entry.name} is not a real run directory.`);
     const runFile = path.join(runsRoot, entry.name, "RUN.json");
@@ -216,44 +219,31 @@ async function assertNoOtherActiveRun(runsRoot        , launchId        )       
     }
     const existing = runtimeRecord(parsed, `${entry.name}/RUN.json`);
     if (existing.launchId !== entry.name) throw new Error(`Guide runtime state is corrupt: ${entry.name} does not match its launch ID.`);
-    if (existing.status !== "COMPLETE" && existing.status !== "HALTED" && existing.launchId !== launchId) {
-      throw new Error(`Guide runtime ${existing.launchId} is still ${existing.status}; a new session cannot start.`);
-    }
+    records.push({ run: existing, runRoot: path.join(runsRoot, entry.name) });
   }
+  return records.sort((left, right) =>
+    left.run.preparedAt.localeCompare(right.run.preparedAt) || left.run.launchId.localeCompare(right.run.launchId));
 }
 
-export async function currentGuideRuntime(root        )                                   {
+export async function listGuideRuntimes(root        )                              {
   const runtimeRoot = path.join(root, GUIDE_RUNTIME_DIR);
   const runsRoot = path.join(runtimeRoot, GUIDE_RUNS_DIR);
-  if (!(await pathExists(runtimeRoot))) return null;
+  if (!(await pathExists(runtimeRoot))) return [];
   const runtimeMetadata = await lstat(runtimeRoot);
   if (!runtimeMetadata.isDirectory()) throw new Error("Guide runtime directory must be a real directory; symbolic links are refused.");
-  if (!(await pathExists(runsRoot))) return null;
+  if (!(await pathExists(runsRoot))) return [];
   const runsMetadata = await lstat(runsRoot);
   if (!runsMetadata.isDirectory()) throw new Error("Guide runs directory must be a real directory; symbolic links are refused.");
-  const records                                                      = [];
-  for (const entry of await readdir(runsRoot, { withFileTypes: true })) {
-    if (!entry.isDirectory()) throw new Error(`Guide runtime state is unsafe: ${entry.name} is not a real run directory.`);
-    const runRoot = path.join(runsRoot, entry.name);
-    const runFile = path.join(runRoot, "RUN.json");
-    if (!(await pathExists(runFile)) || !(await lstat(runFile)).isFile()) {
-      throw new Error(`Guide runtime state is corrupt: ${entry.name}/RUN.json is missing or not a regular file.`);
-    }
-    let run                    ;
-    try {
-      run = runtimeRecord(JSON.parse(await readFile(runFile, "utf8")), `${entry.name}/RUN.json`);
-    } catch (error) {
-      if (error instanceof SyntaxError) throw new Error(`Guide runtime state is corrupt: ${entry.name}/RUN.json is not valid JSON.`);
-      throw error;
-    }
-    if (run.launchId !== entry.name) throw new Error(`Guide runtime state is corrupt: ${entry.name} does not match its launch ID.`);
-    records.push({ run, runRoot });
-  }
+  const records = await readRuntimeRecords(runsRoot);
+  return records.map((selected) => ({ run: selected.run, runRoot: selected.runRoot, ...runtimeCommands(selected.runRoot) }));
+}
+
+export async function currentGuideRuntime(root        , launchId         )                                   {
+  const records = await listGuideRuntimes(root);
+  if (launchId) return records.find(({ run }) => run.launchId === launchId) ?? null;
   const active = records.filter(({ run }) => run.status !== "COMPLETE" && run.status !== "HALTED");
-  if (active.length > 1) throw new Error("More than one Guide runtime is unfinished; Guide state is ambiguous.");
-  const selected = active[0] ?? records.sort((left, right) => left.run.preparedAt.localeCompare(right.run.preparedAt)).at(-1);
-  if (!selected) return null;
-  return { run: selected.run, runRoot: selected.runRoot, ...runtimeCommands(selected.runRoot) };
+  if (active.length > 1) throw new Error("More than one Guide runtime is unfinished; select one by launch ID instead of guessing.");
+  return active[0] ?? records.at(-1) ?? null;
 }
 
 export async function prepareGuideRuntime(
@@ -267,7 +257,7 @@ export async function prepareGuideRuntime(
   validateMaxTurns(maxTurns);
   const launch = await verifyGuideLaunch(root, config);
   const runsRoot = await assertRuntimeAreaSafe(root);
-  await assertNoOtherActiveRun(runsRoot, launch.id);
+  await readRuntimeRecords(runsRoot);
   const runRoot = path.join(runsRoot, launch.id);
   const runFile = path.join(runRoot, "RUN.json");
 

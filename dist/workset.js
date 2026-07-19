@@ -29,7 +29,7 @@ const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 
 function git(root        , args          , accepted = [0])         {
-  const result = spawnSync("git", args, { cwd: root, encoding: "utf8" });
+  const result = spawnSync("git", args, { cwd: root, encoding: "utf8", env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" } });
   const status = result.status ?? -1;
   if (!accepted.includes(status)) throw new Error(`git ${args.join(" ")} failed: ${(result.stderr ?? "").trim()}`);
   return result.stdout ?? "";
@@ -222,7 +222,7 @@ async function claimSessionPathsUnlocked(
     }
     if (existing.has(relative)) continue;
     const beforeSha256 = await assertContainedRegularOrMissing(root, relative);
-    const ignored = spawnSync("git", ["check-ignore", "-q", "--", relative], { cwd: root, encoding: "utf8" });
+    const ignored = spawnSync("git", ["check-ignore", "-q", "--", relative], { cwd: root, encoding: "utf8", env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" } });
     if (ignored.status === 0) {
       throw new Error(`Write claim is ignored by Git and cannot become durable evidence: ${relative}.`);
     }
@@ -250,6 +250,7 @@ export async function claimSessionPaths(
 )                          {
   const lease = await acquireGitOperationLock(root, `claim:${sessionId}`, "atomic session write-claim acquisition", {
     stagedPaths: () => stagedProjectPaths(root),
+    waitMs: 5_000,
   });
   try {
     return await claimSessionPathsUnlocked(root, config, sessionId, values);
@@ -281,7 +282,7 @@ async function claimGuidePathsUnlocked(
     }
     if (existing.has(relative)) continue;
     const beforeSha256 = await assertContainedRegularOrMissing(root, relative);
-    const ignored = spawnSync("git", ["check-ignore", "-q", "--", relative], { cwd: root, encoding: "utf8" });
+    const ignored = spawnSync("git", ["check-ignore", "-q", "--", relative], { cwd: root, encoding: "utf8", env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" } });
     if (ignored.status === 0) throw new Error(`Guide write claim is ignored by Git and cannot become durable evidence: ${relative}.`);
     if (ignored.status !== 1) throw new Error(`Unable to inspect Git ignore rules for Guide write claim ${relative}.`);
     const dirty = git(root, ["status", "--porcelain", "--untracked-files=all", "--", relative]);
@@ -306,6 +307,7 @@ export async function claimGuidePaths(
 )                          {
   const lease = await acquireGitOperationLock(root, "claim:guide", "atomic Guide write-claim acquisition", {
     stagedPaths: () => stagedProjectPaths(root),
+    waitMs: 5_000,
   });
   try {
     return await claimGuidePathsUnlocked(root, config, values);
@@ -430,11 +432,22 @@ export async function checkSessionClaimClosure(
     const tracked = spawnSync("git", ["ls-files", "--error-unmatch", "--", claim.path], {
       cwd: root,
       encoding: "utf8",
+      env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
     }).status === 0;
     if (claim.afterSha256 === null) {
       if (tracked) reasons.push(`Claimed session deletion has not been committed: ${claim.path}.`);
     } else if (!tracked) {
       reasons.push(`Claimed session output is not committed: ${claim.path}.`);
+      continue;
+    }
+
+    const pushed = spawnSync("git", ["diff", "--quiet", "@{u}", "--", claim.path], {
+      cwd: root,
+      encoding: "utf8",
+      env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
+    });
+    if (pushed.status !== 0) {
+      reasons.push(`Claimed session output has not been pushed: ${claim.path}.`);
     }
   }
   return reasons;
@@ -445,6 +458,7 @@ async function indexPathSha256(root        , relative        )                  
     cwd: root,
     encoding: "utf8",
     maxBuffer: 20 * 1024 * 1024,
+    env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
   });
   if (listed.status !== 0) throw new Error(`Unable to inspect staged Git identity for ${relative}.`);
   const entries = listed.stdout.split("\0").filter(Boolean);
@@ -456,6 +470,7 @@ async function indexPathSha256(root        , relative        )                  
     cwd: root,
     encoding: "buffer",
     maxBuffer: 20 * 1024 * 1024,
+    env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" },
   });
   if (blob.status !== 0) throw new Error(`Unable to read staged Git bytes for ${relative}.`);
   return sha256(blob.stdout);

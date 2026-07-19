@@ -144,8 +144,22 @@ export async function createSession(
     throw new Error("A dependent session must name at least one terminal dependency.");
   }
 
-  const id = await nextSessionId(root, config);
-  const directory = sessionRoot(root, config, id);
+  await mkdir(path.join(root, config.sessionsDir), { recursive: true });
+  let id = "";
+  let directory = "";
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    id = await nextSessionId(root, config);
+    directory = sessionRoot(root, config, id);
+    try {
+      await mkdir(directory);
+      break;
+    } catch (error) {
+      if ((error                         ).code !== "EEXIST") throw error;
+      id = "";
+      directory = "";
+    }
+  }
+  if (!id || !directory) throw new Error("Unable to allocate a unique session directory after concurrent session starts.");
   await mkdir(path.join(directory, "phases"), { recursive: true });
   await mkdir(path.join(directory, "reviews", "history"), { recursive: true });
 
