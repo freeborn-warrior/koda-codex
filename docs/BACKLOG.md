@@ -34,7 +34,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
-- [x] Make the CLI ceremony legible without implementation logs: permanent Guide/Producer/Reviewer labels, explicit owner-input state, frozen phase-entry progress, artifact and gate-pass handovers, Reviewer phase position, and sequential status that prints only Reviewer first and only then Producer. All summaries derive from exposed disk/process facts; hidden reasoning is never claimed. Commit/push evidence pending this milestone.
+- [x] Make the CLI ceremony legible without implementation logs: permanent Guide/Producer/Reviewer labels, explicit owner-input state, frozen phase-entry progress, artifact and gate-pass handovers, Reviewer phase position, and sequential status that prints only Reviewer first and only then Producer. All summaries derive from exposed disk/process facts; hidden reasoning is never claimed (`d57d3fd`; pushed 147-check proof).
 
 - [x] Implement the settled wait-or-halt transfer: immediate bound direction record, no current-phase consumption, atomic release in the next advancement record, required receiving-phase citation, early-use refusal, immutable pushed halt, and Guide-confirmed fresh Brief. The historical same-phase handback route was removed rather than retained as a hidden pause-inject-resume path (`cde10de`; pushed 146-check proof).
 

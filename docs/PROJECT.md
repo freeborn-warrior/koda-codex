@@ -120,6 +120,7 @@ owner contract
 - [Wait-or-halt post-push 146-check result](test-results/2026-07-19-wait-or-halt-pushed-final.md)
 - [CLI ceremony development failures](test-results/2026-07-19-cli-ceremony-development-failures.md)
 - [CLI ceremony 147-check result](test-results/2026-07-19-cli-ceremony-final.md)
+- [CLI ceremony post-push 147-check result](test-results/2026-07-19-cli-ceremony-pushed-final.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
 - [Always-open Reviewer 135-check result](test-results/2026-07-19-reviewer-open-conversation-final.md)
 - [Always-open Reviewer post-push 135-check result](test-results/2026-07-19-reviewer-open-conversation-pushed-final.md)
