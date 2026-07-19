@@ -27,6 +27,7 @@
 - In Koda's product relay, the owner initiates a session by invoking `koda-c-session` with a written prompt. Once the session is active, the producer never solicits the owner: every request goes to the owner-facing reviewer, and every actionable reviewer handback exists as a named disk artifact before producer use.
 - When a project has a Guide manifest, the owner confirms the exact prompt through `koda-c-session-prompt` before `koda-c-session` may open it. The Guide owns project direction and reconciles its configured steering files between sessions; a changed confirmed input is stale and requires an immutable pushed cancellation before reconfirmation.
 - Preserve the owner-ruled runtime: one visible persistent producer context and one separate visible persistent reviewer context span the full session. Owner input to producer is closed; owner conversation happens only with the reviewer. Do not replace the reviewer with fresh per-phase contexts.
+- Preserve the owner-ruled transfer bridge: record direction immediately but release it only at the next successful gate; explicit pushed halt is the sole interrupt and returns through a new session and fresh Brief. Never add pause-inject-resume or a same-phase direction handback.
 
 ## Git
 

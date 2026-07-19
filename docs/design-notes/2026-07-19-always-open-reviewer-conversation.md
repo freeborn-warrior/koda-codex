@@ -20,11 +20,11 @@ An idle Reviewer question resumes the same saved reviewer context in explicit `o
 Two exact classifications keep scope legible:
 
 - `GUIDE CONVERSATION — PROJECT SCOPE` returns wider project thinking to Guide;
-- `OWNER DIRECTION — ACTIVE SESSION TRANSFER REQUIRED` makes possible direction visible.
+- `OWNER DIRECTION — WAIT FOR GATE` identifies direction that must be recorded now and released only at the next boundary.
 
-The runtime renders the second case as `OWNER DIRECTION — NOT SENT`. It changes no project file, does not pause or steer Producer, and names the missing mechanism honestly. The shipped formal-review owner-handback binds direction to an active review and receipt. Reusing it outside that decision point would silently invent different authority, so idle active-session transfer remains a separate owner decision.
+The first runtime slice rendered the second case as `OWNER DIRECTION — NOT SENT`. It changed no project file, did not pause or steer Producer, and honestly named the then-missing mechanism. The later wait-or-halt owner ruling supersedes only its no-record behavior: direction must now be recorded immediately, while current-phase non-consumption remains absolute. The formal-review revision handback must not be reused for new direction; review defects use verdict routing, while new direction waits for the receiving phase.
 
-Likewise, Guide conversation cannot silently change the confirmed session snapshot. Any Guide decision that must affect active work needs an explicit disk-backed transfer into Reviewer before it can enter Producer's evidence loop.
+Likewise, Guide conversation cannot silently change the confirmed session snapshot. Guide records direction into the same waiting evidence class. It enters Producer's evidence loop only through the next gate.
 
 ## Test evidence
 
@@ -32,7 +32,7 @@ The deterministic slice proves three distinct cases:
 
 1. a pipe-driven active-session question invokes the `resume` path with the already saved Reviewer context ID, increments its saved turn count, and changes no project file;
 2. a project-level thought returns to Guide without creating a handback or project mutation;
-3. adversarial actionable direction creates no owner-handback and is named as unsent;
+3. actionable direction is recorded immediately with frozen-entry/artifact/review binding, creates no current-phase handback, and remains unusable until advancement;
 4. a real macOS pseudo-terminal displays `reviewer> `, accepts one typed line, receives the Reviewer response, exits cleanly, and leaves the project unchanged.
 
 The pseudo-terminal fixture uses the installed `/usr/bin/expect`; it validates the actual terminal-input branch that ordinary captured-process tests cannot reach. The shared `koda-c-review` package also passes Codex's system skill validator.

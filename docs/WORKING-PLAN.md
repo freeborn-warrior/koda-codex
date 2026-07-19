@@ -18,7 +18,8 @@ Turn the proved two-context session relay into a project-level experience that c
 6. [x] Prove the Guide-to-session transition against a real Git project with separate deterministic processes, injected return-stage interruption, pushed close, pushed Guide return, and unchanged repository identity.
 7. [x] Add one opt-in macOS Ghostty action that requests the two labeled session contexts while preserving exact manual recovery commands.
 8. [x] Keep the persistent Reviewer conversational between formal handoffs without turning conversation into Producer input; pushed deterministic proof covers captured input, active-direction mutation, and a real pseudo-terminal.
-9. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
+9. [x] Implement the owner-ruled wait-or-halt boundary: record direction now, release it only through the next gate, and make halt restart from a fresh Brief after pushed immutable evidence.
+10. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
 
 ## Submission cut
 
@@ -30,7 +31,7 @@ The product needs one strong standard session moving from durable Guide state in
 - Project and role behavior belongs in repository-local skills and plain files.
 - Owner confirmation remains required at every gate for the current target.
 - No producer input from the owner after session start; owner conversation stays with the persistent reviewer.
-- No new session while the previous session lacks immutable pushed close.
+- No new session while the previous session lacks immutable pushed close or explicit pushed halt.
 - Every persistent product output stays inside the project repository.
 - Tests are a living product contract and may grow, but must never be weakened to hide failure.
 

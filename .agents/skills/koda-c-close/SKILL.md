@@ -10,10 +10,11 @@ Perform the session-close ceremony outside the configurable phase chain. Git mus
 ## ENTRY CHECK
 
 1. Locate `koda.config.json`, the latest session, and `state.json`. Refuse if missing or invalid.
-2. Require `currentPhaseIndex` and the advancement history to equal the declared phase count. Refuse if any phase remains active.
-3. Verify the final advancement names the final configured phase and binds its review ID and receipt.
-4. Run `git status`, identify the current branch and upstream, and verify the project has a usable Git repository. Refuse with the exact missing Git condition.
-5. If `close.md` already exists, never edit or replace it. Proceed only to verification; any bound session-file change invalidates it and must be reverted.
+2. Refuse if `halt.md` exists. Halt and close are mutually exclusive terminal ceremonies.
+3. Require `currentPhaseIndex` and the advancement history to equal the declared phase count. Refuse if any phase remains active.
+4. Verify the final advancement names the final configured phase and binds its review ID and receipt.
+5. Run `git status`, identify the current branch and upstream, and verify the project has a usable Git repository. Refuse with the exact missing Git condition.
+6. If `close.md` already exists, never edit or replace it. Proceed only to verification; any bound session-file change invalidates it and must be reverted.
 
 ## ITS OWN JOB
 

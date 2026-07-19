@@ -13,7 +13,8 @@ Translate the owner's session contract into a precise brief. Hand the completed 
 2. Require `state.json.phases[currentPhaseIndex].name` to equal `brief`. Refuse and name the actual current phase otherwise.
 3. Require a non-empty `session-prompt.md`. Read it as the owner contract; do not substitute chat memory.
 4. When `currentPhaseIndex > 0`, derive the prior phase from `state.json`, then verify its non-empty artifact, active review, exact receipt entry in `approvals.md`, and matching `advances` record. Refuse on the first missing proof.
-5. If the brief artifact already exists, preserve it unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
+5. Read every `state.json.entryDirections` record from its bound prior session before writing. Cite each exact direction ID and file in the Brief. Do not read or apply direction recorded after this Brief phase entered; it waits for the next gate.
+6. If the brief artifact already exists, preserve it unless disk contains an acknowledged blocking review bound to its current hash. Chat and waiting direction recorded after phase entry are never same-phase revision authority.
 
 ## ITS OWN JOB
 
@@ -59,6 +60,6 @@ When input is needed mid-phase, read and follow the [in-phase consultation proto
 
 ## HANDOVER OBLIGATION
 
-Before stopping, verify from disk that the brief exists, is non-empty, cites the prompt, states scope and checkable success, resolves required input, and names `koda-c-review` as its immediate receiver. Leave `currentPhaseIndex` unchanged. Do not create or edit a review, quote a receipt, write an approval, or run `koda advance`.
+Before stopping, verify from disk that the brief exists, is non-empty, cites the prompt and every entry direction ID, states scope and checkable success, resolves required input, and names `koda-c-review` as its immediate receiver. Leave `currentPhaseIndex` unchanged. Do not create or edit a review, quote a receipt, write an approval, or run `koda advance`.
 
 Run `koda status`; the phase must remain `brief` and the gate must remain closed pending independent review proof. Report the artifact path and hand it to `koda-c-review`.

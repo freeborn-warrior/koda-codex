@@ -13,7 +13,8 @@ Define how the declared outcome will be made and verified. Hand the plan to the 
 2. Require the current phase name to equal `plan`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its artifact, definitive review, exact ledger receipt, and advancement record on disk.
 4. Read the session prompt plus only the approved artifacts and cited evidence needed to plan. Do not rely on conversation summaries.
-5. If a plan artifact exists, preserve it unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
+5. Read every direction ID released in the prior advancement record and its exact waiting-direction file. Treat those as entry inputs and cite each ID. Ignore direction recorded after Plan entered; it waits for the next gate.
+6. If a plan artifact exists, preserve it unless disk contains an acknowledged blocking review bound to its current hash. Chat and waiting direction recorded after phase entry are never same-phase revision authority.
 
 ## ITS OWN JOB
 
@@ -55,6 +56,6 @@ When input is needed, read and follow the [in-phase consultation protocol](../..
 
 ## HANDOVER OBLIGATION
 
-Verify that each step has an observable output and proof, negative checks cover fail-closed requirements, no unresolved owner decision is disguised as implementation detail, and `koda-c-review` is the immediate receiver.
+Verify that each step has an observable output and proof, every released direction ID is cited, negative checks cover fail-closed requirements, no unresolved owner decision is disguised as implementation detail, and `koda-c-review` is the immediate receiver.
 
 Leave `currentPhaseIndex` unchanged. Create no output promised by the plan beyond the plan artifact itself, and create no review, approval, receipt, or advancement. Run `koda status`, then report the artifact path and hand it to `koda-c-review`.

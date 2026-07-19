@@ -76,7 +76,7 @@ test("a completed session is closed only after its state is committed and pushed
   const cli = path.resolve("src/cli.ts");
   const beforeCommit = spawnSync(process.execPath, [cli, "session", "new", nextPrompt], { cwd: root, encoding: "utf8" });
   assert.equal(beforeCommit.status, 1);
-  assert.match(beforeCommit.stderr, /is not closed/);
+  assert.match(beforeCommit.stderr, /is neither closed nor pushed-halted/);
 
   execFileSync("git", ["add", "."], { cwd: root });
   execFileSync("git", ["commit", "-m", "complete and close session"], { cwd: root });

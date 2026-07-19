@@ -13,7 +13,8 @@ Summarize what the session files prove. Hand the summary to the shared reviewer.
 2. Require the current phase name to equal `summary`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its artifact, definitive review, exact ledger receipt, and advancement record.
 4. Read the session prompt, advanced phase artifacts, their active reviews, approval entries, and cited live evidence from disk. Refuse stale conversational summaries.
-5. Preserve an existing summary unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
+5. Read every direction ID released in the prior advancement record and its exact waiting-direction file. Treat those as entry inputs and cite each ID. Ignore direction recorded after Summary entered; it waits for the next session Brief.
+6. Preserve an existing summary unless disk contains an acknowledged blocking review bound to its current hash. Chat and waiting direction recorded after phase entry are never same-phase revision authority.
 
 ## ITS OWN JOB
 
@@ -54,6 +55,6 @@ When input is needed, read and follow the [in-phase consultation protocol](../..
 
 ## HANDOVER OBLIGATION
 
-Verify every claim against cited files, record every skip, keep closure explicitly pending, and resolve required input. Leave `currentPhaseIndex` unchanged and create no review, approval, receipt, advancement, commit, push, or close artifact.
+Verify every claim against cited files, cite every released direction ID, record every skip, keep closure explicitly pending, and resolve required input. Leave `currentPhaseIndex` unchanged and create no review, approval, receipt, advancement, commit, push, or close artifact.
 
 Run `koda status`; the phase must remain `summary` and the gate must remain closed pending independent review proof. Report the summary path and hand it to `koda-c-review`.

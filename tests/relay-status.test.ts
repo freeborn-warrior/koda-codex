@@ -101,8 +101,8 @@ test("RELAY STATUS TRUTH: corrupt or ambiguous run state refuses instead of gues
   assert.match(ambiguous.stderr, /More than one unfinished run exists/);
 });
 
-test("RELAY STATUS TRUTH: a corrupt owner handback refuses immediately by name", async (t) => {
-  const temporary = await mkdtemp(path.join(tmpdir(), "koda-relay-status-handback-"));
+test("RELAY STATUS TRUTH: a corrupt waiting direction refuses immediately by name", async (t) => {
+  const temporary = await mkdtemp(path.join(tmpdir(), "koda-relay-status-direction-"));
   t.after(() => rm(temporary, { recursive: true, force: true }));
   const runRoot = await prepareRun(temporary);
   const project = path.join(runRoot, "project");
@@ -111,9 +111,9 @@ test("RELAY STATUS TRUTH: a corrupt owner handback refuses immediately by name",
   const session = await createSession(project, config, prompt);
   const phase = session.state.phases[0];
   await writeFile(artifactPath(session.directory, phase, 0), "# Brief\n\nCurrent artifact.\n", "utf8");
-  const directory = path.join(session.directory, "owner-handbacks", "01-brief");
+  const directory = path.join(session.directory, "directions");
   await mkdir(directory, { recursive: true });
-  await writeFile(path.join(directory, "01-direction.md"), "# forged handback\n", "utf8");
+  await writeFile(path.join(directory, "01-wait.md"), "# forged waiting direction\n", "utf8");
   const runPath = path.join(runRoot, "RUN.json");
   const run = JSON.parse(await readFile(runPath, "utf8"));
   run.status = "RUNNING";
@@ -122,6 +122,6 @@ test("RELAY STATUS TRUTH: a corrupt owner handback refuses immediately by name",
 
   const result = status(temporary);
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /RELAY STATUS REFUSED — Owner handback state is corrupt/);
-  assert.match(result.stderr, /exactly one generated KODA_OWNER_HANDBACK marker/);
+  assert.match(result.stderr, /RELAY STATUS REFUSED — Waiting direction state is corrupt/);
+  assert.match(result.stderr, /exactly one generated KODA_WAITING_DIRECTION marker/);
 });

@@ -208,7 +208,7 @@ async function assertNoOtherActiveRun(runsRoot        , launchId        )       
     }
     const existing = runtimeRecord(parsed, `${entry.name}/RUN.json`);
     if (existing.launchId !== entry.name) throw new Error(`Guide runtime state is corrupt: ${entry.name} does not match its launch ID.`);
-    if (existing.status !== "COMPLETE" && existing.launchId !== launchId) {
+    if (existing.status !== "COMPLETE" && existing.status !== "HALTED" && existing.launchId !== launchId) {
       throw new Error(`Guide runtime ${existing.launchId} is still ${existing.status}; a new session cannot start.`);
     }
   }
@@ -241,7 +241,7 @@ export async function currentGuideRuntime(root        )                         
     if (run.launchId !== entry.name) throw new Error(`Guide runtime state is corrupt: ${entry.name} does not match its launch ID.`);
     records.push({ run, runRoot });
   }
-  const active = records.filter(({ run }) => run.status !== "COMPLETE");
+  const active = records.filter(({ run }) => run.status !== "COMPLETE" && run.status !== "HALTED");
   if (active.length > 1) throw new Error("More than one Guide runtime is unfinished; Guide state is ambiguous.");
   const selected = active[0] ?? records.sort((left, right) => left.run.preparedAt.localeCompare(right.run.preparedAt)).at(-1);
   if (!selected) return null;

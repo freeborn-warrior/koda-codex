@@ -1,7 +1,7 @@
 import { lstat, mkdir, readdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import type { PhaseConfig, ProjectConfig, SessionState } from "./types.ts";
+import type { DirectionReference, PhaseConfig, ProjectConfig, SessionState } from "./types.ts";
 import { assertSafeSessionsDirectory, pathExists, validatePhaseChain } from "./config.ts";
 
 const SESSION_PATTERN = /^(\d{4}-\d{2}-\d{2})-(\d{2})$/;
@@ -102,6 +102,7 @@ export async function createSession(
   root: string,
   config: ProjectConfig,
   prompt: string,
+  options: { entryDirections?: DirectionReference[] } = {},
 ): Promise<{ id: string; directory: string; state: SessionState }> {
   if (prompt.trim() === "") {
     throw new Error("The session prompt must exist and be non-empty.");
@@ -121,6 +122,9 @@ export async function createSession(
     phases: config.phases.map((phase) => ({ ...phase })),
     currentPhaseIndex: 0,
     advances: [],
+    ...(options.entryDirections?.length
+      ? { entryDirections: options.entryDirections.map((direction) => ({ ...direction })) }
+      : {}),
   };
 
   await writeTextAtomic(path.join(directory, "session-prompt.md"), prompt.endsWith("\n") ? prompt : `${prompt}\n`);
@@ -160,6 +164,22 @@ export function validateSessionState(value: unknown, expectedId?: string): Sessi
   if (state.advances.length !== state.currentPhaseIndex) {
     throw new Error("state.json advancement history does not match the current phase.");
   }
+  const directionIds = new Set<string>();
+  if (state.entryDirections !== undefined) {
+    if (!Array.isArray(state.entryDirections)) throw new Error("state.json entryDirections must be an array.");
+    for (const direction of state.entryDirections) {
+      if (
+        !direction ||
+        typeof direction.id !== "string" || !/^[0-9a-f-]{36}$/.test(direction.id) ||
+        typeof direction.sessionId !== "string" || !SESSION_PATTERN.test(direction.sessionId) ||
+        typeof direction.sha256 !== "string" || !/^[0-9a-f]{64}$/.test(direction.sha256) ||
+        directionIds.has(direction.id)
+      ) {
+        throw new Error("state.json has an invalid or duplicate entry direction.");
+      }
+      directionIds.add(direction.id);
+    }
+  }
   for (let index = 0; index < state.advances.length; index += 1) {
     const advance = state.advances[index];
     if (
@@ -167,9 +187,16 @@ export function validateSessionState(value: unknown, expectedId?: string): Sessi
       advance.phase !== state.phases[index]?.name ||
       typeof advance.receipt !== "string" ||
       typeof advance.reviewId !== "string" ||
-      typeof advance.advancedAt !== "string"
+      typeof advance.advancedAt !== "string" ||
+      (advance.directions !== undefined && !Array.isArray(advance.directions))
     ) {
       throw new Error(`state.json has an invalid advancement record at index ${index}.`);
+    }
+    for (const directionId of advance.directions ?? []) {
+      if (typeof directionId !== "string" || !/^[0-9a-f-]{36}$/.test(directionId) || directionIds.has(directionId)) {
+        throw new Error(`state.json has an invalid or reused direction at advancement ${index}.`);
+      }
+      directionIds.add(directionId);
     }
   }
   return state as SessionState;

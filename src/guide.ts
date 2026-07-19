@@ -4,7 +4,9 @@ import path from "node:path";
 
 import { evaluateSessionClosure } from "./close.ts";
 import { pathExists } from "./config.ts";
+import { carryDirectionsForNextSession, carryPendingDirectionsAfterHalt } from "./direction.ts";
 import { checkGitFilesPushed } from "./git.ts";
+import { evaluateSessionHalt } from "./halt.ts";
 import {
   displayPath,
   latestSessionId,
@@ -380,13 +382,28 @@ export async function cancelGuideLaunch(
 async function previousSessionEvidence(
   root: string,
   config: ProjectConfig,
-): Promise<Pick<GuideLaunchRequest, "previousSessionId" | "previousCloseSha256" | "previousCarryForward">> {
+): Promise<Pick<GuideLaunchRequest, "previousSessionId" | "previousCloseSha256" | "previousCarryForward"> & { requiredPromptIds: string[] }> {
   const id = await latestSessionId(root, config);
-  if (!id) return { previousSessionId: null, previousCloseSha256: null, previousCarryForward: null };
+  if (!id) return { previousSessionId: null, previousCloseSha256: null, previousCarryForward: null, requiredPromptIds: [] };
   const directory = sessionRoot(root, config, id);
   const state = await loadSessionState(directory, id);
   const closure = await evaluateSessionClosure(root, directory, state);
-  if (!closure.closed) throw new Error(`Session ${id} is not closed:\n- ${closure.reasons.join("\n- ")}`);
+  if (!closure.closed) {
+    const halt = await evaluateSessionHalt(root, directory, state);
+    if (!halt.halted || !halt.metadata) {
+      const reasons = halt.exists ? halt.reasons : closure.reasons;
+      throw new Error(`Session ${id} is neither closed nor pushed-halted:\n- ${reasons.join("\n- ")}`);
+    }
+    const haltRelative = path.relative(root, path.join(directory, "halt.md")).split(path.sep).join("/");
+    const haltEvidence = await hashProjectFile(root, haltRelative, "Previous immutable halt");
+    const directions = await carryPendingDirectionsAfterHalt(directory, state);
+    return {
+      previousSessionId: id,
+      previousCloseSha256: haltEvidence.sha256,
+      previousCarryForward: haltEvidence,
+      requiredPromptIds: [halt.metadata.id, ...directions.map((direction) => direction.id)],
+    };
+  }
 
   const closeRelative = path.relative(root, path.join(directory, "close.md")).split(path.sep).join("/");
   const previousClose = await hashProjectFile(root, closeRelative, "Previous immutable close");
@@ -401,6 +418,7 @@ async function previousSessionEvidence(
     previousSessionId: id,
     previousCloseSha256: previousClose.sha256,
     previousCarryForward: await hashProjectFile(root, carryRelative, "Previous carry-forward artifact"),
+    requiredPromptIds: (await carryDirectionsForNextSession(directory, state)).map((direction) => direction.id),
   };
 }
 
@@ -444,6 +462,11 @@ export async function confirmGuideLaunch(
   if (pending.length) throw new Error(`Launch ${pending[0]!.id} is already READY_TO_LAUNCH; bind or resolve it first.`);
   const prompt = await validatePromptLocation(root, config, promptFile);
   const previous = await previousSessionEvidence(root, config);
+  const missingPriorIds = previous.requiredPromptIds.filter((id) => !prompt.content.includes(id));
+  if (missingPriorIds.length > 0) {
+    throw new Error(`The Guide prompt must cite every direction released at the prior session boundary (and the halt ID after halt):\n- ${missingPriorIds.join("\n- ")}`);
+  }
+  const { requiredPromptIds: _requiredPromptIds, ...previousLaunchEvidence } = previous;
   const launch: GuideLaunchRequest = {
     version: 1,
     id: randomUUID(),
@@ -456,7 +479,7 @@ export async function confirmGuideLaunch(
       "Guide project manifest",
     ),
     continuity: await snapshotContinuity(root, manifest),
-    ...previous,
+    ...previousLaunchEvidence,
     confirmedBy: confirmedBy.trim(),
     confirmedAt: nowIso(),
   };
@@ -501,6 +524,10 @@ export async function verifyGuideLaunch(
     if (expected !== actual) throw new Error("This prompt is not the owner-confirmed READY_TO_LAUNCH prompt.");
   }
   const currentPrevious = await previousSessionEvidence(root, config);
+  const missingPriorIds = currentPrevious.requiredPromptIds.filter((id) => !prompt.content.includes(id));
+  if (missingPriorIds.length > 0) {
+    throw new Error(`The confirmed Guide prompt no longer cites required prior-boundary direction evidence:\n- ${missingPriorIds.join("\n- ")}`);
+  }
   if (
     currentPrevious.previousSessionId !== launch.previousSessionId ||
     currentPrevious.previousCloseSha256 !== launch.previousCloseSha256 ||

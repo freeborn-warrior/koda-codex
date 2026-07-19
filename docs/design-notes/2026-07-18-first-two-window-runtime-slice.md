@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-18
 
-**Status:** Implemented and deterministically tested; live two-window owner run still pending
+**Status:** Historical implementation note. Its same-phase owner-handback route was superseded and removed by the 2026-07-19 wait-or-halt ruling; the remaining two-window relay became the base of the three-context runtime.
 
 ## Why this became the active product milestone
 

@@ -46,10 +46,18 @@ test("PACKAGED NPX SUITE: the documented local npx command does not mutate its c
 
 test("PACKAGED NPX SUITE: a real tarball installs and runs the plain-JavaScript koda binary", async (t) => {
   const temporary = await temporaryRoot(t, "koda-package-test-");
+  const project = path.join(temporary, "repo");
   const cache = path.join(temporary, "npm-cache");
   const environment = { ...process.env, npm_config_cache: cache };
+  await cp(path.resolve("."), project, {
+    recursive: true,
+    filter: (source) => !source.includes(`${path.sep}.git${path.sep}`)
+      && !source.endsWith(`${path.sep}.git`)
+      && !source.includes(`${path.sep}node_modules${path.sep}`)
+      && !source.endsWith(`${path.sep}node_modules`),
+  });
   const packed = spawnSync("npm", ["pack", "--silent", "--pack-destination", temporary], {
-    cwd: path.resolve("."),
+    cwd: project,
     encoding: "utf8",
     env: environment,
   });

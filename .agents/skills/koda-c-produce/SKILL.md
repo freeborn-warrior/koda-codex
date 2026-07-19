@@ -13,7 +13,8 @@ Make the session's real output—code, prose, design, research, or another decla
 2. Require the current phase name to equal `produce`. Refuse and name the actual phase otherwise.
 3. Derive the prior phase from `state.json`; verify its non-empty artifact, definitive review, exact ledger receipt, and matching advancement record.
 4. Read only the approved artifacts and cited files needed to produce the declared output. Refuse if the intended deliverable, boundaries, or proof are not checkable.
-5. Preserve existing output unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
+5. Read every direction ID released in the prior advancement record and its exact waiting-direction file. Treat those as entry inputs and cite each ID. Ignore direction recorded after Produce entered; it waits for the next gate.
+6. Preserve existing output unless disk contains an acknowledged blocking review bound to its current hash. Chat and waiting direction recorded after phase entry are never same-phase revision authority.
 
 ## ITS OWN JOB
 
@@ -54,6 +55,6 @@ When input is needed, read and follow the [in-phase consultation protocol](../..
 
 ## HANDOVER OBLIGATION
 
-Verify that every claimed output exists, every claimed check was actually run, and the manifest cites the real files. Leave `currentPhaseIndex` unchanged. Do not create a review, ledger entry, receipt, or advancement, and do not perform work belonging to another declared phase.
+Verify that every claimed output exists, every claimed check was actually run, and the manifest cites the real files plus every released direction ID. Leave `currentPhaseIndex` unchanged. Do not create a review, ledger entry, receipt, or advancement, and do not perform work belonging to another declared phase.
 
 Run `koda status`; the phase must remain `produce` and the gate must remain closed pending independent review proof. Report the manifest and output paths, then hand them to `koda-c-review`.

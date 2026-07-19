@@ -5,8 +5,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { pathExists, readProjectConfig } from "../src/config.ts";
-import { artifactPath, currentPhase, loadSessionState, reviewPath, sessionRoot } from "../src/project.ts";
-import { pendingOwnerHandbacks, readOwnerHandbacks } from "./owner-handback.ts";
+import { pendingDirectionsForActivePhase, readWaitingDirections } from "../src/direction.ts";
+import { currentPhase, loadSessionState, sessionRoot } from "../src/project.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
   readReviewerJob,
@@ -72,7 +72,7 @@ async function discoverRun(): Promise<string> {
     const run = await readRun(candidate);
     if (run) all.push({ root: candidate, run });
   }
-  const active = all.filter((item) => item.run.status !== "COMPLETE");
+  const active = all.filter((item) => item.run.status !== "COMPLETE" && item.run.status !== "HALTED");
   if (active.length > 1) refuse("More than one unfinished run exists. Name the run path explicitly.");
   if (active.length === 1) return active[0].root;
   if (all.length === 0) refuse("No relay run exists. Prepare one first.");
@@ -102,8 +102,8 @@ const job = await readReviewerJob(runRoot);
 const lock = await reviewerWindowLockStatus(runRoot);
 
 let phase = "Session not opened";
-let ownerHandbackCount = 0;
-let pendingOwnerHandbackCount = 0;
+let directionCount = 0;
+let waitingDirectionCount = 0;
 if (run.sessionId) {
   const config = await readProjectConfig(project);
   const directory = sessionRoot(project, config, run.sessionId);
@@ -114,21 +114,10 @@ if (run.sessionId) {
     : `${state.phases.length}/${state.phases.length} — phases complete`;
   if (active) {
     try {
-      const handbacks = await readOwnerHandbacks(directory, active.phase.name, active.index);
-      ownerHandbackCount = handbacks.length;
-      const artifact = artifactPath(directory, active.phase, active.index);
-      const review = reviewPath(directory, active.phase, active.index);
-      if (handbacks.length > 0 && await pathExists(artifact) && await pathExists(review)) {
-        pendingOwnerHandbackCount = (await pendingOwnerHandbacks({
-          sessionDir: directory,
-          phase: active.phase.name,
-          phaseIndex: active.index,
-          artifactPath: artifact,
-          reviewPath: review,
-        })).length;
-      }
+      directionCount = (await readWaitingDirections(directory)).length;
+      waitingDirectionCount = (await pendingDirectionsForActivePhase(directory, state)).length;
     } catch (error) {
-      refuse(`Owner handback state is corrupt: ${error instanceof Error ? error.message : String(error)}`);
+      refuse(`Waiting direction state is corrupt: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }
@@ -158,21 +147,22 @@ else console.log(`Console process: stopped; stale lock belongs to ${lock.pid}`);
 console.log(`Console state: ${reviewerState?.status ?? "not started"}`);
 
 console.log("\nDISK HANDOVER");
-console.log(`Owner handbacks in active phase: ${ownerHandbackCount}`);
-console.log(`Acknowledged handbacks pending producer use: ${pendingOwnerHandbackCount}`);
+console.log(`Waiting directions recorded in session: ${directionCount}`);
+console.log(`Directions waiting for the next gate: ${waitingDirectionCount}`);
 if (!job) console.log("No reviewer job is waiting.");
 else {
   console.log(`Job: ${job.kind} / ${job.phase}`);
   console.log(`Status: ${job.status}`);
   console.log(`Expected artifact: ${job.expectedPath}`);
-  if (job.handbackPath) console.log(`Owner handback: ${job.handbackPath}`);
   if (job.completion) console.log(`Completion: ${job.completion}`);
   if (job.error) console.log(`Error: ${job.error}`);
 }
 
 console.log("\nNEXT SAFE ACTION");
-if (run.status === "COMPLETE") {
-  console.log("None. This relay session is complete.");
+if (run.status === "COMPLETE" || run.status === "HALTED") {
+  console.log(run.status === "COMPLETE"
+    ? "None. This relay session is complete."
+    : "Return to Guide and start a new session from the pushed halt through a fresh Brief.");
 } else if (job?.status === "FAILED") {
   console.log("Read the named reviewer job error. Do not delete or retry it by guessing.");
 } else if (lock && !lock.alive) {

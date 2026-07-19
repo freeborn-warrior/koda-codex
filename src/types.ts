@@ -24,6 +24,13 @@ export interface AdvanceRecord {
   receipt: string;
   reviewId: string;
   advancedAt: string;
+  directions?: string[];
+}
+
+export interface DirectionReference {
+  id: string;
+  sessionId: string;
+  sha256: string;
 }
 
 export interface SessionState {
@@ -33,6 +40,7 @@ export interface SessionState {
   phases: PhaseConfig[];
   currentPhaseIndex: number;
   advances: AdvanceRecord[];
+  entryDirections?: DirectionReference[];
 }
 
 export interface CloseMetadata {
@@ -43,6 +51,18 @@ export interface CloseMetadata {
   finalPhase: string;
   finalReviewId: string;
   finalReceipt: string;
+  preparedAt: string;
+}
+
+export interface HaltMetadata {
+  version: 1;
+  id: string;
+  sessionId: string;
+  sessionSha256: string;
+  phase: string;
+  phaseIndex: number;
+  ownerDirection: string;
+  ownerDirectionSha256: string;
   preparedAt: string;
 }
 

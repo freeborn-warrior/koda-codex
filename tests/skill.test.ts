@@ -71,8 +71,8 @@ test("the shared reviewer keeps all phase criteria in one place", async () => {
   assert.match(review, /Do not quote the receipt in chat/);
   assert.match(review, /Owner-explanation mode/);
   assert.match(review, /Owner-conversation mode/);
-  assert.match(review, /OWNER DIRECTION — DISK HANDOFF REQUIRED/);
-  assert.match(review, /OWNER DIRECTION — ACTIVE SESSION TRANSFER REQUIRED/);
+  assert.match(review, /OWNER DIRECTION — WAIT FOR GATE/);
+  assert.match(review, /Never suggest pause-inject-resume/);
   assert.match(review, /GUIDE CONVERSATION — PROJECT SCOPE/);
   assert.match(review, /alter no file/i);
 

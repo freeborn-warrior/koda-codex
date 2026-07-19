@@ -13,7 +13,8 @@ Map what is true on disk before anyone plans. Hand the evidence map to the share
 2. Require the current phase name to equal `orient`. Refuse and name the actual phase otherwise.
 3. Require a non-empty session prompt and the current phase's declared input files.
 4. Derive the prior phase from `state.json`; verify its non-empty artifact, definitive review, exact receipt in `approvals.md`, and matching advancement record. Never infer approval from prose.
-5. If an orient artifact already exists, preserve it unless disk contains an acknowledged blocking review or a confirmed owner-direction handback bound to its current hash. Chat is never revision authority. Read and cite every applicable handback before revising.
+5. Read every direction ID released in that advancement record and its exact waiting-direction file. Treat those as entry inputs and cite each ID. Ignore direction recorded after Orient entered; it waits for the next gate.
+6. If an orient artifact already exists, preserve it unless disk contains an acknowledged blocking review bound to its current hash. Chat and waiting direction recorded after phase entry are never same-phase revision authority.
 
 ## ITS OWN JOB
 
@@ -52,6 +53,6 @@ Do not turn findings into a plan. When input is needed, read and follow the [in-
 
 ## HANDOVER OBLIGATION
 
-Verify that every material claim is cited or labeled as inference, every unavailable fact is explicit, required input is resolved, and `koda-c-review` is the immediate receiver. Leave `currentPhaseIndex` unchanged and create no review, approval, receipt, or advancement.
+Verify that every material claim and released direction ID is cited, every unavailable fact is explicit, required input is resolved, and `koda-c-review` is the immediate receiver. Leave `currentPhaseIndex` unchanged and create no review, approval, receipt, or advancement.
 
 Run `koda status`; the phase must remain `orient` and the gate must remain closed pending independent review proof. Report the artifact path and hand it to `koda-c-review`; the gate selects what follows.

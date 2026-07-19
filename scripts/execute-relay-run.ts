@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { closePath, evaluateSessionClosure } from "../src/close.ts";
 import { pathExists, readProjectConfig } from "../src/config.ts";
 import { evaluateGate } from "../src/gate.ts";
+import { evaluateSessionHalt } from "../src/halt.ts";
 import {
   artifactPath,
   currentPhase,
@@ -21,7 +22,6 @@ import {
   writeTextAtomic,
 } from "../src/project.ts";
 import { readApprovalEntries, sha256 } from "../src/receipt.ts";
-import { pendingOwnerHandbacks, type OwnerHandback } from "./owner-handback.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
   REVIEWER_LOCK_DIR,
@@ -91,7 +91,7 @@ async function discoverExecutableRun(): Promise<string> {
     const record = await readFile(path.join(candidate, "RUN.json"), "utf8")
       .then((content) => JSON.parse(content) as { version?: number; status?: string })
       .catch(() => null);
-    if (record?.version === 1 && record.status !== "COMPLETE") candidates.push(candidate);
+    if (record?.version === 1 && record.status !== "COMPLETE" && record.status !== "HALTED") candidates.push(candidate);
   }
   if (candidates.length === 0) throw new Error("No prepared or paused relay run exists. Prepare one first.");
   if (candidates.length > 1) throw new Error("More than one relay run is active. Koda will not guess which session you mean.");
@@ -108,7 +108,7 @@ if (!(await lstat(runPath)).isFile() || !(await lstat(transcriptPath)).isFile())
   throw new Error("Relay RUN.json and TRANSCRIPT.md must be regular files.");
 }
 const run = JSON.parse(await readFile(runPath, "utf8")) as RunRecord;
-if (run.version !== 1 || run.status === "COMPLETE") {
+if (run.version !== 1 || run.status === "COMPLETE" || run.status === "HALTED") {
   throw new Error(`Relay run cannot execute from status ${run.status}.`);
 }
 if (
@@ -417,12 +417,14 @@ async function dispatchReviewerWindowJob(
       await saveRun();
       await note(`Window B completed ${purpose}`, [
         `- Reviewer context: \`${run.reviewer.threadId}\``,
-        `- Disk handback: \`${current.handbackPath ?? path.relative(project, expectedFile)}\``,
+        current.completion === "HALTED"
+          ? "- Disk handback: active session `halt.md`."
+          : `- Disk handback: \`${path.relative(project, expectedFile)}\``,
         kind === "consultation"
           ? "- Consultation response was written before the producer resumed."
-          : current.completion === "OWNER_HANDBACK"
-            ? "- Kristian acknowledged the active review and explicitly sent a bound owner-direction handback before the producer resumed."
-          : "- Owner acknowledgement was recorded through Koda in Window B; Kristian's quote entered neither model chat.",
+          : current.completion === "HALTED"
+            ? "- Kristian invoked the sole interrupt; pushed halt evidence voided the phase without acknowledging its review."
+            : "- Owner acknowledgement was recorded through Koda in Window B; Kristian's quote entered neither model chat.",
       ]);
       await removeReviewerJob(runRoot);
       console.log("WINDOW B HANDOVER COMPLETE — deriving the next route from disk.");
@@ -455,6 +457,7 @@ async function producePhase(phaseName: string, revision: boolean): Promise<void>
     revision
       ? "This is an explicit revision request after the blocking review's receipt and any owner ruling were recorded. Read that disk handback and resolve every required revision."
       : "Perform this phase's own job from its approved disk inputs.",
+    "Read and cite only direction IDs released into this phase's entry by state.json. Never inspect or apply waiting directions recorded after the phase entered.",
     "You are the non-interactive producer. Never review, approve, advance, quote a receipt, or ask the owner in chat.",
     "If input is genuinely required, write the protocol consultation request to disk and stop. Otherwise verify the artifact handover and stop.",
   ].join(" "));
@@ -467,32 +470,6 @@ function printProducerHandover(phaseName: string, artifactFile: string, content:
   console.log(`Control: ${next}`);
 }
 
-async function applyOwnerDirection(phaseName: string, artifactFile: string, handbacks: OwnerHandback[]): Promise<void> {
-  const before = await readFile(artifactFile, "utf8");
-  const relativeHandbacks = handbacks.map((handback) => path.relative(project, handback.path));
-  await modelTurn("producer", `apply confirmed owner direction in ${phaseName}`, [
-    `Read ${producerSkill(phaseName)} completely and explicitly use koda-c-${phaseName} for the current phase named ${phaseName} on disk.`,
-    `Use node ${run.cli} wherever the skill says koda.`,
-    `Kristian explicitly sent these owner-via-reviewer handbacks after reading the active review: ${relativeHandbacks.join(", ")}.`,
-    "Read each complete handback, revise the current phase artifact from the verbatim owner direction, and cite each exact handback path in that artifact.",
-    "The old review receipt is recorded, but the handback does not approve or advance the phase. Leave the revised artifact for a fresh formal review.",
-    "You are the non-interactive producer. Never review, approve, advance, quote a receipt, or ask the owner in chat. Verify the disk handover and stop.",
-  ].join(" "));
-  const revised = await readNonEmpty(artifactFile);
-  if (!revised || sha256(revised) === sha256(before)) {
-    throw new Error(`Producer did not change ${artifactFile} after the confirmed owner handback.`);
-  }
-  for (const relative of relativeHandbacks) {
-    if (!revised.includes(relative)) throw new Error(`The revised artifact does not cite owner handback ${relative}.`);
-  }
-  printProducerHandover(
-    phaseName,
-    artifactFile,
-    revised,
-    "returned to Window B for a fresh independent review; the handback did not advance the phase.",
-  );
-}
-
 async function reviewPhase(phaseName: string, mode: "formal" | "repair" | "fresh"): Promise<void> {
   const modeInstruction = mode === "formal"
     ? "Create the first formal review of the completed current artifact."
@@ -503,6 +480,7 @@ async function reviewPhase(phaseName: string, mode: "formal" | "repair" | "fresh
     `Read ${reviewerSkill()} completely and explicitly use koda-c-review in formal-review mode for current phase ${phaseName}.`,
     `Use node ${run.cli} wherever the skill says koda.`,
     modeInstruction,
+    "Judge the artifact against its frozen phase-entry inputs. Verify every direction ID released into that entry and refuse any waiting direction used before its gate boundary.",
     "Remain independent from the producer context. Use only the artifact and files it cites, write the complete review to disk, run Koda status, and stop.",
     "Never approve, advance, modify the producer artifact, or quote the receipt in your response.",
   ].join(" ");
@@ -581,6 +559,7 @@ async function advance(phaseName: string, previousIndex: number): Promise<void> 
   await note(`gate advanced ${phaseName}`, [
     `- State index: ${previousIndex} → ${session.state.currentPhaseIndex}`,
     "- Authority: Koda re-read artifact, review, verdict, receipt acknowledgement, and prior history from disk",
+    `- Waiting directions released: ${session.state.advances.at(-1)?.directions?.join(", ") || "none"}`,
   ]);
 }
 
@@ -1014,18 +993,6 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const ownerHandbacks = await pendingOwnerHandbacks({
-      sessionDir: session.directory,
-      phase: active.phase.name,
-      phaseIndex: active.index,
-      artifactPath: artifactFile,
-      reviewPath: reviewPath(session.directory, active.phase, active.index),
-    });
-    if (ownerHandbacks.length > 0) {
-      await applyOwnerDirection(active.phase.name, artifactFile, ownerHandbacks);
-      continue;
-    }
-
     const reviewFile = reviewPath(session.directory, active.phase, active.index);
     if (!(await pathExists(reviewFile))) {
       await reviewPhase(active.phase.name, "formal");
@@ -1056,6 +1023,22 @@ async function main(): Promise<void> {
 
     if (!gate.approval) {
       await ownerAcknowledge(active.phase.name, reviewFile);
+      const halt = await evaluateSessionHalt(project, session.directory, session.state);
+      if (halt.halted) {
+        run.status = "HALTED";
+        run.lastAction = `session halted during ${active.phase.name}; fresh Brief required`;
+        run.lastError = undefined;
+        await saveRun();
+        await note(`session halted during ${active.phase.name}`, [
+          `- Halt ID: \`${halt.metadata?.id}\``,
+          `- Voided phase: \`${active.phase.name}\``,
+          "- No artifact, review, or approval from the in-flight phase counts as gated work.",
+          "- Continuation requires a fresh Brief through a new session.",
+        ]);
+        console.log(`\nRELAY HALTED — ${session.id}`);
+        console.log(`Halt evidence: ${path.relative(project, session.directory)}/halt.md`);
+        return;
+      }
       gate = await evaluateGate(session.directory, active.phase, active.index);
     }
 

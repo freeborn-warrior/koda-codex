@@ -49,7 +49,7 @@ npm run relay:reviewer
 
 Leave this running too. It discovers the same run and waits. When Window A posts a handover, Window B automatically resumes the same persistent reviewer context. There is no phase-specific command to copy.
 
-While Window A is working, Window B shows `reviewer> `. Type an active-session question there and press Return. The same Reviewer context answers from current disk evidence, then returns to the prompt. This conversation changes no project file and is never treated as Producer input. A project-level thought is marked for Guide. Possible direction that would alter active work is marked `OWNER DIRECTION — NOT SENT`; it does not pause or steer Producer because Koda-C does not yet have the distinct owner-approved idle-transfer artifact.
+While Window A is working, Window B shows `reviewer> `. Type an active-session question there and press Return. The same Reviewer context answers from current disk evidence, then returns to the prompt. Ordinary explanation changes no project file. A project-level thought is marked for Guide. Direction is marked `OWNER DIRECTION — WAIT FOR GATE` and written immediately under the session's `directions/` folder, bound to the frozen phase entry and the artifact/review state observed when it arrived. Producer does not receive it until the next successful gate.
 
 For a formal review, Window B shows the reviewer progress and then says `REVIEW READY`. It asks you to press Return, opens the complete review, and waits while you read it:
 
@@ -61,26 +61,24 @@ For a formal review, Window B shows the reviewer progress and then says `REVIEW 
    - press Return to acknowledge;
    - type `d` to ask the same reviewer a question about the review;
    - type `r` to reread the complete review;
-   - type `p` to pause safely with the producer still waiting.
+   - type `h` to halt the whole session attempt and enter the fresh-Brief direction;
+   - type `p` to stop the relay safely without changing phase inputs.
 6. Explanation questions resume the same reviewer context, alter no files, and return to this menu. Ask as many as needed.
-7. If your discussion introduces new product direction, Window B says `OWNER DIRECTION — DISK HANDOFF REQUIRED`. It then offers two additional choices:
-   - type `s` to send the direction to the producer as a bound disk handback;
-   - type `x` to discard it, sending nothing.
-   You may also keep discussing, reread, or pause. Classification by the reviewer never sends it automatically.
-8. When you acknowledge—or after explicitly sending a direction—the exact receipt is on the macOS clipboard. Press Command–V and Return when Koda asks in this same window.
+7. If discussion introduces new product direction, Window B records it immediately and says `DIRECTION RECORDED — WAITING FOR GATE`. Acknowledging the review still judges the unchanged artifact against its frozen entry contract. There is no send-now or same-phase revision choice.
+8. When you acknowledge, the exact receipt is on the macOS clipboard. Press Command–V and Return when Koda asks in this same window.
 9. If Koda asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
 
 The reviewer console never prints the receipt into its readable progress stream, and Kristian's acknowledgement input is never sent as a model message. The raw reviewer event evidence may contain the generated receipt because the reviewer creates and validates the review that contains it; the receipt is not treated as a secret. A changed review or wrong quote refuses, writes no approval, and leaves a named failed job on disk. After a valid acknowledgement, Window A re-reads the gate and automatically advances, revises, or requests a fresh review according to the verdict.
 
-Window B prints a disk-derived `REVIEWER HANDOVER` after a consultation answer or acknowledgement. It names the response/review/owner-handback path and says that Window A regains control; the gate still decides the route.
+Window B prints a disk-derived `REVIEWER HANDOVER` after a consultation answer or acknowledgement. It names the response, review, or waiting-direction path and says that Window A regains control; the gate still decides the route.
 
-The reviewer can explain findings, evidence, implications, and `DISCUSS` options without changing the review. A confirmed new direction is written under the active session's `owner-handbacks/<NN>-<phase>/` directory. It binds Kristian's verbatim statement, the reviewer relay, current artifact hash, active review ID, and review hash. The receipt remains mandatory. Window A consumes the handback before an otherwise open gate, requires the producer to revise and cite it, then routes the stale artifact to a fresh formal review and fresh receipt. See the [owner-direction handback protocol](OWNER-DIRECTION-HANDBACK.md).
+The reviewer can explain findings, evidence, implications, and `DISCUSS` options without changing the review. Waiting direction binds Kristian's verbatim statement, the Reviewer classification, phase entry, current artifact hash or explicit absence, and current review hash when one exists. On advancement, `state.json` releases its ID to the receiving phase, whose artifact must read and cite it. If Kristian chooses `h`, Window B instead creates immutable `halt.md`, commits and pushes the bound session, and tells Window A to stop; the next session must start through a fresh Brief citing the halt and waiting direction IDs.
 
 For an in-phase owner question, Window B displays the reviewer's recorded question, accepts Kristian's answer there, resumes the same reviewer context, and requires the answer to be written into the consultation response before Window A continues.
 
 ## One-session and one-reviewer invariants
 
-The two commands discover rather than guess. They refuse if more than one unfinished run exists. A lock directory refuses a second Window B process for the same run. Producer and reviewer share the run and session only through files; their Codex context IDs must remain distinct. A new Koda session still cannot open until the prior immutable close is committed and pushed.
+The two commands discover rather than guess. They refuse if more than one unfinished run exists. A lock directory refuses a second Window B process for the same run. Producer and reviewer share the run and session only through files; their Codex context IDs must remain distinct. A new Koda session cannot open until the prior immutable close or explicit halt is committed and pushed.
 
 ## Stopping and resuming
 
@@ -119,13 +117,13 @@ That command removes a lock only after the recorded process is no longer alive. 
 
 ## Successful ending
 
-Success exists only when Window A prints `RELAY COMPLETE` and Window B prints `SESSION CLOSED`. The run's `RESULT.md` must say `Status: COMPLETE`, show distinct context IDs, record every phase advancement and owner acknowledgement, and name the pushed close commit.
+Normal success exists only when Window A prints `RELAY COMPLETE` and Window B prints `SESSION CLOSED`. An explicit interrupt instead ends with `RELAY HALTED` / `SESSION HALTED`, a pushed `halt.md`, no advancement for the voided phase, and a required return to Guide for a fresh Brief.
 
 ## Current honest boundary
 
 This slice proves the automatic producer-to-reviewer wake-up, one persistent Window B reviewer, a terminal-backed conversation prompt while Producer works, same-window review explanations and exact receipt acknowledgement, an owner-ruling loop for in-phase consultations, and readable progress derived from actual Codex events. The historical manual route remains a repository relay harness around the bounded `software-clean` scenario; the newer Guide launcher connects the same runtime to a real project but still needs owner-observed proof.
 
-Conversation between handoffs is deliberately non-mutating. Product decisions entered through `DISCUSS`, consultation prompts, or explicitly sent review-time owner handbacks are disk-backed. Idle active-session direction and Guide-to-Reviewer direction remain unsent until their transfer protocol is owner-approved. Notification transport, remote control, a polished split-pane interface, and complete abort recovery remain later layers.
+Ordinary explanation between handoffs is deliberately non-mutating. Product decisions entered through `DISCUSS` or consultation prompts are disk-backed; new direction is also disk-backed immediately but waits for the next gate. Pause-inject-resume does not exist. Notification transport, remote control, a polished split-pane interface, and broader crash recovery remain later layers.
 
 ## Safety boundaries
 

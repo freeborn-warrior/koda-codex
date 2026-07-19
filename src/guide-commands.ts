@@ -14,7 +14,8 @@ import {
 } from "./guide.ts";
 import { currentGuideRuntime, prepareGuideRuntime } from "./guide-runtime.ts";
 import { requestGhosttyWindows, type GhosttyWindowRequest } from "./ghostty.ts";
-import { displayPath, latestSessionId } from "./project.ts";
+import { evaluateSessionHalt } from "./halt.ts";
+import { displayPath, latestSessionId, loadSessionState, sessionRoot } from "./project.ts";
 
 export interface GuideCliIo {
   out(message: string): void;
@@ -79,16 +80,29 @@ export async function runGuideCli(
     if (pending.length === 0) io.out("NO PROMPT READY — Guide discussion or drafting may continue.");
     else if (pending.length === 1) io.out(`READY TO LAUNCH — ${pending[0]!.id}`);
     if (runtime) {
+      if (runtime.run.status === "HALTED") {
+        const sessionId = await latestSessionId(root, config);
+        if (!sessionId) throw new Error("Guide runtime claims HALTED but no session exists.");
+        const directory = sessionRoot(root, config, sessionId);
+        const state = await loadSessionState(directory, sessionId);
+        const halt = await evaluateSessionHalt(root, directory, state);
+        if (!halt.halted) throw new Error(`Guide runtime claims HALTED without pushed halt evidence:\n- ${halt.reasons.join("\n- ")}`);
+      }
       io.out("");
-      io.out(`${runtime.run.status === "COMPLETE" ? "LAST SESSION RUNTIME" : "ACTIVE SESSION RUNTIME"} — ${runtime.run.launchId}`);
+      const terminal = runtime.run.status === "COMPLETE" || runtime.run.status === "HALTED";
+      io.out(`${terminal ? "LAST SESSION RUNTIME" : "ACTIVE SESSION RUNTIME"} — ${runtime.run.launchId}`);
       io.out(`State: ${runtime.run.status}`);
       if (runtime.run.terminalLaunch) {
         io.out(`Visible launch: ${runtime.run.terminalLaunch.adapter} requested at ${runtime.run.terminalLaunch.requestedAt}`);
       }
       if (runtime.run.lastError) io.out(`Last error: ${runtime.run.lastError}`);
-      if (runtime.run.status === "COMPLETE") {
-        io.out(`Guide return: ${runtime.run.guideReturn}`);
-        io.out(`Durable evidence: ${runtime.run.archive}`);
+      if (terminal) {
+        if (runtime.run.status === "COMPLETE") {
+          io.out(`Guide return: ${runtime.run.guideReturn}`);
+          io.out(`Durable evidence: ${runtime.run.archive}`);
+        } else {
+          io.out("The prior session ended through pushed halt. Reconcile it and confirm a fresh Brief before launching again.");
+        }
       } else {
         io.out("Window B — reviewer / owner:");
         io.out(runtime.reviewerCommand);

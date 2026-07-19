@@ -24,8 +24,9 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - One persistent producer context and one separate persistent reviewer context span the full session. Both are visible side by side; Kristian may watch but not type into the producer and speaks only with the reviewer. Phase boundaries never create a fresh reviewer.
 - There is one producer skill per declared native phase and one shared reviewer skill with per-phase criteria.
 - A producer hands its artifact to the reviewer. Only an allowed verdict, owner receipt, and `advance` activate the next phase from config.
-- Session closure is an immutable artifact with Git between preparation and verification. A new session cannot open until that close is pushed.
+- Normal session closure is an immutable artifact with Git between preparation and verification. Explicit halt is the only other terminal state. A new session cannot open until the prior close or halt is pushed.
 - The current target keeps owner receipt acknowledgement at every gate. Exception-only owner attention is a distinct open policy decision and must not be introduced silently.
+- Active-phase direction has only two owner-ruled transitions: wait by default or halt. Wait records immediately but enters Producer input only through the next successful gate; halt terminates the session attempt and requires pushed immutable halt evidence before a new session starts from a fresh Brief. Pause-inject-resume is forbidden.
 - The competition entry is licensed under GPLv3 only, with `Copyright (C) 2026 Kristian Bengtsson` as the sole project copyright line.
 - The product name remains **Koda-C**. The CLI command is `koda`; `koda-codex` is the lowercase repository and package slug for this Codex-built competition implementation.
 - New reviewer fixtures are scored only by contracts committed before their first model run. The final model program stopped at its declared cap: two Luna baseline repeats and nine medium runs across the three new fixtures and models. All inference-chain cells passed, so no unique winner existed and the conditional low-effort confirmation was not run.
@@ -42,6 +43,8 @@ owner contract
       APPROVE / APPROVE WITH COMMENTS → next configured phase
       REVISE / REJECT                 → same producer phase
       DISCUSS                         → owner ruling, then fresh review
+      waiting owner direction         → recorded now, released to receiving phase only
+      explicit halt                   → void phase, push halt.md, return through fresh Brief
   → final declared phase advances
   → close.md is prepared
   → Git commit + push
@@ -63,6 +66,8 @@ owner contract
 - TypeScript source built during packaging into dependency-free plain JavaScript for Node.js 22.18+.
 - Configurable phase chain snapshot into each session's `state.json`.
 - Commands for init, session open/status/close, review generation, receipt approval, and advancement.
+- Bound waiting-direction evidence, atomic gate release, required receiving-phase citation, and early-use refusal.
+- Immutable pushed halt that voids the in-flight phase and requires a Guide-confirmed fresh Brief carrying the halt and waiting direction IDs.
 - Artifact hashing, generated review metadata, unique receipts, structured Markdown approval entries, and verdict routing.
 - Fail-closed checks for missing, empty, stale, malformed, duplicated, or mismatched evidence.
 - Immutable close-artifact hashing plus Git-derived commit/push verification.
@@ -81,8 +86,8 @@ owner contract
 - `koda guide launch` prepares one real-project runtime from that pushed binding. Ignored `.koda/runs/` holds recoverable rendezvous state; producer, reviewer, and status share one hardened path resolver; immutable close remains an ordinary pushed project commit; and tracked `docs/guide/runs/` plus `docs/guide/returns/` return the result to Guide without deleting or replacing the real repository's `.git` directory.
 - A deterministic two-process integration proves confirmed prompt → separate context identities → Brief gate and owner receipt → pushed close → injected return-stage interruption → exact resume → pushed Guide return. No live model was called, so automatic visible context launch and Kristian's owner-observed run remain owed.
 - The first macOS terminal adapter adds explicit `--open ghostty`: it records one launch request, asks for labeled Reviewer then Producer windows using direct argument arrays, preserves Guide as the existing conversation, and refuses duplicate automatic opening after success or partial failure. Deterministic injection tests do not substitute for Kristian's live visible proof.
-- Window B now keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in non-mutating `owner conversation` mode; a project-level thought is redirected to Guide, and possible active-session direction is named as unsent because no owner-approved idle-transfer artifact exists yet.
-- At a formal decision point, Window B can resume the same reviewer context in `owner explanation` mode so Kristian may ask questions, reread, acknowledge, or pause. Explanation alters no files. New product direction stays paused until Kristian explicitly sends or discards it. A sent direction becomes a bound owner-via-reviewer artifact, keeps the receipt mandatory, reaches the producer before advancement, and forces a fresh review after revision.
+- Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
+- At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode so Kristian may ask questions, reread, acknowledge, halt, or stop the relay. New direction waits for the next gate and does not rewrite reviewed work. Explicit `h` prepares, commits, pushes, and verifies immutable halt evidence; no receipt or current-phase advancement is allowed to count.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
 - The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.
 
@@ -109,6 +114,7 @@ owner contract
 - [Ghostty launcher 132-check result](test-results/2026-07-18-ghostty-launcher-final.md)
 - [Ghostty launcher post-push 132-check result](test-results/2026-07-18-ghostty-launcher-pushed-final.md)
 - [Always-open Reviewer conversation design](design-notes/2026-07-19-always-open-reviewer-conversation.md)
+- [Wait-or-halt owner ruling](design-notes/2026-07-19-wait-or-halt-owner-ruling.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
 - [Always-open Reviewer 135-check result](test-results/2026-07-19-reviewer-open-conversation-final.md)
 - [Always-open Reviewer post-push 135-check result](test-results/2026-07-19-reviewer-open-conversation-pushed-final.md)
@@ -146,6 +152,7 @@ owner contract
 - **Owner-approved staffing direction:** Roles are persistent seats, session kinds and phases are assignments, and model plus effort is the staff placed into each assignment. Future config may assign Guide, session-kind reviewer, default producer, and per-phase producer independently; resolved staffing must be snapshotted at launch and supported by sealed model-matrix evidence. Skill frontmatter describes work but does not become the authoritative org chart.
 - **Owner-approved attention direction:** A future delegated policy may allow routine sessions to flow under Guide/reviewer acknowledgement, while any phase may emit a monotonic `OWNER_ATTENTION_REQUIRED` artifact. An agent may request stricter attention but may never waive attention required by config. The current target remains owner-at-every-gate.
 - **Owner-approved experience direction:** The finished terminal product is one visible, ongoing Guide project conversation enclosing a visible non-interactive Producer and a visible owner-facing session Reviewer. Guide and Reviewer both remain conversational, but at different scopes; Producer never accepts owner input after start. Guide discussion cannot silently alter the confirmed active-session snapshot and needs an explicit disk-backed transfer into Reviewer to affect it. Historical two-window runs remain valid evidence, not the finished UX target.
+- **Owner-approved transfer ruling:** Direction from owner-facing Guide or Reviewer conversation is written immediately but waits for the next gate; phase inputs stay frozen from entry through review. The only interrupt is an explicit halt that voids the in-flight phase and returns through a fresh Brief after immutable pushed halt evidence. Pause-inject-resume must never be built.
 - **Project-profile clarification:** Draft, Edit, and Refine are valid profile vocabulary when they create distinct artifacts and review moments. They do not alter the native reference chain merely by renaming unfinished Produce work.
 - **Transparency extension:** `PROJECT.md` and `BACKLOG.md` expose work that would otherwise live only in Codex's internal plan.
 - **Codex-native packaging correction:** Skills first existed under top-level `skills/`; official discovery requires `.agents/skills/`. They were moved without duplication, and root `AGENTS.md` now holds durable repository guidance.

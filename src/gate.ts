@@ -1,5 +1,6 @@
 import { pathExists } from "./config.ts";
-import { artifactPath, ledgerPath, readRegularText, reviewPath } from "./project.ts";
+import { pendingDirectionsForActivePhase, requiredDirectionsForPhase } from "./direction.ts";
+import { artifactPath, ledgerPath, loadSessionState, readRegularText, reviewPath } from "./project.ts";
 import {
   parseReview,
   readApprovalLedger,
@@ -153,6 +154,39 @@ export async function evaluateGate(
       ? "The owner's ruling is recorded; DISCUSS still requires a fresh definitive review."
       : "DISCUSS requires an owner ruling in the ledger, then a fresh definitive review.";
     issues.push(issue("verdict_discuss", message));
+  }
+
+  try {
+    const state = await loadSessionState(sessionDir);
+    if (state.currentPhaseIndex === index && state.phases[index]?.name === phase.name) {
+      const [requiredDirections, pendingDirections] = await Promise.all([
+        requiredDirectionsForPhase(sessionDir, state, index),
+        pendingDirectionsForActivePhase(sessionDir, state),
+      ]);
+      if (artifact !== null && artifact.trim() !== "") {
+        for (const direction of requiredDirections) {
+          if (!artifact.includes(direction.metadata.id)) {
+            issues.push(issue(
+              "direction_input_missing",
+              `The artifact does not cite required direction ${direction.metadata.id} released at phase entry.`,
+            ));
+          }
+        }
+        for (const direction of pendingDirections) {
+          if (artifact.includes(direction.metadata.id)) {
+            issues.push(issue(
+              "direction_used_before_gate",
+              `Direction ${direction.metadata.id} was queued after phase entry and cannot be used before the next gate.`,
+            ));
+          }
+        }
+      }
+    }
+  } catch (error) {
+    issues.push(issue(
+      "direction_evidence_invalid",
+      `Waiting direction evidence is invalid: ${error instanceof Error ? error.message : String(error)}`,
+    ));
   }
 
   return {

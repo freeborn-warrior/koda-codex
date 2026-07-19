@@ -15,8 +15,9 @@ Act as a bounded in-phase evidence adviser, the independent receiver of a comple
 4. For consultation mode, read the [in-phase consultation protocol](../../../docs/IN-PHASE-CONSULTATION.md) completely. Require a non-empty request under the current session's `consultations/<NN>-<phase>/`, addressed to `reviewer`, and read only it and its cited evidence.
 5. For formal-review mode, require a non-empty current artifact at `phases/<NN>-<phase>.md`; read only it and files it explicitly cites. Do not use producer chat context or roam through unrelated files to rescue missing evidence.
 6. For formal-review mode, if this reviewer advised during the phase, require the completed artifact to cite that consultation and disclose the prior advice in the review. Independence means the reviewer did not write the producer artifact; do not hide consultation history. If an active formal review exists, run no replacement until its receipt is recorded; for DISCUSS, require the owner's ruling too. Never overwrite an unread review.
-7. For owner-explanation mode, require the named active formal review to be a complete regular file for the current phase. Read that review and only the cited evidence needed to answer the exact question. Refuse if the review changed, is already superseded, or the question asks this mode to approve, route, edit, or impersonate an owner ruling.
-8. For owner-conversation mode, require an active session and derive its current phase from `state.json`. Read the session prompt, current state, existing current-phase evidence, and only explicitly cited project files needed for the exact message. Do not require a formal review. Refuse requests to edit, approve, advance, or silently steer Producer.
+7. For formal-review mode, derive the phase-entry direction IDs from `state.json`: Brief uses `entryDirections`; later phases use the prior advancement record. Require the artifact to cite every released ID and judge their application. Exclude every direction recorded after phase entry from the current review contract; if the artifact cites one early, require refusal for split provenance.
+8. For owner-explanation mode, require the named active formal review to be a complete regular file for the current phase. Read that review and only the cited evidence needed to answer the exact question. Refuse if the review changed, is already superseded, or the question asks this mode to approve, route, edit, or impersonate an owner ruling.
+9. For owner-conversation mode, require an active session and derive its current phase from `state.json`. Read the session prompt, current state, existing current-phase evidence, and only explicitly cited project files needed for the exact message. Do not require a formal review. Refuse requests to edit, approve, advance, or silently steer Producer.
 
 ## ITS OWN JOB
 
@@ -40,7 +41,7 @@ Explain the active review at the owner's altitude. Answer the exact question, di
 
 If the owner is clarifying a `DISCUSS` question or states a ruling, explain that the final ruling must be entered only through Koda's owner prompt after the review is acknowledged. Do not record or relay it from this explanation turn.
 
-If the owner introduces a new product direction that the active review does not already route, begin the final answer exactly `OWNER DIRECTION — DISK HANDOFF REQUIRED`. State the direction plainly and explain that it has not reached the producer. Never turn actionable owner chat into producer input without a named handback artifact. The reviewer runtime—not this skill turn—must ask the owner whether to send it, serialize the exact owner statement and this reviewer relay, and keep the receipt ceremony mandatory.
+If the owner introduces new product direction that the active review does not already route, begin the final answer exactly `OWNER DIRECTION — WAIT FOR GATE`. State the direction plainly. The runtime must record the exact owner statement and classification immediately as waiting evidence, but the reviewed artifact keeps its frozen entry contract. The direction enters Producer input only through the next successful gate. Do not ask the owner to send it again and do not revise already reviewed work from it.
 
 ### Owner-conversation mode
 
@@ -48,7 +49,9 @@ Answer active-session questions while Producer is working or between formal hand
 
 If the message concerns the wider project path, future sessions, or ideas beyond the confirmed active-session scope, begin exactly `GUIDE CONVERSATION — PROJECT SCOPE` and direct the owner to continue it with Guide.
 
-If the owner states direction that would change active work, begin exactly `OWNER DIRECTION — ACTIVE SESSION TRANSFER REQUIRED`. State it plainly and say no transfer exists yet. The runtime must not create a producer handback until a distinct owner-approved active-session transfer artifact exists; never improvise one from chat.
+If the owner states direction that would change work, begin exactly `OWNER DIRECTION — WAIT FOR GATE`. State it plainly. The runtime must record the exact owner statement and this classification immediately. Make clear that recording is not steering: Producer cannot read or apply it during the active phase, and Koda releases it only in the next successful advancement record.
+
+Never suggest pause-inject-resume. If the owner explicitly wants to stop the in-flight phase rather than wait, explain the separate halt ceremony: no current-phase artifact, review, or approval may count; immutable halt evidence must be committed and pushed; work returns through a new session and fresh Brief. Do not infer or execute halt from ordinary direction.
 
 ### Verdict rules
 
@@ -96,8 +99,8 @@ For consultation mode, keep the owner-facing conversation in this reviewer task,
 
 For formal-review mode, write the complete review to disk before reporting anything in chat. Use concise Markdown with evidence checked, required revisions or owner questions, and optional comments. Omit empty sections except owner questions for DISCUSS.
 
-For owner-explanation mode, alter no file and return control to the owner-facing reviewer window. The preserved reviewer event is owner conversation, not a producer handback. If the answer begins `OWNER DIRECTION — DISK HANDOFF REQUIRED`, acknowledgement remains paused until the owner explicitly sends or discards it. A sent direction must exist under `owner-handbacks/<NN>-<phase>/` and bind the exact owner statement, current artifact, and active review before the receipt is recorded and the producer resumes. A `DISCUSS` ruling remains safe because Koda records it in the approval ledger before the producer can resume.
+For owner-explanation mode, alter no file and return control to the owner-facing reviewer window. The preserved reviewer event is owner conversation, not a producer handback. If the answer begins `OWNER DIRECTION — WAIT FOR GATE`, the runtime must write the waiting record immediately; it neither blocks acknowledgement nor changes the artifact under review. A `DISCUSS` ruling remains safe because Koda records it in the approval ledger before the producer can resume.
 
-For owner-conversation mode, alter no file and return to the open Reviewer prompt. Preserve the model event as conversation evidence only. Project-level thoughts return to Guide. Active-session direction remains explicitly unsent until Koda-C has an owner-approved transfer artifact; conversation alone must neither pause nor steer Producer.
+For owner-conversation mode, alter no file and return to the open Reviewer prompt. Preserve the model event as conversation evidence. Project-level thoughts return to Guide. When the answer begins `OWNER DIRECTION — WAIT FOR GATE`, the runtime must create the bound waiting-direction artifact immediately. Conversation never pauses or steers Producer; the advancement record is the only release into a later phase.
 
 Do not quote the receipt in chat. In any mode, do not approve evidence, run `koda advance`, modify the producer artifact, or begin another phase. In formal-review mode, the complete formal review is the handback artifact; report only its path and verdict so the owner must read the file. Leave routing to the receipt gate.

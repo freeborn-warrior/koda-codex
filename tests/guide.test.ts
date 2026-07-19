@@ -6,6 +6,7 @@ import test from "node:test";
 
 import { runCli } from "../src/commands.ts";
 import { DEFAULT_CONFIG } from "../src/config.ts";
+import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
 import { runGuideCli } from "../src/guide-commands.ts";
 import {
   cancelGuideLaunch,
@@ -15,7 +16,8 @@ import {
 } from "../src/guide.ts";
 import { prepareGuideRuntime } from "../src/guide-runtime.ts";
 import { requestGhosttyWindows } from "../src/ghostty.ts";
-import { createSession, writeJsonAtomic } from "../src/project.ts";
+import { prepareHaltArtifact } from "../src/halt.ts";
+import { createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
 import { temporaryRoot } from "./helpers.ts";
 
 const prompt = [
@@ -90,8 +92,53 @@ test("GUIDE ENTRY: an active prior session refuses a new launch request and name
   await createSession(h.root, DEFAULT_CONFIG, prompt);
   await assert.rejects(
     confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian"),
-    /Session .* is not closed:\n- Every declared phase has not advanced/,
+    /Session .* is neither closed nor pushed-halted:\n- Every declared phase has not advanced/,
   );
+});
+
+test("GUIDE HALT RETURN: a pushed halt and every waiting direction must enter a fresh confirmed Brief", async (t) => {
+  const h = await guideHarness(t, true);
+  const first = await createSession(h.root, DEFAULT_CONFIG, prompt);
+  const direction = await createWaitingDirection({
+    sessionDir: first.directory,
+    state: first.state,
+    source: "owner-via-guide",
+    ownerStatement: "Carry the changed product direction into a fresh Brief.",
+    classification: `${WAITING_DIRECTION_PREFIX}\nDo not inject this into the active phase.`,
+  });
+  await prepareHaltArtifact(first.directory, first.state, "End this attempt and restart from Guide.");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "halt first guided session"]);
+  h.git(h.root, ["push"]);
+
+  await assert.rejects(
+    confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian"),
+    /Guide prompt must cite every direction released at the prior session boundary/,
+  );
+  const haltContent = await readFile(path.join(first.directory, "halt.md"), "utf8");
+  const haltId = haltContent.match(/- Halt ID: `([^`]+)`/)?.[1];
+  assert(haltId);
+  const freshPrompt = prompt
+    .replace("- Previous close: none for the first session", `- Previous terminal evidence: halt ${haltId}`)
+    .replace("- Carried forward by owner: none", `- Carried forward by owner: waiting direction ${direction.metadata.id}`);
+  await writeFile(h.promptFile, freshPrompt, "utf8");
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  assert.equal(confirmed.launch.previousSessionId, first.id);
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm fresh Brief after halt"]);
+  h.git(h.root, ["push"]);
+
+  const output: string[] = [];
+  await runCli(["session", "new", h.promptFile], h.root, {
+    out(message) { output.push(message); },
+    error() {},
+    async prompt() { return ""; },
+  });
+  assert.match(output.join("\n"), /Fresh Brief after pushed halt/);
+  const sessions = (await readdir(path.join(h.root, "docs", "sessions"))).sort();
+  assert.equal(sessions.length, 2);
+  const next = await loadSessionState(path.join(h.root, "docs", "sessions", sessions[1]!));
+  assert.deepEqual(next.entryDirections?.map((entry) => entry.id), [direction.metadata.id]);
 });
 
 test("GUIDE CONFIRMATION: one request binds prompt, manifest, continuity, and owner", async (t) => {
@@ -389,6 +436,25 @@ test("GUIDE RUNTIME STATUS TRUTH: corrupt live state refuses instead of hiding b
   await assert.rejects(
     runGuideCli(["status"], h.root, { out() {} }),
     /Guide runtime state is corrupt: .*RUN\.json is not valid JSON/,
+  );
+});
+
+test("GUIDE RUNTIME STATUS TRUTH: a forged HALTED label refuses without pushed halt evidence", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm forged halt fixture"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), { ...prepared.run, status: "HALTED" });
+  await assert.rejects(
+    runGuideCli(["status"], h.root, { out() {} }),
+    /Guide runtime claims HALTED but no session exists/,
   );
 });
 

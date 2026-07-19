@@ -2,8 +2,8 @@
 
 Koda-C's core CLI is intentionally small: dependency-free JavaScript on Node.js
 22.18 or newer, no install or post-install hooks, no daemon, no database, and no
-network call. It reads Git state during close, but it does not commit or push.
-The close command prints the exact Git commands for the repository owner to run.
+network call. It reads Git state during close and halt, but it does not commit or push.
+The close and halt commands print the exact Git commands for the repository owner to run.
 
 This document distinguishes that core from the model-testing relay scripts that
 also ship in the competition repository.
@@ -24,6 +24,10 @@ parent, and ignored project-local runtime under `.koda/`:
 - `session new` creates one dated session, its copied prompt, ledger, and state;
 - `review new`, `approve`, and `advance` write their named review, ledger, and
   state artifacts atomically;
+- `direction wait` writes one bound regular-file direction record under the
+  active session; advancement is the only operation that releases its ID;
+- the first `session halt` writes immutable `halt.md`; its printed Git steps
+  must run before the second invocation can verify terminal halt;
 - the first `session close` writes immutable `close.md`; the second only verifies
   disk and Git state.
 - `guide confirm`, `cancel`, and `bind` write their named durable evidence;
@@ -35,7 +39,7 @@ parent, and ignored project-local runtime under `.koda/`:
 
 Koda refuses a configured sessions directory that resolves outside the project.
 Session state must retain valid configured phase names. Artifacts, reviews,
-ledgers, state, close evidence, and all other files bound into close must be
+ledgers, state, directions, halt/close evidence, and all other bound files must be
 ordinary files inside the session; symbolic links and special files refuse.
 
 Close now checks both halves of the promise: every session file is in the digest,
@@ -51,8 +55,10 @@ named branch with an upstream, and zero commits ahead of that upstream.
 - editing the review after its receipt was acknowledged;
 - reused receipts, malformed or duplicate generated markers, corrupted ledger or
   state, path-like phase names, linked evidence, and ignored close evidence;
-- starting another session before the prior immutable close is committed and
-  represented in the local upstream-tracking history.
+- using waiting direction before its gate release or omitting a released
+  direction from the receiving artifact;
+- starting another session before the prior immutable close or explicit halt is
+  committed and represented in the local upstream-tracking history.
 
 All of those conditions are re-derived from disk. They are covered by deliberate
 mutation tests rather than trusted cached status.
@@ -90,19 +96,19 @@ paths must remain inside the prepared run. A real-project run must be one direct
 child of that project's ignored `.koda/runs/`, resolve back to that exact project,
 and use the trusted CLI shipped by the same Koda-C package. Archive and return
 parents must be real contained directories; linked or changed recovery evidence
-refuses. Owner-direction handbacks add the same containment rule inside the active session:
-their root and phase directory must be real directories resolving beneath that
-session, and every handback must be a regular file. A linked parent directory
-cannot redirect even the initial atomic write.
+refuses. Waiting-direction evidence has the same containment rule inside the active
+session: its root must be a real directory resolving beneath that session, and
+every numbered direction must be a regular file. A linked parent directory cannot
+redirect even the initial atomic write.
 
-The persistent Reviewer accepts owner conversation between formal handoffs, but
-that path is read-only with respect to project evidence. The question resumes the
-same reviewer context, the raw model event remains inside ignored run state, and
-no artifact, review, approval, consultation, or owner handback is created. A model
-marker is classification, not authority: project scope returns to Guide, while
-possible active-session direction is printed as `OWNER DIRECTION — NOT SENT` and
-does not reach Producer. Only a separately validated disk artifact may cross that
-boundary.
+The persistent Reviewer accepts owner conversation between formal handoffs.
+Ordinary explanation remains read-only, while a `WAIT FOR GATE` classification
+causes the trusted runtime to write the exact owner words and model classification
+as waiting evidence. Classification does not steer Producer: the current phase
+entry remains frozen and only advancement releases direction. Explicit `h` is a
+separate owner action that makes the Reviewer runtime prepare, session-stage,
+commit, push, and verify `halt.md`; it refuses unrelated pre-staged changes. The
+historical same-phase owner-handback route was removed.
 
 Run those scripts only against a run folder created by `relay:prepare` or a
 pushed `koda guide launch` in a trusted project. Do not execute a modified
@@ -113,8 +119,8 @@ does not launch a model. With it, Koda asks Ghostty to run the same documented
 role commands that would otherwise be started manually.
 
 Git commit and push may execute hooks already configured in a repository. The
-core close command only prints Git instructions; the explicitly started relay
-supervisor executes its documented commits and pushes. Inspect unfamiliar
+core close and halt commands only print Git instructions; the explicitly started relay
+supervisor and explicit Reviewer halt ceremony execute their documented commits and pushes. Inspect unfamiliar
 repository hooks and remotes before starting a real-project relay.
 
 The Ghostty adapter is deliberately opt-in. It records launch intent before the

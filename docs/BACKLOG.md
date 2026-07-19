@@ -9,7 +9,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
 - [ ] Owner-test the new one-action Ghostty adapter against a genuine Guide-confirmed session. Deterministic tests prove labeled Reviewer-first/Producer-second requests, no shell evaluation, partial-open recovery, and duplicate refusal; they do not prove macOS displayed the windows.
 - [ ] Make the CLI ceremony legible without reading implementation logs: permanent context labels, owner-input state, phase progress and artifact/handover summaries, conversational reviewer notifications, one named reason per refusal, and one safe recovery action. Never present hidden chain-of-thought as product output.
-- [ ] Design and test an explicit Guide-to-Reviewer transfer for a project-level decision that must affect an already active session. Conversation or steering-file mutation alone must never alter the confirmed session snapshot.
+- [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
 
 ## Next
 
@@ -35,14 +35,16 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
-- [x] Keep the Reviewer conversational while Producer works: a real terminal prompt resumes the same persistent context, safe answers mutate no project file, project-scope thoughts return to Guide, and active direction is named but remains unsent (`8ca8aab`; pushed 135-check proof). Owner-observed proof remains part of the full three-context run.
+- [x] Implement the settled wait-or-halt transfer: immediate bound direction record, no current-phase consumption, atomic release in the next advancement record, required receiving-phase citation, early-use refusal, immutable pushed halt, and Guide-confirmed fresh Brief. The historical same-phase handback route was removed rather than retained as a hidden pause-inject-resume path. Commit/push evidence pending this milestone.
+
+- [x] Keep the Reviewer conversational while Producer works: a real terminal prompt resumes the same persistent context, safe answers mutate no project file, project-scope thoughts return to Guide, and the later owner ruling makes active direction record immediately while still waiting for the boundary (`8ca8aab` is the earlier pushed conversation proof). Owner-observed proof remains part of the full three-context run.
 
 - [x] Add an opt-in `koda guide launch --open ghostty` adapter that keeps Guide open, requests labeled Reviewer then Producer windows, persists intent before GUI mutation, passes only explicit argument arrays, retains exact manual commands, and refuses duplicate automatic opening. Owner-observed live proof remains owed.
 - [x] Connect pushed Guide confirmation to an explicit real-project runtime: clean/pushed and ignored-runtime entry checks, shared path hardening, two-process relay compatibility, injected finalization recovery, unchanged project Git, pushed runtime archive, machine-readable Guide return, and disk-derived Guide status. Live visible context creation remains owed.
 - [x] Build the first disk-recoverable Guide slice: project-specific steering manifest, local `koda-c-session-prompt` skill, exact owner-confirmed prompt/project/prior-session hashes, immutable cancellation, pushed-handover verification, unconfirmed/stale refusal, and launch-to-session binding. Fresh discovery and visible two-context launch remain separate owed proofs.
 
 - [x] Let Kristian discuss an active formal review in the same reviewer context; ordinary explanation changes no file, while new direction pauses without an explicit owner send (`f68f5d7`, evidence at `9610429`).
-- [x] Add the general owner-direction handback: explicit send, verbatim owner statement, reviewer relay, artifact/review/hash binding, mandatory receipt, producer citation, stale-review refusal, and fresh-review route. Deterministic two-process proof covers the full path through pushed close.
+- [x] Historical experiment: same-phase owner-direction handback with explicit send and fresh-review routing. Superseded and removed from active runtime by the 2026-07-19 wait-or-halt ruling; retained only in Git history and dated test evidence.
 - [x] Add consistent disk-derived role handovers: producer artifact path/size/hash/control, consultation pause/response, reviewer verdict binding, acknowledgement outcome, and explicit next owner of control. These summarize exposed facts, never hidden chain-of-thought.
 - [x] Build and deterministically prove the first real two-window runtime slice: streamed non-interactive producer, automatic disk jobs, one persistent Window B reviewer, same-window exact owner receipt, in-phase owner ruling, separate-process rendezvous, and pushed close (`84a31fb`, evidence at `ece10c5`).
 

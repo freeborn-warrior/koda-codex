@@ -11,8 +11,15 @@ import {
   readProjectConfig,
 } from "./config.ts";
 import { closePath, evaluateSessionClosure, prepareCloseArtifact } from "./close.ts";
+import {
+  carryDirectionsForNextSession,
+  carryPendingDirectionsAfterHalt,
+  createWaitingDirection,
+  pendingDirectionsForActivePhase,
+} from "./direction.ts";
 import { evaluateGate } from "./gate.ts";
 import { pushCommandArgs } from "./git.ts";
+import { evaluateSessionHalt, haltPath, prepareHaltArtifact } from "./halt.ts";
 import { bindGuideLaunch, hasGuideManifest, verifyGuideLaunch } from "./guide.ts";
 import { runGuideCli } from "./guide-commands.ts";
 import { requireAdvancedHistory, validateAdvancedHistory } from "./history.ts";
@@ -42,7 +49,7 @@ import {
   recordApproval,
   sha256,
 } from "./receipt.ts";
-import type { ApprovalEntry, GateResult, Verdict } from "./types.ts";
+import type { ApprovalEntry, DirectionReference, GateResult, Verdict } from "./types.ts";
 
 const packageRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
@@ -150,23 +157,44 @@ async function sessionNewCommand(args: string[], cwd: string, io: CliIo): Promis
   if (prompt.trim() === "") throw new Error("The session prompt must be non-empty.");
 
   const previousId = await latestSessionId(root, config);
+  let entryDirections: DirectionReference[] = [];
+  let priorHaltId: string | null = null;
   if (previousId) {
     const previousDir = sessionRoot(root, config, previousId);
     const previous = await loadSessionState(previousDir, previousId);
     const closure = await evaluateSessionClosure(root, previousDir, previous);
-    if (!closure.closed) {
-      throw new Error(`Session ${previousId} is not closed:\n- ${closure.reasons.join("\n- ")}`);
+    const halt = await evaluateSessionHalt(root, previousDir, previous);
+    if (!closure.closed && !halt.halted) {
+      const reasons = halt.exists ? halt.reasons : closure.reasons;
+      throw new Error(`Session ${previousId} is neither closed nor pushed-halted:\n- ${reasons.join("\n- ")}`);
+    }
+    if (halt.halted && halt.metadata) {
+      priorHaltId = halt.metadata.id;
+      entryDirections = await carryPendingDirectionsAfterHalt(previousDir, previous);
+      const requiredIds = [halt.metadata.id, ...entryDirections.map((direction) => direction.id)];
+      const missing = requiredIds.filter((id) => !prompt.includes(id));
+      if (missing.length > 0) {
+        throw new Error(`The fresh session prompt must cite the pushed halt and every waiting direction ID:\n- ${missing.join("\n- ")}`);
+      }
+    } else {
+      entryDirections = await carryDirectionsForNextSession(previousDir, previous);
+      const missing = entryDirections.map((direction) => direction.id).filter((id) => !prompt.includes(id));
+      if (missing.length > 0) {
+        throw new Error(`The new session prompt must cite every direction released at the prior session boundary:\n- ${missing.join("\n- ")}`);
+      }
     }
   }
 
   const guideLaunch = await hasGuideManifest(root, config)
     ? await verifyGuideLaunch(root, config, promptPath)
     : null;
-  const session = await createSession(root, config, prompt);
+  const session = await createSession(root, config, prompt, { entryDirections });
   if (guideLaunch) await bindGuideLaunch(root, config, guideLaunch, session.id, session.state);
   io.out(`✓ Opened session ${session.id}`);
   io.out(`Prompt: ${displayPath(root, path.join(session.directory, "session-prompt.md"))}`);
   io.out(`Current phase: ${session.state.phases[0].name}`);
+  if (entryDirections.length > 0) io.out(`Waiting directions entering Brief: ${entryDirections.length}`);
+  if (priorHaltId) io.out(`Fresh Brief after pushed halt: ${priorHaltId}`);
   io.out(`Write the artifact: ${displayPath(root, artifactPath(session.directory, session.state.phases[0], 0))}`);
 }
 
@@ -179,6 +207,9 @@ function gateNextStep(root: string, result: GateResult): string[] {
     return ["Create the peer-review template:", `  ${command("review", "new", result.phase.name)}`];
   }
   if (
+    codes.has("direction_input_missing") ||
+    codes.has("direction_used_before_gate") ||
+    codes.has("direction_evidence_invalid") ||
     codes.has("artifact_changed") ||
     codes.has("receipt_missing") ||
     codes.has("receipt_mismatch") ||
@@ -225,6 +256,12 @@ async function statusCommand(args: string[], cwd: string, io: CliIo): Promise<vo
   const active = currentPhase(session.state);
 
   io.out(`KODA — ${session.id}`);
+  const halt = await evaluateSessionHalt(root, session.directory, session.state);
+  if (halt.exists) {
+    io.out(halt.halted ? "SESSION HALTED — fresh Brief may open" : "HALT PREPARED — SESSION NOT YET HALTED");
+    for (const reason of halt.reasons) io.out(`✗ ${reason}`);
+    return;
+  }
   const historyIssues = await validateAdvancedHistory(session.directory, session.state);
   if (historyIssues.length) {
     io.out("SESSION EVIDENCE BROKEN — ENTRY REFUSED");
@@ -239,10 +276,44 @@ async function statusCommand(args: string[], cwd: string, io: CliIo): Promise<vo
   }
 
   io.out(`Phase ${active.index + 1}/${session.state.phases.length}: ${active.phase.name}`);
+  const waiting = await pendingDirectionsForActivePhase(session.directory, session.state);
+  if (waiting.length > 0) io.out(`WAITING AT NEXT GATE — ${waiting.length} recorded direction(s); current phase inputs remain frozen.`);
   const result = await evaluateGate(session.directory, active.phase, active.index);
   io.out(result.open ? "GATE OPEN — ready to advance" : `GATE CLOSED — ${result.issues.length} requirement(s) missing`);
   for (const finding of result.issues) io.out(`✗ ${finding.message}`);
   for (const line of gateNextStep(root, result)) io.out(line);
+}
+
+async function directionWaitCommand(args: string[], cwd: string, io: CliIo): Promise<void> {
+  const source = option(args, "--source") ?? "owner-via-guide";
+  rejectUnknownOptions(args);
+  if (args.length !== 2) {
+    throw new Error("Usage: koda direction wait <owner-message-file> <classification-file> [--source owner-via-guide|owner-via-reviewer]");
+  }
+  if (source !== "owner-via-guide" && source !== "owner-via-reviewer") {
+    throw new Error("Direction source must be owner-via-guide or owner-via-reviewer.");
+  }
+  const root = await findProjectRoot(cwd);
+  const config = await readProjectConfig(root);
+  const session = await loadLatestSession(root, config);
+  if (await pathExists(haltPath(session.directory))) throw new Error("Session halt is already prepared; no new direction may enter it.");
+  await requireAdvancedHistory(session.directory, session.state);
+  if (!currentPhase(session.state)) throw new Error("No active phase can receive waiting direction.");
+  const [ownerStatement, classification] = await Promise.all([
+    readRegularText(path.resolve(cwd, args[0]), "The owner direction file"),
+    readRegularText(path.resolve(cwd, args[1]), "The direction classification file"),
+  ]);
+  const created = await createWaitingDirection({
+    sessionDir: session.directory,
+    state: session.state,
+    source,
+    ownerStatement,
+    classification,
+  });
+  io.out(`DIRECTION RECORDED — WAITING FOR GATE`);
+  io.out(`✓ ${displayPath(root, created.path)}`);
+  io.out(`Direction ID: ${created.metadata.id}`);
+  io.out("The active phase inputs remain frozen. Producer receives this only after the next successful gate.");
 }
 
 async function reviewNewCommand(args: string[], cwd: string, io: CliIo): Promise<void> {
@@ -251,6 +322,7 @@ async function reviewNewCommand(args: string[], cwd: string, io: CliIo): Promise
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
   const session = await loadLatestSession(root, config);
+  if (await pathExists(haltPath(session.directory))) throw new Error("Session halt is already prepared; no review may be created.");
   await requireAdvancedHistory(session.directory, session.state);
   const active = currentPhase(session.state);
   if (!active) throw new Error("All phases are complete; no review can be created.");
@@ -276,6 +348,7 @@ async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<v
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
   const session = await loadLatestSession(root, config);
+  if (await pathExists(haltPath(session.directory))) throw new Error("Session halt is already prepared; no review may be approved.");
   await requireAdvancedHistory(session.directory, session.state);
   const active = currentPhase(session.state);
   if (!active) throw new Error("All phases are complete; there is nothing to approve.");
@@ -349,6 +422,7 @@ async function advanceCommand(args: string[], cwd: string, io: CliIo): Promise<v
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
   const session = await loadLatestSession(root, config);
+  if (await pathExists(haltPath(session.directory))) throw new Error("Session halt is already prepared; no phase may advance.");
   await requireAdvancedHistory(session.directory, session.state);
   const active = currentPhase(session.state);
   if (!active) throw new Error("All phases have already advanced. Commit and push, then run `koda session close`." );
@@ -360,17 +434,26 @@ async function advanceCommand(args: string[], cwd: string, io: CliIo): Promise<v
     return;
   }
 
+  const waitingDirections = await pendingDirectionsForActivePhase(session.directory, session.state);
   session.state.advances.push({
     phase: active.phase.name,
     receipt: result.review.receipt,
     reviewId: result.review.metadata.id,
     advancedAt: nowIso(),
+    ...(waitingDirections.length > 0
+      ? { directions: waitingDirections.map((direction) => direction.metadata.id) }
+      : {}),
   });
   session.state.currentPhaseIndex += 1;
   await saveSessionState(session.directory, session.state);
 
   io.out(`GATE OPEN — ${active.phase.name.toUpperCase()}`);
   io.out(`✓ Advanced with artifact, review, ${result.review.verdict}, and exact receipt proof.`);
+  const released = session.state.advances.at(-1)?.directions ?? [];
+  if (released.length > 0) {
+    io.out(`✓ Released ${released.length} waiting direction(s) to the receiving phase.`);
+    for (const id of released) io.out(`  ${id}`);
+  }
   const next = currentPhase(session.state);
   if (next) {
     io.out(`Next phase: ${next.phase.name}`);
@@ -387,6 +470,7 @@ async function sessionCloseCommand(args: string[], cwd: string, io: CliIo): Prom
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
   const session = await loadLatestSession(root, config);
+  if (await pathExists(haltPath(session.directory))) throw new Error("A halted session cannot run the close ceremony.");
   if (session.state.currentPhaseIndex !== session.state.phases.length) {
     io.out(`SESSION NOT CLOSED — ${session.id}`);
     io.out("✗ Every declared phase has not advanced.");
@@ -423,6 +507,47 @@ async function sessionCloseCommand(args: string[], cwd: string, io: CliIo): Prom
   io.out("✓ Final phase gated, immutable close committed, and branch pushed.");
 }
 
+async function sessionHaltCommand(args: string[], cwd: string, io: CliIo): Promise<void> {
+  rejectUnknownOptions(args);
+  if (args.length > 1) throw new Error("Usage: koda session halt [owner-direction-file]");
+  const root = await findProjectRoot(cwd);
+  const config = await readProjectConfig(root);
+  const session = await loadLatestSession(root, config);
+  const file = haltPath(session.directory);
+  if (!(await pathExists(file))) {
+    if (args.length !== 1) throw new Error("Usage: koda session halt <owner-direction-file>");
+    const ownerDirection = await readRegularText(path.resolve(cwd, args[0]), "The halt direction file");
+    const pushArgs = pushCommandArgs(root);
+    if (!pushArgs) {
+      io.out(`SESSION NOT HALTED — ${session.id}`);
+      io.out("✗ Configure a Git remote and named branch before preparing halt.md.");
+      process.exitCode = 2;
+      return;
+    }
+    const prepared = await prepareHaltArtifact(session.directory, session.state, ownerDirection);
+    const relativeSession = displayPath(root, session.directory);
+    io.out(`HALT PREPARED — ${session.id} — NOT HALTED`);
+    io.out(`✓ Created immutable ${displayPath(root, prepared)}`);
+    io.out("The active phase is void and cannot resume. Commit and push the bound session, then verify:");
+    io.out(`  git add ${shellQuote(relativeSession)}`);
+    io.out(`  git commit -m ${shellQuote(`halt session ${session.id}`)}`);
+    io.out(`  git ${pushArgs.map(shellQuote).join(" ")}`);
+    io.out(`  ${command("session", "halt")}`);
+    process.exitCode = 2;
+    return;
+  }
+  const halt = await evaluateSessionHalt(root, session.directory, session.state);
+  if (!halt.halted) {
+    io.out(`SESSION NOT HALTED — ${session.id}`);
+    for (const reason of halt.reasons) io.out(`✗ ${reason}`);
+    process.exitCode = 2;
+    return;
+  }
+  io.out(`SESSION HALTED — ${session.id}`);
+  io.out(`✓ In-flight phase ${halt.metadata?.phase} is void; no artifact, review, or approval from it may count.`);
+  io.out(`Fresh Brief must cite halt ID: ${halt.metadata?.id}`);
+}
+
 function help(io: CliIo): void {
   io.out("Koda — phase gates with proof the review was read");
   io.out("");
@@ -433,8 +558,10 @@ function help(io: CliIo): void {
   io.out("  koda guide launch ... [--open ghostty]");
   io.out("  koda status");
   io.out("  koda review new <phase>");
+  io.out("  koda direction wait <owner-message-file> <classification-file> [--source owner-via-guide|owner-via-reviewer]");
   io.out("  koda approve <phase> [quoted-receipt] [--approver <name>]");
   io.out("  koda advance");
+  io.out("  koda session halt [owner-direction-file]");
   io.out("  koda session close");
 }
 
@@ -450,10 +577,12 @@ export async function runCli(args: string[], cwd = process.cwd(), io: CliIo = de
   if (verb === "status") return statusCommand(rest, cwd, io);
   if (verb === "guide") return runGuideCli(rest, cwd, { out: io.out });
   if (verb === "review" && rest[0] === "new") return reviewNewCommand(rest.slice(1), cwd, io);
+  if (verb === "direction" && rest[0] === "wait") return directionWaitCommand(rest.slice(1), cwd, io);
   if (verb === "approve") return approveCommand(rest, cwd, io);
   if (verb === "advance") return advanceCommand(rest, cwd, io);
   if (verb === "session" && rest[0] === "new") return sessionNewCommand(rest.slice(1), cwd, io);
   if (verb === "session" && rest[0] === "close") return sessionCloseCommand(rest.slice(1), cwd, io);
+  if (verb === "session" && rest[0] === "halt") return sessionHaltCommand(rest.slice(1), cwd, io);
   throw new Error(`Unknown command: ${args.join(" ")}. Run \`koda --help\`.`);
 }
 

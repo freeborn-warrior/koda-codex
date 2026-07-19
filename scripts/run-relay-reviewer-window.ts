@@ -8,10 +8,12 @@ import { createInterface } from "node:readline";
 import { createInterface as createPrompt } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 
-import { pathExists } from "../src/config.ts";
-import { writeTextAtomic } from "../src/project.ts";
+import { pathExists, readProjectConfig } from "../src/config.ts";
+import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
+import { pushCommandArgs } from "../src/git.ts";
+import { evaluateSessionHalt, prepareHaltArtifact } from "../src/halt.ts";
+import { displayPath, loadLatestSession, writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
-import { createOwnerHandback } from "./owner-handback.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
   acquireReviewerWindow,
@@ -61,7 +63,12 @@ async function discoverRun(): Promise<string> {
     const record = await readFile(path.join(candidate, "RUN.json"), "utf8")
       .then((content) => JSON.parse(content) as RunRecord)
       .catch(() => null);
-    if (record && record.version === 1 && record.status !== "COMPLETE") candidates.push(candidate);
+    if (
+      record &&
+      record.version === 1 &&
+      record.status !== "COMPLETE" &&
+      record.status !== "HALTED"
+    ) candidates.push(candidate);
   }
   if (candidates.length === 0) refuse("No prepared or active relay run exists. Start Window A first.");
   if (candidates.length > 1) refuse("More than one relay run is active. Koda will not guess which session you mean.");
@@ -251,7 +258,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   await writeReviewerWindowState(runRoot, state);
 
   const testMode = Boolean(process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CONFIRM_READ === "1");
-  let pendingDirection: { statement: string; relay: string } | null = null;
+  let waitingDirectionPath: string | null = null;
   const beforeHash = createHash("sha256").update(before).digest("hex");
   const requireUnchangedReview = async () => {
     const current = await readFile(review, "utf8");
@@ -269,45 +276,70 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     if (pager.status !== 0) throw new Error(`The review reader exited ${pager.status ?? -1}; nothing was acknowledged.`);
     await requireUnchangedReview();
   };
+  const haltSession = async (ownerDirectionInput: string) => {
+    const ownerDirection = ownerDirectionInput.trim();
+    if (!ownerDirection) throw new Error("A halt needs the owner's exact direction for the fresh Brief.");
+    const config = await readProjectConfig(project);
+    const session = await loadLatestSession(project, config);
+    const pushArgs = pushCommandArgs(project);
+    if (!pushArgs) throw new Error("Configure a Git remote and named branch before halting this session.");
+    const stagedBefore = spawnSync("git", ["diff", "--cached", "--name-only"], { cwd: project, encoding: "utf8" });
+    if (stagedBefore.status !== 0 || stagedBefore.stdout.trim() !== "") {
+      throw new Error("Halt refused because unrelated staged changes already exist.");
+    }
+    const aheadBefore = spawnSync("git", ["rev-list", "--count", "@{u}..HEAD"], { cwd: project, encoding: "utf8" });
+    if (aheadBefore.status !== 0 || aheadBefore.stdout.trim() !== "0") {
+      throw new Error("Halt refused because the current branch already has unpushed commits.");
+    }
+    const prepared = await prepareHaltArtifact(session.directory, session.state, ownerDirection);
+    const relativeSession = displayPath(project, session.directory);
+    const addResult = withOwnerConsolePaused(() => spawnSync("git", ["add", "--", relativeSession], { cwd: project, encoding: "utf8" }));
+    if (addResult.status !== 0) throw new Error(`Halt Git step failed: git add -- ${relativeSession}\n${addResult.stderr}`);
+    const stagedAfter = spawnSync("git", ["diff", "--cached", "--name-only"], { cwd: project, encoding: "utf8" });
+    const stagedPaths = stagedAfter.stdout.trim().split(/\r?\n/).filter(Boolean);
+    if (stagedAfter.status !== 0 || stagedPaths.length === 0 || stagedPaths.some((file) => file !== relativeSession && !file.startsWith(`${relativeSession}/`))) {
+      throw new Error("Halt refused because Git staging contains missing or unrelated paths.");
+    }
+    for (const args of [["commit", "-m", `halt session ${session.id}`], pushArgs]) {
+      const result = withOwnerConsolePaused(() => spawnSync("git", args, { cwd: project, encoding: "utf8" }));
+      if (result.status !== 0) throw new Error(`Halt Git step failed: git ${args.join(" ")}\n${result.stderr}`);
+    }
+    const halt = await evaluateSessionHalt(project, session.directory, session.state);
+    if (!halt.halted) throw new Error(`Halt verification failed: ${halt.reasons.join("; ")}`);
+    job.completion = "HALTED";
+    console.log(`\nSESSION HALTED — ${session.id}`);
+    console.log(`Disk evidence: ${displayPath(project, prepared)}`);
+    console.log(`Halt ID: ${halt.metadata?.id}`);
+    console.log("The in-flight phase is void. Window A will stop; later work must begin through a fresh Brief.");
+  };
   const discuss = async (question: string) => {
     const response = await modelTurn(`explain ${job.phase} review`, [
       `Read ${path.join(project, ".agents", "skills", "koda-c-review", "SKILL.md")} completely and explicitly use koda-c-review in owner-explanation mode.`,
       `The active review is ${review}.`,
       `The owner's exact question is ${JSON.stringify(question)}.`,
       "Explain only from the review and evidence it cites. Do not edit any file, run Koda, approve, advance, or quote the receipt.",
-      "If this introduces a new product direction outside the active review, follow the skill's exact OWNER DIRECTION marker and make clear it has not reached the producer.",
+      "If this introduces new product direction, follow the skill's exact WAIT FOR GATE marker. Direction must be recorded now but cannot enter the current phase contract.",
     ].join(" "));
     await requireUnchangedReview();
     state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: null });
     await writeReviewerWindowState(runRoot, state);
-    if (response.trimStart().startsWith("OWNER DIRECTION — DISK HANDOFF REQUIRED") && parsed.verdict !== "DISCUSS") {
-      pendingDirection = { statement: question, relay: response.trim() };
-      job.error = "OWNER_DIRECTION_HANDOFF_REQUIRED";
-      await writeReviewerJob(runRoot, job);
-      console.log("\nACKNOWLEDGEMENT PAUSED — this is new owner direction, not an explanation.");
-      console.log("It has not reached the producer. This runtime will not turn chat into work without a disk handback.");
+    if (response.trimStart().startsWith(WAITING_DIRECTION_PREFIX)) {
+      const config = await readProjectConfig(project);
+      const session = await loadLatestSession(project, config);
+      const created = await createWaitingDirection({
+        sessionDir: session.directory,
+        state: session.state,
+        source: "owner-via-reviewer",
+        ownerStatement: question,
+        classification: response,
+      });
+      waitingDirectionPath = displayPath(project, created.path);
+      console.log("\nDIRECTION RECORDED — WAITING FOR GATE");
+      console.log(`Disk evidence: ${waitingDirectionPath}`);
+      console.log("The reviewed artifact keeps its frozen contract. Producer receives this direction only after advancement.");
+    } else if (response.trimStart().startsWith("OWNER DIRECTION — DISK HANDOFF REQUIRED")) {
+      throw new Error("Reviewer used the superseded DISK HANDOFF REQUIRED marker. Re-run the explanation under the wait-or-halt contract.");
     }
-  };
-  const writeDirectionHandback = async () => {
-    if (!pendingDirection) throw new Error("No classified owner direction is waiting for handback.");
-    const match = /^(\d{2})-([a-z0-9-]+)-review\.md$/.exec(path.basename(review));
-    if (!match || match[2] !== job.phase) throw new Error("The active review path cannot locate its phase handback directory.");
-    const sessionDir = path.dirname(path.dirname(review));
-    const artifact = path.join(sessionDir, "phases", `${match[1]}-${job.phase}.md`);
-    const handback = await createOwnerHandback({
-      sessionDir,
-      phase: job.phase,
-      phaseIndex: Number(match[1]) - 1,
-      artifactPath: artifact,
-      reviewPath: review,
-      ownerStatement: pendingDirection.statement,
-      reviewerRelay: pendingDirection.relay,
-    });
-    job.handbackPath = path.relative(project, handback.path);
-    job.error = null;
-    await writeReviewerJob(runRoot, job);
-    console.log(`OWNER HANDBACK WRITTEN — ${job.handbackPath}`);
-    console.log("The exact review receipt is still required before Window A may consume it.");
   };
 
   console.log(`\nREVIEW READY — ${job.phase.toUpperCase()} — ${parsed.verdict}`);
@@ -325,16 +357,15 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     testDiscussionConsumed = true;
     await discuss(testQuestion);
   }
-  if (testMode && pendingDirection && process.env.KODA_RELAY_TEST_DIRECTION_ACTION === "handoff") {
-    await writeDirectionHandback();
+  const testHaltDirection = testMode ? process.env.KODA_RELAY_TEST_HALT_DIRECTION?.trim() : undefined;
+  if (testHaltDirection) {
+    await haltSession(testHaltDirection);
+    return;
   }
   if (!testMode) {
     for (;;) {
-      const blocked = job.error === "OWNER_DIRECTION_HANDOFF_REQUIRED";
-      const choice = (await promptOwner(blocked
-        ? "Type s to send this direction, d to discuss, x to discard it, r to reread, or p to pause: "
-        : "Press Return to acknowledge, d to discuss, r to reread, or p to pause safely: ")).trim().toLowerCase();
-      if ((choice === "" || choice === "a") && !blocked) break;
+      const choice = (await promptOwner("Press Return to acknowledge, d to discuss, r to reread, h to halt, or p to stop the relay: ")).trim().toLowerCase();
+      if (choice === "" || choice === "a") break;
       if (choice === "r") {
         await openReview();
         continue;
@@ -348,25 +379,18 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
         await discuss(question);
         continue;
       }
-      if (choice === "s" && blocked) {
-        await writeDirectionHandback();
-        break;
-      }
-      if (choice === "x" && blocked) {
-        pendingDirection = null;
-        job.error = null;
-        await writeReviewerJob(runRoot, job);
-        console.log("Owner direction discarded. Nothing was sent to the producer.");
-        continue;
+      if (choice === "h") {
+        const ownerDirection = await promptOwner("Direction that the fresh Brief must carry: ");
+        if (!ownerDirection.trim()) {
+          console.log("No direction entered; halt was not prepared.");
+          continue;
+        }
+        await haltSession(ownerDirection);
+        return;
       }
       if (choice === "p") throw new OwnerPaused("Kristian paused at the reviewer decision point.");
-      console.log(blocked
-        ? "Acknowledgement remains paused until the owner direction has a disk handback."
-        : "Choose Return, d, r, or p.");
+      console.log("Choose Return, d, r, h, or p.");
     }
-  }
-  if (job.error === "OWNER_DIRECTION_HANDOFF_REQUIRED") {
-    throw new OwnerPaused("A new owner direction still requires a disk handback before acknowledgement.");
   }
 
   const testClipboard = process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CLIPBOARD_FILE;
@@ -395,10 +419,10 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     },
   ));
   if (approved.status !== 0) throw new Error(`Owner acknowledgement exited ${approved.status ?? -1}.`);
-  job.completion = job.handbackPath ? "OWNER_HANDBACK" : "ACKNOWLEDGED";
+  job.completion = "ACKNOWLEDGED";
   console.log("ACKNOWLEDGED — Window A will now derive the route from disk.");
   console.log(`REVIEWER HANDOVER — ${job.phase.toUpperCase()} — ${job.completion}`);
-  console.log(`Disk evidence: ${job.handbackPath ?? path.relative(project, review)}`);
+  console.log(`Disk evidence: ${waitingDirectionPath ?? path.relative(project, review)}`);
   console.log("Control: returned to Window A; the gate, not this message, determines the next action.");
 }
 
@@ -462,10 +486,22 @@ async function holdOwnerConversation(question: string): Promise<void> {
     "Do not edit any file, create a review or handback, run Koda, approve, advance, quote a receipt, or claim the Producer received this conversation.",
     "Use the skill's exact boundary marker if the message is project-level Guide scope or actionable direction for the active session.",
   ].join(" "));
-  if (response.trimStart().startsWith("OWNER DIRECTION — ACTIVE SESSION TRANSFER REQUIRED")) {
-    console.log("\nOWNER DIRECTION — NOT SENT");
-    console.log("The Reviewer identified possible active-session direction, but this conversation changed no file and reached no Producer.");
-    console.log("Koda-C does not yet have an owner-approved idle transfer artifact. The current session keeps its confirmed course.");
+  if (response.trimStart().startsWith(WAITING_DIRECTION_PREFIX)) {
+    const config = await readProjectConfig(project);
+    const session = await loadLatestSession(project, config);
+    const created = await createWaitingDirection({
+      sessionDir: session.directory,
+      state: session.state,
+      source: "owner-via-reviewer",
+      ownerStatement: question,
+      classification: response,
+    });
+    console.log("\nDIRECTION RECORDED — WAITING FOR GATE");
+    console.log(`Disk evidence: ${displayPath(project, created.path)}`);
+    console.log(`Direction ID: ${created.metadata.id}`);
+    console.log("The active phase inputs remain frozen. Producer receives this only after the next successful gate.");
+  } else if (response.trimStart().startsWith("OWNER DIRECTION — ACTIVE SESSION TRANSFER REQUIRED")) {
+    throw new Error("Reviewer used the superseded ACTIVE SESSION TRANSFER REQUIRED marker. Re-run the conversation under the wait-or-halt contract.");
   } else if (response.trimStart().startsWith("GUIDE CONVERSATION — PROJECT SCOPE")) {
     console.log("\nGUIDE SCOPE — continue this project-level thought in the Guide conversation.");
     console.log("Nothing from this Reviewer conversation changed the active session.");
@@ -477,7 +513,7 @@ async function holdOwnerConversation(question: string): Promise<void> {
 console.log("KODA-C REVIEWER WINDOW");
 console.log(`Reviewer: ${state.model} / ${state.effort}`);
 console.log("This window owns the active-session Reviewer context. Leave it open.");
-console.log("You may type an active-session question while Producer works; conversation alone never becomes Producer input.");
+console.log("You may type an active-session question while Producer works; direction is recorded now and waits for the next gate.");
 console.log("Waiting for the producer in Window A…");
 if (ownerConsole) process.stdout.write("reviewer> ");
 
@@ -486,8 +522,10 @@ try {
   let testIdleConversationConsumed = false;
   while (!stopping) {
     const run = await readRun();
-    if (run.status === "COMPLETE") {
-      console.log("\nSESSION CLOSED — reviewer window complete.");
+    if (run.status === "COMPLETE" || run.status === "HALTED") {
+      console.log(run.status === "COMPLETE"
+        ? "\nSESSION CLOSED — reviewer window complete."
+        : "\nSESSION HALTED — reviewer window complete; return to Guide for a fresh Brief.");
       break;
     }
     const job = await readReviewerJob(runRoot);

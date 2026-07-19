@@ -91,4 +91,24 @@ export const VERDICTS = [
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //# sourceURL=/Users/freeborn/Dev/koda-codex/src/types.ts

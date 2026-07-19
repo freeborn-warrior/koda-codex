@@ -19,7 +19,7 @@ async function durableSessionFiles(directory: string, sessionDir: string): Promi
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const candidate = path.join(directory, entry.name);
     const relative = path.relative(sessionDir, candidate);
-    if (relative === "close.md") continue;
+    if (relative === "close.md" || relative === "halt.md") continue;
     if (entry.isDirectory()) files.push(...await durableSessionFiles(candidate, sessionDir));
     if (entry.isFile()) files.push(candidate);
     if (!entry.isDirectory() && !entry.isFile()) {
@@ -70,6 +70,9 @@ export function parseCloseArtifact(content: string): CloseMetadata | null {
 }
 
 export async function prepareCloseArtifact(sessionDir: string, state: SessionState): Promise<string> {
+  if (await pathExists(path.join(sessionDir, "halt.md"))) {
+    throw new Error("A session with halt.md cannot be closed.");
+  }
   if (state.currentPhaseIndex !== state.phases.length || state.advances.length !== state.phases.length) {
     throw new Error("Every declared phase must advance before close can be prepared.");
   }
@@ -117,6 +120,9 @@ export async function evaluateSessionClosure(
   state: SessionState,
 ): Promise<{ closed: boolean; reasons: string[] }> {
   const reasons: string[] = [];
+  if (await pathExists(path.join(sessionDir, "halt.md"))) {
+    return { closed: false, reasons: ["halt.md and close.md cannot coexist; session terminal state is ambiguous."] };
+  }
   const complete = state.currentPhaseIndex === state.phases.length && state.advances.length === state.phases.length;
   if (!complete) return { closed: false, reasons: ["Every declared phase has not advanced."] };
 
