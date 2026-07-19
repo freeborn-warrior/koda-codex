@@ -76,5 +76,6 @@ the stack—Producer rejoin—not a loss of project-level Guide truth.
 - Guide reports the exact missing role from process evidence and keeps raw recovery
   commands away from the owner-facing surface.
 
-Pushed-code proof is deliberately separate and must be recorded only after the
-repair commit reaches `origin/main`.
+Pushed-code proof is deliberately separate: repair commit `153814a` reached
+`origin/main` before the unchanged **204/204** suite produced the
+[durable transcript](2026-07-19-first-use-recovery-polish-pushed.md).

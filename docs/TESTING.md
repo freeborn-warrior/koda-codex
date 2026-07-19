@@ -1278,5 +1278,12 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [development record](test-results/2026-07-19-first-use-recovery-polish-development-failures.md).
 - **Evidence:** [One-key UX audit](quality-runs/2026-07-19-first-use-ux-audit-05/RESULT.md)
   and [role-liveness security audit](security-runs/2026-07-19-role-liveness-audit-10/RESULT.md).
-- **Verdict:** LOCAL MECHANICS AND SECURITY PASS; PUSHED BINDING AND HUMAN RECOVERY
-  REMAIN.
+- **Pushed-code proof:** Repair commit `153814a` reached `origin/main` before the
+  unchanged complete suite passed **204/204** and wrote the
+  [durable transcript](test-results/2026-07-19-first-use-recovery-polish-pushed.md).
+  Toolkit capability `ghostty-first-use-recovery-v5` binds that transcript and every
+  changed launch/recovery file.
+- **Final manifest regression:** After the transcript, manifest, current README,
+  backlog, project document, and submission checklist were assembled, the complete
+  suite passed **204/204** again.
+- **Verdict:** PUSHED MECHANICS AND SECURITY PASS; HUMAN RECOVERY REMAINS.

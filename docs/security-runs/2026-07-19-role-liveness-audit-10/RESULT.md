@@ -1,7 +1,7 @@
 # Security audit 10 — visible-role ownership and recovery
 
 **Date:** 2026-07-19  
-**Verdict:** LOCAL SECURITY CHECKS PASS; PUSHED AND HUMAN PROOF PENDING
+**Verdict:** PUSHED SECURITY CHECKS PASS; HUMAN PROOF PENDING
 
 ## Threats checked
 
@@ -47,3 +47,5 @@ cannot suppress macOS or Codex host permission prompts. Those remain explicit hu
 observations, while the gate and role identity continue to fail closed.
 
 See the [development record](../../test-results/2026-07-19-first-use-recovery-polish-development-failures.md).
+The [pushed 204-check transcript](../../test-results/2026-07-19-first-use-recovery-polish-pushed.md)
+is hash-bound by toolkit capability `ghostty-first-use-recovery-v5`.

@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "capability": "ghostty-partial-recovery-v4",
-  "verifiedAt": "2026-07-19T22:21:46.935Z",
-  "repairCommit": "9d4eaa717733fa6f5b7b115ea699cd91043ddbe6",
-  "testedCommit": "9d4eaa717733fa6f5b7b115ea699cd91043ddbe6",
-  "testCount": 199,
+  "capability": "ghostty-first-use-recovery-v5",
+  "verifiedAt": "2026-07-19T22:51:29.774Z",
+  "repairCommit": "153814acc15e568ba4ee99724784212e04d303f2",
+  "testedCommit": "153814acc15e568ba4ee99724784212e04d303f2",
+  "testCount": 204,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-producer-rejoin-pushed.md",
-    "sha256": "62efc6fb25f00860795f0773e3063f05373955b6676007403174dd7703ea8572"
+    "path": "docs/test-results/2026-07-19-first-use-recovery-polish-pushed.md",
+    "sha256": "d2dd87b17da0648b2d3874ed94e93a7b43a13335356315e962b4959159049f7f"
   },
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "ca44d3ab159c019da14f5e6e0b5ec5f5c07fd787808521b5be69ef66977d0305"
+      "sha256": "f8aa67d4e4713b630383137e878e333ee2f32b2ac4a25c245b0f1070e9c20ec4"
     },
     {
       "path": "src/relay-environment.ts",
@@ -24,15 +24,19 @@
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "61dd9ec6eb7ca0fdca97c7c15551cd093d69efb3433bfdf08f4e7515700be416"
+      "sha256": "43fbe0e2b87ee82841833b9f97eff259732e0dfc577c7bc2b1f860d58415a439"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "c5248782d5be096e994310dcb2b91d00eb24ff3db8cdd8a11989c89002027f8a"
+      "sha256": "77634738de1871a86a96e19d609114c49a9f0f65947de2e666514f5f7abc121d"
+    },
+    {
+      "path": "scripts/relay-window-protocol.ts",
+      "sha256": "e5d66a7fca7f2f49d787c6ac0db7e4da05e501772b85d97841053828efa2f78a"
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "2050cff9b65eb41b46df9a833bb626252d65f289bc501fd8796be8191809430e"
+      "sha256": "9114995194fa8780c0d8d474a749b32371e84959eb9be99a40f8f80c8e52677c"
     },
     {
       "path": "dist/relay-environment.js",
@@ -60,11 +64,11 @@
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "a0ccfbc81147fde128a7a8d28f662740c172b859c6d563edd771637b4e269ac7"
+      "sha256": "a14346c990218e72a14718b57f7aa3c28b967fefebad514bbef34607e18192ab"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "b5e767549f4f6275c8d056bf15bf845b36d4ffc3c36bebdd0e1aae6d2f3ef182"
+      "sha256": "2b72f61dce6fd715c2fdd300dc11950173d4ac775608751c43d2c34da7bd5c44"
     },
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",
@@ -80,7 +84,7 @@
     },
     {
       "path": "scripts/show-relay-status.ts",
-      "sha256": "065a72ca2115c10c35425aaaa8f837873956002340ea99a27ab6f13a356fa60a"
+      "sha256": "f839ce7ef533071ddbee7dff804040801da9def49568c52076142568396576e0"
     },
     {
       "path": "src/direction.ts",

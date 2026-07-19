@@ -1,7 +1,7 @@
 # First-use UX audit 05 — one-key routine flow
 
 **Date:** 2026-07-19  
-**Verdict:** LOCAL MECHANICS PASS; HUMAN OBSERVATION STILL REQUIRED
+**Verdict:** PUSHED MECHANICS PASS; HUMAN OBSERVATION STILL REQUIRED
 
 ## User contract audited
 
@@ -47,12 +47,15 @@ weakening the product.
 
 ## Evidence and limits
 
-Deterministic tests pass **204/204** locally. They include real child processes,
+Deterministic tests pass **204/204** against pushed repair commit `153814a`. They include real child processes,
 pseudo-terminals, process locks, malformed paths, launch-order mutations, and real
 single/plural Guide integrations. The corrected coverage suite also passes
 **204/204**.
 
+The [durable transcript](../../test-results/2026-07-19-first-use-recovery-polish-pushed.md)
+is hash-bound by toolkit capability `ghostty-first-use-recovery-v5`.
+
 These checks cannot prove that Ghostty's actual window arrangement, macOS permission
 dialogs, font size, or wording feel clear to a person. Kristian's preserved live
 session therefore remains paused at Brief with zero acknowledgement and zero
-advancement until the pushed repair is ready for one fresh observation.
+advancement until Kristian is ready for one fresh observation.

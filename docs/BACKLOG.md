@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, role liveness, ordered startup, numbered retry, fresh-model isolation, and hardened Git locking now pass 204/204 locally; pushed proof, Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, role liveness, ordered startup, numbered retry, fresh-model isolation, and hardened Git locking now pass a pushed, integrity-bound 204/204 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
@@ -14,9 +14,6 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
 - [ ] Owner-test the repaired one-action Ghostty adapter against a genuine Guide-confirmed session. The original callback-only adapter test was insufficient and encoded the unsafe multi-token launch; never reinstate that claim.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
-- [ ] Promote the 204-check first-use recovery repair to pushed toolkit evidence,
-  then return the preserved session to Kristian only through Guide. Do not ask him to
-  run a raw role command or restart both session windows.
 
 ## Next
 
@@ -41,6 +38,13 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Make visible-role failure recoverable without making the owner a terminal
+  operator: Reviewer and Producer hold separate live locks, initial launch waits for
+  each role in order, Guide reports the exact missing role and hides raw commands,
+  and reader/clipboard/halt mistakes stay at numbered choices. Repair commit
+  `153814a` passes the pushed **204/204** transcript and is bound as toolkit
+  capability `ghostty-first-use-recovery-v5`. Human observation is still required.
 
 - [x] Repair the live partial-recovery interleaving without bypassing the job guard:
   Producer rejoins the exact existing formal-review job, Guide offers one missing-role
