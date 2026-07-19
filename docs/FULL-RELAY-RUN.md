@@ -56,11 +56,11 @@ Preparation does not call a model and does not create a Koda session.
 Start the two persistent sides once:
 
 ```bash
-# Window A
-npm run relay:producer
-
-# Window B
+# Window B — start first
 npm run relay:reviewer
+
+# Window A — start second
+npm run relay:producer
 ```
 
 Each command discovers the only unfinished run and refuses ambiguity. Window B stays open and receives formal review or consultation jobs automatically. At `REVIEW READY`, Kristian may discuss, reread, acknowledge, explicitly halt, or stop the relay. A newly classified direction is recorded immediately and waits for the next gate; there is no send-now path. He quotes the copied exact receipt into Koda in Window B when continuing normally. The readable progress renderer removes receipt lines, and Kristian's acknowledgement input is not submitted as a model message. Raw reviewer events may contain the generated receipt because the reviewer creates the review that contains it. Window A consumes only completed jobs plus disk evidence and then derives the route.

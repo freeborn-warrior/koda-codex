@@ -8,7 +8,6 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
 - [ ] Owner-test the new one-action Ghostty adapter against a genuine Guide-confirmed session. Deterministic tests prove labeled Reviewer-first/Producer-second requests, no shell evaluation, partial-open recovery, and duplicate refusal; they do not prove macOS displayed the windows.
-- [ ] Make the CLI ceremony legible without reading implementation logs: permanent context labels, owner-input state, phase progress and artifact/handover summaries, conversational reviewer notifications, one named reason per refusal, and one safe recovery action. Never present hidden chain-of-thought as product output.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
 
 ## Next
@@ -34,6 +33,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Make the CLI ceremony legible without implementation logs: permanent Guide/Producer/Reviewer labels, explicit owner-input state, frozen phase-entry progress, artifact and gate-pass handovers, Reviewer phase position, and sequential status that prints only Reviewer first and only then Producer. All summaries derive from exposed disk/process facts; hidden reasoning is never claimed. Commit/push evidence pending this milestone.
 
 - [x] Implement the settled wait-or-halt transfer: immediate bound direction record, no current-phase consumption, atomic release in the next advancement record, required receiving-phase citation, early-use refusal, immutable pushed halt, and Guide-confirmed fresh Brief. The historical same-phase handback route was removed rather than retained as a hidden pause-inject-resume path (`cde10de`; pushed 146-check proof).
 

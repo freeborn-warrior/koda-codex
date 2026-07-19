@@ -34,7 +34,7 @@ function status(root: string) {
   });
 }
 
-test("RELAY STATUS TRUTH: a prepared run names both windows and exact safe commands", async (t) => {
+test("RELAY STATUS TRUTH: a prepared run names all roles and prints only the first safe action", async (t) => {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-relay-status-"));
   t.after(() => rm(temporary, { recursive: true, force: true }));
   await prepareRun(temporary);
@@ -42,11 +42,35 @@ test("RELAY STATUS TRUTH: a prepared run names both windows and exact safe comma
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /Run state: PREPARED/);
   assert.match(result.stdout, /Session: not opened/);
+  assert.match(result.stdout, /GUIDE — PROJECT \/ OWNER/);
+  assert.match(result.stdout, /Owner input: OPEN in the existing Guide conversation/);
   assert.match(result.stdout, /WINDOW A — PRODUCER/);
+  assert.match(result.stdout, /Owner input: CLOSED — watch only; speak in Window B/);
   assert.match(result.stdout, /WINDOW B — REVIEWER \/ OWNER/);
+  assert.match(result.stdout, /Owner input: OPEN — active-session conversation belongs here/);
   assert.match(result.stdout, /Console process: not running/);
+  assert.match(result.stdout, /First, start or resume Window B\. Then run status again/);
   assert.match(result.stdout, /npm run relay:reviewer/);
+  assert.doesNotMatch(result.stdout, /npm run relay:producer/);
+});
+
+test("RELAY STATUS TRUTH: after Reviewer is alive, Producer becomes the one safe next action", async (t) => {
+  const temporary = await mkdtemp(path.join(tmpdir(), "koda-relay-status-sequence-"));
+  t.after(() => rm(temporary, { recursive: true, force: true }));
+  const runRoot = await prepareRun(temporary);
+  const lock = path.join(runRoot, REVIEWER_LOCK_DIR);
+  await mkdir(lock);
+  await writeJsonAtomic(path.join(lock, "OWNER.json"), {
+    version: 1,
+    pid: process.pid,
+    startedAt: new Date().toISOString(),
+  });
+  const result = status(temporary);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, new RegExp(`Console process: running as ${process.pid}`));
+  assert.match(result.stdout, /Window B is ready\. Start or resume Window A/);
   assert.match(result.stdout, /npm run relay:producer/);
+  assert.doesNotMatch(result.stdout, /npm run relay:reviewer/);
 });
 
 test("RELAY STATUS TRUTH: a stopped reviewer process names explicit stale-lock recovery", async (t) => {
@@ -76,7 +100,7 @@ test("RELAY STATUS TRUTH: an active recorded producer is never duplicated by a b
   await writeJsonAtomic(runPath, run);
   const result = status(temporary);
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Start or resume Window B/);
+  assert.match(result.stdout, /First, start or resume Window B\. Then run status again/);
   assert.match(result.stdout, /do not start a second producer blindly/);
   assert.doesNotMatch(result.stdout, /Start or resume Window A in the other pane/);
 });

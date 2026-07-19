@@ -145,6 +145,10 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(execute, /evaluateGate/);
   assert.match(execute, /evaluateSessionClosure/);
   assert.match(execute, /dispatchReviewerWindowJob/);
+  assert.match(execute, /KODA-C PRODUCER WINDOW/);
+  assert.match(execute, /Owner input: CLOSED — watch here; speak only in the Reviewer window/);
+  assert.match(execute, /PHASE \$\{active\.index \+ 1\}\/\$\{session\.state\.phases\.length\}/);
+  assert.match(execute, /GATE PASSED — \$\{phaseName\.toUpperCase\(\)\}/);
   assert.match(execute, /AWAITING_REVIEWER_WINDOW/);
   assert.match(execute, /renderCodexEvent/);
   assert.match(execute, /recoverCompletedReviewerJob/);
@@ -169,6 +173,8 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(reviewHelper, /must be a regular file inside the active session/);
   assert.match(reviewerExecute, /Reviewer project resolves outside its prepared run folder/);
   assert.match(reviewerWindow, /acquireReviewerWindow/);
+  assert.match(reviewerWindow, /Owner input: OPEN — active-session conversation belongs here/);
+  assert.match(reviewerWindow, /This context remains the Reviewer for the complete session/);
   assert.match(reviewerWindow, /stdio: \["ignore", "pipe", "pipe"\]/);
   assert.match(reviewerWindow, /parseReview\(before\)/);
   assert.match(reviewerWindow, /"approve", job\.phase, "--approver", "Kristian"/);

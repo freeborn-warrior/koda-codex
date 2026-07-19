@@ -339,6 +339,8 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   await writeJsonAtomic(path.join(runRoot, "RUN.json"), { ...run, status: "PAUSED_BY_OWNER" });
   const guideStatus: string[] = [];
   await runGuideCli(["status"], h.root, { out(message) { guideStatus.push(message); } });
+  assert.match(guideStatus.join("\n"), /Owner input: OPEN — project-level conversation belongs in this Guide context/);
+  assert.match(guideStatus.join("\n"), /Guide direction cannot inject the active phase/);
   assert.match(guideStatus.join("\n"), new RegExp(`ACTIVE SESSION RUNTIME — ${confirmed.launch.id}`));
   assert.match(guideStatus.join("\n"), /State: PAUSED_BY_OWNER/);
   assert.match(guideStatus.join("\n"), /Window B — reviewer \/ owner:[\s\S]*Window A — producer:[\s\S]*Read-only detail:/);

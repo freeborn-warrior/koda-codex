@@ -75,6 +75,8 @@ export async function runGuideCli(
     const runtime = await currentGuideRuntime(root);
     if (pending.length > 1) throw new Error(`${pending.length} prompts claim READY_TO_LAUNCH; Guide state is ambiguous.`);
     io.out(`KODA GUIDE — ${await latestSessionId(root, config) ?? "no sessions yet"}`);
+    io.out("Owner input: OPEN — project-level conversation belongs in this Guide context.");
+    io.out("Active-session questions belong in Reviewer; Guide direction cannot inject the active phase.");
     io.out(`Manifest: ${displayPath(root, guideManifestPath(root, config))}`);
     io.out(`Project: ${manifest.project} — ${continuity.length} continuity file(s)`);
     if (pending.length === 0) io.out("NO PROMPT READY — Guide discussion or drafting may continue.");

@@ -19,7 +19,7 @@ The bounded session still contains two independent working contexts: Producer an
 - talk with **Reviewer** about the active session, its findings, consultations, and owner decisions;
 - never talk directly to **Producer** after session start.
 
-An active session is bound to its confirmed snapshot. Guide conversation or steering-file changes cannot silently alter that running session. If a Guide-level decision truly needs to affect it, Koda-C needs an explicit disk-backed transfer into Reviewer, followed by the appropriate owner/review evidence, before Producer may use it. That transfer protocol is not implemented yet.
+An active session is bound to its confirmed snapshot. Guide conversation or steering-file changes cannot silently alter that running session. Direction from Guide or Reviewer is now written immediately as bound waiting evidence and reaches Producer only through the next successful gate. Explicit pushed halt is the sole interrupt and returns through a new session and fresh Brief. The mechanics are implemented; the full owner-observed three-window experience remains pending.
 
 ## What the CLI must make obvious
 
@@ -47,4 +47,4 @@ The first owner-observed relay proved two separate session contexts and caught a
 
 The first macOS adapter now makes the intended arrangement one explicit command: `koda guide launch ... --open ghostty`. It records launch intent, requests a labeled Reviewer first and Producer second, keeps Guide as the existing conversation, passes direct process arguments rather than a shell-evaluated command, and refuses duplicate automatic opening. A partial GUI request leaves exact manual recovery commands on disk.
 
-The adapter has been tested with an injected macOS opener, not by launching real windows during unattended development. The Reviewer prompt has deterministic pipe and real pseudo-terminal coverage, but no owner-observed full session yet. Rich phase narration and the explicit Guide/idle-direction transfer remain product work. Historical documents may accurately call the first run a two-window proof. Current roadmap language must distinguish that evidence from the three-context finished experience.
+The adapter has been tested with an injected macOS opener, not by launching real windows during unattended development. The Reviewer prompt has deterministic pipe and real pseudo-terminal coverage, but no owner-observed full session yet. The runtime now prints permanent role/input labels, phase-entry summaries, disk-derived handovers, gate-pass summaries, and one sequential safe start action. Historical documents may accurately call the first run a two-window proof. Current roadmap language must distinguish that evidence from the still-unproved owner-observed three-context experience.

@@ -29,6 +29,13 @@ npm run relay:prepare -- software-clean gpt-5.6-sol medium gpt-5.6-terra medium
 
 Preparation creates exactly one new run. It does not call either model and does not open a Koda session.
 
+Start order is intentionally simple:
+
+1. In Window B, run `npm run relay:reviewer` and leave it open.
+2. In Window A, run `npm run relay:producer` and leave it open.
+
+Window B will say that owner input is open. Window A will say that owner input is closed. You never need a phase-specific command after that.
+
 ## Window A — producer
 
 ```bash
@@ -38,7 +45,7 @@ npm run relay:producer
 
 Leave this running. It discovers the one prepared run, starts or resumes the non-interactive producer, and streams the role's emitted updates, completed checks, file changes, and turn endings. When an artifact is ready, Window A writes one reviewer job to disk and waits. It does not run the reviewer itself in this mode.
 
-At each producer stop, Window A prints a `PRODUCER HANDOVER` or `PRODUCER PAUSED` block derived from disk. It names the artifact or consultation, observed byte count and short hash when applicable, and which window now has control. This is a factual summary, not hidden model thinking.
+Window A begins with the permanent `KODA-C PRODUCER WINDOW` label, names its model and session, and says `Owner input: CLOSED`. At phase entry it prints `PHASE n/total`; after a successful gate it prints the revalidated evidence, released waiting-direction IDs, completed count, and next phase or close ceremony. At each producer stop it prints a `PRODUCER HANDOVER` or `PRODUCER PAUSED` block derived from disk. These are factual summaries, not hidden model thinking.
 
 ## Window B — reviewer and owner
 
@@ -47,7 +54,7 @@ cd /Users/freeborn/Dev/koda-codex
 npm run relay:reviewer
 ```
 
-Leave this running too. It discovers the same run and waits. When Window A posts a handover, Window B automatically resumes the same persistent reviewer context. There is no phase-specific command to copy.
+Leave this running too. It begins with the permanent `KODA-C REVIEWER WINDOW` label and says `Owner input: OPEN`. It discovers the same run and waits. When Window A posts a handover, Window B automatically resumes the same persistent reviewer context. There is no phase-specific command to copy.
 
 While Window A is working, Window B shows `reviewer> `. Type an active-session question there and press Return. The same Reviewer context answers from current disk evidence, then returns to the prompt. Ordinary explanation changes no project file. A project-level thought is marked for Guide. Direction is marked `OWNER DIRECTION — WAIT FOR GATE` and written immediately under the session's `directions/` folder, bound to the frozen phase entry and the artifact/review state observed when it arrived. Producer does not receive it until the next successful gate.
 
@@ -107,7 +114,7 @@ cd /Users/freeborn/Dev/koda-codex
 npm run relay:status
 ```
 
-It reports the run, session, phase, both context IDs and turn counts, reviewer-console process, disk job, last error, and the next safe command. It refuses ambiguous or corrupt run state rather than choosing one. If the computer killed Window B without letting it clean up, status names the stopped process and prints the explicit recovery command:
+It reports Guide, Producer, and Reviewer scope; owner-input state; run, session, and phase; both session context IDs and turn counts; reviewer-console process; disk job; last error; and exactly one safe next action. Before Reviewer is alive it prints only the Reviewer command. After Reviewer is alive it prints only the Producer command. It refuses ambiguous or corrupt run state rather than choosing one. If the computer killed Window B without letting it clean up, status names the stopped process and prints the explicit recovery command:
 
 ```bash
 npm run relay:reviewer -- --recover-stale-lock

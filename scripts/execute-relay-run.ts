@@ -561,6 +561,14 @@ async function advance(phaseName: string, previousIndex: number): Promise<void> 
     "- Authority: Koda re-read artifact, review, verdict, receipt acknowledgement, and prior history from disk",
     `- Waiting directions released: ${session.state.advances.at(-1)?.directions?.join(", ") || "none"}`,
   ]);
+  const released = session.state.advances.at(-1)?.directions ?? [];
+  const next = currentPhase(session.state);
+  console.log(`\nGATE PASSED — ${phaseName.toUpperCase()} — ${session.state.currentPhaseIndex}/${session.state.phases.length} phases complete`);
+  console.log("Evidence: artifact, independent review, verdict, owner receipt, and prior gates revalidated from disk");
+  console.log(`Waiting direction release: ${released.length === 0 ? "none" : released.join(", ")}`);
+  console.log(next
+    ? `Next: ${next.phase.name.toUpperCase()} — Producer receives only its frozen entry evidence`
+    : "Next: immutable session close ceremony");
 }
 
 async function commitProducedOutput(): Promise<void> {
@@ -936,6 +944,14 @@ async function main(): Promise<void> {
   run.lastError = undefined;
   await saveRun();
 
+  console.log("KODA-C PRODUCER WINDOW");
+  console.log(`Producer: ${run.producer.model} / ${run.producer.effort}`);
+  console.log(`Session: ${run.sessionId ?? "not opened yet"}`);
+  console.log("Owner input: CLOSED — watch here; speak only in the Reviewer window");
+  console.log("This context remains the Producer for the complete configured session.");
+
+  let announcedPhase: string | null = null;
+
   for (;;) {
     await recoverCompletedReviewerJob();
     const session = await latest();
@@ -951,6 +967,14 @@ async function main(): Promise<void> {
       if (!closure.closed) await closeSession();
       await finalize();
       return;
+    }
+
+    const phaseKey = `${session.id}:${active.index}:${active.phase.name}`;
+    if (announcedPhase !== phaseKey) {
+      announcedPhase = phaseKey;
+      console.log(`\nPHASE ${active.index + 1}/${session.state.phases.length} — ${active.phase.name.toUpperCase()}`);
+      console.log("State: ACTIVE — inputs frozen at phase entry");
+      console.log("Handover: Producer artifact → independent Reviewer → owner receipt → mechanical gate");
     }
 
     const consultation = await outstandingConsultation(session.directory, active.phase.name, active.index);

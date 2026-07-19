@@ -12,7 +12,7 @@ import { pathExists, readProjectConfig } from "../src/config.ts";
 import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
 import { pushCommandArgs } from "../src/git.ts";
 import { evaluateSessionHalt, prepareHaltArtifact } from "../src/halt.ts";
-import { displayPath, loadLatestSession, writeTextAtomic } from "../src/project.ts";
+import { currentPhase, displayPath, loadLatestSession, writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
@@ -251,6 +251,9 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   const before = await readFile(review, "utf8");
   const parsed = parseReview(before);
   if (!parsed.verdict || !parsed.receipt || !parsed.metadata) throw new Error("The reviewer did not leave a valid definitive review.");
+  const progressConfig = await readProjectConfig(project);
+  const progressSession = await loadLatestSession(project, progressConfig);
+  const active = currentPhase(progressSession.state);
 
   job.status = "AWAITING_OWNER";
   await writeReviewerJob(runRoot, job);
@@ -343,10 +346,13 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   };
 
   console.log(`\nREVIEW READY — ${job.phase.toUpperCase()} — ${parsed.verdict}`);
+  if (active?.phase.name === job.phase) {
+    console.log(`Phase: ${active.index + 1}/${progressSession.state.phases.length}`);
+  }
   console.log("This is your decision point in Window B. The producer is waiting in Window A.");
   console.log(`Review: ${path.relative(project, review)}`);
   console.log(`Binding: artifact SHA-256 ${parsed.metadata.artifactSha256.slice(0, 12)}…; review ID ${parsed.metadata.id}`);
-  console.log("Control: Kristian may read, discuss, reread, pause, or acknowledge. Nothing has advanced.");
+  console.log("Control: Kristian may read, discuss, reread, halt, stop, or acknowledge. Nothing has advanced.");
   await openReview();
 
   const configuredTestQuestion = testMode ? process.env.KODA_RELAY_TEST_DISCUSSION_QUESTION?.trim() : undefined;
@@ -512,7 +518,9 @@ async function holdOwnerConversation(question: string): Promise<void> {
 
 console.log("KODA-C REVIEWER WINDOW");
 console.log(`Reviewer: ${state.model} / ${state.effort}`);
-console.log("This window owns the active-session Reviewer context. Leave it open.");
+console.log(`Relay: ${path.basename(runRoot)}`);
+console.log("Owner input: OPEN — active-session conversation belongs here");
+console.log("This context remains the Reviewer for the complete session. Leave it open.");
 console.log("You may type an active-session question while Producer works; direction is recorded now and waits for the next gate.");
 console.log("Waiting for the producer in Window A…");
 if (ownerConsole) process.stdout.write("reviewer> ");

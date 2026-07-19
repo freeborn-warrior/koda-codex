@@ -131,16 +131,21 @@ console.log(`Owner acknowledgements: ${run.ownerAcknowledgements ?? 0}`);
 if (run.lastAction) console.log(`Last action: ${run.lastAction}`);
 if (run.lastError) console.log(`Last error: ${run.lastError}`);
 
+console.log("\nGUIDE — PROJECT / OWNER");
+console.log("Owner input: OPEN in the existing Guide conversation");
+console.log("Scope: project path and later sessions; the active phase remains frozen");
+
 console.log("\nWINDOW A — PRODUCER");
 console.log(`Model: ${run.producer.model} / ${run.producer.effort}`);
 console.log(`Context: ${run.producer.threadId ?? "not started"}`);
 console.log(`Turns: ${run.producer.turns}`);
-console.log("Input: closed by the supervisor");
+console.log("Owner input: CLOSED — watch only; speak in Window B");
 
 console.log("\nWINDOW B — REVIEWER / OWNER");
 console.log(`Model: ${reviewerState?.model ?? run.reviewer.model} / ${reviewerState?.effort ?? run.reviewer.effort}`);
 console.log(`Context: ${reviewerState?.threadId ?? run.reviewer.threadId ?? "not started"}`);
 console.log(`Turns: ${reviewerState?.turns ?? run.reviewer.turns}`);
+console.log("Owner input: OPEN — active-session conversation belongs here");
 if (!lock) console.log("Console process: not running");
 else if (lock.alive) console.log(`Console process: running as ${lock.pid}`);
 else console.log(`Console process: stopped; stale lock belongs to ${lock.pid}`);
@@ -169,12 +174,9 @@ if (run.status === "COMPLETE" || run.status === "HALTED") {
   console.log("Recover the stopped reviewer window explicitly:");
   console.log(`  ${reviewerRecoveryCommand}`);
 } else if (!lock) {
-  console.log("Start or resume Window B:");
+  console.log("First, start or resume Window B. Then run status again:");
   console.log(`  ${reviewerCommand}`);
-  if (run.status === "PREPARED" || run.status.startsWith("PAUSED")) {
-    console.log("Start or resume Window A in the other pane:");
-    console.log(`  ${producerCommand}`);
-  } else {
+  if (run.status !== "PREPARED" && !run.status.startsWith("PAUSED")) {
     console.log(`Window A is recorded as ${run.status}. Check that pane; do not start a second producer blindly.`);
   }
 } else if (job?.status === "AWAITING_OWNER") {
