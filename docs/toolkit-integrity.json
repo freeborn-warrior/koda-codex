@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "ghostty-clean-launch-v1",
-  "verifiedAt": "2026-07-19T19:40:50.560Z",
+  "verifiedAt": "2026-07-19T20:08:39.852Z",
   "repairCommit": "963a76b563397bfe0400373563db57e3b79a5862",
-  "testedCommit": "963a76b563397bfe0400373563db57e3b79a5862",
-  "testCount": 181,
+  "testedCommit": "d9e51d2c8ad79fb743d9dee000fc02a8dc849d7a",
+  "testCount": 187,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-ghostty-integrity-repair-pushed-final.md",
-    "sha256": "e2119a1c4a255915d92d81015ffb220133fa1f75e99a7affab29846901db65f5"
+    "path": "docs/test-results/2026-07-19-guide-toolkit-integrity-pushed-final.md",
+    "sha256": "d6982a869e9cb103f2b5f8af90c5c8a213c832e16ea0194339035ab523c82378"
   },
   "files": [
     {

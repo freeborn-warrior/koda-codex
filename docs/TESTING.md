@@ -950,8 +950,21 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   The historical link was restored alongside the new 187-check evidence and the
   same focused set passed **15/15**. A final ready-to-push durable repetition then
   passed **187/187** in [the ready-to-push transcript](test-results/2026-07-19-guide-toolkit-integrity-ready-to-push.md).
+- **Post-push verification:** After the complete mechanism, tests, docs, skill,
+  and security audit were committed and pushed at `d9e51d2`, the unchanged suite
+  passed **187/187** again with that pushed commit recorded as its base in
+  [the post-push transcript](test-results/2026-07-19-guide-toolkit-integrity-pushed-final.md).
+  The toolkit manifest now reports 187/187 and binds this exact transcript hash.
+- **Post-push evidence-promotion correction:** After the manifest moved from the
+  old 181-check repair transcript to the new post-push 187-check transcript, a
+  focused Guide/package/submission set passed **36/37**. The only failure was a
+  test that hardcoded the superseded evidence filename even though the product
+  correctly bound the new file. The assertion was corrected to require exact
+  equality with the currently verified manifest evidence path; the binding,
+  hash, capability, and stale-refusal conditions remain unchanged. The same
+  focused set then passed **37/37**, and the complete suite passed **187/187**.
 - **Boundary:** This proves deterministic discovery, integrity binding, and stale
   refusal. It does not prove the real Ghostty experience is now clear. Kristian's
   fresh owner-observed retry remains the release-blocking human test.
-- **Verdict:** OWNER COURIER REMOVED MECHANICALLY; POST-PUSH REPETITION AND HUMAN
-  GHOSTTY RETRY REMAIN.
+- **Verdict:** OWNER COURIER REMOVED AND POST-PUSH VERIFIED; HUMAN GHOSTTY RETRY
+  REMAINS.

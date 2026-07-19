@@ -48,8 +48,9 @@ it hashes.
   reconfirm recovery.
 
 The final complete deterministic suite passed **187/187**, including package and
-security checks. Every named result is preserved in
-[`../../test-results/2026-07-19-guide-toolkit-integrity-final.md`](../../test-results/2026-07-19-guide-toolkit-integrity-final.md).
+security checks. After the implementation was pushed at `d9e51d2`, the unchanged
+suite passed **187/187** again. Every named post-push result is preserved in
+[`../../test-results/2026-07-19-guide-toolkit-integrity-pushed-final.md`](../../test-results/2026-07-19-guide-toolkit-integrity-pushed-final.md).
 
 ## Findings
 

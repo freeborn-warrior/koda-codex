@@ -125,7 +125,7 @@ test("GUIDE TOOLKIT BINDING: confirmation carries machine-discovered launch inte
   assert.match(confirmed.launch.toolkit?.manifestSha256 ?? "", /^[a-f0-9]{64}$/);
   assert.equal(
     confirmed.launch.toolkit?.evidence.path,
-    "docs/test-results/2026-07-19-ghostty-integrity-repair-pushed-final.md",
+    toolkit.evidence.path,
   );
 });
 
