@@ -1,0 +1,152 @@
+import { createHash } from "node:crypto";
+import { lstat, readFile, realpath } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+const MANIFEST_RELATIVE = "docs/toolkit-integrity.json";
+const HASH_PATTERN = /^[a-f0-9]{64}$/;
+const COMMIT_PATTERN = /^[a-f0-9]{40}$/;
+
+interface ToolkitIntegrityFile {
+  path: string;
+  sha256: string;
+}
+
+interface ToolkitIntegrityManifest {
+  version: 1;
+  capability: string;
+  verifiedAt: string;
+  repairCommit: string;
+  testedCommit: string;
+  testCount: number;
+  evidence: ToolkitIntegrityFile;
+  files: ToolkitIntegrityFile[];
+}
+
+export interface ToolkitIntegritySnapshot {
+  version: 1;
+  capability: string;
+  manifestSha256: string;
+  repairCommit: string;
+  testedCommit: string;
+  testCount: number;
+  evidence: ToolkitIntegrityFile;
+}
+
+function packageRoot(): string {
+  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+}
+
+function contained(parent: string, candidate: string): boolean {
+  const relative = path.relative(parent, candidate);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+function assertRelative(value: string, label: string): void {
+  if (value.trim() === "" || path.isAbsolute(value) || value.split(/[\\/]/).includes("..")) {
+    throw new Error(`${label} must be a non-empty toolkit-relative path without '..'.`);
+  }
+}
+
+function digest(content: Uint8Array): string {
+  return createHash("sha256").update(content).digest("hex");
+}
+
+async function verifiedFile(root: string, relative: string, expected: string, label: string): Promise<Buffer> {
+  assertRelative(relative, label);
+  if (!HASH_PATTERN.test(expected)) throw new Error(`${label} has an invalid SHA-256 value.`);
+  const candidate = path.resolve(root, relative);
+  let metadata;
+  try {
+    metadata = await lstat(candidate);
+  } catch {
+    throw new Error(`${label} is missing: ${relative}.`);
+  }
+  if (!metadata.isFile()) throw new Error(`${label} must be a real regular file: ${relative}.`);
+  const [resolvedRoot, resolvedCandidate] = await Promise.all([realpath(root), realpath(candidate)]);
+  if (!contained(resolvedRoot, resolvedCandidate)) throw new Error(`${label} resolves outside the toolkit: ${relative}.`);
+  const content = await readFile(candidate);
+  if (content.length === 0) throw new Error(`${label} is empty: ${relative}.`);
+  if (digest(content) !== expected) throw new Error(`${label} changed after verification: ${relative}.`);
+  return content;
+}
+
+function verifyEvidenceClaims(manifest: ToolkitIntegrityManifest, content: string): void {
+  const required = [
+    `- Result: **PASS**`,
+    `- Recorded at: ${manifest.verifiedAt}`,
+    `- Base commit: \`${manifest.testedCommit.slice(0, 7)}\``,
+    `ℹ tests ${manifest.testCount}`,
+    `ℹ pass ${manifest.testCount}`,
+    `ℹ fail 0`,
+  ];
+  const missing = required.find((line) => !content.includes(line));
+  if (missing) throw new Error(`Toolkit verification evidence contradicts the integrity manifest: missing ${missing}.`);
+}
+
+function parseManifest(value: unknown): ToolkitIntegrityManifest {
+  if (!value || typeof value !== "object") throw new Error("Toolkit integrity manifest must contain a JSON object.");
+  const item = value as Partial<ToolkitIntegrityManifest>;
+  if (
+    item.version !== 1 ||
+    typeof item.capability !== "string" || !/^[a-z][a-z0-9-]{0,63}$/.test(item.capability) ||
+    typeof item.verifiedAt !== "string" || Number.isNaN(Date.parse(item.verifiedAt)) ||
+    typeof item.repairCommit !== "string" || !COMMIT_PATTERN.test(item.repairCommit) ||
+    typeof item.testedCommit !== "string" || !COMMIT_PATTERN.test(item.testedCommit) ||
+    !Number.isSafeInteger(item.testCount) || item.testCount! < 1 ||
+    !item.evidence || typeof item.evidence.path !== "string" || typeof item.evidence.sha256 !== "string" ||
+    !Array.isArray(item.files) || item.files.length === 0
+  ) throw new Error("Toolkit integrity manifest is invalid.");
+  assertRelative(item.evidence.path, "Toolkit verification evidence");
+  if (!HASH_PATTERN.test(item.evidence.sha256)) throw new Error("Toolkit verification evidence has an invalid SHA-256 value.");
+  const seen = new Set<string>();
+  for (const file of item.files) {
+    if (!file || typeof file.path !== "string" || typeof file.sha256 !== "string") {
+      throw new Error("Toolkit integrity manifest has invalid file evidence.");
+    }
+    assertRelative(file.path, "Toolkit integrity file");
+    if (!HASH_PATTERN.test(file.sha256)) throw new Error(`Toolkit integrity file has an invalid SHA-256 value: ${file.path}.`);
+    if (seen.has(file.path)) throw new Error(`Toolkit integrity manifest lists a file more than once: ${file.path}.`);
+    seen.add(file.path);
+  }
+  return item as ToolkitIntegrityManifest;
+}
+
+export async function verifyToolkitIntegrityAt(root: string): Promise<ToolkitIntegritySnapshot> {
+  const manifestFile = path.resolve(root, MANIFEST_RELATIVE);
+  let metadata;
+  try {
+    metadata = await lstat(manifestFile);
+  } catch {
+    throw new Error(`Toolkit readiness is unverified: ${MANIFEST_RELATIVE} is missing.`);
+  }
+  if (!metadata.isFile()) throw new Error("Toolkit readiness is unverified: the integrity manifest must be a real regular file.");
+  const [resolvedRoot, resolvedManifest] = await Promise.all([realpath(root), realpath(manifestFile)]);
+  if (!contained(resolvedRoot, resolvedManifest)) throw new Error("Toolkit readiness is unverified: the integrity manifest resolves outside the toolkit.");
+  const manifestBytes = await readFile(manifestFile);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(manifestBytes.toString("utf8"));
+  } catch {
+    throw new Error("Toolkit readiness is unverified: the integrity manifest is not valid JSON.");
+  }
+  const manifest = parseManifest(parsed);
+  const evidence = await verifiedFile(root, manifest.evidence.path, manifest.evidence.sha256, "Toolkit verification evidence");
+  verifyEvidenceClaims(manifest, evidence.toString("utf8"));
+  for (const file of manifest.files) {
+    await verifiedFile(root, file.path, file.sha256, "Toolkit integrity file");
+  }
+  return {
+    version: 1,
+    capability: manifest.capability,
+    manifestSha256: digest(manifestBytes),
+    repairCommit: manifest.repairCommit,
+    testedCommit: manifest.testedCommit,
+    testCount: manifest.testCount,
+    evidence: manifest.evidence,
+  };
+}
+
+export async function verifyToolkitIntegrity(): Promise<ToolkitIntegritySnapshot> {
+  return verifyToolkitIntegrityAt(packageRoot());
+}

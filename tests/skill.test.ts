@@ -132,6 +132,10 @@ test("session open and close remain ceremonies outside producer phase routing", 
   assert.match(prompt, /conceptually later idea is a dependent successor and waits; a genuinely independent sibling may proceed/i);
   assert.match(prompt, /owner-via-guide.*`koda direction wait --session <session-id>`/is);
   assert.match(prompt, /Repeat the disk preflight and relationship classification for every later session request/is);
+  assert.match(prompt, /Kristian supplies intent, priorities, constraints, product judgments, and confirmation/is);
+  assert.match(prompt, /Never ask him to relay a filesystem path, shell command, hash, commit ID, test count, receipt, or evidence location/is);
+  assert.match(prompt, /verified toolkit capability and integrity-manifest hash/is);
+  assert.match(prompt, /no toolkit-owned technical prerequisite has been mislabeled as an owner question/is);
   assert.match(prompt, /`koda guide verify` succeeds.*committed and pushed/is);
   assert.match(prompt, /Do not run `koda session new`/);
   assert.match(session, /currentPhaseIndex: 0/);

@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "capability": "ghostty-clean-launch-v1",
+  "verifiedAt": "2026-07-19T19:40:50.560Z",
+  "repairCommit": "963a76b563397bfe0400373563db57e3b79a5862",
+  "testedCommit": "963a76b563397bfe0400373563db57e3b79a5862",
+  "testCount": 181,
+  "evidence": {
+    "path": "docs/test-results/2026-07-19-ghostty-integrity-repair-pushed-final.md",
+    "sha256": "e2119a1c4a255915d92d81015ffb220133fa1f75e99a7affab29846901db65f5"
+  },
+  "files": [
+    {
+      "path": "src/ghostty.ts",
+      "sha256": "fde0443035484d15c430afe3e21db69353787b688e7e2d90282dd96b39d5bd55"
+    },
+    {
+      "path": "src/relay-environment.ts",
+      "sha256": "5035845519153e5e13a2c43f18549876c71f4e2c1e2c1f15dbea28b1946fa577"
+    },
+    {
+      "path": "src/guide-runtime.ts",
+      "sha256": "266d6289cb5557c98afca306ac942fbdbe9880dc36bf4da6c6353529a3e724de"
+    },
+    {
+      "path": "scripts/execute-relay-run.ts",
+      "sha256": "dcfff28e78126a39a1adce6fcd1163c078c853e16542c5fe306ff452b030114f"
+    },
+    {
+      "path": "scripts/run-relay-reviewer-window.ts",
+      "sha256": "dd1acfa75d76eb6ec9277c155d52e06b166d16c0f1cabf896c94ffd146cb94df"
+    },
+    {
+      "path": "dist/ghostty.js",
+      "sha256": "45f5c2b9c133c350194d5c62f01db0503fa0ad86362f7f488df1937f0f747c10"
+    },
+    {
+      "path": "dist/relay-environment.js",
+      "sha256": "1c5ea37f61385119db595941a3bd038d330e0eb5acfd34b438c205af392b277c"
+    },
+    {
+      "path": "dist/guide-runtime.js",
+      "sha256": "ffc9acde039ce0c65e3a312f58cd6bcce7a2615447953eac6c53828060195158"
+    },
+    {
+      "path": "src/toolkit-integrity.ts",
+      "sha256": "a896bd1a2e0565ec870ceb45e4b3911151f7043ac15cdce07b2df0cd04305b2e"
+    },
+    {
+      "path": "dist/toolkit-integrity.js",
+      "sha256": "f6b7c8e5989b9c659aeed8a33501a6d72d630dd15eafc0fe4fc281f1f08395af"
+    },
+    {
+      "path": "src/guide.ts",
+      "sha256": "db25c5d1674e8efd056efdc6535b9174d2813607e806c2fe0ef088ad74676105"
+    },
+    {
+      "path": "dist/guide.js",
+      "sha256": "7481cb377d4ac3435649cf03462aaab7549a89afb83f1b36e5e26eb3a1304c35"
+    },
+    {
+      "path": "src/guide-commands.ts",
+      "sha256": "4bb01ce4cd3aa573a7f3f78f3d8e8fa55285301ae884309d53282b73a48b73c8"
+    },
+    {
+      "path": "dist/guide-commands.js",
+      "sha256": "b9fceedfdf830449e025c1efa249522791f1466d5b545d2bc485b427fbcb027b"
+    },
+    {
+      "path": ".agents/skills/koda-c-session-prompt/SKILL.md",
+      "sha256": "87eeca0b2c16add003d6f81c6c008878c995088fa8ce71d19f1606f49ba07b6e"
+    }
+  ]
+}

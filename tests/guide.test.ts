@@ -19,6 +19,7 @@ import { ghosttyWindowRequests, requestGhosttyWindows } from "../src/ghostty.ts"
 import { prepareHaltArtifact } from "../src/halt.ts";
 import { createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
 import { temporaryRoot } from "./helpers.ts";
+import { verifyToolkitIntegrity } from "../src/toolkit-integrity.ts";
 
 const prompt = [
   "# Session prompt",
@@ -110,6 +111,36 @@ test("GUIDE PREFLIGHT: active work distinguishes blocked successors from explici
   assert.match(status, /different kind name alone proves nothing/);
   assert.doesNotMatch(status, /NEXT SESSION BLOCKED — the current project path is still in flight/);
   assert.doesNotMatch(status, /one next-session draft may continue/);
+  const toolkit = await verifyToolkitIntegrity();
+  assert.match(status, new RegExp(`TOOLKIT READY — ${toolkit.capability} — ${toolkit.testCount}/${toolkit.testCount} post-push checks`));
+  assert.match(status, /The owner must never relay commands, paths, hashes, commits, test counts, receipts, or evidence locations/);
+});
+
+test("GUIDE TOOLKIT BINDING: confirmation carries machine-discovered launch integrity", async (t) => {
+  const h = await guideHarness(t);
+  const toolkit = await verifyToolkitIntegrity();
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  assert.equal(confirmed.launch.toolkit?.capability, toolkit.capability);
+  assert.equal(confirmed.launch.toolkit?.testCount, toolkit.testCount);
+  assert.match(confirmed.launch.toolkit?.manifestSha256 ?? "", /^[a-f0-9]{64}$/);
+  assert.equal(
+    confirmed.launch.toolkit?.evidence.path,
+    "docs/test-results/2026-07-19-ghostty-integrity-repair-pushed-final.md",
+  );
+});
+
+test("GUIDE TOOLKIT MUTATION: changed bound toolkit proof makes the launch stale", async (t) => {
+  const h = await guideHarness(t);
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  const file = path.join(guideLaunchesDir(h.root, DEFAULT_CONFIG), `${confirmed.launch.id}.json`);
+  await writeJsonAtomic(file, {
+    ...confirmed.launch,
+    toolkit: { ...confirmed.launch.toolkit, manifestSha256: "0".repeat(64) },
+  });
+  await assert.rejects(
+    verifyGuideLaunch(h.root, DEFAULT_CONFIG),
+    /verified toolkit changed after owner confirmation.*stale/,
+  );
 });
 
 test("GUIDE INDEPENDENT CONTROL: an active Produce session permits an owner-classified Explore sibling", async (t) => {

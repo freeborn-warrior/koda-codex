@@ -905,3 +905,53 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   fresh owner-observed run remains required because tests cannot prove Ghostty's
   real window count, permission prompts, or Kristian's human clarity.
 - **Verdict:** MECHANICAL REPAIR PASS; RELEASE BLOCKER REMAINS UNTIL FRESH HUMAN RUN.
+
+## 2026-07-19 — Guide toolkit binding and owner-courier removal
+
+- **Observed UX failure:** The first post-halt retry was correctly classified as
+  a dependent successor, but Guide treated the launcher-repair proof as owner
+  input. Kristian was asked to copy a repository path, commit IDs, a test count,
+  and evidence locations from the builder conversation. He correctly identified
+  that no ordinary human could be expected to supply that material.
+- **Product change:** A repository-contained toolkit integrity manifest now binds
+  the current Ghostty launch capability to its post-push evidence and critical
+  launcher, environment, Guide, and session-prompter files. `guide status`
+  verifies those bytes and reports one capability. New Guide confirmations bind
+  that snapshot; changed toolkit proof makes the launch stale. The updated
+  session-prompter forbids owner technical relays and reserves open items for real
+  product decisions.
+- **Live-project correction:** The unconfirmed retry prompt and continuity files
+  were normalized from copied paths, hashes, commits, and test counts to verified
+  capability `ghostty-clean-launch-v1`. No replacement launch was confirmed or
+  opened.
+- **Mutation coverage:** A changed critical toolkit file refuses and names the
+  path; linked verification evidence refuses; a changed toolkit snapshot inside a
+  launch request refuses as stale. Skill-contract tests require the no-courier
+  rule and toolkit binding language.
+- **Validation:** Both repository-local copies of `koda-c-session-prompt` passed
+  the packaged skill validator. Initial focused Guide/skill/toolkit checks passed
+  **41/41**. The first ordinary and durable complete suites passed **186/186** in
+  [the development transcript](test-results/2026-07-19-guide-toolkit-binding-final.md).
+  Security review then added a manifest-versus-transcript consistency mutation;
+  focused checks passed **42/42**, and the final ordinary and durable complete
+  suites passed **187/187** in [the final per-test transcript](test-results/2026-07-19-guide-toolkit-integrity-final.md).
+- **Execution mistake preserved:** One combined validation command ran Guide
+  status successfully from the isolated project and then tried to locate the root
+  test files from that same directory. Node named the missing test paths and ran
+  no tests. The identical focused test command was rerun from the repository root
+  and passed **41/41**. A later combined command passed **42/42** and then invoked
+  Guide status from the Koda-C source root, which correctly named the absence of
+  `koda.config.json`; status was rerun from the isolated project and passed. No
+  assertion or product condition changed in either correction.
+- **Documentation regression caught after the durable run:** A focused
+  submission/package/security check passed **14/15** because the updated README
+  judge path accidentally replaced, rather than retained, the committed
+  152-check fresh-Guide preflight link. The existing assertion was not changed.
+  The historical link was restored alongside the new 187-check evidence and the
+  same focused set passed **15/15**. A final ready-to-push durable repetition then
+  passed **187/187** in [the ready-to-push transcript](test-results/2026-07-19-guide-toolkit-integrity-ready-to-push.md).
+- **Boundary:** This proves deterministic discovery, integrity binding, and stale
+  refusal. It does not prove the real Ghostty experience is now clear. Kristian's
+  fresh owner-observed retry remains the release-blocking human test.
+- **Verdict:** OWNER COURIER REMOVED MECHANICALLY; POST-PUSH REPETITION AND HUMAN
+  GHOSTTY RETRY REMAIN.

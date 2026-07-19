@@ -18,6 +18,7 @@ import { evaluateSessionClosure } from "./close.ts";
 import { evaluateSessionHalt } from "./halt.ts";
 import { currentPhase, displayPath, latestSessionId, listSessionIds, loadSessionState, sessionRoot } from "./project.ts";
 import { claimGuidePaths, loadGuideWorkSet } from "./workset.ts";
+import { verifyToolkitIntegrity } from "./toolkit-integrity.ts";
 
 export interface GuideCliIo {
   out(message: string): void;
@@ -101,6 +102,7 @@ export async function runGuideCli(
     rejectUnknownOptions(rest);
     if (rest.length) throw new Error("Usage: koda guide status");
     const manifest = await loadGuideManifest(root, config);
+    const toolkit = await verifyToolkitIntegrity();
     const continuity = await snapshotContinuity(root, manifest);
     const guideWorkSet = await loadGuideWorkSet(root, config);
     await requireGuideCancellationsPushed(root, config);
@@ -140,6 +142,8 @@ export async function runGuideCli(
     io.out(`KODA GUIDE — ${latestId ?? "no sessions yet"}`);
     io.out("Owner input: OPEN — project-level conversation belongs in this Guide context.");
     io.out("Active-session questions belong in Reviewer; Guide direction cannot inject the active phase.");
+    io.out(`TOOLKIT READY — ${toolkit.capability} — ${toolkit.testCount}/${toolkit.testCount} post-push checks`);
+    io.out("The Guide carries toolkit proof itself. The owner must never relay commands, paths, hashes, commits, test counts, receipts, or evidence locations between contexts.");
     io.out(`Manifest: ${displayPath(root, guideManifestPath(root, config))}`);
     io.out(`Project: ${manifest.project} — ${continuity.length} continuity file(s)`);
     io.out(`Guide write set: ${guideWorkSet.claims.length} additional path(s)`);
@@ -230,6 +234,7 @@ export async function runGuideCli(
     }
     io.out(`✓ Owner confirmation bound prompt SHA-256 ${result.launch.promptSha256}`);
     io.out(`✓ Bound ${result.launch.continuity.length} project continuity file(s).`);
+    io.out(`✓ Bound verified toolkit contract ${result.launch.toolkit!.capability}.`);
     io.out(`Launch request: ${displayPath(root, result.file)}`);
     return;
   }

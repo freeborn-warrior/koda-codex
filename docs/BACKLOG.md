@@ -36,6 +36,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
+- [x] Remove Kristian as the technical transfer bridge between builder and Guide. `koda guide status` now verifies a repository-contained toolkit integrity manifest, the session-prompter forbids asking the owner to carry commands/paths/hashes/commits/test counts/receipts, and new launch confirmations bind the verified toolkit snapshot so later changes make the request stale. The unconfirmed retry draft was normalized back to a capability name instead of owner-relayed internals.
+
 - [x] Mechanically repair the first Ghostty integrity failure without weakening a test: one mode-700 launcher token per role, `env -i` role startup, credential/parent-context stripping for model children, changed/linked launcher refusal, and pushed-halt priority over stale acknowledgement jobs. Focused 44/44, ordinary 181/181, coverage 181/181, durable 181/181, and post-push 181/181 passed at `963a76b`.
 
 - [x] Preserve the first owner-observed three-context attempt as an honest pushed halt, not a pass: Guide, Sol Producer, and Terra Reviewer opened; Brief reached formal review; zero acknowledgements and zero advancements occurred; halt `c9743416-67dc-45bd-b7f0-4de56c6bb300` was pushed at `ba22bfe`; the sanitized integrity incident records the unsafe tabs, credential exposure, and post-halt race without storing the secret, receipt, or screenshots.

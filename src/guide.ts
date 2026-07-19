@@ -19,6 +19,7 @@ import {
   writeJsonAtomic,
 } from "./project.ts";
 import { sha256 } from "./receipt.ts";
+import { verifyToolkitIntegrity, type ToolkitIntegritySnapshot } from "./toolkit-integrity.ts";
 import type { ProjectConfig, SessionLaunchMode, SessionState } from "./types.ts";
 
 const MANIFEST_FILE = "project.json";
@@ -57,6 +58,7 @@ export interface GuideLaunchRequest {
   sessionKind: string;
   launchMode: SessionLaunchMode;
   dependencies: GuideLaunchDependency[];
+  toolkit?: ToolkitIntegritySnapshot;
   confirmedBy: string;
   confirmedAt: string;
 }
@@ -261,6 +263,20 @@ function parseLaunch(value: unknown, source: string): GuideLaunchRequest {
     }
     assertRelativeProjectPath(evidence.path, `${source} continuity evidence`);
     if (!hashPattern.test(evidence.sha256)) throw new Error(`${source} has invalid continuity SHA-256 evidence.`);
+  }
+  if (item.toolkit !== undefined) {
+    const toolkit = item.toolkit;
+    if (
+      !toolkit || toolkit.version !== 1 ||
+      typeof toolkit.capability !== "string" || !/^[a-z][a-z0-9-]{0,63}$/.test(toolkit.capability) ||
+      typeof toolkit.manifestSha256 !== "string" || !hashPattern.test(toolkit.manifestSha256) ||
+      typeof toolkit.repairCommit !== "string" || !/^[a-f0-9]{40}$/.test(toolkit.repairCommit) ||
+      typeof toolkit.testedCommit !== "string" || !/^[a-f0-9]{40}$/.test(toolkit.testedCommit) ||
+      !Number.isSafeInteger(toolkit.testCount) || toolkit.testCount < 1 ||
+      !toolkit.evidence || typeof toolkit.evidence.path !== "string" || typeof toolkit.evidence.sha256 !== "string" ||
+      !hashPattern.test(toolkit.evidence.sha256)
+    ) throw new Error(`${source} has invalid toolkit integrity evidence.`);
+    assertRelativeProjectPath(toolkit.evidence.path, `${source} toolkit evidence`);
   }
   const dependencies = item.dependencies ?? [];
   const dependencyIds = new Set<string>();
@@ -628,6 +644,7 @@ export async function confirmGuideLaunch(
     sessionKind,
     launchMode,
     dependencies,
+    toolkit: await verifyToolkitIntegrity(),
     confirmedBy: confirmedBy.trim(),
     confirmedAt: nowIso(),
   };
@@ -653,6 +670,19 @@ export async function verifyGuideLaunch(
   if (pending.length === 0) throw new Error("No Guide prompt is READY_TO_LAUNCH.");
   if (pending.length !== 1) throw new Error("More than one Guide prompt is READY_TO_LAUNCH; state is ambiguous.");
   const launch = pending[0]!;
+  if (!launch.toolkit) {
+    throw new Error("The Guide launch predates toolkit integrity binding; cancel it and reconfirm before launch.");
+  }
+  const currentToolkit = await verifyToolkitIntegrity();
+  if (
+    currentToolkit.capability !== launch.toolkit.capability ||
+    currentToolkit.manifestSha256 !== launch.toolkit.manifestSha256 ||
+    currentToolkit.repairCommit !== launch.toolkit.repairCommit ||
+    currentToolkit.testedCommit !== launch.toolkit.testedCommit ||
+    currentToolkit.testCount !== launch.toolkit.testCount ||
+    currentToolkit.evidence.path !== launch.toolkit.evidence.path ||
+    currentToolkit.evidence.sha256 !== launch.toolkit.evidence.sha256
+  ) throw new Error("The verified toolkit changed after owner confirmation; the launch is stale.");
   const manifest = await loadGuideManifest(root, config);
   const currentManifest = await hashProjectFile(root, launch.manifest.path, "Guide project manifest");
   if (currentManifest.sha256 !== launch.manifest.sha256) {

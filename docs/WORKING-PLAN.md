@@ -28,6 +28,7 @@ Turn the proved two-context session relay into a project-level experience that c
 16. [x] Confirm the project/session model: Produce is one session kind; independent Explore, Research, Architecture, Triage, Produce, and later sibling sessions may be active concurrently.
 17. [x] Replace global latest-session inference with explicit session identity, kind, dependencies, aggregate project status, dependency-scoped launch refusal, Guide confirmation, skill targeting, and relay routing while preserving every existing gate (162-check deterministic proof).
 18. [x] Remove the one-live-runtime preparation limit: enumerate exact runtime IDs, allocate simultaneous session directories atomically, print run-bound commands, serialize short claim/Git ceremonies, and prove two concurrent Producer/Reviewer pairs through pushed close in one project.
+19. [x] Remove the owner-as-courier failure from Guide handover: verify the toolkit's launch contract from its repository-contained manifest, expose one plain capability in status, bind its integrity snapshot at confirmation, and make any later toolkit drift stale without asking Kristian to transport technical evidence.
 
 ## Submission cut
 
@@ -37,6 +38,7 @@ The submission demonstration still needs one strong Produce session moving from 
 
 - The core `koda` gate remains small, deterministic, dependency-free, and domain-general.
 - Project and role behavior belongs in repository-local skills and plain files.
+- Technical prerequisites move through verified files and launch bindings; the owner supplies intent and product decisions, never paths, hashes, commands, commits, receipts, or test counts from another context.
 - Owner confirmation remains required at every gate for the current target.
 - No producer input from the owner after session start; owner conversation stays with the persistent reviewer.
 - Core CLI, Guide confirmation, session skills, Producer, Reviewer, and relay supervisor bind explicit session identity. Session and Guide work sets reserve exact paths, record session before/after hashes, reject overlap and unclaimed mutation, stage only owned paths, and serialize Git ceremonies with a short recoverable lock. Runtime discovery and Guide status enumerate exact launch IDs. A four-process test closes two independent sessions through distinct persistent Producer/Reviewer pairs in one Git project, while the earlier control proves unrelated Guide dirt survives exact close.

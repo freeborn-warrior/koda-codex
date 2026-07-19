@@ -33,6 +33,10 @@ parent, and ignored project-local runtime under `.koda/`:
 - the first `session close` writes immutable `close.md`; the second only verifies
   disk and Git state.
 - `guide confirm`, `cancel`, and `bind` write their named durable evidence;
+- `guide status` and `guide confirm` first validate the installed toolkit
+  integrity manifest, its hashed post-push transcript, the transcript's PASS/base
+  commit/test totals, and every named critical regular file. New launch requests
+  freeze that toolkit snapshot; `guide verify` refuses changed proof as stale;
 - `guide launch` writes only ignored `.koda/runs/<launch-id>/` rendezvous state
   after verifying pushed confirmation evidence, an empty shared Git index, and
   one exact confirmed request. Unrelated unstaged claimed work may remain.
@@ -75,6 +79,14 @@ The hashes are integrity bindings, not signatures. Anyone who can rewrite the
 repository as the same operating-system user can fabricate a new internally
 consistent artifact, review, ledger, state, and Git history. Koda does not
 authenticate a human identity or defend against a malicious repository owner.
+
+The toolkit integrity manifest has the same boundary. It catches accidental,
+partial, stale, empty, linked, or inconsistent installation changes and prevents
+the owner from acting as an evidence courier. It is not a signed release or a
+defense against a same-user attacker who replaces the verifier, manifest, critical
+files, and evidence together. The packaged runtime may not contain `.git`, so its
+tested-commit field is checked against the hashed transcript rather than resolved
+through a local Git object database.
 
 The receipt proves that the unique review phrase entered the decision record. It
 does not prove comprehension. The receipt is evidence, not a secret; the macOS
@@ -221,4 +233,7 @@ The first live-launch incident is preserved without its credential or receipt in
 [`security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md`](security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md),
 and the whole-product repair delta is audited in
 [`security-runs/2026-07-19-ghostty-repair-audit-05/RESULT.md`](security-runs/2026-07-19-ghostty-repair-audit-05/RESULT.md).
+The Guide/toolkit handover delta and its remaining local-trust boundary are
+audited in
+[`security-runs/2026-07-19-guide-toolkit-binding-audit-06/RESULT.md`](security-runs/2026-07-19-guide-toolkit-binding-audit-06/RESULT.md).
 The latest named full-suite transcript is linked from the README.
