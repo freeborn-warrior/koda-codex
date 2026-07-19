@@ -41,3 +41,21 @@ pushed halt evidence priority over stale runtime jobs. Focused checks passed
 Those results repair the deterministic contract; they do not rewrite this run as
 successful. A fresh owner-observed launch is still required to prove real Ghostty
 window count, permission behavior, and human clarity.
+
+## Retry preparation after the repair
+
+The first retry conversation exposed another UX failure before launch: Guide
+asked Kristian to carry toolkit paths, commits, test counts, and evidence
+locations from the builder context. Kristian identified that as unusable for an
+ordinary human. No retry was confirmed or launched.
+
+Koda now validates repository-contained toolkit proof itself. `guide status`
+reports `TOOLKIT READY — ghostty-clean-launch-v1 — 187/187 post-push checks`, and
+new confirmations bind that exact toolkit snapshot. The session-prompter forbids
+technical owner relays. The unconfirmed retry was normalized to cite only the
+verified capability, committed and pushed in the isolated project at `f3dc524`.
+
+The exact draft is [archived here](RETRY-SESSION-PROMPT-DRAFT.md), and
+`RETRY-DRAFT-HISTORY.bundle` preserves its complete restorable project history.
+This is preparation evidence, not owner confirmation. No new launch request,
+runtime, session, model context, review, receipt, or acknowledgement exists.

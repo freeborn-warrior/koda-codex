@@ -1,7 +1,7 @@
 {
   "version": 1,
   "runId": "2026-07-19-markdown-headings-01",
-  "status": "HALTED_AFTER_LIVE_LAUNCH_FAILURE",
+  "status": "HALTED_WITH_RETRY_DRAFT_PUSHED",
   "preparedAt": "2026-07-19T18:28:31Z",
   "liveProject": ".koda/verification-projects/2026-07-19-markdown-headings-01/project",
   "initialCommit": "f3d99323f7df8bf308d0f26ea9cc5eb7a9a3256d",
@@ -50,6 +50,17 @@
     "id": "c9743416-67dc-45bd-b7f0-4de56c6bb300",
     "commit": "ba22bfe",
     "pushed": true
+  },
+  "retryDraft": {
+    "projectCommit": "f3dc524b3b74a116097d2b7dec38e830d7d74004",
+    "pushed": true,
+    "prompt": "docs/guide/prompts/2026-07-19-markdown-heading-reporter-retry.md",
+    "promptSha256": "6822425ee5fcb3fbfa8f200112245cc1f46251202273538e87ea46a6309a6109",
+    "archive": "docs/verification-runs/2026-07-19-markdown-headings-01/RETRY-DRAFT-HISTORY.bundle",
+    "toolkitCapability": "ghostty-clean-launch-v1",
+    "toolkitTestCount": 187,
+    "ownerConfirmed": false,
+    "launchCreated": false
   },
   "result": "docs/verification-runs/2026-07-19-markdown-headings-01/RESULT.md",
   "securityIncident": "docs/security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md",
