@@ -159,6 +159,7 @@ owner contract
 - [First Guide live-test preflight 177-check result](test-results/2026-07-19-live-test-preflight-docs-final.md)
 - [Pre-submission concurrency development failures](test-results/2026-07-19-pre-submission-concurrency-development-failures.md)
 - [Pre-submission concurrency repair 179-check result](test-results/2026-07-19-pre-submission-concurrency-repairs-final.md)
+- [Pre-submission concurrency repair post-push 179-check result](test-results/2026-07-19-pre-submission-concurrency-repairs-pushed-final.md)
 - [Whole-product quality audit](quality-runs/2026-07-19-whole-product-01/RESULT.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
 - [Always-open Reviewer 135-check result](test-results/2026-07-19-reviewer-open-conversation-final.md)
