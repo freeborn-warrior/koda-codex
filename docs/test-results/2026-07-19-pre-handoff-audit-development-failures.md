@@ -36,6 +36,30 @@ The runner now resolves Codex to a canonical absolute executable using the paren
 shell before applying the child environment allowlist. A permanent assertion requires
 both steps. The next attempt uses another new evidence ID; attempt 04 is not scored.
 
+## Discovery 05 passed; active Guide preflight 02 had a stale fixture
+
+Fresh Sol/low discovery 05 passed its full contract: all ten Koda-C skills, exact
+repository-local placement guidance, zero tools, and zero repository reads.
+
+The following Sol/medium Guide task started correctly and behaved conservatively. It
+loaded the session-prompt skill, ran Guide status, inspected the active session, named
+`2026-07-19-01` at Brief, refused to draft, and left every file unchanged. However,
+the fixture predated toolkit integrity and omitted `docs/toolkit-integrity.json`.
+Guide therefore stopped first at `TOOLKIT NOT READY`; the run could not reach the
+sealed target's `NEXT SESSION BLOCKED` state or explain that the idea could be
+discussed now while starting it required wait or halt.
+
+This is recorded as an invalid fixture for the current entry contract, not a promoted
+pass and not a model failure. The corrected fixture creates a minimal evidence file,
+hashes it and the tested skill into a valid integrity manifest, and includes that state
+in the before/after snapshot. A permanent test requires the fixture proof. New IDs are
+used for both corrected runs.
+
+The first credential-signature scan command for these new evidence folders began its
+pattern with hyphens without the argument terminator, so `rg` treated the pattern as
+an option and ran no scan. The corrected command used `--`; it completed with no
+matching evidence file. No result was inferred from the failed invocation.
+
 ## Complete suite — concurrent Git-lock release race
 
 The first complete run after the runner correction passed **194/195**. The failing

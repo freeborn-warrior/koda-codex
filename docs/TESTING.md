@@ -1079,3 +1079,19 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   before constructing the allowlisted child environment. Credentials and parent
   context remain stripped. The failed attempt is immutable and the corrected run uses
   a new ID.
+
+## 2026-07-19 — Fresh discovery 05 passed; Guide preflight 02 exposed fixture drift
+
+- **Discovery:** Sol/low reported all ten Koda-C skills and repository-local placement
+  guidance from startup context with zero tools and zero repository reads. **PASS.**
+- **Active preflight:** Sol/medium loaded `koda-c-session-prompt`, ran Guide status,
+  inspected the active session, named `2026-07-19-01` at Brief, refused to draft, and
+  changed no fixture file. The sealed score still failed because Guide status stopped
+  first at missing `docs/toolkit-integrity.json`; it therefore did not emit the later
+  `NEXT SESSION BLOCKED` state or the expected discussion-versus-start explanation.
+- **Classification:** **INVALID FIXTURE FOR THE CURRENT ENTRY CONTRACT.** The model
+  behaved safely, but the run does not prove the targeted active-session route and is
+  not promoted as a pass.
+- **Correction:** The fixture now contains a minimal internally hash-bound toolkit
+  proof before its snapshot. A permanent contract assertion requires it. Both the
+  discovery and active-preflight retry use new immutable IDs.

@@ -138,7 +138,7 @@ async function discoveryRun(): Promise<void> {
     answer.includes(`Total: ${expected.length}`) &&
     answer.includes(".agents/skills/") &&
     answer.includes("DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY");
-  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-05`);
+  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-06`);
   await writeRunFiles(destination, run, {
     effort: "low",
     threadId: threadId(parsed),
@@ -148,7 +148,7 @@ async function discoveryRun(): Promise<void> {
     toolEventCount: toolEvents.length,
     status: pass ? "PASS" : "FAIL",
   }, [
-    `# Fresh Codex startup discovery — ${date} — Sol low — 05`,
+    `# Fresh Codex startup discovery — ${date} — Sol low — 06`,
     "",
     `- Status: **${pass ? "PASS" : "FAIL"}**`,
     `- Model: \`${model}\``,
@@ -198,6 +198,43 @@ async function activePreflightRun(): Promise<void> {
         "",
       ].join("\n"), "utf8"),
     ]);
+    const fixtureVerifiedAt = "2026-07-19T00:00:00.000Z";
+    const fixtureTestedCommit = "1".repeat(40);
+    const fixtureEvidencePath = "docs/toolkit-preflight-proof.md";
+    const fixtureCriticalPath = ".agents/skills/koda-c-session-prompt/SKILL.md";
+    const fixtureEvidence = [
+      "# Fixture toolkit proof",
+      "",
+      "- Result: **PASS**",
+      `- Recorded at: ${fixtureVerifiedAt}`,
+      `- Base commit: \`${fixtureTestedCommit.slice(0, 7)}\``,
+      "",
+      "ℹ tests 1",
+      "ℹ pass 1",
+      "ℹ fail 0",
+      "",
+    ].join("\n");
+    await writeFile(path.join(fixture, fixtureEvidencePath), fixtureEvidence, "utf8");
+    const [fixtureEvidenceBytes, fixtureCriticalBytes] = await Promise.all([
+      readFile(path.join(fixture, fixtureEvidencePath)),
+      readFile(path.join(fixture, fixtureCriticalPath)),
+    ]);
+    await writeJsonAtomic(path.join(fixture, "docs", "toolkit-integrity.json"), {
+      version: 1,
+      capability: "guide-preflight-fixture-v1",
+      verifiedAt: fixtureVerifiedAt,
+      repairCommit: fixtureTestedCommit,
+      testedCommit: fixtureTestedCommit,
+      testCount: 1,
+      evidence: {
+        path: fixtureEvidencePath,
+        sha256: createHash("sha256").update(fixtureEvidenceBytes).digest("hex"),
+      },
+      files: [{
+        path: fixtureCriticalPath,
+        sha256: createHash("sha256").update(fixtureCriticalBytes).digest("hex"),
+      }],
+    });
     const active = await createSession(fixture, DEFAULT_CONFIG, "# Active owner prompt\n\nComplete the current bounded path first.\n");
     await writeJsonAtomic(path.join(fixture, "docs", "guide", "project.json"), {
       version: 1,
@@ -223,7 +260,7 @@ async function activePreflightRun(): Promise<void> {
       filesUnchanged: unchanged,
     };
     const pass = run.status === 0 && Object.values(checks).every(Boolean);
-    const destination = path.join(root, "docs", "guide-preflight-runs", `${date}-sol-medium-02`);
+    const destination = path.join(root, "docs", "guide-preflight-runs", `${date}-sol-medium-03`);
     await writeRunFiles(destination, run, {
       effort: "medium",
       threadId: threadId(parsed),
@@ -232,7 +269,7 @@ async function activePreflightRun(): Promise<void> {
       checks,
       status: pass ? "PASS" : "FAIL",
     }, [
-      `# Fresh Guide active-session preflight — ${date} — Sol medium — 02`,
+      `# Fresh Guide active-session preflight — ${date} — Sol medium — 03`,
       "",
       `- Status: **${pass ? "PASS" : "FAIL"}**`,
       `- Model: \`${model}\``,

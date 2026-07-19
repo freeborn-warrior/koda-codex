@@ -176,6 +176,8 @@ test("the fresh Guide preflight model run is sealed, blind, ephemeral, and read-
   assert.match(runner, /Use \$koda-c-session-prompt\. I want to start a new session that is conceptually ahead/);
   assert.match(runner, /const before = await snapshot\(fixture\)/);
   assert.match(runner, /const after = await snapshot\(fixture\)/);
+  assert.match(runner, /"docs", "toolkit-integrity\.json"/);
+  assert.match(runner, /capability: "guide-preflight-fixture-v1"/);
   assert.match(runner, /Object\.values\(checks\)\.every\(Boolean\)/);
   assert.match(runner, /await mkdir\(destination\);/);
   assert.doesNotMatch(runner, /mkdir\(destination, \{ recursive: true \}\)/);
