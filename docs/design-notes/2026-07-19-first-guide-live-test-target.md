@@ -1,7 +1,7 @@
 # First Guide live-test target
 
 **Date:** 2026-07-19  
-**Status:** Owner decision required before initialization or prompt drafting
+**Status:** Resolved — self-hosting deferred until after submission
 
 ## Entry-check result
 
@@ -50,8 +50,19 @@ It proves launch mechanics but has less product value: its work is artificial,
 its continuity ends after the test, and it repeats the fixture character already
 covered deterministically.
 
-## Decision needed from Kristian
+## Owner ruling
 
-Approve or reject forward-only self-hosting for this first live test. Until that
-decision exists, the session-prompter must continue to refuse and no launch
-command should be given to Kristian.
+Kristian chose not to initialize Koda-C itself before the contest submission.
+The current build is moving quickly, and changing the submission repository into
+its own first managed project would combine product validation with an adoption
+decision. Self-hosting remains valuable future work, not rejected product
+direction.
+
+Before submission, Koda-C will instead exercise the complete current workflow in
+a fresh representative verification project. Every durable input, transcript,
+result, snapshot, and Git proof remains in this repository. The root Koda-C
+repository receives no live `koda.config.json`, Guide manifest, or retrofitted
+session history.
+
+The detailed scope and consequences are recorded in the
+[pre-submission verification ruling](2026-07-19-pre-submission-verification-ruling.md).

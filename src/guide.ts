@@ -144,6 +144,14 @@ export function guideLaunchesDir(root: string, config: ProjectConfig): string {
   return path.join(guideRoot(root, config), "launches");
 }
 
+export function guideRunsDir(root: string, config: ProjectConfig): string {
+  return path.join(guideRoot(root, config), "runs");
+}
+
+export function guideReturnsDir(root: string, config: ProjectConfig): string {
+  return path.join(guideRoot(root, config), "returns");
+}
+
 export function guideCancellationsDir(root: string, config: ProjectConfig): string {
   return path.join(guideRoot(root, config), "cancellations");
 }

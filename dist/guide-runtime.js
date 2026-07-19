@@ -4,7 +4,7 @@ import { lstat, mkdir, readFile, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 
 import { pathExists } from "./config.js";
-import { verifyGuideLaunch,                         } from "./guide.js";
+import { guideReturnsDir, guideRunsDir, verifyGuideLaunch,                         } from "./guide.js";
 import { nowIso, writeJsonAtomic, writeTextAtomic } from "./project.js";
 
 
@@ -304,8 +304,8 @@ export async function prepareGuideRuntime(
     sessionKind: launch.sessionKind,
     launchMode: launch.launchMode,
     dependencySessionIds: launch.dependencies.map((item) => item.sessionId),
-    archive: `docs/guide/runs/${launch.id}`,
-    guideReturn: `docs/guide/returns/${launch.id}.json`,
+    archive: path.relative(root, path.join(guideRunsDir(root, config), launch.id)).split(path.sep).join("/"),
+    guideReturn: path.relative(root, path.join(guideReturnsDir(root, config), `${launch.id}.json`)).split(path.sep).join("/"),
     initialCommit: head.stdout,
     maxTurns,
   };

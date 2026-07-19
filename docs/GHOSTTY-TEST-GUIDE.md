@@ -8,7 +8,8 @@ process locks.
 
 ### Before Kristian types anything
 
-Koda-C must already be initialized as a Guide project, and Guide must have:
+The isolated verification project must already be initialized as a Guide project,
+and Guide must have:
 
 1. drafted one session prompt through `koda-c-session-prompt`;
 2. shown Kristian that exact prompt in plain language;

@@ -4,7 +4,14 @@ import path from "node:path";
 
 import { pathExists } from "./config.js";
 import { acquireGitOperationLock } from "./git-operation-lock.js";
-import { guideManifestPath, guideRoot, hasGuideManifest, loadGuideManifest } from "./guide.js";
+import {
+  guideManifestPath,
+  guideReturnsDir,
+  guideRoot,
+  guideRunsDir,
+  hasGuideManifest,
+  loadGuideManifest,
+} from "./guide.js";
 import { listSessionIds, loadSession, nowIso, sessionRoot, writeJsonAtomic } from "./project.js";
 import { sha256 } from "./receipt.js";
 
@@ -160,6 +167,8 @@ async function guideOwnedPaths(root        , config               )             
   return new Set([
     path.relative(root, guideManifestPath(root, config)).split(path.sep).join("/"),
     path.relative(root, guideWorkSetPath(root, config)).split(path.sep).join("/"),
+    path.relative(root, guideRunsDir(root, config)).split(path.sep).join("/"),
+    path.relative(root, guideReturnsDir(root, config)).split(path.sep).join("/"),
     ...manifest.continuityFiles.map((item) => normalizeProjectPath(item)),
     ...workSet.claims.map((item) => item.path),
   ]);
@@ -341,7 +350,12 @@ export async function validateSessionWorktree(root        , config              
   const siblings = await activeSessionClaims(root, config, sessionId);
   const ambiguous           = [];
   for (const changed of changedProjectPaths(root)) {
-    if (changed === ownPrefix || changed.startsWith(`${ownPrefix}/`) || own.has(changed) || guide.has(changed)) continue;
+    if (changed === ownPrefix || changed.startsWith(`${ownPrefix}/`) || own.has(changed)) continue;
+    let guideOwned = false;
+    for (const claimed of guide) {
+      if (changed === claimed || changed.startsWith(`${claimed}/`)) { guideOwned = true; break; }
+    }
+    if (guideOwned) continue;
     let siblingOwned = false;
     for (const claimed of siblings.keys()) {
       if (changed === claimed || changed.startsWith(`${claimed}/`)) { siblingOwned = true; break; }

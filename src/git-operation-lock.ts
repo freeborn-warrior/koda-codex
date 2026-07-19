@@ -20,6 +20,27 @@ interface LockRecord {
   acquiredAt: string;
 }
 
+export async function inspectExistingGitOperationLock(
+  lock: string,
+  area: string,
+  lockMetadata: Awaited<ReturnType<typeof lstat>>,
+): Promise<boolean> {
+  if (!lockMetadata.isDirectory()) {
+    throw new Error("The Git-operation lock must be a real direct child of project-local .koda; symbolic links are refused.");
+  }
+  let resolvedLock: string;
+  try {
+    resolvedLock = await realpath(lock);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+    throw error;
+  }
+  if (path.dirname(resolvedLock) !== area) {
+    throw new Error("The Git-operation lock must be a real direct child of project-local .koda; symbolic links are refused.");
+  }
+  return true;
+}
+
 function processIsAlive(pid: number): boolean {
   try {
     process.kill(pid, 0);
@@ -123,11 +144,19 @@ export async function acquireGitOperationLock(
         if ((inspectionError as NodeJS.ErrnoException).code === "ENOENT") continue;
         throw inspectionError;
       }
-      if (!lockMetadata.isDirectory() || path.dirname(await realpath(lock)) !== area) {
-        throw new Error("The Git-operation lock must be a real direct child of project-local .koda; symbolic links are refused.");
+      if (!(await inspectExistingGitOperationLock(lock, area, lockMetadata))) continue;
+      if (!(await pathExists(recordFile))) {
+        if (!(await pathExists(lock))) continue;
+        throw new Error("The Git-operation lock exists without readable owner evidence; refuse automatic recovery.");
       }
-      if (!(await pathExists(recordFile))) throw new Error("The Git-operation lock exists without readable owner evidence; refuse automatic recovery.");
-      if (!(await lstat(recordFile)).isFile()) throw new Error("The Git-operation lock evidence must be a regular file.");
+      let recordMetadata;
+      try {
+        recordMetadata = await lstat(recordFile);
+      } catch (inspectionError) {
+        if ((inspectionError as NodeJS.ErrnoException).code === "ENOENT" && !(await pathExists(lock))) continue;
+        throw inspectionError;
+      }
+      if (!recordMetadata.isFile()) throw new Error("The Git-operation lock evidence must be a regular file.");
       let current: LockRecord;
       try {
         current = parseLock(await readFile(recordFile, "utf8"));
@@ -147,7 +176,12 @@ export async function acquireGitOperationLock(
         throw new Error(`A stale Git-operation lock cannot recover while the shared index contains staged paths: ${staged.join(", ")}.`);
       }
       if (recoveredStale) throw new Error("Unable to acquire the Git-operation lock after stale-lock recovery.");
-      await rm(lock, { recursive: true });
+      try {
+        await rm(lock, { recursive: true });
+      } catch (recoveryError) {
+        if ((recoveryError as NodeJS.ErrnoException).code === "ENOENT") continue;
+        throw recoveryError;
+      }
       recoveredStale = true;
     }
   }

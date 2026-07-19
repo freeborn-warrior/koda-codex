@@ -172,6 +172,13 @@ non-conflicting file work continues outside the lock. Core mutation commands
 still rely on atomic files rather than one global transaction, so callers must
 not concurrently mutate the same session evidence.
 
+Lock contention treats disappearance during inspection as a normal cooperative
+release and retries; a present linked, non-directory, corrupt, or staged stale
+lock still refuses. Guide owns its configured `runs/` and `returns/` namespaces
+before runtime evidence is written, so another active session cannot mistake a
+legitimate concurrent Guide archive for unclaimed project mutation. Exact
+staging remains narrowed to the selected launch's archive and return paths.
+
 Ctrl-C during a model turn terminates the direct Codex child, force-stops that
 child after two seconds if soft termination is ignored, preserves partial event
 and stderr evidence, and binds the interruption to its observed context ID. Any

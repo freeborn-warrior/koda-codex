@@ -33,6 +33,7 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - The competition entry is licensed under GPLv3 only, with `Copyright (C) 2026 Kristian Bengtsson` as the sole project copyright line.
 - The product name remains **Koda-C**. The CLI command is `koda`; `koda-codex` is the lowercase repository and package slug for this Codex-built competition implementation.
 - New reviewer fixtures are scored only by contracts committed before their first model run. The final model program stopped at its declared cap: two Luna baseline repeats and nine medium runs across the three new fixtures and models. All inference-chain cells passed, so no unique winner existed and the conditional low-effort confirmation was not run.
+- Forward-only Koda-C self-hosting is deferred until after submission. The first complete Guide-launched owner test uses an isolated representative project, with every durable result archived in this repository and no retrofitted Koda state added to the root build.
 
 ## Lifecycle
 
@@ -154,7 +155,10 @@ owner contract
 - [Plural runtime post-push 177-check result](test-results/2026-07-19-plural-runtime-pushed-final.md)
 - [Plural runtime security audit](security-runs/2026-07-19-plural-runtime-audit-04/RESULT.md)
 - [First Guide live-test target and entry-check result](design-notes/2026-07-19-first-guide-live-test-target.md)
+- [Pre-submission verification owner ruling](design-notes/2026-07-19-pre-submission-verification-ruling.md)
 - [First Guide live-test preflight 177-check result](test-results/2026-07-19-live-test-preflight-docs-final.md)
+- [Pre-submission concurrency development failures](test-results/2026-07-19-pre-submission-concurrency-development-failures.md)
+- [Pre-submission concurrency repair 179-check result](test-results/2026-07-19-pre-submission-concurrency-repairs-final.md)
 - [Whole-product quality audit](quality-runs/2026-07-19-whole-product-01/RESULT.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
 - [Always-open Reviewer 135-check result](test-results/2026-07-19-reviewer-open-conversation-final.md)

@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdir, readFile, rename, rm, symlink, unlink, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, rename, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
 import { DEFAULT_CONFIG } from "../src/config.ts";
 import { runCli } from "../src/commands.ts";
-import { acquireGitOperationLock, GIT_OPERATION_LOCK } from "../src/git-operation-lock.ts";
+import {
+  acquireGitOperationLock,
+  GIT_OPERATION_LOCK,
+  inspectExistingGitOperationLock,
+} from "../src/git-operation-lock.ts";
 import { createSession, writeJsonAtomic } from "../src/project.ts";
 import { changedProjectPaths, claimGuidePaths, claimSessionPaths, ownedSessionPaths, reconcileSessionWorkSet, stagedProjectPaths, validateSessionWorktree, verifySessionWorkSetObservations, verifyStagedSessionClaims } from "../src/workset.ts";
 import { temporaryRoot } from "./helpers.ts";
@@ -151,6 +155,24 @@ test("WRITE SET: unrelated Guide and sibling dirt may coexist; unclaimed dirt re
   assert.ok(owned.every((item) => item !== "docs/PROJECT.md"));
 });
 
+test("GUIDE RUNTIME OWNERSHIP: published run and return namespaces are never mistaken for sibling work", async (t) => {
+  const h = await harness(t);
+  const runEvidence = path.join(h.root, "docs", "guide", "runs", "launch-a", "RESULT.md");
+  const returnEvidence = path.join(h.root, "docs", "guide", "returns", "launch-a.json");
+  await mkdir(path.dirname(runEvidence), { recursive: true });
+  await mkdir(path.dirname(returnEvidence), { recursive: true });
+  await writeFile(runEvidence, "# Guide result\n", "utf8");
+  await writeFile(returnEvidence, "{}\n", "utf8");
+
+  await validateSessionWorktree(h.root, DEFAULT_CONFIG, h.first.id);
+
+  await writeFile(path.join(h.root, "unclaimed-result.md"), "# Ambiguous\n", "utf8");
+  await assert.rejects(
+    validateSessionWorktree(h.root, DEFAULT_CONFIG, h.first.id),
+    /Unclaimed project mutation.*unclaimed-result\.md/,
+  );
+});
+
 test("WRITE SET MUTATION: rename and delete are exact owned changes, including both rename sides", async (t) => {
   const h = await harness(t);
   await mkdir(path.join(h.root, "src"), { recursive: true });
@@ -252,6 +274,24 @@ test("GIT LOCK SERIALIZATION: relay callers may wait for a live short ceremony",
   await first.release();
   const second = await waiting;
   await second.release();
+});
+
+test("GIT LOCK SERIALIZATION MUTATION: release between inspection steps retries instead of leaking ENOENT", async (t) => {
+  const h = await harness(t);
+  const area = path.join(h.root, ".koda");
+  const lock = path.join(h.root, GIT_OPERATION_LOCK);
+  await mkdir(lock, { recursive: true });
+  const observed = await lstat(lock);
+
+  // Break exactly one condition: the live owner releases after the contender's
+  // lstat but before its realpath containment check.
+  await rm(lock, { recursive: true });
+
+  assert.equal(await inspectExistingGitOperationLock(lock, area, observed), false);
+  const recovered = await acquireGitOperationLock(h.root, "session-b", "commit", {
+    stagedPaths: () => stagedProjectPaths(h.root),
+  });
+  await recovered.release();
 });
 
 test("GIT LOCK CONTAINMENT: linked .koda cannot redirect lock evidence", async (t) => {
