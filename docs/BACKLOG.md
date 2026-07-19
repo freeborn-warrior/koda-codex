@@ -6,9 +6,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Perform the owner-observed three-window run from verified launch `bf91c29d-a7a3-4cd5-8118-80b186d7a790`, guiding Kristian one action at a time. Do not start another runtime or expose a receipt outside Reviewer.
+- [ ] **Release blocker:** close the Ghostty launch integrity incident with a fresh owner-observed run. The deterministic repair is complete: single-token private role launchers, clean child environments, immutable launcher checks, halt-first routing, and 181/181 durable proof now pass. Real Ghostty window count, permission behavior, and human clarity must still pass before the incident closes.
+- [ ] Repeat the owner-observed three-window run only after the release blocker above is closed. The fresh prompt must carry halt `c9743416-67dc-45bd-b7f0-4de56c6bb300`; do not reuse the voided Brief or its receipt.
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
-- [ ] Owner-test the new one-action Ghostty adapter against a genuine Guide-confirmed session. Deterministic tests prove labeled Reviewer-first/Producer-second requests, no shell evaluation, partial-open recovery, and duplicate refusal; they do not prove macOS displayed the windows.
+- [ ] Owner-test the repaired one-action Ghostty adapter against a genuine Guide-confirmed session. The original callback-only adapter test was insufficient and encoded the unsafe multi-token launch; never reinstate that claim.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
 
 ## Next
@@ -35,6 +36,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
+- [x] Mechanically repair the first Ghostty integrity failure without weakening a test: one mode-700 launcher token per role, `env -i` role startup, credential/parent-context stripping for model children, changed/linked launcher refusal, and pushed-halt priority over stale acknowledgement jobs. Focused 44/44, ordinary 181/181, coverage 181/181, and durable 181/181 passed; post-push proof remains part of the milestone handover.
+
+- [x] Preserve the first owner-observed three-context attempt as an honest pushed halt, not a pass: Guide, Sol Producer, and Terra Reviewer opened; Brief reached formal review; zero acknowledgements and zero advancements occurred; halt `c9743416-67dc-45bd-b7f0-4de56c6bb300` was pushed at `ba22bfe`; the sanitized integrity incident records the unsafe tabs, credential exposure, and post-halt race without storing the secret, receipt, or screenshots.
+
 - [x] Bind Kristian's corrected exact verification prompt, commit and push launch `bf91c29d-a7a3-4cd5-8118-80b186d7a790`, and pass `koda guide verify` with prompt, independent first-session relationship, and all three continuity hashes unchanged ([confirmation proof](verification-runs/2026-07-19-markdown-headings-01/CONFIRMATION-ATTEMPT-02.md)).
 
 - [x] Prepare the representative three-window verification project in the repository-local ignored runtime area: clean pushed initial Git state, ten local skills, six phases, Guide manifest, committed continuity, verified restorable bundle, unscripted task contract, successful between-session entry check, and an exact prompt draft awaiting owner confirmation ([run contract](verification-runs/2026-07-19-markdown-headings-01/CONTRACT.md)).
@@ -56,7 +61,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 - [x] Keep the Reviewer conversational while Producer works: a real terminal prompt resumes the same persistent context, safe answers mutate no project file, project-scope thoughts return to Guide, and the later owner ruling makes active direction record immediately while still waiting for the boundary (`8ca8aab` is the earlier pushed conversation proof). Owner-observed proof remains part of the full three-context run.
 
-- [x] Add an opt-in `koda guide launch --open ghostty` adapter that keeps Guide open, requests labeled Reviewer then Producer windows, persists intent before GUI mutation, passes only explicit argument arrays, retains exact manual commands, and refuses duplicate automatic opening. Owner-observed live proof remains owed.
+- [x] Historical first implementation of opt-in `koda guide launch --open ghostty`: it preserved Guide, recorded launch intent, and refused duplicate opening, but its mocked callback test accepted an unsafe multi-token command. The first live owner run exposed that failure; the adapter has since been replaced by the single-token private-launcher design above.
 - [x] Connect pushed Guide confirmation to an explicit real-project runtime: clean/pushed and ignored-runtime entry checks, shared path hardening, two-process relay compatibility, injected finalization recovery, unchanged project Git, pushed runtime archive, machine-readable Guide return, and disk-derived Guide status. Live visible context creation remains owed.
 - [x] Build the first disk-recoverable Guide slice: project-specific steering manifest, local `koda-c-session-prompt` skill, exact owner-confirmed prompt/project/prior-session hashes, immutable cancellation, pushed-handover verification, unconfirmed/stale refusal, and launch-to-session binding. Fresh discovery and visible two-context launch remain separate owed proofs.
 

@@ -1,10 +1,11 @@
 import { spawnSync } from "node:child_process";
-import { realpath } from "node:fs/promises";
+import { chmod, lstat, readFile, realpath, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 import type { PreparedGuideRuntime } from "./guide-runtime.ts";
 import { nowIso, writeJsonAtomic } from "./project.ts";
+import { relayRoleEnvironment } from "./relay-environment.ts";
 
 export interface GhosttyWindowRequest {
   role: "reviewer" | "producer";
@@ -41,10 +42,12 @@ function windowRequest(options: {
   role: GhosttyWindowRequest["role"];
   title: string;
   project: string;
-  executable: string;
-  script: string;
-  scriptArgs: string[];
+  launcher: string;
 }): GhosttyWindowRequest {
+  const relativeLauncher = path.relative(options.project, options.launcher).split(path.sep).join("/");
+  if (!relativeLauncher.startsWith(".koda/runs/") || /\s/.test(relativeLauncher)) {
+    throw new Error("Ghostty role launcher must be a space-free path inside the project runtime.");
+  }
   return {
     role: options.role,
     title: options.title,
@@ -55,15 +58,54 @@ function windowRequest(options: {
       `--title=${options.title}`,
       `--working-directory=${options.project}`,
       "--wait-after-command=true",
+      "--shell-integration=none",
       "-e",
-      "/usr/bin/env",
-      `PATH=${process.env.PATH ?? "/usr/bin:/bin:/usr/sbin:/sbin"}`,
-      `KODA_CODEX_BIN=${options.executable}`,
-      process.execPath,
-      options.script,
-      ...options.scriptArgs,
+      `./${relativeLauncher}`,
     ],
   };
+}
+
+export function ghosttyRoleLauncherSource(options: {
+  executable: string;
+  project: string;
+  script: string;
+  scriptArgs: string[];
+  environmentSource?: NodeJS.ProcessEnv;
+}): string {
+  const environment = relayRoleEnvironment(options.executable, options.environmentSource);
+  const shellWord = (value: string): string => `'${value.replaceAll("'", `'"'"'`)}'`;
+  const environmentArguments = Object.entries(environment).map(([key, value]) => {
+    if (value === undefined) throw new Error(`Ghostty role environment is missing ${key}.`);
+    return `${key}=${value}`;
+  });
+  const command = [
+    "/usr/bin/env",
+    "-i",
+    ...environmentArguments,
+    process.execPath,
+    options.script,
+    ...options.scriptArgs,
+  ].map(shellWord);
+  return [
+    "#!/bin/sh",
+    "set -eu",
+    `cd ${shellWord(options.project)}`,
+    `exec ${command.join(" \\\n  ")}`,
+    "",
+  ].join("\n");
+}
+
+async function ensureLauncher(file: string, content: string): Promise<void> {
+  try {
+    await writeFile(file, content, { encoding: "utf8", mode: 0o700, flag: "wx" });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    const metadata = await lstat(file);
+    if (!metadata.isFile() || metadata.isSymbolicLink() || await readFile(file, "utf8") !== content) {
+      throw new Error(`Existing Ghostty role launcher is unsafe or changed: ${file}`);
+    }
+  }
+  await chmod(file, 0o700);
 }
 
 export async function ghosttyWindowRequests(
@@ -77,22 +119,32 @@ export async function ghosttyWindowRequests(
   const executable = await codexExecutable(dependencies.codexExecutable);
   const scripts = path.join(packageRoot(), "scripts");
   const shortId = prepared.launch.id.slice(0, 8);
+  const reviewerLauncher = path.join(prepared.runRoot, "launch-reviewer.sh");
+  const producerLauncher = path.join(prepared.runRoot, "launch-producer.sh");
+  await ensureLauncher(reviewerLauncher, ghosttyRoleLauncherSource({
+    executable,
+    project,
+    script: path.join(scripts, "run-relay-reviewer-window.ts"),
+    scriptArgs: [prepared.runRoot],
+  }));
+  await ensureLauncher(producerLauncher, ghosttyRoleLauncherSource({
+    executable,
+    project,
+    script: path.join(scripts, "execute-relay-run.ts"),
+    scriptArgs: ["--reviewer-window", prepared.runRoot],
+  }));
   return [
     windowRequest({
       role: "reviewer",
       title: `Koda-C Reviewer — ${shortId}`,
       project,
-      executable,
-      script: path.join(scripts, "run-relay-reviewer-window.ts"),
-      scriptArgs: [prepared.runRoot],
+      launcher: reviewerLauncher,
     }),
     windowRequest({
       role: "producer",
       title: `Koda-C Producer — ${shortId}`,
       project,
-      executable,
-      script: path.join(scripts, "execute-relay-run.ts"),
-      scriptArgs: ["--reviewer-window", prepared.runRoot],
+      launcher: producerLauncher,
     }),
   ];
 }

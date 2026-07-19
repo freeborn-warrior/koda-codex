@@ -24,6 +24,7 @@ import {
   writeTextAtomic,
 } from "../src/project.ts";
 import { readApprovalEntries, sha256 } from "../src/receipt.ts";
+import { relayCodexEnvironment } from "../src/relay-environment.ts";
 import {
   claimSessionPaths,
   ownedSessionPaths,
@@ -262,7 +263,7 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
 
   const child = spawn(process.env.KODA_CODEX_BIN ?? "codex", args, {
     cwd: project,
-    env: { ...process.env, ...(run.sessionId ? { KODA_SESSION_ID: run.sessionId } : {}) },
+    env: relayCodexEnvironment(process.env, run.sessionId),
     stdio: ["ignore", "pipe", "pipe"],
   });
   activeModelChild = child;
@@ -1215,6 +1216,25 @@ async function main(): Promise<void> {
       continue;
     }
     run.sessionId = session.id;
+
+    const halted = await evaluateSessionHalt(project, session.directory, session.state);
+    if (halted.halted) {
+      run.status = "HALTED";
+      run.lastAction = `session halted during ${halted.metadata?.phase}; fresh Brief required`;
+      run.lastError = undefined;
+      await saveRun();
+      await note(`session halted during ${halted.metadata?.phase}`, [
+        `- Halt ID: \`${halted.metadata?.id}\``,
+        `- Voided phase: \`${halted.metadata?.phase}\``,
+        "- Pushed halt evidence wins over any stale reviewer job or runtime label.",
+        "- No artifact, review, or approval from the in-flight phase counts as gated work.",
+        "- Continuation requires a fresh Brief through a new session.",
+      ]);
+      await removeReviewerJob(runRoot);
+      console.log(`\nRELAY HALTED — ${session.id}`);
+      console.log(`Halt evidence: ${path.relative(project, session.directory)}/halt.md`);
+      return;
+    }
 
     const active = currentPhase(session.state);
     if (!active) {

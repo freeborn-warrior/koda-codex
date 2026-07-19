@@ -1,10 +1,22 @@
 # Koda-C terminal testing in Ghostty
 
-## First real three-window test — built, not owner-tested yet
+## Current status — first live attempt halted; repaired path awaits a fresh run
 
 This is the route Kristian will use. It is written for someone who should not
 need to understand shell state, environment variables, run directories, or
 process locks.
+
+The first live attempt is over and must not be resumed. It created real Guide,
+Producer, and Reviewer contexts, then exposed a serious launcher flaw: unintended
+tabs, repeated permissions, an environment dump containing an ambient credential,
+and a stale review prompt after pushed halt. Kristian halted before acknowledging
+anything; zero phases advanced. The [sanitized incident](security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md)
+records that failure without storing the credential, receipt, or screenshots.
+
+The repaired adapter now passes deterministic focused 44/44 and complete
+181/181 checks. A successful fresh human run is still required. Until a new prompt
+and launch are prepared, Kristian should keep only the existing Guide window open
+and idle. He should not run a command or ask Guide to resume the halted attempt.
 
 ### Before Kristian types anything
 
@@ -35,9 +47,10 @@ Guide. Start Codex in the target project, let it reconstruct status from disk,
 then speak to it in ordinary language. Kristian should not paste a shell command
 into the Codex conversation.
 
-For the current sealed verification run, the one terminal command that starts
+For each fresh sealed verification run, the one terminal command that starts
 Window G is recorded in that run's `OWNER-STEPS.md`. It starts Guide only; it does
-not launch the session.
+not launch the session. The current halted run's owner steps intentionally contain
+no launch command.
 
 Once Guide reports the exact verified launch ID, Kristian says in Window G:
 
@@ -55,21 +68,27 @@ conversation message. Guide runs it once from the target project. It should leav
 Guide open, then request a labeled Reviewer window first and a labeled Producer
 window second.
 
-After pressing Return:
+After a fresh launch request:
 
 1. Do not ask Guide to launch again.
-2. Wait for Window B to say `KODA-C REVIEWER WINDOW` and `Owner input: OPEN`.
-3. Wait for Window A to say `KODA-C PRODUCER WINDOW` and `Owner input: CLOSED`.
-4. Leave Window A alone. Watching is safe; typing is not part of the workflow.
-5. Speak about the active session only in Window B.
-6. Keep Window G available for project-level conversation and future ideas.
+2. Exactly one Reviewer and one Producer window should appear. If any extra tab,
+   environment output, Node prompt, red direct-execution error, or confusing
+   repeated permission request appears, stop. Do not keep approving prompts and
+   do not try to identify the real windows by trial and error.
+3. Wait for Window B to say `KODA-C REVIEWER WINDOW` and `Owner input: OPEN`.
+4. Wait for Window A to say `KODA-C PRODUCER WINDOW` and `Owner input: CLOSED`.
+5. Leave Window A alone. Watching is safe; typing is not part of the workflow.
+6. Speak about the active session only in Window B.
+7. Keep Window G available for project-level conversation and future ideas.
 
 Do not run the launch command in this repository merely to experiment when no
 fresh confirmed prompt exists; the entry checks will refuse.
 
-The automatic path has deterministic argument/order/failure tests but has not
-yet been watched by Kristian on screen. If either requested window does not
-appear, do not repeat the launch command. In Window G, paste exactly:
+The repaired automatic path has deterministic argument, executable-launcher,
+environment, order, failure, and halt-race tests. Those do not predict macOS
+permission behavior. If either requested window does not appear, do not repeat
+the launch command. In Window G, ask Guide to report current Koda status; Guide
+may run the read-only command:
 
 ```bash
 koda guide status

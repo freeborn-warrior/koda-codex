@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdir, readFile, readdir, symlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, stat, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
@@ -15,7 +15,7 @@ import {
   verifyGuideLaunch,
 } from "../src/guide.ts";
 import { currentGuideRuntime, listGuideRuntimes, prepareGuideRuntime } from "../src/guide-runtime.ts";
-import { requestGhosttyWindows } from "../src/ghostty.ts";
+import { ghosttyWindowRequests, requestGhosttyWindows } from "../src/ghostty.ts";
 import { prepareHaltArtifact } from "../src/halt.ts";
 import { createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
 import { temporaryRoot } from "./helpers.ts";
@@ -550,7 +550,7 @@ test("GUIDE RUNTIME STATUS TRUTH: a forged HALTED label refuses without pushed h
   );
 });
 
-test("GUIDE GHOSTTY START: one explicit action requests Reviewer then Producer without shell evaluation", async (t) => {
+test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Reviewer and Producer launcher", async (t) => {
   const h = await guideHarness(t, true);
   const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
   h.git(h.root, ["add", "-A"]);
@@ -587,14 +587,28 @@ test("GUIDE GHOSTTY START: one explicit action requests Reviewer then Producer w
     assert.equal(request.args[0], "-na");
     assert.equal(request.args[1], "Ghostty.app");
     assert.ok(request.args.includes("--wait-after-command=true"));
-    assert.ok(request.args.includes("/usr/bin/env"));
-    assert.ok(request.args.includes(`KODA_CODEX_BIN=${process.execPath}`));
+    assert.ok(request.args.includes("--shell-integration=none"));
+    const executeIndex = request.args.indexOf("-e");
+    assert.notEqual(executeIndex, -1);
+    assert.equal(request.args.length, executeIndex + 2, "Ghostty must receive exactly one command token after -e");
+    assert.match(request.args[executeIndex + 1]!, /^\.\/\.koda\/runs\/[0-9a-f-]+\/launch-(reviewer|producer)\.sh$/);
+    assert.ok(!request.args.includes("/usr/bin/env"));
+    assert.ok(!request.args.some((item) => item.startsWith("PATH=")));
+    assert.ok(!request.args.some((item) => item.startsWith("KODA_CODEX_BIN=")));
     assert.ok(!request.args.includes("/bin/zsh"));
     assert.ok(!request.args.includes("-lc"));
   }
+  const runRoot = path.join(h.root, ".koda", "runs", confirmed.launch.id);
+  const reviewerLauncher = await readFile(path.join(runRoot, "launch-reviewer.sh"), "utf8");
+  const producerLauncher = await readFile(path.join(runRoot, "launch-producer.sh"), "utf8");
+  assert.match(reviewerLauncher, /run-relay-reviewer-window\.ts/);
+  assert.match(producerLauncher, /execute-relay-run\.ts/);
+  assert.doesNotMatch(reviewerLauncher + producerLauncher, /FIREWORKS_API_KEY|OPENAI_API_KEY|CODEX_THREAD_ID/);
+  assert.equal((await stat(path.join(runRoot, "launch-reviewer.sh"))).mode & 0o777, 0o700);
+  assert.equal((await stat(path.join(runRoot, "launch-producer.sh"))).mode & 0o777, 0o700);
   assert.match(output.join("\n"), /THREE-CONTEXT START REQUESTED/);
   assert.match(output.join("\n"), /This Guide conversation stays open/);
-  const runFile = path.join(h.root, ".koda", "runs", confirmed.launch.id, "RUN.json");
+  const runFile = path.join(runRoot, "RUN.json");
   const run = JSON.parse(await readFile(runFile, "utf8"));
   assert.equal(run.terminalLaunch.adapter, "ghostty-macos");
 
@@ -603,6 +617,18 @@ test("GUIDE GHOSTTY START: one explicit action requests Reviewer then Producer w
     /automatic Ghostty opening refuses to create duplicate Producer or Reviewer processes/,
   );
   assert.equal(opened.length, 2);
+
+  await writeFile(path.join(runRoot, "launch-reviewer.sh"), "tampered launcher\n", "utf8");
+  const reused = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  await assert.rejects(
+    ghosttyWindowRequests(h.root, reused, { platform: "darwin", codexExecutable: process.execPath }),
+    /Existing Ghostty role launcher is unsafe or changed/,
+  );
 });
 
 test("GUIDE GHOSTTY MUTATION: a failed Producer request refuses duplicate automatic recovery", async (t) => {

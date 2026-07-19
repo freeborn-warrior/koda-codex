@@ -840,3 +840,65 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Correction:** The current run now gives exactly one terminal command: start interactive Codex in the isolated project with `-C`, Sol, medium effort, and a bounded Guide-only prompt. After disk status appears, Kristian speaks to Guide in plain language; Guide invokes the technical launch command. The owner never assembles a run path or pastes shell into a Codex prompt.
 - **Source boundary:** Installed Codex CLI `0.144.6` locally confirms `-C`, `-m`, `-c`, and an optional starting prompt. Its local model catalog confirms both `gpt-5.6-sol` and `gpt-5.6-terra` support medium effort. The official Codex manual fetch failed because the sandbox could not resolve `developers.openai.com`; no undocumented flag was invented. The exact local command remains subject to owner observation in Ghostty.
 - **Verdict:** INSTRUCTION AMBIGUITY CORRECTED; OWNER STEP 1 READY.
+
+## 2026-07-19 — First live three-window failure and Ghostty integrity repair
+
+- **Live variant:** Ghostty 1.3.1 on macOS, persistent Guide, Sol/medium Producer,
+  Terra/medium Reviewer, and the owner in the Reviewer window. This was a live,
+  unscripted product attempt, not a planted model fixture.
+- **Live result:** **HALTED — HUMAN EXPERIENCE AND SECURITY FAILURE.** Launch
+  `bf91c29d-a7a3-4cd5-8118-80b186d7a790` opened the intended role contexts plus
+  unintended tabs created from loose command tokens. The extra surfaces included
+  an environment dump, Node prompt, empty shell, and direct-execution errors. The
+  environment dump rendered an active ambient credential. This ledger stores no
+  credential value, receipt, unsafe screenshot, or raw environment output.
+- **Owner impact and response:** Repeated permissions, similarly named tabs, and
+  contradictory errors made the session unusable for a non-technical owner.
+  Kristian invoked the official Reviewer halt before acknowledgement. Halt
+  `c9743416-67dc-45bd-b7f0-4de56c6bb300` was committed and pushed at verification-
+  project commit `ba22bfe`; **0** acknowledgements and **0/6** advanced phases
+  exist. Kristian chose not to rotate the exposed credential immediately because
+  other projects depend on it and will monitor use. That choice is recorded as an
+  owner operational ruling, not as technical remediation.
+- **Second product defect:** After pushed halt, Producer consumed the completed
+  Reviewer job before checking terminal evidence and presented the voided review
+  again. Disk-only reconciliation restored `HALTED` and removed the stale job
+  without another model call.
+- **Why earlier tests passed:** The mocked Ghostty callback asserted the unsafe
+  multi-token vector rather than executing it through real Ghostty. The Reviewer
+  halt test stopped before Producer consumed the completed `HALTED` job. Both
+  missing adversarial conditions became permanent tests; no gate was weakened.
+- **Interim deterministic result:** The first repair passed **180/180** and was
+  preserved in [the interim transcript](test-results/2026-07-19-ghostty-integrity-repair-final.md).
+  Audit then identified that this still inspected launcher text rather than
+  executing the private launcher under a hostile environment, so one stronger
+  security test was added.
+- **Test-authoring failure:** The first strengthened focused run passed **43/44**.
+  The only failure was an obsolete filename regular expression after the launcher
+  gained an explicit extension; the one-token safety assertion and all product
+  conditions passed. The filename expectation was corrected without relaxing the
+  command-token, environment, mutation, or halt-race requirements.
+- **Defense-in-depth change:** The private launcher was moved from Node bootstrap
+  code to a mode-700 non-interactive shell trampoline. Ghostty sees one relative
+  executable token. The file immediately uses `/usr/bin/env -i` and an explicit
+  allowlist before starting the role process. Every model child independently
+  receives the same safe subset. The executable test supplies hostile credential,
+  parent-context, and `NODE_OPTIONS` values and proves none reach Node.
+- **Final focused result:** **44/44 passed**, including exact one-token requests,
+  actual launcher execution, changed-launcher refusal, and the pushed-halt race.
+- **Complete results:** The ordinary suite passed **181/181**. The coverage suite
+  passed **181/181** with 89.08% line coverage overall, 100% in the environment
+  sanitizer, and 93.92% in the Ghostty adapter. The durable suite passed
+  **181/181** and is preserved in [the final repair transcript](test-results/2026-07-19-ghostty-integrity-repair-complete.md).
+- **Ready-to-push repetition:** After the path-quoting control and all incident,
+  project, README, owner-step, and security-report updates landed, the ordinary
+  suite passed **181/181** again and a second durable run passed **181/181** in
+  [the ready-to-push transcript](test-results/2026-07-19-ghostty-integrity-repair-ready-to-push.md).
+- **Security checks:** Diff whitespace, repair-surface symlinks, repository
+  credential signatures, real package installation, and reachable Git object
+  integrity passed. `git fsck --full` named only recoverable unreachable objects
+  left by prior development operations, not reachable corruption.
+- **Boundary:** Deterministic mechanics are repaired. Post-push verification and
+  one fresh owner-observed run remain required because tests cannot prove Ghostty's
+  real window count, permission prompts, or Kristian's human clarity.
+- **Verdict:** MECHANICAL REPAIR PASS; RELEASE BLOCKER REMAINS UNTIL FRESH HUMAN RUN.

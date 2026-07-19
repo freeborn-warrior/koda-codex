@@ -1,7 +1,7 @@
 {
   "version": 1,
   "runId": "2026-07-19-markdown-headings-01",
-  "status": "READY_TO_LAUNCH",
+  "status": "HALTED_AFTER_LIVE_LAUNCH_FAILURE",
   "preparedAt": "2026-07-19T18:28:31Z",
   "liveProject": ".koda/verification-projects/2026-07-19-markdown-headings-01/project",
   "initialCommit": "f3d99323f7df8bf308d0f26ea9cc5eb7a9a3256d",
@@ -39,5 +39,19 @@
     "pushed": true
   },
   "ownerConfirmed": true,
-  "modelRunStarted": false
+  "modelRunStarted": true,
+  "session": {
+    "id": "2026-07-19-01",
+    "reachedPhase": "brief",
+    "completedPhases": 0,
+    "ownerAcknowledgements": 0
+  },
+  "halt": {
+    "id": "c9743416-67dc-45bd-b7f0-4de56c6bb300",
+    "commit": "ba22bfe",
+    "pushed": true
+  },
+  "result": "docs/verification-runs/2026-07-19-markdown-headings-01/RESULT.md",
+  "securityIncident": "docs/security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md",
+  "freshSessionRequired": true
 }

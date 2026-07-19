@@ -1,29 +1,27 @@
 # Owner steps — three-window verification
 
-**Current state:** verified launch `bf91c29d-a7a3-4cd5-8118-80b186d7a790` is
-committed and pushed. No runtime, model, session, or Ghostty role window exists.
+**Current state:** this attempt is finished and pushed-halted. It is not safe to
+resume, acknowledge, or relaunch.
 
-## Step 1 — open Guide
+The first live launch reached a real Brief and formal review, but the terminal
+adapter created unintended tabs and exposed an ambient credential. Kristian used
+the Reviewer-side halt. Halt `c9743416-67dc-45bd-b7f0-4de56c6bb300` is pushed at
+verification-project commit `ba22bfe`; zero phases advanced and zero owner
+acknowledgements exist.
 
-Open one new Ghostty window. Paste this entire command as one line and press
-Return once:
+## What Kristian should do now
 
-```bash
-codex -C "/Users/freeborn/Dev/koda-codex/.koda/verification-projects/2026-07-19-markdown-headings-01/project" -m gpt-5.6-sol -c 'model_reasoning_effort="medium"' 'Act as this project’s persistent Guide. Read the repository guidance and explicitly use koda-c-session-prompt. Reconstruct truth from disk, run node /Users/freeborn/Dev/koda-codex/dist/cli.js guide status, report the exact verified launch ID and whether it is safe to launch, then wait for Kristian. Do not prepare a runtime, open Ghostty windows, create a session, or alter project files.'
-```
+Nothing in Producer or Reviewer. Those windows are closed. The existing Guide
+window may remain open and idle; it is safe because Guide is between sessions and
+the halted session is visible from disk.
 
-This opens only Window G. If Codex asks whether you trust the project, choose the
-option that trusts this project. Do not type a launch command at the Codex prompt.
-Wait until Guide reports status, then tell Codex what it said or paste the visible
-message back to the current Koda-C conversation for the next single step.
+Do not reuse the old launch command, Brief, review, or receipt. Do not ask Guide
+to resume this session.
 
-## What must not exist after Step 1
+The next human step will be issued one action at a time only after the launcher
+repair is committed, pushed, and independently reverified. That later attempt
+must begin as a new Guide-confirmed session whose fresh Brief cites the pushed
+halt and its owner direction.
 
-- no Reviewer window;
-- no Producer window;
-- no Koda session;
-- no runtime preparation;
-- no model acting as Producer or Reviewer.
-
-Later steps are intentionally withheld here until Step 1 is observed. Kristian
-receives one action at a time; recovery depends on the state that actually appears.
+See the [halted result](RESULT.md) and the sanitized
+[security incident](../../security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md).

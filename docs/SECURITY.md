@@ -37,8 +37,9 @@ parent, and ignored project-local runtime under `.koda/`:
   after verifying pushed confirmation evidence, an empty shared Git index, and
   one exact confirmed request. Unrelated unstaged claimed work may remain.
 - explicit `guide launch ... --open ghostty` additionally invokes macOS
-  `/usr/bin/open` twice with argument arrays to request labeled Reviewer then
-  Producer windows. It does not build or evaluate a shell command string.
+  `/usr/bin/open` twice to request labeled Reviewer then Producer windows. Each
+  request gives Ghostty exactly one project-relative, mode-700 launcher token;
+  loose role-command arguments are never passed through `open --args`.
 
 Koda refuses a configured sessions directory that resolves outside the project.
 Session state must retain valid configured phase names. Artifacts, reviews,
@@ -117,11 +118,15 @@ historical same-phase owner-handback route was removed.
 
 Run those scripts only against a run folder created by `relay:prepare` or a
 pushed `koda guide launch` in a trusted project. Do not execute a modified
-`RUN.json` received from someone else. Codex subprocesses inherit the launcher's environment because they
-must inherit Codex authentication; do not launch the harness from a shell holding
-unrelated secrets. Without the explicit Ghostty option, the core `koda` CLI
-does not launch a model. With it, Koda asks Ghostty to run the same documented
-role commands that would otherwise be started manually.
+`RUN.json` received from someone else. Guide-launched role files immediately
+clear ambient state with `/usr/bin/env -i`; Codex subprocesses independently
+receive an allowlist containing safe terminal identity, a fixed executable path,
+their bound session ID, and `HOME` so Codex can find its own authentication.
+Ambient API credentials, parent context IDs, arbitrary project variables, and
+Node startup options are excluded. Do not reintroduce blanket environment
+inheritance to support a custom provider; add and review the smallest explicit
+capability instead. Without the explicit Ghostty option, the core `koda` CLI
+does not launch a model.
 
 Git commit and push may execute hooks already configured in a repository. The
 core close and halt commands only print Git instructions; the explicitly started relay
@@ -148,10 +153,15 @@ OS identities, or a service boundary.
 
 The Ghostty adapter is deliberately opt-in. It records launch intent before the
 first GUI request and refuses automatic opening for an existing runtime, even if
-only one prior request appeared to succeed. It passes only the current `PATH` and
-the resolved Codex executable location explicitly to the role command; it never
-serializes arbitrary environment variables into a shell line. A failed request
-leaves the runtime prepared and names `koda guide status` as manual recovery.
+only one prior request appeared to succeed. The first live implementation proved
+that a mocked argument vector was insufficient: loose tokens created extra tabs
+and an ambient credential was rendered. The repaired adapter passes one private
+launcher path after `-e`. That file uses fixed shell quoting and an explicit clean
+environment before starting the exact role command. Changed, linked, or replaced
+launchers refuse during request construction. A failed request leaves the runtime
+prepared and names `koda guide status` as manual recovery. Same-user replacement
+between the final content check and external execution remains a local TOCTOU
+boundary, not hostile-writer isolation.
 
 ## Concurrency and recovery
 
@@ -207,4 +217,8 @@ verification of claimed external outputs, lives in
 [`security-runs/2026-07-19-concurrent-mutation-audit-03/RESULT.md`](security-runs/2026-07-19-concurrent-mutation-audit-03/RESULT.md);
 the plural-runtime follow-up lives in
 [`security-runs/2026-07-19-plural-runtime-audit-04/RESULT.md`](security-runs/2026-07-19-plural-runtime-audit-04/RESULT.md).
+The first live-launch incident is preserved without its credential or receipt in
+[`security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md`](security-runs/2026-07-19-ghostty-launch-integrity-incident/RESULT.md),
+and the whole-product repair delta is audited in
+[`security-runs/2026-07-19-ghostty-repair-audit-05/RESULT.md`](security-runs/2026-07-19-ghostty-repair-audit-05/RESULT.md).
 The latest named full-suite transcript is linked from the README.

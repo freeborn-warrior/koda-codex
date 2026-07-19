@@ -15,6 +15,7 @@ import { pushCommandArgs } from "../src/git.ts";
 import { evaluateSessionHalt, prepareHaltArtifact } from "../src/halt.ts";
 import { currentPhase, displayPath, loadSession, writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
+import { relayCodexEnvironment } from "../src/relay-environment.ts";
 import { stagedProjectPaths } from "../src/workset.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
@@ -207,7 +208,7 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
   console.log(`\nREVIEWER ${turn} — ${purpose}`);
   const child = spawn(process.env.KODA_CODEX_BIN ?? "codex", args, {
     cwd: project,
-    env: { ...process.env, ...(activeRun.sessionId ? { KODA_SESSION_ID: activeRun.sessionId } : {}) },
+    env: relayCodexEnvironment(process.env, activeRun.sessionId),
     stdio: ["ignore", "pipe", "pipe"],
   });
   activeModelChild = child;

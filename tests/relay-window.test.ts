@@ -374,6 +374,24 @@ test("REVIEWER HALT: the sole interrupt voids the phase and pushes immutable evi
   assert.equal(halt.metadata?.ownerDirection, "Restart from a fresh Brief with the newly settled product direction.");
   assert.equal(result.session.state.currentPhaseIndex, 0);
   assert.equal(result.session.state.advances.length, 0);
+
+  const reconciled = spawnSync(process.execPath, [
+    "scripts/execute-relay-run.ts",
+    "--reviewer-window",
+    result.runRoot,
+  ], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 5_000,
+    env: { ...process.env, KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot) },
+  });
+  assert.equal(reconciled.status, 0, `${reconciled.stdout}\n${reconciled.stderr}`);
+  assert.match(reconciled.stdout, /RELAY HALTED/);
+  assert.equal(await readReviewerJob(result.runRoot), null, "a pushed halt must remove any stale owner job");
+  const reconciledRun = JSON.parse(await readFile(path.join(result.runRoot, "RUN.json"), "utf8"));
+  assert.equal(reconciledRun.status, "HALTED");
+  assert.match(reconciledRun.lastAction, /fresh Brief required/);
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
 });
 
 test("TWO-WINDOW RELAY: a pending formal-review job wakes one persistent reviewer and returns acknowledged disk evidence", async (t) => {
