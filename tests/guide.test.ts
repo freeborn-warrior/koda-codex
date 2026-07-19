@@ -96,6 +96,29 @@ test("GUIDE ENTRY: an active prior session refuses a new launch request and name
   );
 });
 
+test("GUIDE PREFLIGHT: an active session blocks a conceptually competing session before drafting", async (t) => {
+  const h = await guideHarness(t);
+  const active = await createSession(h.root, DEFAULT_CONFIG, prompt);
+  const output: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { output.push(message); } });
+  const status = output.join("\n");
+  assert.match(status, /NEXT SESSION BLOCKED — the current project path is still in flight/);
+  assert.match(status, new RegExp(`Current bounded session: ${active.id} — brief \\(1/6\\)`));
+  assert.match(status, /Named condition: Every declared phase has not advanced/);
+  assert.match(status, /discuss and preserve a future idea, but do not draft, confirm, or launch a competing session/);
+  assert.match(status, /wait for immutable pushed close, or explicitly halt and push halt\.md/);
+  assert.doesNotMatch(status, /one next-session draft may continue/);
+});
+
+test("GUIDE PREFLIGHT CONTROL: a project with no active session permits exactly one draft", async (t) => {
+  const h = await guideHarness(t);
+  const output: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { output.push(message); } });
+  const status = output.join("\n");
+  assert.match(status, /BETWEEN SESSIONS — Guide discussion or one next-session draft may continue/);
+  assert.doesNotMatch(status, /NEXT SESSION BLOCKED/);
+});
+
 test("GUIDE HALT RETURN: a pushed halt and every waiting direction must enter a fresh confirmed Brief", async (t) => {
   const h = await guideHarness(t, true);
   const first = await createSession(h.root, DEFAULT_CONFIG, prompt);
@@ -110,6 +133,11 @@ test("GUIDE HALT RETURN: a pushed halt and every waiting direction must enter a 
   h.git(h.root, ["add", "-A"]);
   h.git(h.root, ["commit", "-m", "halt first guided session"]);
   h.git(h.root, ["push"]);
+
+  const status: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { status.push(message); } });
+  assert.match(status.join("\n"), /BETWEEN SESSIONS — Guide discussion or one next-session draft may continue/);
+  assert.doesNotMatch(status.join("\n"), /NEXT SESSION BLOCKED/);
 
   await assert.rejects(
     confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian"),
@@ -341,6 +369,8 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   await runGuideCli(["status"], h.root, { out(message) { guideStatus.push(message); } });
   assert.match(guideStatus.join("\n"), /Owner input: OPEN — project-level conversation belongs in this Guide context/);
   assert.match(guideStatus.join("\n"), /Guide direction cannot inject the active phase/);
+  assert.match(guideStatus.join("\n"), /NEXT SESSION BLOCKED — the current project path is still in flight/);
+  assert.match(guideStatus.join("\n"), /do not draft, confirm, or launch a competing session/);
   assert.match(guideStatus.join("\n"), new RegExp(`ACTIVE SESSION RUNTIME — ${confirmed.launch.id}`));
   assert.match(guideStatus.join("\n"), /State: PAUSED_BY_OWNER/);
   assert.match(guideStatus.join("\n"), /Window B — reviewer \/ owner:[\s\S]*Window A — producer:[\s\S]*Read-only detail:/);

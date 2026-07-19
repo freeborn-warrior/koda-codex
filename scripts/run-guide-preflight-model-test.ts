@@ -1,0 +1,248 @@
+import { createHash } from "node:crypto";
+import { spawnSync } from "node:child_process";
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+
+import { DEFAULT_CONFIG } from "../src/config.ts";
+import { createSession, writeJsonAtomic } from "../src/project.ts";
+
+const root = process.cwd();
+const codex = process.env.KODA_CODEX_BIN?.trim() || "codex";
+const date = "2026-07-19";
+const model = "gpt-5.6-sol";
+
+function runCodex(cwd: string, effort: "low" | "medium", prompt: string, skipGit: boolean) {
+  const args = [
+    "exec",
+    "--ephemeral",
+    "--ignore-user-config",
+    "--sandbox", "read-only",
+    "--json",
+    "--color", "never",
+    "--model", model,
+    "-c", `model_reasoning_effort=\"${effort}\"`,
+    ...(skipGit ? ["--skip-git-repo-check"] : []),
+    prompt,
+  ];
+  const result = spawnSync(codex, args, { cwd, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+  return {
+    args,
+    status: result.status ?? -1,
+    stdout: result.stdout ?? "",
+    stderr: result.stderr ?? String(result.error ?? ""),
+  };
+}
+
+function events(text: string): Array<Record<string, unknown>> {
+  return text.trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+}
+
+function agentText(items: Array<Record<string, unknown>>): string {
+  return items.flatMap((event) => {
+    const item = event.item as { type?: string; text?: string } | undefined;
+    return item?.type === "agent_message" && typeof item.text === "string" ? [item.text] : [];
+  }).join("\n\n");
+}
+
+function threadId(items: Array<Record<string, unknown>>): string | null {
+  const started = items.find((event) => event.type === "thread.started");
+  return typeof started?.thread_id === "string" ? started.thread_id : null;
+}
+
+function commandEvidence(items: Array<Record<string, unknown>>): string {
+  return items.flatMap((event) => {
+    const item = event.item as { type?: string; command?: string; aggregated_output?: string } | undefined;
+    if (item?.type !== "command_execution") return [];
+    return [`${item.command ?? ""}\n${item.aggregated_output ?? ""}`];
+  }).join("\n");
+}
+
+async function snapshot(directory: string): Promise<Record<string, string>> {
+  const result: Record<string, string> = {};
+  async function visit(current: string): Promise<void> {
+    for (const entry of (await readdir(current, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
+      const absolute = path.join(current, entry.name);
+      const relative = path.relative(directory, absolute).split(path.sep).join("/");
+      if (entry.isDirectory()) await visit(absolute);
+      else if (entry.isFile()) {
+        const content = await readFile(absolute);
+        result[relative] = createHash("sha256").update(content).digest("hex");
+      } else result[relative] = `SPECIAL:${(await stat(absolute)).mode}`;
+    }
+  }
+  await visit(directory);
+  return result;
+}
+
+async function writeRunFiles(
+  destination: string,
+  run: ReturnType<typeof runCodex>,
+  metadata: Record<string, unknown>,
+  result: string,
+): Promise<void> {
+  await mkdir(destination, { recursive: true });
+  await Promise.all([
+    writeFile(path.join(destination, "CODEX-EVENTS.jsonl"), run.stdout, "utf8"),
+    writeFile(path.join(destination, "CODEX-STDERR.txt"), run.stderr, "utf8"),
+    writeJsonAtomic(path.join(destination, "RUN.json"), {
+      version: 1,
+      date,
+      model,
+      ephemeral: true,
+      ignoredUserConfig: true,
+      sandbox: "read-only",
+      exitStatus: run.status,
+      commandArgs: run.args,
+      ...metadata,
+    }),
+    writeFile(path.join(destination, "RESULT.md"), result, "utf8"),
+  ]);
+}
+
+async function discoveryRun(): Promise<void> {
+  const prompt = "Do not call any tool and do not read any repository file. From startup context already supplied to this fresh task only, report: (1) every available skill whose name starts with koda-c-, exactly as listed; (2) the total number; (3) one repository guidance rule about where project skills must live. If startup context lacks an item, say unavailable instead of searching. Finish with DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY.";
+  const run = runCodex(root, "low", prompt, false);
+  const parsed = events(run.stdout);
+  const answer = agentText(parsed);
+  const expected = (await readdir(path.join(root, ".agents", "skills"), { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith("koda-c-"))
+    .map((entry) => entry.name)
+    .sort();
+  const discovered = [...answer.matchAll(/\bkoda-c-[a-z-]+\b/g)].map((match) => match[0]).sort();
+  const toolEvents = parsed.filter((event) => {
+    const item = event.item as { type?: string } | undefined;
+    return item?.type && item.type !== "agent_message";
+  });
+  const pass = run.status === 0 && toolEvents.length === 0 &&
+    JSON.stringify(discovered) === JSON.stringify(expected) &&
+    answer.includes(`Total: ${expected.length}`) &&
+    answer.includes(".agents/skills/") &&
+    answer.includes("DISCOVERY_SOURCE: STARTUP_CONTEXT_ONLY");
+  const destination = path.join(root, "docs", "discovery-runs", `${date}-fresh-codex-startup-02`);
+  await writeRunFiles(destination, run, {
+    effort: "low",
+    threadId: threadId(parsed),
+    prompt,
+    expectedSkills: expected,
+    discoveredSkills: discovered,
+    toolEventCount: toolEvents.length,
+    status: pass ? "PASS" : "FAIL",
+  }, [
+    `# Fresh Codex startup discovery — ${date} — Sol low — 02`,
+    "",
+    `- Status: **${pass ? "PASS" : "FAIL"}**`,
+    `- Model: \`${model}\``,
+    "- Effort: low",
+    "- Context: fresh ephemeral Codex task with user configuration ignored",
+    "- Sandbox: read-only",
+    `- Koda-C skills discovered from startup context: ${discovered.length} of ${expected.length}`,
+    `- Tool calls or repository reads: ${toolEvents.length}`,
+    "- Raw events: [`CODEX-EVENTS.jsonl`](CODEX-EVENTS.jsonl)",
+    "- Stderr: [`CODEX-STDERR.txt`](CODEX-STDERR.txt)",
+    "",
+    "## Model answer",
+    "",
+    answer,
+    "",
+  ].join("\n"));
+  if (!pass) throw new Error("Fresh startup discovery did not satisfy its sealed contract.");
+}
+
+async function activePreflightRun(): Promise<void> {
+  const fixture = await mkdtemp(path.join(tmpdir(), "koda-guide-preflight-"));
+  try {
+    await Promise.all([
+      mkdir(path.join(fixture, ".agents", "skills"), { recursive: true }),
+      mkdir(path.join(fixture, "docs", "sessions"), { recursive: true }),
+      mkdir(path.join(fixture, "docs", "guide", "prompts"), { recursive: true }),
+    ]);
+    await Promise.all([
+      cp(path.join(root, "dist"), path.join(fixture, "dist"), { recursive: true }),
+      cp(
+        path.join(root, ".agents", "skills", "koda-c-session-prompt"),
+        path.join(fixture, ".agents", "skills", "koda-c-session-prompt"),
+        { recursive: true },
+      ),
+    ]);
+    await Promise.all([
+      writeJsonAtomic(path.join(fixture, "koda.config.json"), DEFAULT_CONFIG),
+      writeFile(path.join(fixture, "docs", "PROJECT.md"), "# Project\n\nBuild one path at a time.\n", "utf8"),
+      writeFile(path.join(fixture, "docs", "BACKLOG.md"), "# Backlog\n\n- [ ] Finish the active session.\n", "utf8"),
+      writeFile(path.join(fixture, "docs", "WORKING-PLAN.md"), "# Working plan\n\n1. Complete the active Brief.\n", "utf8"),
+      writeFile(path.join(fixture, "AGENTS.md"), [
+        "# Guide preflight fixture",
+        "",
+        "- Use repository-local skills from `.agents/skills/`.",
+        "- Invoke this fixture's Koda CLI as `node dist/cli.js`.",
+        "- Derive session truth from disk and never invent a terminal state.",
+        "",
+      ].join("\n"), "utf8"),
+    ]);
+    const active = await createSession(fixture, DEFAULT_CONFIG, "# Active owner prompt\n\nComplete the current bounded path first.\n");
+    await writeJsonAtomic(path.join(fixture, "docs", "guide", "project.json"), {
+      version: 1,
+      project: "Blind Guide preflight fixture",
+      continuityFiles: ["docs/PROJECT.md", "docs/BACKLOG.md", "docs/WORKING-PLAN.md"],
+    });
+    const before = await snapshot(fixture);
+    const prompt = "Use $koda-c-session-prompt. I want to start a new session that is conceptually ahead of the session already running. Do what the skill requires and tell me what happens.";
+    const run = runCodex(fixture, "medium", prompt, true);
+    const after = await snapshot(fixture);
+    const parsed = events(run.stdout);
+    const answer = agentText(parsed);
+    const commands = commandEvidence(parsed);
+    const unchanged = JSON.stringify(before) === JSON.stringify(after);
+    const checks = {
+      statusPreflight: /guide status/.test(commands),
+      namedBlockedState: /NEXT SESSION BLOCKED/.test(commands),
+      namedActiveSession: commands.includes(active.id),
+      namedBrief: /brief/i.test(commands),
+      ownerFacingRefusal: /(?:cannot|can't|blocked|won't).*?(?:start|draft|session)|(?:start|draft).*?(?:cannot|can't|blocked|won't)/is.test(answer),
+      distinguishesDiscussion: /discuss|explore|preserve|idea/i.test(answer),
+      namesWaitAndHalt: /wait|close/i.test(answer) && /halt/i.test(answer),
+      filesUnchanged: unchanged,
+    };
+    const pass = run.status === 0 && Object.values(checks).every(Boolean);
+    const destination = path.join(root, "docs", "guide-preflight-runs", `${date}-sol-medium-01`);
+    await writeRunFiles(destination, run, {
+      effort: "medium",
+      threadId: threadId(parsed),
+      prompt,
+      fixtureSessionId: active.id,
+      checks,
+      status: pass ? "PASS" : "FAIL",
+    }, [
+      `# Fresh Guide active-session preflight — ${date} — Sol medium — 01`,
+      "",
+      `- Status: **${pass ? "PASS" : "FAIL"}**`,
+      `- Model: \`${model}\``,
+      "- Effort: medium",
+      `- Active fixture session: \`${active.id}\` at Brief`,
+      `- Disk status preflight observed: ${checks.statusPreflight ? "PASS" : "FAIL"}`,
+      `- Named blocked state/session/phase: ${checks.namedBlockedState && checks.namedActiveSession && checks.namedBrief ? "PASS" : "FAIL"}`,
+      `- Owner-facing refusal: ${checks.ownerFacingRefusal ? "PASS" : "FAIL"}`,
+      `- Future discussion distinguished from start: ${checks.distinguishesDiscussion ? "PASS" : "FAIL"}`,
+      `- Wait and halt routes named: ${checks.namesWaitAndHalt ? "PASS" : "FAIL"}`,
+      `- Fixture files unchanged: ${checks.filesUnchanged ? "PASS" : "FAIL"}`,
+      "- Raw events: [`CODEX-EVENTS.jsonl`](CODEX-EVENTS.jsonl)",
+      "- Stderr: [`CODEX-STDERR.txt`](CODEX-STDERR.txt)",
+      "",
+      "## Model answer",
+      "",
+      answer,
+      "",
+      "## Boundary",
+      "",
+      "This run tests one fresh Sol/medium response to one phrasing. It proves neither universal natural-language classification nor owner usability in Ghostty.",
+      "",
+    ].join("\n"));
+    if (!pass) throw new Error("Fresh Guide preflight did not satisfy its sealed contract.");
+  } finally {
+    await rm(fixture, { recursive: true, force: true });
+  }
+}
+
+await discoveryRun();
+await activePreflightRun();
+console.log("Fresh startup discovery and active-session Guide preflight both passed their sealed contracts.");

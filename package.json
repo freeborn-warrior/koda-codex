@@ -32,6 +32,7 @@
     "reviewer:execute": "node scripts/execute-reviewer-run.ts",
     "test": "node --test tests/*.test.ts",
     "test:coverage": "node --experimental-test-coverage --test tests/*.test.ts",
+    "test:guide-preflight-model": "node scripts/run-guide-preflight-model-test.ts",
     "test:record": "node scripts/run-tests-and-record.ts",
     "start": "node src/cli.ts"
   },

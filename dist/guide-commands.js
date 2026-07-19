@@ -14,8 +14,9 @@ import {
 } from "./guide.js";
 import { currentGuideRuntime, prepareGuideRuntime } from "./guide-runtime.js";
 import { requestGhosttyWindows,                           } from "./ghostty.js";
+import { evaluateSessionClosure } from "./close.js";
 import { evaluateSessionHalt } from "./halt.js";
-import { displayPath, latestSessionId, loadSessionState, sessionRoot } from "./project.js";
+import { currentPhase, displayPath, latestSessionId, loadSessionState, sessionRoot } from "./project.js";
 
 
 
@@ -73,14 +74,54 @@ export async function runGuideCli(
     await requireGuideCancellationsPushed(root, config);
     const pending = await pendingGuideLaunches(root, config);
     const runtime = await currentGuideRuntime(root);
+    const latestId = await latestSessionId(root, config);
+    let blockedSession
+
+
+
+
+             = null;
+    if (latestId) {
+      const directory = sessionRoot(root, config, latestId);
+      const state = await loadSessionState(directory, latestId);
+      const closure = await evaluateSessionClosure(root, directory, state);
+      if (!closure.closed) {
+        const halt = await evaluateSessionHalt(root, directory, state);
+        if (!halt.halted) {
+          const active = currentPhase(state);
+          blockedSession = {
+            id: latestId,
+            phase: active ? active.phase.name : "close ceremony",
+            progress: active
+              ? `${active.index + 1}/${state.phases.length}`
+              : `${state.phases.length}/${state.phases.length}`,
+            reason: (halt.exists ? halt.reasons : closure.reasons)[0] ?? "pushed terminal evidence is missing",
+          };
+        }
+      }
+    }
     if (pending.length > 1) throw new Error(`${pending.length} prompts claim READY_TO_LAUNCH; Guide state is ambiguous.`);
-    io.out(`KODA GUIDE — ${await latestSessionId(root, config) ?? "no sessions yet"}`);
+    const runtimeActive = Boolean(runtime && runtime.run.status !== "COMPLETE" && runtime.run.status !== "HALTED");
+    io.out(`KODA GUIDE — ${latestId ?? "no sessions yet"}`);
     io.out("Owner input: OPEN — project-level conversation belongs in this Guide context.");
     io.out("Active-session questions belong in Reviewer; Guide direction cannot inject the active phase.");
     io.out(`Manifest: ${displayPath(root, guideManifestPath(root, config))}`);
     io.out(`Project: ${manifest.project} — ${continuity.length} continuity file(s)`);
-    if (pending.length === 0) io.out("NO PROMPT READY — Guide discussion or drafting may continue.");
-    else if (pending.length === 1) io.out(`READY TO LAUNCH — ${pending[0] .id}`);
+    if (blockedSession || runtimeActive) {
+      io.out("NEXT SESSION BLOCKED — the current project path is still in flight.");
+      if (blockedSession) {
+        io.out(`Current bounded session: ${blockedSession.id} — ${blockedSession.phase} (${blockedSession.progress})`);
+        io.out(`Named condition: ${blockedSession.reason}`);
+      } else if (runtime) {
+        io.out(`Current bound launch: ${runtime.run.launchId} — ${runtime.run.status}`);
+      }
+      io.out("You may discuss and preserve a future idea, but do not draft, confirm, or launch a competing session.");
+      io.out("Allowed transitions: wait for immutable pushed close, or explicitly halt and push halt.md.");
+    } else if (pending.length === 0) {
+      io.out("BETWEEN SESSIONS — Guide discussion or one next-session draft may continue.");
+    } else if (pending.length === 1) {
+      io.out(`READY TO LAUNCH — ${pending[0] .id}`);
+    }
     if (runtime) {
       if (runtime.run.status === "HALTED") {
         const sessionId = await latestSessionId(root, config);

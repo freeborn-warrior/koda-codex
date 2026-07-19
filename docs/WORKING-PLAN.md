@@ -19,7 +19,8 @@ Turn the proved two-context session relay into a project-level experience that c
 7. [x] Add one opt-in macOS Ghostty action that requests the two labeled session contexts while preserving exact manual recovery commands.
 8. [x] Keep the persistent Reviewer conversational between formal handoffs without turning conversation into Producer input; pushed deterministic proof covers captured input, active-direction mutation, and a real pseudo-terminal.
 9. [x] Implement the owner-ruled wait-or-halt boundary: record direction now, release it only through the next gate, and make halt restart from a fresh Brief after pushed immutable evidence.
-10. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
+10. [x] Make the session-prompter preflight every start request and refuse conceptually competing sessions before a draft exists.
+11. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
 
 ## Submission cut
 

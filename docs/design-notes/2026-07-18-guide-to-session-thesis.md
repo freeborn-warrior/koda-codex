@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-18
 
-**Status:** Owner-directed leading thesis for post-submission product work; not yet shipped behavior
+**Status:** Core prompt, confirmation, preflight, launch, and return mechanics implemented; owner-observed three-context proof pending
 
 ## The desired experience
 
@@ -13,7 +13,7 @@ When Kristian is ready, he explicitly invokes a distinct `koda-c-session-prompt`
 - one new persistent producer context, visible but closed to owner input;
 - one new separate persistent reviewer context, which is Kristian's only conversational interface about the bounded session; the enclosing Guide remains available for the ongoing project conversation.
 
-The producer and reviewer remain separate from each other and persist across every configured phase. The Guide does not become a third in-session authority. It hands over through the approved prompt artifact, then remains idle while the reviewer owns the owner-facing session conversation.
+The producer and reviewer remain separate from each other and persist across every configured phase. The Guide does not become a third in-session authority. It hands over through the approved prompt artifact, then remains conversational at project scope while the reviewer owns the owner-facing bounded-session conversation.
 
 After immutable close, commit, and push, the final Summary and close evidence return to the Guide. The long-lived Guide conversation can then continue from what actually happened on disk.
 
@@ -23,7 +23,7 @@ After immutable close, commit, and push, the final Summary and close evidence re
 
 The separate `koda-c-session-prompt` skill has a different responsibility:
 
-1. **ENTRY CHECK:** derive project state from disk; require the prior session to be immutably closed and pushed; read its final Summary, close evidence, current project document, backlog, and relevant owner decisions; refuse if another prompt is already launch-ready or a session remains open.
+1. **ENTRY CHECK:** run Guide status before drafting; derive project state from disk; require the prior session to have immutable pushed close or pushed halt; read its final approved evidence, current project document, backlog, and relevant owner decisions; refuse if another prompt is already launch-ready or a session remains open. Conceptually later work does not create a parallel lane.
 2. **ITS OWN JOB:** work with Kristian in the Guide context to define one session's purpose, why it matters now, scope, exclusions, success evidence, owner decisions, known risks, and unresolved questions. Write a draft prompt artifact and revise it through discussion.
 3. **HANDOVER OBLIGATION:** require Kristian's explicit confirmation, bind the confirmed content hash, mark exactly one prompt `READY TO LAUNCH`, and write a supervisor-consumable launch request. It must not create Koda session state, impersonate the producer, choose a reviewer verdict, or silently launch from an unfinished conversation.
 
@@ -62,7 +62,7 @@ The exact prompt and launch-request paths remain implementation details. The dur
 ## Safety and truth conditions
 
 - Never launch from ordinary Guide conversation, a draft prompt, inference, or inactivity timeout. Require explicit skill invocation and explicit launch confirmation.
-- Never launch while any prior Koda session lacks immutable pushed close.
+- Never draft or launch while any prior Koda session lacks immutable pushed close or pushed halt.
 - Never create more than one active or waiting session for the same project.
 - Re-hash the prompt at launch; changed content invalidates earlier confirmation.
 - Use fixed executable argument arrays rather than shell-built commands.

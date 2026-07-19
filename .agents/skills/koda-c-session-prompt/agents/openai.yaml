@@ -1,4 +1,4 @@
 interface:
   display_name: "Koda-C Session Prompt"
-  short_description: "Turn Guide context into a confirmed session"
-  default_prompt: "Use $koda-c-session-prompt to draft and confirm the next bounded Koda session prompt."
+  short_description: "Preflight and confirm the next Guide session"
+  default_prompt: "Use $koda-c-session-prompt to preflight, draft, and confirm the next bounded Koda session."

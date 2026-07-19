@@ -113,6 +113,11 @@ test("session open and close remain ceremonies outside producer phase routing", 
     readFile(".agents/skills/koda-c-close/SKILL.md", "utf8"),
   ]);
   assert.match(prompt, /project-level perspective across many bounded sessions/i);
+  assert.match(prompt, /Before drafting, editing, confirming, or launching.*run `koda guide status`/is);
+  assert.match(prompt, /If it reports `NEXT SESSION BLOCKED`.*create no prompt/is);
+  assert.match(prompt, /conceptually later or separate idea does not create a parallel lane/i);
+  assert.match(prompt, /owner-via-guide.*`koda direction wait`/is);
+  assert.match(prompt, /Repeat the disk preflight.*start, draft, confirm, or launch another session/is);
   assert.match(prompt, /`koda guide verify` succeeds.*committed and pushed/is);
   assert.match(prompt, /Do not run `koda session new`/);
   assert.match(session, /currentPhaseIndex: 0/);
@@ -123,6 +128,32 @@ test("session open and close remain ceremonies outside producer phase routing", 
   assert.match(close, /immutable/i);
   assert.match(close, /`close\.md`/);
   assert.match(close, /writes nothing/);
+});
+
+test("the session-prompt skill is the sole skill route to a future session launch", async () => {
+  const prompt = await readFile(".agents/skills/koda-c-session-prompt/SKILL.md", "utf8");
+  assert.match(prompt, /koda guide confirm <prompt-file> --owner Kristian/);
+  for (const name of historicalSessionSkillNames) {
+    const skill = await readFile(`.agents/skills/${name}/SKILL.md`, "utf8");
+    assert.doesNotMatch(skill, /koda guide confirm|READY_TO_LAUNCH/, name);
+  }
+});
+
+test("the fresh Guide preflight model run is sealed, blind, ephemeral, and read-only", async () => {
+  const [contract, runner] = await Promise.all([
+    readFile("docs/guide-preflight-runs/CONTRACT.md", "utf8"),
+    readFile("scripts/run-guide-preflight-model-test.ts", "utf8"),
+  ]);
+  assert.match(contract, /Commit this file, the tested skill, and the runner before the first model run/);
+  assert.match(contract, /A vague “not now” without the disk check is not a pass/);
+  assert.match(contract, /block-everything task also fails the deterministic honest control/);
+  assert.match(runner, /"--ephemeral"/);
+  assert.match(runner, /"--ignore-user-config"/);
+  assert.match(runner, /"--sandbox", "read-only"/);
+  assert.match(runner, /Use \$koda-c-session-prompt\. I want to start a new session that is conceptually ahead/);
+  assert.match(runner, /const before = await snapshot\(fixture\)/);
+  assert.match(runner, /const after = await snapshot\(fixture\)/);
+  assert.match(runner, /Object\.values\(checks\)\.every\(Boolean\)/);
 });
 
 test("historical fresh Codex startup discovered the original nine local skills and root guidance without reading disk", async () => {
