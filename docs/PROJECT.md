@@ -26,10 +26,10 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - One persistent producer context and one separate persistent reviewer context span the full session. Both are visible side by side; Kristian may watch but not type into the producer and speaks only with the reviewer. Phase boundaries never create a fresh reviewer.
 - There is one producer skill per declared native phase and one shared reviewer skill with per-phase criteria.
 - A producer hands its artifact to the reviewer. Only an allowed verdict, owner receipt, and `advance` activate the next phase from config.
-- Normal session closure is an immutable artifact with Git between preparation and verification. Explicit halt is the only other terminal state. A new session cannot open until the prior close or halt is pushed.
+- Normal session closure is an immutable artifact with Git between preparation and verification. Explicit halt is the only other terminal state. A dependent successor cannot open until its prerequisite has pushed close or halt; an independent sibling session kind may run concurrently.
 - The current target keeps owner receipt acknowledgement at every gate. Exception-only owner attention is a distinct open policy decision and must not be introduced silently.
 - Active-phase direction has only two owner-ruled transitions: wait by default or halt. Wait records immediately but enters Producer input only through the next successful gate; halt terminates the session attempt and requires pushed immutable halt evidence before a new session starts from a fresh Brief. Pause-inject-resume is forbidden.
-- Explicit `$koda-c-session-prompt` use is the only owner-facing route from Guide conversation toward a future session. It must preflight disk before drafting; an active or prepared path refuses by name even when the proposed session is conceptually later or separate.
+- Explicit `$koda-c-session-prompt` use is the only owner-facing route from Guide conversation toward a bounded session. Its preflight must eventually judge declared dependencies and write claims: unresolved successors refuse, while independent sibling session kinds may launch. The current implementation still applies the older global refusal and is marked incomplete.
 - The competition entry is licensed under GPLv3 only, with `Copyright (C) 2026 Kristian Bengtsson` as the sole project copyright line.
 - The product name remains **Koda-C**. The CLI command is `koda`; `koda-codex` is the lowercase repository and package slug for this Codex-built competition implementation.
 - New reviewer fixtures are scored only by contracts committed before their first model run. The final model program stopped at its declared cap: two Luna baseline repeats and nine medium runs across the three new fixtures and models. All inference-chain cells passed, so no unique winner existed and the conditional low-effort confirmation was not run.
@@ -52,17 +52,18 @@ owner contract
   → close.md is prepared
   → Git commit + push
   → close is verified
-  → another session may open
+  → dependent successors may open; independent sibling sessions may already be active
 ```
 
 ## Context model
 
-- A **Koda session** is the dated, disk-backed project record under the configured sessions directory.
+- A **Koda project** is the Guide-held parent context, dependency graph, steering documents, and Git history shared by many bounded sessions.
+- A **Koda session** is one identified, typed, disk-backed child workstream under that project. Produce is one session kind; Explore, Research, Architecture, Triage, and later kinds may use different phase configs while retaining the same gate/receipt/close discipline.
 - A **Codex task** is one agent context/window. The producer and reviewer should use separate tasks so the review does not inherit producer reasoning.
 - Runtime continuity is session-scoped: the same producer task and the same reviewer task traverse every configured phase. Fresh reviewer tasks remain fixture/testing tools, not the intended owner session experience.
 - Context handover happens through artifacts, cited evidence, reviews, receipts, and state—not through copied chat summaries.
 - Kristian deliberately starts a session in the producer window by invoking `koda-c-session` with a written prompt prepared beforehand. After that opening handoff, he speaks only with the owner-facing reviewer until close. Every producer request enters that reviewer task, and every actionable handback returns as a named disk artifact.
-- A new session reads the prior pushed close and final summary, then records deliberate carry-forward items in its new owner prompt.
+- A dependent session reads the pushed close/summary of every declared prerequisite and records deliberate carry-forward items. An independent sibling records why it does not depend on active sessions instead of inheriting an arbitrary "latest" session.
 
 ## Current implementation
 
@@ -135,6 +136,8 @@ owner contract
 - [Fresh Guide preflight 152-check result](test-results/2026-07-19-guide-preflight-fresh-model-final.md)
 - [Fresh Guide preflight post-push 152-check result](test-results/2026-07-19-guide-preflight-fresh-model-pushed-final.md)
 - [Process interruption recovery design](design-notes/2026-07-19-interruption-recovery.md)
+- [Concurrent project work and Git provenance ruling](design-notes/2026-07-19-concurrent-project-work-owner-ruling.md)
+- [Concurrent project/session ruling 157-check regression](test-results/2026-07-19-concurrent-session-ruling-final.md)
 - [Interruption recovery development failures](test-results/2026-07-19-interruption-recovery-development-failures.md)
 - [Interruption recovery complete-suite result](test-results/2026-07-19-interruption-recovery-final.md)
 - [Interruption recovery post-push 156-check result](test-results/2026-07-19-interruption-recovery-pushed-final.md)
@@ -182,7 +185,8 @@ owner contract
 - **Owner-approved attention direction:** A future delegated policy may allow routine sessions to flow under Guide/reviewer acknowledgement, while any phase may emit a monotonic `OWNER_ATTENTION_REQUIRED` artifact. An agent may request stricter attention but may never waive attention required by config. The current target remains owner-at-every-gate.
 - **Owner-approved experience direction:** The finished terminal product is one visible, ongoing Guide project conversation enclosing a visible non-interactive Producer and a visible owner-facing session Reviewer. Guide and Reviewer both remain conversational, but at different scopes; Producer never accepts owner input after start. Guide discussion cannot silently alter the confirmed active-session snapshot and needs an explicit disk-backed transfer into Reviewer to affect it. Historical two-window runs remain valid evidence, not the finished UX target.
 - **Owner-approved transfer ruling:** Direction from owner-facing Guide or Reviewer conversation is written immediately but waits for the next gate; phase inputs stay frozen from entry through review. The only interrupt is an explicit halt that voids the in-flight phase and returns through a fresh Brief after immutable pushed halt evidence. Pause-inject-resume must never be built.
-- **Owner-approved session-intent ruling:** The Guide may discuss paths ahead while a session runs, but only explicit `koda-c-session-prompt` use may attempt the next-session ceremony. That skill preflights disk and creates no prompt until the current path has pushed close or pushed halt.
+- **Superseded global session-intent ruling:** The first implementation made `koda-c-session-prompt` refuse every new session while one was active. Its provenance principle remains—dependent work cannot bypass pushed terminal evidence—but its global serialization is replaced by the project/session-kind ruling below.
+- **Owner-approved concurrent project/session ruling:** An active Produce session does not lock the whole project. Guide and unrelated project work may continue changing tracked files, and independent Explore, Research, Architecture, Triage, Produce, or later session kinds may run as sibling bounded sessions. Each session needs explicit identity, dependencies, contexts, gates, and write set. Dependent successors wait for pushed close/halt; independent siblings may launch. Session commits require exact attributable write sets and a short Git-operation lock; broad `git add -A` staging must be removed.
 - **Project-profile clarification:** Draft, Edit, and Refine are valid profile vocabulary when they create distinct artifacts and review moments. They do not alter the native reference chain merely by renaming unfinished Produce work.
 - **Transparency extension:** `PROJECT.md` and `BACKLOG.md` expose work that would otherwise live only in Codex's internal plan.
 - **Codex-native packaging correction:** Skills first existed under top-level `skills/`; official discovery requires `.agents/skills/`. They were moved without duplication, and root `AGENTS.md` now holds durable repository guidance.
@@ -197,7 +201,7 @@ Any future contradiction—not merely an extension—requires Kristian's explici
 
 ## Roadmap vocabulary
 
-Explore, Research, Architecture, Triage, Produce, and Librarian are now explicit roadmap vocabulary. They do not expand into separate rushed runtimes for the current submission. The shared gate, receipt, close, and reviewer invariants remain the base beneath any later kind-specific phase and review criteria.
+Explore, Research, Architecture, Triage, and Produce are confirmed sibling session kinds beneath the project Guide; Librarian remains a possible read-only Guide-side role. The current runtime implements only the serialized reference path and must migrate to explicit session identity and dependencies. The shared gate, receipt, close, and reviewer invariants remain the base beneath kind-specific phase and review criteria.
 
 Self-hosting Koda-C development remains an optional later validation, not the current goal. The current goal is to make the two-context producer/reviewer/owner relay strong across every phase and prove that relay in genuinely fresh tasks.
 

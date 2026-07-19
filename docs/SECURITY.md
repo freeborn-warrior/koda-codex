@@ -127,12 +127,14 @@ The real-project relay currently starts from a clean pushed checkout but its
 pre-close output commit stages every changed non-ignored path with `git add -A`.
 That captures a Producer whose output paths are not known in advance, but it also
 means an unrelated owner or Guide edit made after launch could enter the same
-commit. Until Koda has either an exclusive project mutation lease, an exact
-produced-output manifest, or both, keep Guide conversation read-only with respect
-to tracked project files during an active relay and do not manually edit the
-checkout. Waiting direction written through the trusted Reviewer path remains
-part of the session evidence. This is a named current integrity boundary, not a
-safe simultaneous-editing claim.
+commit. Kristian has ruled that Guide and unrelated project changes must be able
+to continue during Produce, so a whole-project mutation lease is not an acceptable
+product solution. Until exact per-workstream write sets, conflict detection,
+exact-path staging, and a short recoverable Git-operation lock ship, the current
+runner still cannot safely commit such a concurrently dirty checkout. Waiting
+direction written through the trusted Reviewer path remains part of the session
+evidence. This is a named temporary implementation boundary, not a reversal of
+the owner-approved concurrent experience.
 
 The Ghostty adapter is deliberately opt-in. It records launch intent before the
 first GUI request and refuses automatic opening for an existing runtime, even if

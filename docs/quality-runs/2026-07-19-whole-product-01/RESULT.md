@@ -1,6 +1,6 @@
 # Whole-product quality audit — 2026-07-19 — run 01
 
-- Status: **DETERMINISTIC PASS WITH OWNER-OBSERVED PROOF AND ONE DESIGN DECISION PENDING**
+- Status: **DETERMINISTIC PASS WITH OWNER-OBSERVED PROOF AND CONCURRENCY IMPLEMENTATION PENDING**
 - Platform: macOS arm64
 - Node: `v26.0.0`
 - Scope: gate engine, full six-phase workflow, Guide launch/return, separate Producer and Reviewer processes, owner acknowledgement, waiting direction, halt, interruption recovery, package, skills, evidence, and terminal language
@@ -73,8 +73,20 @@ output manifest, or both. The issue is promoted to `BACKLOG.md` and the current
 safe-use boundary is explicit in `SECURITY.md`; no policy was silently chosen
 while the owner was asleep.
 
+### Owner addendum
+
+Kristian subsequently ruled that Guide and unrelated project work must be able
+to change files while Produce runs. The whole-project exclusive lease is
+therefore rejected. The chosen direction is exact per-workstream write sets,
+same-path conflict refusal, exact-path Git staging, and a short recoverable lock
+only around stage/commit/push. Kristian then confirmed the parent model: Produce,
+Explore, Research, Architecture, Triage, and later kinds are sibling bounded
+sessions, and independent siblings may be active concurrently. Implementation
+and mutations remain pending; the current global session refusal is now an
+explicit gap rather than the intended product rule.
+
 ## Verdict
 
-The mechanics are ready for the next owner-observed three-window run after the
-current changes are pushed. The live human ceremony and the mutation-provenance
-decision remain distinct work; neither is represented as already passed.
+The mechanics are ready for the next owner-observed three-window run. The live
+human ceremony and the concurrent-provenance implementation remain distinct
+work; neither is represented as already passed.

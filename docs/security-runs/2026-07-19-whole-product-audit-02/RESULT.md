@@ -1,6 +1,6 @@
 # Whole-product security audit — 2026-07-19 — run 02
 
-- Status: **PASS WITH ONE HIGH-PRIORITY INTEGRITY DESIGN DECISION AND DOCUMENTED TRUST BOUNDARIES**
+- Status: **PASS WITH ONE HIGH-PRIORITY INTEGRITY IMPLEMENTATION AND DOCUMENTED TRUST BOUNDARIES**
 - Platform: macOS arm64
 - Node: `v26.0.0`
 - Scope: package lifecycle and contents, dependency surface, executable modes,
@@ -55,6 +55,15 @@ attacker was shown to gain access.
   compatible combination. Whatever is chosen must mutation-test one unrelated
   staged file, one unrelated unstaged file, an allowed waiting-direction write,
   intended deletion/rename, and crash recovery.
+
+**Owner addendum:** Kristian requires Guide and unrelated project work to remain
+able to modify files during Produce. A whole-project lease is rejected. Koda must
+use exact per-workstream write sets and path-conflict detection, with a short
+recoverable lock only for Git stage/commit/push. The current broad-staging runner
+remains unsafe for that experience until the new contract is implemented and
+mutation-tested. Kristian also confirmed that independent formal session kinds
+may run concurrently, which makes explicit session identity and dependency-aware
+Git attribution mandatory rather than optional scaling work.
 
 ## Finding S-02-02 — repository Git hooks execute with relay authority
 

@@ -23,11 +23,14 @@ Turn the proved two-context session relay into a project-level experience that c
 11. [x] Make Ctrl-C a named, fail-closed operational stop: kill the in-flight child, preserve partial evidence, distrust possible handbacks, resume the same context for reconciliation, and refuse context replacement when identity is missing.
 12. [x] Audit the whole product, package, and new interruption surface; consolidate recovery validation, preserve 157/157 deterministic checks with coverage, and publish the current security boundaries.
 13. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test, under the current documented single-writer project boundary.
-14. [ ] Settle mutation provenance with Kristian before claiming Guide/owner tracked-file edits are safe during an active relay; then mutation-test the chosen lease/manifest contract.
+14. [x] Settle the top-level mutation ruling: an active Produce session may not lock the whole project; Guide and unrelated project work may continue changing files.
+15. [ ] Implement exact per-workstream write sets, same-path conflict refusal, exact-path staging, and a short recoverable Git-operation lock; mutation-test attribution and crash recovery.
+16. [x] Confirm the project/session model: Produce is one session kind; independent Explore, Research, Architecture, Triage, Produce, and later sibling sessions may be active concurrently.
+17. [ ] Replace global latest-session inference with explicit session identity, kind, dependencies, aggregate project status, and dependency-scoped launch refusal while preserving every existing gate.
 
 ## Submission cut
 
-The product needs one strong standard session moving from durable Guide state into the existing two-context relay while all three human-facing contexts are visible: ongoing project Guide, non-interactive Producer, and conversational session Reviewer. Explore, research, architecture, triage, and other session kinds are recorded product direction, but do not block this proof and will not be rushed into separate runtimes.
+The submission demonstration still needs one strong Produce session moving from durable Guide state into its two-context relay while Guide, Producer, and Reviewer are visible. The product model must no longer claim that this is the project's only possible active session. Full kind-specific skills may grow after the demonstration, but explicit session identity and dependency-scoped truth cannot remain globally hard-coded.
 
 ## Current constraints
 
@@ -35,7 +38,7 @@ The product needs one strong standard session moving from durable Guide state in
 - Project and role behavior belongs in repository-local skills and plain files.
 - Owner confirmation remains required at every gate for the current target.
 - No producer input from the owner after session start; owner conversation stays with the persistent reviewer.
-- No new session while the previous session lacks immutable pushed close or explicit pushed halt.
+- The current implementation still opens no second formal Koda session while one is active. This is an acknowledged implementation gap: the owner-approved product allows independent sibling sessions and blocks only dependent successors until pushed close or halt.
 - Every persistent product output stays inside the project repository.
 - Tests are a living product contract and may grow, but must never be weakened to hide failure.
 - Koda-C is the workflow; the CLI and terminal panes are replaceable mechanical surfaces, not the product definition.
@@ -43,6 +46,7 @@ The product needs one strong standard session moving from durable Guide state in
 ## Proof still owed
 
 - One owner-observed Guide confirmation arranging the complete three-context experience while preserving two independent session contexts.
-- One owner decision on active-session mutation provenance before simultaneous tracked-file editing is part of the safe claim.
+- One implementation and mutation proof of owner-approved concurrent Guide/project-file attribution.
+- One implementation and mutation proof of explicit concurrent session identities, kinds, dependencies, and aggregate status.
 - Cross-model continuation evidence before the org-chart staffing design becomes executable per-phase config.
 - Cross-provider staffing remains only a possible consequence of disk-separated seats, not required proof or a current commitment.
