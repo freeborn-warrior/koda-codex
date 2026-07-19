@@ -16,8 +16,10 @@ import { VERDICTS } from "./types.js";
 const REVIEW_MARKER = "KODA_REVIEW";
 const APPROVAL_MARKER = "KODA_APPROVAL";
 
-export function sha256(content        )         {
-  return createHash("sha256").update(content, "utf8").digest("hex");
+export function sha256(content                                 )         {
+  return typeof content === "string"
+    ? createHash("sha256").update(content, "utf8").digest("hex")
+    : createHash("sha256").update(content).digest("hex");
 }
 
 export function generateReceipt()                                  {

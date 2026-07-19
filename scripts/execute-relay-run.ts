@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { closePath, evaluateSessionClosure } from "../src/close.ts";
 import { pathExists, readProjectConfig } from "../src/config.ts";
 import { evaluateGate } from "../src/gate.ts";
+import { acquireGitOperationLock } from "../src/git-operation-lock.ts";
 import { evaluateSessionHalt } from "../src/halt.ts";
 import {
   artifactPath,
@@ -23,6 +24,14 @@ import {
   writeTextAtomic,
 } from "../src/project.ts";
 import { readApprovalEntries, sha256 } from "../src/receipt.ts";
+import {
+  claimSessionPaths,
+  ownedSessionPaths,
+  reconcileSessionWorkSet,
+  stagedProjectPaths,
+  verifyStagedSessionClaims,
+  verifySessionWorkSetObservations,
+} from "../src/workset.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
   baseTurnPurpose,
@@ -339,6 +348,11 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
     await saveRun();
     throw new PausedRun(run.lastError);
   }
+  if (run.sessionId) {
+    const config = await readProjectConfig(project);
+    if (role === "producer") await reconcileSessionWorkSet(project, config, run.sessionId);
+    else await verifySessionWorkSetObservations(project, config, run.sessionId);
+  }
   await saveRun();
 }
 
@@ -521,7 +535,11 @@ async function syncReviewerCompletion(): Promise<void> {
   run.reviewer.threadId = reviewerState.threadId;
   run.reviewer.turns = reviewerState.turns;
   const session = await latest();
-  if (session) run.ownerAcknowledgements = (await readApprovalEntries(session.directory)).length;
+  if (session) {
+    const config = await readProjectConfig(project);
+    await verifySessionWorkSetObservations(project, config, session.id);
+    run.ownerAcknowledgements = (await readApprovalEntries(session.directory)).length;
+  }
 }
 
 async function recoverCompletedReviewerJob(): Promise<void> {
@@ -630,6 +648,8 @@ async function openSession(): Promise<void> {
   }
   const session = await loadSession(project, config, opened[0]!);
   run.sessionId = session.id;
+  await claimSessionPaths(project, config, session.id, [path.relative(project, session.directory)]);
+  await reconcileSessionWorkSet(project, config, session.id);
   await saveRun();
 }
 
@@ -755,15 +775,34 @@ async function advance(phaseName: string, previousIndex: number): Promise<void> 
 }
 
 async function commitProducedOutput(): Promise<void> {
-  git(["add", "-A"]);
-  const staged = git(["diff", "--cached", "--quiet"], [0, 1]);
-  if (staged.status === 1) {
-    git(["commit", "-m", `chore: record ${run.sessionId ?? "relay"} output before close`]);
-    git(["push"]);
-    await note("pre-close output commit", [
-      "- The supervisor committed and pushed every non-ignored produced file before immutable close preparation.",
-      "- The close ceremony still performs its own required close.md commit and push afterward.",
-    ]);
+  if (!run.sessionId) throw new Error("A bound session ID is required before committing produced output.");
+  const config = await readProjectConfig(project);
+  await reconcileSessionWorkSet(project, config, run.sessionId);
+  const owned = await ownedSessionPaths(project, config, run.sessionId);
+  const lease = await acquireGitOperationLock(project, run.sessionId, "pre-close exact-path commit and push", {
+    stagedPaths: () => stagedProjectPaths(project),
+  });
+  try {
+    const alreadyStaged = stagedProjectPaths(project);
+    if (alreadyStaged.length > 0) throw new Error(`Shared Git index is not empty before session commit: ${alreadyStaged.join(", ")}.`);
+    await verifySessionWorkSetObservations(project, config, run.sessionId);
+    git(["add", "--", ...owned]);
+    await verifyStagedSessionClaims(project, config, run.sessionId);
+    const staged = stagedProjectPaths(project);
+    const allowed = new Set(owned);
+    if (staged.some((item) => !allowed.has(item))) throw new Error(`Exact-path staging captured unrelated files: ${staged.join(", ")}.`);
+    if (staged.length > 0) {
+      git(["commit", "-m", `chore: record ${run.sessionId} output before close`]);
+      await note("pre-close output commit", [
+        `- The supervisor committed and pushed ${staged.length} path(s) owned by session \`${run.sessionId}\`.`,
+        "- Unrelated Guide or sibling-session worktree changes were neither staged nor required to be clean.",
+        "- The close ceremony still performs its own required close.md commit and push afterward.",
+      ]);
+    }
+    const ahead = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
+    if (ahead !== "0") git(["push"]);
+  } finally {
+    await lease.release();
   }
 }
 
@@ -786,14 +825,28 @@ async function closeSession(): Promise<void> {
   if (!(await pathExists(closeFile))) throw new Error("The producer did not prepare immutable close.md.");
   const relativeSession = path.relative(project, session.directory);
   const relativeClose = path.relative(project, closeFile);
-  const pending = git(["status", "--porcelain", "--untracked-files=all"]).stdout.trim();
-  if (pending !== `?? ${relativeClose}`) {
-    throw new Error(`Close preparation changed files other than immutable close.md: ${pending || "none"}`);
+  const pending = git(["status", "--porcelain", "--untracked-files=all", "--", relativeSession]).stdout.trim();
+  if (pending !== "" && pending !== `?? ${relativeClose}` && pending !== `A  ${relativeClose}`) {
+    throw new Error(`Close preparation changed session files other than immutable close.md: ${pending}`);
   }
 
-  git(["add", relativeSession]);
-  git(["commit", "-m", `close session ${session.id}`]);
-  git(["push"]);
+  const lease = await acquireGitOperationLock(project, session.id, "immutable close exact-path commit and push", {
+    stagedPaths: () => stagedProjectPaths(project),
+  });
+  try {
+    const alreadyStaged = stagedProjectPaths(project);
+    if (alreadyStaged.length > 0) throw new Error(`Shared Git index is not empty before close commit: ${alreadyStaged.join(", ")}.`);
+    if (pending !== "") git(["add", "--", relativeClose]);
+    const staged = stagedProjectPaths(project);
+    if (pending !== "" && (staged.length !== 1 || staged[0] !== relativeClose)) {
+      throw new Error(`Close staging must contain only ${relativeClose}; observed ${staged.join(", ") || "nothing"}.`);
+    }
+    if (staged.length === 1) git(["commit", "-m", `close session ${session.id}`]);
+    const ahead = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
+    if (ahead !== "0") git(["push"]);
+  } finally {
+    await lease.release();
+  }
   await note("supervisor close commit and push", [
     `- Exact prepared session path: \`${relativeSession}\``,
     `- Commit message: \`close session ${session.id}\``,
@@ -966,27 +1019,25 @@ async function finishGuideReturn(stage: string): Promise<void> {
     await cp(stageReturn, guideReturnTarget, { errorOnExist: true });
   }
 
-  const changed = git(["status", "--porcelain", "--untracked-files=all"]).stdout.trim().split(/\r?\n/).filter(Boolean);
-  for (const line of changed) {
-    const changedPath = line.slice(3).replace(/^"|"$/g, "");
-    if (changedPath !== guideReturnRelative && !changedPath.startsWith(`${archiveRelative}/`) && changedPath !== `${archiveRelative}/`) {
-      throw new Error(`Guide return recovery refuses unrelated project change: ${line}.`);
-    }
-  }
-
-  const trackedReturn = git(["ls-files", "--error-unmatch", "--", guideReturnRelative], [0, 1]).status === 0;
-  if (!trackedReturn) {
+  const lease = await acquireGitOperationLock(project, `guide:${run.launchId}`, "exact-path Guide return commit and push", {
+    stagedPaths: () => stagedProjectPaths(project),
+  });
+  try {
+    const alreadyStaged = stagedProjectPaths(project);
+    if (alreadyStaged.length > 0) throw new Error(`Shared Git index is not empty before Guide return: ${alreadyStaged.join(", ")}.`);
     git(["add", "--", archiveRelative, guideReturnRelative]);
-    const staged = git(["diff", "--cached", "--name-only"]).stdout.trim().split(/\r?\n/).filter(Boolean);
-    if (!staged.length || staged.some((name) => name !== guideReturnRelative && !name.startsWith(`${archiveRelative}/`))) {
-      throw new Error("Guide return staging contains missing or unrelated Git paths.");
+    const staged = stagedProjectPaths(project);
+    if (staged.some((name) => name !== guideReturnRelative && !name.startsWith(`${archiveRelative}/`))) {
+      throw new Error(`Guide return staging contains unrelated Git paths: ${staged.join(", ")}.`);
     }
-    git(["commit", "-m", `guide: return closed session ${run.sessionId}`]);
+    if (staged.length > 0) git(["commit", "-m", `guide: return closed session ${run.sessionId}`]);
+    const ahead = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
+    if (ahead !== "0") git(["push"]);
+  } finally {
+    await lease.release();
   }
-  const ahead = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
-  if (ahead !== "0") git(["push"]);
-  const remaining = git(["status", "--porcelain", "--untracked-files=all"]).stdout.trim();
-  if (remaining !== "") throw new Error(`Guide return left the project dirty: ${remaining}`);
+  const remainingReturn = git(["status", "--porcelain", "--untracked-files=all", "--", archiveRelative, guideReturnRelative]).stdout.trim();
+  if (remainingReturn !== "") throw new Error(`Guide return paths remain uncommitted: ${remainingReturn}`);
   run.status = "COMPLETE";
   run.completedAt = timestamp();
   run.archiveCommit = git(["rev-parse", "HEAD"]).stdout.trim();
@@ -1009,16 +1060,21 @@ async function finalize(): Promise<void> {
       throw new Error("Interrupted Guide return has no valid bound close commit.");
     }
     const recoveryHead = git(["rev-parse", "HEAD"]).stdout.trim();
-    if (recoveryHead !== run.finalCommit) {
-      throw new Error("Guide return recovery refuses because the project commit changed after return staging.");
+    const commitExists = git(["cat-file", "-e", `${run.finalCommit}^{commit}`], [0, 128]).status === 0;
+    const stillContainsClose = commitExists && git(["merge-base", "--is-ancestor", run.finalCommit, recoveryHead], [0, 1]).status === 0;
+    if (!stillContainsClose) {
+      throw new Error("Guide return recovery refuses because the project commit changed after return staging: the bound close commit is no longer in current history.");
     }
     const stage = await buildGuideReturnStage(session, run.finalCommit);
     await finishGuideReturn(stage);
     return;
   }
 
+  const config = await readProjectConfig(project);
+  const owned = await ownedSessionPaths(project, config, session.id);
+  const ownedStatus = git(["status", "--porcelain", "--untracked-files=all", "--", ...owned]).stdout.trim();
+  if (ownedStatus !== "") throw new Error(`Closed session still has uncommitted owned paths: ${ownedStatus}`);
   const status = git(["status", "--porcelain", "--untracked-files=all"]).stdout.trim();
-  if (status !== "") throw new Error(`Relay project is not clean at close: ${status}`);
   const head = git(["rev-parse", "HEAD"]).stdout.trim();
   const branch = git(["branch", "--show-current"]).stdout.trim();
   const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]).stdout.trim();

@@ -1,7 +1,7 @@
 # Concurrent project work and Git provenance — owner ruling
 
 **Date:** 2026-07-19  
-**Status:** Owner-set product model; implementation and mutation proof pending
+**Status:** Owner-set product model; write-set and Git-lock mechanics implemented and mutation-tested; plural live runtimes pending
 
 ## Owner ruling
 
@@ -60,11 +60,14 @@ dependency-scoped:
 - Guide owns the project-level dependency graph and must refuse a proposed launch
   whose claimed independence is contradicted by its prompt or file claims.
 
-The current CLI does not implement this model. It still infers the latest session,
-globally blocks a second session, and discovers one waiting relay. Migration must
-make session identity explicit for every mutation, make status aggregate active
-sessions, bind each runtime/reviewer/receipt/direction/halt/close to one session,
-and give Guide a disk-backed integration decision when write sets conflict.
+The CLI, Guide confirmation, skills, and relay now implement explicit session
+identity, kinds, terminal dependencies, aggregate session status, and exact
+session/Guide write claims. Session claims bind before and post-work SHA-256,
+overlapping active claims refuse, unclaimed mutation refuses, and the relay stages
+only owned paths under a short recoverable Git-operation lock. The remaining
+global serialization is narrower: Guide runtime discovery and preparation still
+admit one live Producer/Reviewer pair even though multiple session records and
+non-conflicting shared-worktree writes are now safe.
 
 ## Tests required before the new Git claim ships
 
@@ -84,3 +87,10 @@ and give Guide a disk-backed integration decision when write sets conflict.
   and no explicit session ID was supplied;
 - aggregate status names every active session, kind, dependency, phase, contexts,
   write claims, and next safe action without guessing a default.
+
+All write-attribution bullets above now have deterministic coverage, except that
+runtime status does not yet aggregate multiple live context pairs because plural
+runtime preparation has not shipped. Kristian's visible Guide-edit-during-session
+proof also remains a human test. Same-user processes can still bypass Koda and edit
+a claimed path during a model turn; the post-work hash catches later mutation but
+cannot authenticate who authored bytes observed within that turn.

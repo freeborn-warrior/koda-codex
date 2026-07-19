@@ -153,8 +153,13 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(execute, /renderCodexEvent/);
   assert.match(execute, /recoverCompletedReviewerJob/);
   assert.match(execute, /readApprovalEntries\(session\.directory\)/);
-  assert.match(execute, /git\(\["add", "-A"\]\)/);
-  assert.match(execute, /git\(\["add", relativeSession\]\)/);
+  assert.doesNotMatch(execute, /git\(\["add", "-A"\]\)/);
+  assert.match(execute, /acquireGitOperationLock/);
+  assert.match(execute, /ownedSessionPaths/);
+  assert.match(execute, /role === "producer".*reconcileSessionWorkSet/s);
+  assert.match(execute, /else await verifySessionWorkSetObservations/);
+  assert.match(execute, /git\(\["add", "--", \.\.\.owned\]\)/);
+  assert.match(execute, /git\(\["add", "--", relativeClose\]\)/);
   assert.match(execute, /`close session \$\{session\.id\}`/);
   assert.match(execute, /workspace-write intentionally protects `\.git`/);
   assert.match(execute, /verify immutable session close/);

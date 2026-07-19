@@ -16,8 +16,10 @@ import type {
 const REVIEW_MARKER = "KODA_REVIEW";
 const APPROVAL_MARKER = "KODA_APPROVAL";
 
-export function sha256(content: string): string {
-  return createHash("sha256").update(content, "utf8").digest("hex");
+export function sha256(content: string | NodeJS.ArrayBufferView): string {
+  return typeof content === "string"
+    ? createHash("sha256").update(content, "utf8").digest("hex")
+    : createHash("sha256").update(content).digest("hex");
 }
 
 export function generateReceipt(): { id: string; receipt: string } {

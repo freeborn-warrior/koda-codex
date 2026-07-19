@@ -58,6 +58,7 @@ import type {
   SessionState,
   Verdict,
 } from "./types.ts";
+import { claimSessionPaths, loadSessionWorkSet } from "./workset.ts";
 
 const packageRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
@@ -406,6 +407,9 @@ async function printSessionStatus(root: string, session: LoadedSession, io: CliI
   if ((session.state.dependencies ?? []).length > 0) {
     io.out(`Dependencies: ${session.state.dependencies!.map((item) => item.sessionId).join(", ")}`);
   }
+  const workSet = await loadSessionWorkSet(session.directory, session.id);
+  io.out(`Write set: ${workSet.claims.length} external path(s)`);
+  for (const claim of workSet.claims) io.out(`  ${claim.path}`);
   const halt = await evaluateSessionHalt(root, session.directory, session.state);
   if (halt.exists) {
     io.out(halt.halted ? "SESSION HALTED — dependent work may open" : "HALT PREPARED — SESSION NOT YET HALTED");
@@ -491,6 +495,26 @@ async function directionWaitCommand(args: string[], cwd: string, io: CliIo): Pro
   io.out(`✓ ${displayPath(root, created.path)}`);
   io.out(`Direction ID: ${created.metadata.id}`);
   io.out("The active phase inputs remain frozen. Producer receives this only after the next successful gate.");
+}
+
+async function workClaimCommand(args: string[], cwd: string, io: CliIo): Promise<void> {
+  const sessionId = requestedSession(args);
+  rejectUnknownOptions(args);
+  if (args.length === 0) throw new Error("Usage: koda work claim <path> [path...] [--session <session-id>]");
+  const root = await findProjectRoot(cwd);
+  const config = await readProjectConfig(root);
+  const session = await selectedSession(root, config, sessionId);
+  if (await terminalEvidence(root, session)) throw new Error(`Session ${session.id} is terminal and cannot claim new output paths.`);
+  const relative = args.map((value) => {
+    const candidate = path.resolve(cwd, value);
+    const result = path.relative(root, candidate);
+    if (result.startsWith("..") || path.isAbsolute(result)) throw new Error(`Write claim escapes the project: ${value}.`);
+    return result.split(path.sep).join("/");
+  });
+  const before = await claimSessionPaths(root, config, session.id, relative);
+  io.out(`WRITE SET — ${session.id}`);
+  for (const claim of before.claims) io.out(`✓ ${claim.path}`);
+  io.out("Only this session may mutate these paths until it reaches pushed close or halt.");
 }
 
 async function reviewNewCommand(args: string[], cwd: string, io: CliIo): Promise<void> {
@@ -736,11 +760,12 @@ function help(io: CliIo): void {
   io.out("Commands:");
   io.out("  koda init [directory] [--demo]");
   io.out("  koda session new <prompt-file> [--kind <kind>] [--depends-on <session-id>] [--independent]");
-  io.out("  koda guide <status|confirm|cancel|bind|verify|launch>");
+  io.out("  koda guide <status|claim|confirm|cancel|bind|verify|launch>");
   io.out("  koda guide launch ... [--open ghostty]");
   io.out("  koda status [--session <session-id>]");
   io.out("  koda review new <phase> [--session <session-id>]");
   io.out("  koda direction wait <owner-message-file> <classification-file> [--source owner-via-guide|owner-via-reviewer] [--session <session-id>]");
+  io.out("  koda work claim <path> [path...] [--session <session-id>]");
   io.out("  koda approve <phase> [quoted-receipt] [--approver <name>] [--session <session-id>]");
   io.out("  koda advance [--session <session-id>]");
   io.out("  koda session halt [owner-direction-file] [--session <session-id>]");
@@ -760,6 +785,7 @@ export async function runCli(args: string[], cwd = process.cwd(), io: CliIo = de
   if (verb === "guide") return runGuideCli(rest, cwd, { out: io.out });
   if (verb === "review" && rest[0] === "new") return reviewNewCommand(rest.slice(1), cwd, io);
   if (verb === "direction" && rest[0] === "wait") return directionWaitCommand(rest.slice(1), cwd, io);
+  if (verb === "work" && rest[0] === "claim") return workClaimCommand(rest.slice(1), cwd, io);
   if (verb === "approve") return approveCommand(rest, cwd, io);
   if (verb === "advance") return advanceCommand(rest, cwd, io);
   if (verb === "session" && rest[0] === "new") return sessionNewCommand(rest.slice(1), cwd, io);

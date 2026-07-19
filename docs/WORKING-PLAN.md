@@ -24,10 +24,10 @@ Turn the proved two-context session relay into a project-level experience that c
 12. [x] Audit the whole product, package, and new interruption surface; consolidate recovery validation, preserve 157/157 deterministic checks with coverage, and publish the current security boundaries.
 13. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test, under the current documented single-writer project boundary.
 14. [x] Settle the top-level mutation ruling: an active Produce session may not lock the whole project; Guide and unrelated project work may continue changing files.
-15. [ ] Implement exact per-workstream write sets, same-path conflict refusal, exact-path staging, and a short recoverable Git-operation lock; mutation-test attribution and crash recovery.
+15. [x] Implement exact per-workstream write sets, before/after hashes, same-path conflict refusal, exact-path staging, and a short recoverable Git-operation lock; mutation-test attribution, rename/delete, unrelated-dirt close, and dead-lock recovery.
 16. [x] Confirm the project/session model: Produce is one session kind; independent Explore, Research, Architecture, Triage, Produce, and later sibling sessions may be active concurrently.
 17. [x] Replace global latest-session inference with explicit session identity, kind, dependencies, aggregate project status, dependency-scoped launch refusal, Guide confirmation, skill targeting, and relay routing while preserving every existing gate (162-check deterministic proof).
-18. [ ] Remove the remaining one-live-runtime preparation limit only after exact write-set claims, conflict refusal, and the Git-operation lock make simultaneous runtime mutation attributable.
+18. [ ] Remove the remaining one-live-runtime preparation limit: exact write-set claims, conflict refusal, and the Git-operation lock now make simultaneous runtime mutation attributable, but Guide runtime discovery still serializes one Producer/Reviewer pair.
 
 ## Submission cut
 
@@ -39,7 +39,7 @@ The submission demonstration still needs one strong Produce session moving from 
 - Project and role behavior belongs in repository-local skills and plain files.
 - Owner confirmation remains required at every gate for the current target.
 - No producer input from the owner after session start; owner conversation stays with the persistent reviewer.
-- Core CLI, Guide confirmation, session skills, Producer, Reviewer, and relay supervisor now bind explicit session identity. The tested relay can close an independent Explore session while an active Produce sibling remains untouched. Runtime preparation still permits only one live Producer/Reviewer pair at a time until the write-set and Git-lock milestone makes simultaneous mutation safe.
+- Core CLI, Guide confirmation, session skills, Producer, Reviewer, and relay supervisor bind explicit session identity. Session and Guide work sets reserve exact paths, record session before/after hashes, reject overlap and unclaimed mutation, stage only owned paths, and serialize Git ceremonies with a short recoverable lock. The tested relay closes an independent Explore session while an active Produce sibling remains untouched and permits unrelated Guide dirt through close. Runtime preparation still permits only one live Producer/Reviewer pair because runtime discovery/status has not yet been made plural.
 - Every persistent product output stays inside the project repository.
 - Tests are a living product contract and may grow, but must never be weakened to hide failure.
 - Koda-C is the workflow; the CLI and terminal panes are replaceable mechanical surfaces, not the product definition.
@@ -47,7 +47,6 @@ The submission demonstration still needs one strong Produce session moving from 
 ## Proof still owed
 
 - One owner-observed Guide confirmation arranging the complete three-context experience while preserving two independent session contexts.
-- One implementation and mutation proof of owner-approved concurrent Guide/project-file attribution.
-- One implementation and mutation proof of explicit concurrent session identities, kinds, dependencies, and aggregate status.
+- One owner-observed proof of Guide editing a claimed unrelated file while a visible session runs; deterministic attribution and close mutations are complete.
 - Cross-model continuation evidence before the org-chart staffing design becomes executable per-phase config.
 - Cross-provider staffing remains only a possible consequence of disk-separated seats, not required proof or a current commitment.

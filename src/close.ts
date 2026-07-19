@@ -7,6 +7,7 @@ import { checkGitClosure } from "./git.ts";
 import { validateAdvancedHistory } from "./history.ts";
 import { nowIso, readRegularText, writeTextAtomic } from "./project.ts";
 import type { CloseMetadata, SessionState } from "./types.ts";
+import { checkSessionClaimClosure } from "./workset.ts";
 
 const CLOSE_MARKER = "KODA_CLOSE";
 
@@ -159,5 +160,6 @@ export async function evaluateSessionClosure(
 
   const git = checkGitClosure(projectRoot, sessionDir, true);
   reasons.push(...git.reasons);
+  reasons.push(...await checkSessionClaimClosure(projectRoot, sessionDir, state.id));
   return { closed: reasons.length === 0, reasons };
 }

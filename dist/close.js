@@ -7,6 +7,7 @@ import { checkGitClosure } from "./git.js";
 import { validateAdvancedHistory } from "./history.js";
 import { nowIso, readRegularText, writeTextAtomic } from "./project.js";
 
+import { checkSessionClaimClosure } from "./workset.js";
 
 const CLOSE_MARKER = "KODA_CLOSE";
 
@@ -159,6 +160,7 @@ export async function evaluateSessionClosure(
 
   const git = checkGitClosure(projectRoot, sessionDir, true);
   reasons.push(...git.reasons);
+  reasons.push(...await checkSessionClaimClosure(projectRoot, sessionDir, state.id));
   return { closed: reasons.length === 0, reasons };
 }
 

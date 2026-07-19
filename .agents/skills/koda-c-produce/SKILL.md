@@ -18,7 +18,9 @@ Make the session's real output—code, prose, design, research, or another decla
 
 ## ITS OWN JOB
 
-Create the real deliverable in the appropriate project files. Verify each completed unit in proportion to its risk. Write `phases/<NN>-produce.md` as the evidence manifest, not as a substitute for the produced files.
+Derive every real deliverable path from the approved Plan before editing it. Run `koda work claim <path> [path...] --session <session-id>` for those exact project-relative paths and stop on any named ownership or provenance refusal. A claim is an exclusive write boundary, not permission to broaden the Plan. Never claim a Guide continuity file or another active session's path.
+
+Create the real deliverable only in the claimed project files. Verify each completed unit in proportion to its risk. Write `phases/<NN>-produce.md` as the evidence manifest, not as a substitute for the produced files.
 
 Use this exact shape:
 
@@ -55,6 +57,6 @@ When input is needed, read and follow the [in-phase consultation protocol](../..
 
 ## HANDOVER OBLIGATION
 
-Verify that every claimed output exists, every claimed check was actually run, and the manifest cites the real files plus every released direction ID. Leave `currentPhaseIndex` unchanged. Do not create a review, ledger entry, receipt, or advancement, and do not perform work belonging to another declared phase.
+Verify that every output exists, every output outside the session folder appears in `write-set.json`, every claimed check was actually run, and the manifest cites the real files plus every released direction ID. Leave `currentPhaseIndex` unchanged. Do not create a review, ledger entry, receipt, or advancement, and do not perform work belonging to another declared phase.
 
 Run `koda status --session <session-id>`; the phase must remain `produce` and the gate must remain closed pending independent review proof. Report the manifest and output paths, then hand them to `koda-c-review`.

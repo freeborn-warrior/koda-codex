@@ -26,13 +26,16 @@ parent, and ignored project-local runtime under `.koda/`:
   state artifacts atomically;
 - `direction wait` writes one bound regular-file direction record under the
   active session; advancement is the only operation that releases its ID;
+- `work claim` writes the selected session's exact external output claims before
+  mutation; `guide claim` reserves additional Guide paths outside its manifest;
 - the first `session halt` writes immutable `halt.md`; its printed Git steps
   must run before the second invocation can verify terminal halt;
 - the first `session close` writes immutable `close.md`; the second only verifies
   disk and Git state.
 - `guide confirm`, `cancel`, and `bind` write their named durable evidence;
 - `guide launch` writes only ignored `.koda/runs/<launch-id>/` rendezvous state
-  after verifying a clean pushed project and one exact confirmed request.
+  after verifying pushed confirmation evidence, an empty shared Git index, and
+  one exact confirmed request. Unrelated unstaged claimed work may remain.
 - explicit `guide launch ... --open ghostty` additionally invokes macOS
   `/usr/bin/open` twice with argument arrays to request labeled Reviewer then
   Producer windows. It does not build or evaluate a shell command string.
@@ -123,18 +126,23 @@ core close and halt commands only print Git instructions; the explicitly started
 supervisor and explicit Reviewer halt ceremony execute their documented commits and pushes. Inspect unfamiliar
 repository hooks and remotes before starting a real-project relay.
 
-The real-project relay currently starts from a clean pushed checkout but its
-pre-close output commit stages every changed non-ignored path with `git add -A`.
-That captures a Producer whose output paths are not known in advance, but it also
-means an unrelated owner or Guide edit made after launch could enter the same
-commit. Kristian has ruled that Guide and unrelated project changes must be able
-to continue during Produce, so a whole-project mutation lease is not an acceptable
-product solution. Until exact per-workstream write sets, conflict detection,
-exact-path staging, and a short recoverable Git-operation lock ship, the current
-runner still cannot safely commit such a concurrently dirty checkout. Waiting
-direction written through the trusted Reviewer path remains part of the session
-evidence. This is a named temporary implementation boundary, not a reversal of
-the owner-approved concurrent experience.
+The real-project relay no longer uses `git add -A`. Before mutation, Produce must
+declare external paths with `koda work claim`; Guide may reserve new paths with
+`koda guide claim`, while its manifest continuity files are implicitly reserved.
+Active Guide/session and session/session overlap refuses by name. Each session
+claim records the clean before hash and the post-work hash. The relay rechecks the
+post-work hash under the Git-operation lock, stages only current session files and
+claimed external paths, verifies the staged name set, commits, and pushes. Guide
+return uses the same lock and exact-path staging. Unrelated claimed, unstaged, or
+untracked work remains excluded and does not falsify session close.
+
+This is provenance discipline, not operating-system isolation. A process running
+as the same user can ignore Koda and edit a claimed file. Mutation after the
+Producer's recorded handoff is caught by the post-work hash; mutation during the
+model turn may be observed as that turn's output because the filesystem does not
+identify the author. Manual Git commands and third-party tools also do not honor
+Koda's lock. Stronger hostile-writer isolation would require separate worktrees,
+OS identities, or a service boundary.
 
 The Ghostty adapter is deliberately opt-in. It records launch intent before the
 first GUI request and refuses automatic opening for an existing runtime, even if
@@ -146,11 +154,14 @@ leaves the runtime prepared and names `koda guide status` as manual recovery.
 ## Concurrency and recovery
 
 Atomic file replacement prevents partial JSON or ledger writes, and run-folder
-preparation now uses an atomic create so competing preparations refuse instead of
-sharing a folder. There is not yet a project-wide mutation lock. Do not run two
-core mutation commands simultaneously; the current relay supervisor serializes
-them. A mature two-window interface must add recoverable mutation serialization
-before claiming safe concurrent operation.
+preparation uses an atomic create so competing preparations refuse instead of
+sharing a folder. `.koda/git-operation.lock/LOCK.json` serializes only relay-owned
+stage/commit/push ceremonies. A live owner refuses by name. A dead owner is
+recovered automatically only when the shared index is empty; staged crash residue
+refuses rather than guessing which operation owns it. Ordinary non-conflicting
+file work continues outside the lock. Core mutation commands still rely on atomic
+files rather than one global transaction, so callers must not concurrently mutate
+the same session evidence.
 
 Ctrl-C during a model turn terminates the direct Codex child, force-stops that
 child after two seconds if soft termination is ignored, preserves partial event
@@ -160,9 +171,9 @@ skill-backed reconciliation. Reviewer jobs return to `PENDING`; missing context
 identity refuses automatic replacement. The direct-child signal is not a
 platform process-tree sandbox, so service-grade orphan cleanup remains a future
 runtime concern. `FINALIZING_GUIDE_RETURN` stages ignored
-evidence before tracked mutation and resumes only when tracked bytes and unrelated
-project state still match. It also binds the exact pushed close commit and refuses
-if project history moves before recovery. Linked runtime records refuse as unsafe
+evidence before tracked mutation and resumes only when staged bytes still match
+and the bound pushed close remains an ancestor of current history. Unrelated dirty
+work may remain; exact return staging excludes it. Linked runtime records refuse as unsafe
 state. Never delete or recreate a paused run to make its state
 look cleaner.
 
@@ -175,4 +186,7 @@ The latest whole-product result and the earlier hardening baseline live in
 [`security-runs/2026-07-19-whole-product-audit-02/RESULT.md`](security-runs/2026-07-19-whole-product-audit-02/RESULT.md)
 and [`security-runs/2026-07-18-local-audit-01/RESULT.md`](security-runs/2026-07-18-local-audit-01/RESULT.md).
 Later evidence classes retain their own adversarial checks in the current full
-suite; the latest named transcript is linked from the README.
+suite. The exact concurrent-write audit, including independent immutable-close
+verification of claimed external outputs, lives in
+[`security-runs/2026-07-19-concurrent-mutation-audit-03/RESULT.md`](security-runs/2026-07-19-concurrent-mutation-audit-03/RESULT.md);
+the latest named full-suite transcript is linked from the README.

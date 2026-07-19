@@ -10,10 +10,12 @@ import { fileURLToPath } from "node:url";
 
 import { pathExists, readProjectConfig } from "../src/config.ts";
 import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
+import { acquireGitOperationLock } from "../src/git-operation-lock.ts";
 import { pushCommandArgs } from "../src/git.ts";
 import { evaluateSessionHalt, prepareHaltArtifact } from "../src/halt.ts";
 import { currentPhase, displayPath, loadSession, writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
+import { stagedProjectPaths } from "../src/workset.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
   acquireReviewerWindow,
@@ -346,26 +348,29 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     const session = await activeSession();
     const pushArgs = pushCommandArgs(project);
     if (!pushArgs) throw new Error("Configure a Git remote and named branch before halting this session.");
-    const stagedBefore = spawnSync("git", ["diff", "--cached", "--name-only"], { cwd: project, encoding: "utf8" });
-    if (stagedBefore.status !== 0 || stagedBefore.stdout.trim() !== "") {
-      throw new Error("Halt refused because unrelated staged changes already exist.");
-    }
     const aheadBefore = spawnSync("git", ["rev-list", "--count", "@{u}..HEAD"], { cwd: project, encoding: "utf8" });
     if (aheadBefore.status !== 0 || aheadBefore.stdout.trim() !== "0") {
       throw new Error("Halt refused because the current branch already has unpushed commits.");
     }
     const prepared = await prepareHaltArtifact(session.directory, session.state, ownerDirection);
     const relativeSession = displayPath(project, session.directory);
-    const addResult = withOwnerConsolePaused(() => spawnSync("git", ["add", "--", relativeSession], { cwd: project, encoding: "utf8" }));
-    if (addResult.status !== 0) throw new Error(`Halt Git step failed: git add -- ${relativeSession}\n${addResult.stderr}`);
-    const stagedAfter = spawnSync("git", ["diff", "--cached", "--name-only"], { cwd: project, encoding: "utf8" });
-    const stagedPaths = stagedAfter.stdout.trim().split(/\r?\n/).filter(Boolean);
-    if (stagedAfter.status !== 0 || stagedPaths.length === 0 || stagedPaths.some((file) => file !== relativeSession && !file.startsWith(`${relativeSession}/`))) {
-      throw new Error("Halt refused because Git staging contains missing or unrelated paths.");
-    }
-    for (const args of [["commit", "-m", `halt session ${session.id}`], pushArgs]) {
-      const result = withOwnerConsolePaused(() => spawnSync("git", args, { cwd: project, encoding: "utf8" }));
-      if (result.status !== 0) throw new Error(`Halt Git step failed: git ${args.join(" ")}\n${result.stderr}`);
+    const lease = await acquireGitOperationLock(project, session.id, "immutable halt exact-path commit and push", {
+      stagedPaths: () => stagedProjectPaths(project),
+    });
+    try {
+      if (stagedProjectPaths(project).length > 0) throw new Error("Halt refused because unrelated staged changes already exist.");
+      const addResult = withOwnerConsolePaused(() => spawnSync("git", ["add", "--", relativeSession], { cwd: project, encoding: "utf8" }));
+      if (addResult.status !== 0) throw new Error(`Halt Git step failed: git add -- ${relativeSession}\n${addResult.stderr}`);
+      const stagedPaths = stagedProjectPaths(project);
+      if (stagedPaths.length === 0 || stagedPaths.some((file) => file !== relativeSession && !file.startsWith(`${relativeSession}/`))) {
+        throw new Error("Halt refused because Git staging contains missing or unrelated paths.");
+      }
+      for (const args of [["commit", "-m", `halt session ${session.id}`], pushArgs]) {
+        const result = withOwnerConsolePaused(() => spawnSync("git", args, { cwd: project, encoding: "utf8" }));
+        if (result.status !== 0) throw new Error(`Halt Git step failed: git ${args.join(" ")}\n${result.stderr}`);
+      }
+    } finally {
+      await lease.release();
     }
     const halt = await evaluateSessionHalt(project, session.directory, session.state);
     if (!halt.halted) throw new Error(`Halt verification failed: ${halt.reasons.join("; ")}`);

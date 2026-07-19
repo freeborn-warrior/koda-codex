@@ -17,6 +17,7 @@ import { requestGhosttyWindows,                           } from "./ghostty.js";
 import { evaluateSessionClosure } from "./close.js";
 import { evaluateSessionHalt } from "./halt.js";
 import { currentPhase, displayPath, latestSessionId, listSessionIds, loadSessionState, sessionRoot } from "./project.js";
+import { claimGuidePaths, loadGuideWorkSet } from "./workset.js";
 
 
 
@@ -61,6 +62,7 @@ function help(io            )       {
   io.out("");
   io.out("Commands:");
   io.out("  koda guide status");
+  io.out("  koda guide claim <path> [path...]");
   io.out("  koda guide confirm <prompt-file> --owner <name> [--kind <kind>] [--depends-on <session-id>] [--independent]");
   io.out("  koda guide cancel <launch-id> --owner <name> --reason <text>");
   io.out("  koda guide bind <launch-id> <session-id>");
@@ -79,11 +81,28 @@ export async function runGuideCli(
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
 
+  if (verb === "claim") {
+    rejectUnknownOptions(rest);
+    if (rest.length === 0) throw new Error("Usage: koda guide claim <path> [path...]");
+    const relative = rest.map((value) => {
+      const candidate = path.resolve(cwd, value);
+      const result = path.relative(root, candidate);
+      if (result.startsWith("..") || path.isAbsolute(result)) throw new Error(`Guide write claim escapes the project: ${value}.`);
+      return result.split(path.sep).join("/");
+    });
+    const workSet = await claimGuidePaths(root, config, relative);
+    io.out("GUIDE WRITE SET");
+    for (const claim of workSet.claims) io.out(`✓ ${claim.path}`);
+    io.out("Guide may now mutate these paths; active sessions will treat them as unrelated Guide-owned work.");
+    return;
+  }
+
   if (verb === "status") {
     rejectUnknownOptions(rest);
     if (rest.length) throw new Error("Usage: koda guide status");
     const manifest = await loadGuideManifest(root, config);
     const continuity = await snapshotContinuity(root, manifest);
+    const guideWorkSet = await loadGuideWorkSet(root, config);
     await requireGuideCancellationsPushed(root, config);
     const pending = await pendingGuideLaunches(root, config);
     const runtime = await currentGuideRuntime(root);
@@ -122,6 +141,8 @@ export async function runGuideCli(
     io.out("Active-session questions belong in Reviewer; Guide direction cannot inject the active phase.");
     io.out(`Manifest: ${displayPath(root, guideManifestPath(root, config))}`);
     io.out(`Project: ${manifest.project} — ${continuity.length} continuity file(s)`);
+    io.out(`Guide write set: ${guideWorkSet.claims.length} additional path(s)`);
+    for (const claim of guideWorkSet.claims) io.out(`  ${claim.path}`);
     if (activeSessions.length > 0 || runtimeActive) {
       io.out(`ACTIVE PROJECT WORK — ${activeSessions.length} bounded session(s).`);
       for (const session of activeSessions) {

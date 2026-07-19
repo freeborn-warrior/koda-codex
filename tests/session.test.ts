@@ -11,6 +11,7 @@ import { artifactPath, createSession, saveSessionState, writeJsonAtomic } from "
 import { createFreshReview, recordApproval, reviewSha256 } from "../src/receipt.ts";
 import { DEFAULT_CONFIG } from "../src/config.ts";
 import { projectHarness, readyGate, temporaryRoot } from "./helpers.ts";
+import { claimSessionPaths, reconcileSessionWorkSet } from "../src/workset.ts";
 
 test("session creation requires a prompt and numbers dated folders", async (t) => {
   const h = await projectHarness(t);
@@ -62,6 +63,13 @@ test("a completed session is closed only after its state is committed and pushed
   execFileSync("git", ["config", "user.name", "Koda Test"], { cwd: root });
   execFileSync("git", ["config", "user.email", "koda@example.invalid"], { cwd: root });
   execFileSync("git", ["remote", "add", "origin", remote], { cwd: root });
+  execFileSync("git", ["add", "--", "koda.config.json", DEFAULT_CONFIG.sessionsDir], { cwd: root });
+  execFileSync("git", ["commit", "-m", "seed completed session before close"], { cwd: root });
+
+  await claimSessionPaths(root, { ...DEFAULT_CONFIG, phases: DEFAULT_CONFIG.phases.slice(0, 1) }, session.id, ["src/output.js"]);
+  await mkdir(path.join(root, "src"), { recursive: true });
+  await writeFile(path.join(root, "src", "output.js"), "export const complete = true;\n", "utf8");
+  await reconcileSessionWorkSet(root, { ...DEFAULT_CONFIG, phases: DEFAULT_CONFIG.phases.slice(0, 1) }, session.id);
 
   assert.deepEqual(await evaluateSessionClosure(root, session.directory, session.state), {
     closed: false,
@@ -78,17 +86,34 @@ test("a completed session is closed only after its state is committed and pushed
   assert.equal(beforeCommit.status, 1);
   assert.match(beforeCommit.stderr, /is neither closed nor pushed-halted/);
 
-  execFileSync("git", ["add", "."], { cwd: root });
-  execFileSync("git", ["commit", "-m", "complete and close session"], { cwd: root });
+  execFileSync("git", ["add", "--", "koda.config.json", DEFAULT_CONFIG.sessionsDir], { cwd: root });
+  execFileSync("git", ["commit", "-m", "commit session evidence but omit claimed output"], { cwd: root });
   const localOnly = await evaluateSessionClosure(root, session.directory, session.state);
   assert.equal(localOnly.closed, false);
   assert(localOnly.reasons.includes("The current branch has no pushed upstream branch."));
+  assert(localOnly.reasons.includes("Claimed session output has uncommitted changes: src/output.js."));
   const beforePush = spawnSync(process.execPath, [cli, "session", "new", nextPrompt], { cwd: root, encoding: "utf8" });
   assert.equal(beforePush.status, 1);
   assert.match(beforePush.stderr, /no pushed upstream branch/);
   execFileSync("git", ["push", "-u", "origin", "main"], { cwd: root });
 
+  const outputNotCommitted = await evaluateSessionClosure(root, session.directory, session.state);
+  assert.equal(outputNotCommitted.closed, false);
+  assert(outputNotCommitted.reasons.includes("Claimed session output has uncommitted changes: src/output.js."));
+  const beforeOutputPush = spawnSync(process.execPath, [cli, "session", "new", nextPrompt], { cwd: root, encoding: "utf8" });
+  assert.equal(beforeOutputPush.status, 1);
+  assert.match(beforeOutputPush.stderr, /Claimed session output has uncommitted changes: src\/output\.js/);
+
+  execFileSync("git", ["add", "--", "src/output.js"], { cwd: root });
+  execFileSync("git", ["commit", "-m", "commit claimed session output"], { cwd: root });
+  execFileSync("git", ["push"], { cwd: root });
   assert.deepEqual(await evaluateSessionClosure(root, session.directory, session.state), { closed: true, reasons: [] });
+  await writeFile(path.join(root, "guide-notes.md"), "Unrelated Guide work may remain dirty.\n", "utf8");
+  assert.deepEqual(
+    await evaluateSessionClosure(root, session.directory, session.state),
+    { closed: true, reasons: [] },
+    "unrelated project dirt must not falsify a pushed session close",
+  );
   const afterPush = spawnSync(process.execPath, [cli, "session", "new", nextPrompt], { cwd: root, encoding: "utf8" });
   assert.equal(afterPush.status, 0, afterPush.stderr);
   assert.match(afterPush.stdout, /Opened session .*\-02/);

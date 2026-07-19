@@ -182,9 +182,11 @@ async function assertRuntimeAreaSafe(root        )                  {
   if (!ignored.ok) {
     throw new Error(`Guide runtime refuses until ${GUIDE_RUNTIME_DIR}/ is ignored by Git.`);
   }
-  const dirty = git(root, ["status", "--porcelain", "--untracked-files=all"]);
-  if (!dirty.ok) throw new Error(`Unable to inspect project Git status: ${dirty.stderr}`);
-  if (dirty.stdout !== "") throw new Error("Guide runtime requires a clean project; commit and push the current changes first.");
+  const staged = git(root, ["diff", "--cached", "--name-only"]);
+  if (!staged.ok) throw new Error(`Unable to inspect the shared Git index: ${staged.stderr}`);
+  if (staged.stdout !== "") {
+    throw new Error(`Guide runtime requires an empty shared Git index; finish the active Git operation first: ${staged.stdout}.`);
+  }
   const upstream = git(root, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
   if (!upstream.ok) throw new Error("Guide runtime requires a pushed upstream branch.");
   const ahead = git(root, ["rev-list", "--count", "@{u}..HEAD"]);

@@ -65,7 +65,7 @@ git(project, ["config", "user.email", "relay@example.invalid"]);
 git(runtime, ["init", "--bare", remote]);
 git(project, ["remote", "add", "origin", remote]);
 
-await writeFile(path.join(project, ".gitignore"), ".runtime/\n.DS_Store\n", "utf8");
+await writeFile(path.join(project, ".gitignore"), ".runtime/\n.koda/\n.DS_Store\n", "utf8");
 
 await writeJsonAtomic(path.join(project, "koda.config.json"), DEFAULT_CONFIG);
 await mkdir(path.join(project, DEFAULT_CONFIG.sessionsDir), { recursive: true });
