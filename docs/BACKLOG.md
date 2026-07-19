@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved one clean Reviewer plus one clean Producer beside Guide and reached an approved Brief, then exposed an ambiguous receipt interaction. The gate stayed shut with zero acknowledgements. Deterministic numbered retry, one-action Guide recovery, fresh-model isolation, and hardened Git locking pass 197/197; Kristian must still observe recovery and the remaining five phase decisions through pushed close.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, one-role Guide recovery, numbered retry, fresh-model isolation, and hardened Git locking now pass 199/199; Kristian must still observe recovery and the remaining five phase decisions through pushed close.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
@@ -38,6 +38,12 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Repair the live partial-recovery interleaving without bypassing the job guard:
+  Producer rejoins the exact existing formal-review job, Guide offers one missing-role
+  recovery, duplicate Reviewer launch refuses, and Guide waits for actual Producer
+  readiness instead of treating Ghostty request acceptance as success. Deterministic
+  proof passes 199/199; pushed binding is required before owner retry.
 
 - [x] Complete the pre-handoff mechanical, security, package, and first-use UX audit
   before asking Kristian to test again. Four real defects were preserved and fixed:

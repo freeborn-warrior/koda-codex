@@ -26,6 +26,7 @@ import { relayRoleEnvironment } from "./relay-environment.js";
 
 
 
+
 function packageRoot()         {
   return path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 }
@@ -217,6 +218,63 @@ async function waitForRecoveredReviewer(runRoot        )                   {
   return false;
 }
 
+async function recoveredRunState(runRoot        )                                                          {
+  const file = path.join(runRoot, "RUN.json");
+  const metadata = await lstat(file).catch(() => null);
+  if (!metadata || !metadata.isFile() || metadata.isSymbolicLink()) {
+    throw new Error("Recovery requires a real RUN.json file.");
+  }
+  try {
+    return JSON.parse(await readFile(file, "utf8"))                                           ;
+  } catch {
+    throw new Error("Recovery requires valid RUN.json data.");
+  }
+}
+
+async function waitForRecoveredProducer(runRoot        )                   {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const state = await recoveredRunState(runRoot);
+    if (state?.status === "AWAITING_REVIEWER_WINDOW" && !state.lastError) return true;
+    if (["PAUSED_ERROR", "PAUSED_REVIEWER_FAILURE"].includes(String(state?.status))) return false;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return false;
+}
+
+async function readRecoveryRecord(file        )                                   {
+  const metadata = await lstat(file).catch(() => null);
+  if (!metadata || !metadata.isFile() || metadata.isSymbolicLink()) {
+    throw new Error("Visible recovery evidence must be a real RECOVERY.json file.");
+  }
+  let value         ;
+  try {
+    value = JSON.parse(await readFile(file, "utf8"));
+  } catch {
+    throw new Error("Visible recovery evidence must contain valid JSON.");
+  }
+  if (!value || typeof value !== "object") throw new Error("Visible recovery evidence is invalid.");
+  const record = value                           ;
+  if (record.version !== 1 || record.reason !== "owner-receipt-input-retry" || typeof record.requestedAt !== "string") {
+    throw new Error("Visible recovery evidence does not match the owner-receipt recovery contract.");
+  }
+  return record;
+}
+
+export async function producerOnlyRecoveryReady(runtime                  )                   {
+  const recoveryFile = path.join(runtime.runRoot, "RECOVERY.json");
+  if (!(await lstat(recoveryFile).then(() => true).catch(() => false))) return false;
+  const recovery = await readRecoveryRecord(recoveryFile);
+  const job = await receiptRecoveryJob(runtime.runRoot);
+  const jobRecord = job                                      ;
+  const expectedError = `A different reviewer job is already active: ${String(jobRecord.kind)} ${String(jobRecord.phase)} (${job.status}).`;
+  return runtime.run.status === "PAUSED_ERROR" &&
+    runtime.run.lastError === expectedError &&
+    job.status === "AWAITING_OWNER" &&
+    ["formal", "repair", "fresh"].includes(String(jobRecord.kind)) &&
+    recovery.producerRetryAt === undefined &&
+    await reviewerLockAlive(runtime.runRoot);
+}
+
 export async function requestGhosttyRecoveryWindows(
   project        ,
   runtime                  ,
@@ -224,8 +282,37 @@ export async function requestGhosttyRecoveryWindows(
   dependencies                            = {},
 )                                  {
   const recoveryFile = path.join(runtime.runRoot, "RECOVERY.json");
-  if (await lstat(recoveryFile).then(() => true).catch(() => false)) {
-    throw new Error("A visible recovery was already requested. Run koda guide status instead of opening duplicate windows.");
+  const priorRecovery = await lstat(recoveryFile).then(() => true).catch(() => false);
+  if (priorRecovery) {
+    const recovery = await readRecoveryRecord(recoveryFile);
+    if (!(await producerOnlyRecoveryReady(runtime))) {
+      throw new Error("A visible recovery was already requested. Run koda guide status instead of opening duplicate windows.");
+    }
+    const prepared = {
+      ...runtime,
+      launch: { id: runtime.run.launchId },
+    }                        ;
+    const producerRequest = (await ghosttyWindowRequests(project, prepared, dependencies))[1] ;
+    runtime.run.lastAction = "reopen only the missing Producer after Reviewer recovery";
+    runtime.run.lastError = undefined;
+    await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+    const open = dependencies.open ?? defaultOpen;
+    const producer = open(producerRequest.args, project);
+    if (producer.status !== 0) {
+      runtime.run.lastError = `Ghostty refused the recovered Producer window${producer.stderr ? `: ${producer.stderr}` : "."}`;
+      await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+      throw new Error(runtime.run.lastError);
+    }
+    const producerReady = await (dependencies.waitForRecoveredProducer ?? waitForRecoveredProducer)(runtime.runRoot);
+    if (!producerReady) {
+      const current = await recoveredRunState(runtime.runRoot);
+      runtime.run.status = current?.status ?? "PAUSED_ERROR";
+      runtime.run.lastError = current?.lastError ?? "Recovered Producer did not rejoin the existing Reviewer decision point.";
+      await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+      throw new Error(runtime.run.lastError);
+    }
+    await writeJsonAtomic(recoveryFile, { ...recovery, producerRetryAt: nowIso() });
+    return [producerRequest];
   }
   if (runtime.run.status !== "PAUSED_REVIEWER_FAILURE" || runtime.run.lastError !== "Owner acknowledgement exited 1.") {
     throw new Error("Automatic recovery is limited to the named owner-receipt failure. Run koda guide status for other states.");
@@ -268,6 +355,14 @@ export async function requestGhosttyRecoveryWindows(
   const producer = open(requests[1] .args, project);
   if (producer.status !== 0) {
     runtime.run.lastError = `Ghostty refused the recovered Producer window${producer.stderr ? `: ${producer.stderr}` : "."}`;
+    await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+    throw new Error(runtime.run.lastError);
+  }
+  const producerReady = await (dependencies.waitForRecoveredProducer ?? waitForRecoveredProducer)(runtime.runRoot);
+  if (!producerReady) {
+    const current = await recoveredRunState(runtime.runRoot);
+    runtime.run.status = current?.status ?? "PAUSED_ERROR";
+    runtime.run.lastError = current?.lastError ?? "Recovered Producer did not rejoin the existing Reviewer decision point.";
     await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
     throw new Error(runtime.run.lastError);
   }

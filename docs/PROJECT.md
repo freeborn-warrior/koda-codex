@@ -104,6 +104,12 @@ owner contract
   conversation stays open while a dependent start waits for pushed close or halt.
   Toolkit capability `ghostty-pre-handoff-v3` binds the pushed code and transcript;
   owner-observed recovery remains the only release blocker in this surface.
+- The next owner observation exposed one more exact recovery interleaving: Reviewer
+  reopened the Brief decision, but Producer tried to create a second acknowledgement
+  job and exited when the identity guard refused it. No receipt or advancement
+  occurred. Producer now rejoins the existing formal-review job; Guide can reopen
+  only that missing role and waits for its disk readiness before reporting success.
+  The expanded living suite passes 199/199; owner observation is still owed.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.
@@ -133,9 +139,11 @@ owner contract
 - [Receipt acknowledgement UX incident](verification-runs/2026-07-19-markdown-headings-01/RECEIPT-UX-INCIDENT.md)
 - [First-use UX audit](quality-runs/2026-07-19-first-use-ux-audit-02/RESULT.md)
 - [Final pre-handoff first-use UX audit](quality-runs/2026-07-19-first-use-ux-audit-03/RESULT.md)
+- [Partial recovery first-use UX audit](quality-runs/2026-07-19-partial-recovery-ux-audit-04/RESULT.md)
 - [Owner ceremony development failures](test-results/2026-07-19-owner-ceremony-development-failures.md)
 - [Owner ceremony security audit](security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md)
 - [Final pre-handoff security audit](security-runs/2026-07-19-pre-handoff-audit-08/RESULT.md)
+- [Partial recovery security audit](security-runs/2026-07-19-partial-recovery-audit-09/RESULT.md)
 - [Ghostty launcher development failures](test-results/2026-07-18-ghostty-launcher-development-failures.md)
 - [Ghostty launcher 132-check result](test-results/2026-07-18-ghostty-launcher-final.md)
 - [Ghostty launcher post-push 132-check result](test-results/2026-07-18-ghostty-launcher-pushed-final.md)

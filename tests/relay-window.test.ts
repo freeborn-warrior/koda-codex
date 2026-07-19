@@ -406,6 +406,63 @@ test("TWO-WINDOW RECEIPT RECOVERY: the live legacy acknowledgement failure reope
   assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
 });
 
+test("TWO-WINDOW PRODUCER RECOVERY: an awaiting formal review is rejoined instead of replaced", async (t) => {
+  const result = await preparedAcknowledgementRun("wrong");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  const job = await readReviewerJob(result.runRoot);
+  assert.ok(job);
+  job.kind = "formal";
+  job.purpose = "formal review of brief";
+  job.status = "AWAITING_OWNER";
+  job.error = null;
+  job.completion = null;
+  await writeReviewerJob(result.runRoot, job);
+
+  let stdout = "";
+  let stderr = "";
+  const producer = spawn(process.execPath, [
+    "scripts/execute-relay-run.ts",
+    "--reviewer-window",
+    result.runRoot,
+  ], {
+    cwd: process.cwd(),
+    env: { ...process.env, KODA_RELAY_RUNS_ROOT: result.temporary },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  producer.stdout.setEncoding("utf8");
+  producer.stderr.setEncoding("utf8");
+  producer.stdout.on("data", (chunk) => { stdout += chunk; });
+  producer.stderr.on("data", (chunk) => { stderr += chunk; });
+  t.after(() => { if (producer.exitCode === null) producer.kill("SIGKILL"); });
+
+  let producerState: { status?: string; lastError?: string } = {};
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    producerState = JSON.parse(await readFile(path.join(result.runRoot, "RUN.json"), "utf8"));
+    if (producerState.status === "AWAITING_REVIEWER_WINDOW") break;
+    if (producer.exitCode !== null) break;
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  assert.equal(producer.exitCode, null, `Producer exited instead of waiting:\n${stderr}`);
+  assert.equal(producerState.status, "AWAITING_REVIEWER_WINDOW");
+  assert.equal(producerState.lastError, undefined);
+  assert.equal((await readReviewerJob(result.runRoot))?.id, job.id);
+  assert.equal((await readReviewerJob(result.runRoot))?.kind, "formal");
+  for (let attempt = 0; attempt < 40 && !stdout.includes("RESTORING WINDOW B HANDOVER"); attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  assert.match(stdout, /RESTORING WINDOW B HANDOVER — formal review of brief/);
+  assert.doesNotMatch(stderr, /different reviewer job is already active/);
+
+  const exitPromise = new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve) => {
+    producer.once("exit", (code, signal) => resolve({ code, signal }));
+  });
+  producer.kill("SIGTERM");
+  const exit = await exitPromise;
+  assert.equal(exit.code, 2);
+  assert.equal(exit.signal, null);
+  assert.match(stderr, /Window A was stopped while a disk-backed reviewer job remained pending/);
+});
+
 test("TWO-WINDOW OWNER CEREMONY TTY: numbered choices disclose the receipt step before acknowledgement", {
   skip: process.platform !== "darwin",
 }, async (t) => {

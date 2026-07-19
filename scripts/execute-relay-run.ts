@@ -49,6 +49,7 @@ import {
   renderCodexEvent,
   removeReviewerJob,
   writeReviewerJob,
+  type ReviewerJob,
   type ReviewerJobKind,
 } from "./relay-window-protocol.ts";
 
@@ -579,6 +580,12 @@ async function dispatchReviewerWindowJob(
     await writeReviewerJob(runRoot, job);
   }
 
+  await waitForReviewerWindowJob(job, expectedFile);
+}
+
+async function waitForReviewerWindowJob(job: ReviewerJob, expectedFile: string): Promise<void> {
+  const purpose = job.purpose;
+
   run.status = "AWAITING_REVIEWER_WINDOW";
   run.lastAction = `${purpose} in Window B`;
   run.lastError = undefined;
@@ -598,6 +605,7 @@ async function dispatchReviewerWindowJob(
     }
     const current = await readReviewerJob(runRoot);
     if (!current) throw new Error("The reviewer job disappeared before Window A consumed it.");
+    if (current.id !== job.id) throw new Error("The reviewer job changed identity before Window A consumed it.");
     if (current.status === "FAILED") {
       run.status = "PAUSED_REVIEWER_FAILURE";
       run.lastError = current.error ?? `The reviewer window failed ${purpose}.`;
@@ -614,7 +622,7 @@ async function dispatchReviewerWindowJob(
         current.completion === "HALTED"
           ? "- Disk handback: active session `halt.md`."
           : `- Disk handback: \`${path.relative(project, expectedFile)}\``,
-        kind === "consultation"
+        job.kind === "consultation"
           ? "- Consultation response was written before the producer resumed."
           : current.completion === "HALTED"
             ? "- Kristian invoked the sole interrupt; pushed halt evidence voided the phase without acknowledging its review."
@@ -716,6 +724,19 @@ async function answerConsultation(request: string): Promise<void> {
 
 async function ownerAcknowledge(phaseName: string, reviewFile: string): Promise<void> {
   if (twoWindow) {
+    const existing = await readReviewerJob(runRoot);
+    const expectedPath = path.relative(project, reviewFile);
+    if (
+      existing &&
+      ["formal", "repair", "fresh"].includes(existing.kind) &&
+      existing.phase === phaseName &&
+      existing.expectedPath === expectedPath
+    ) {
+      console.log(`\nRESTORING WINDOW B HANDOVER — ${existing.purpose}`);
+      console.log("Reviewer already owns this exact review and owner decision. Window A will wait without creating a second job.");
+      await waitForReviewerWindowJob(existing, reviewFile);
+      return;
+    }
     await dispatchReviewerWindowJob(
       "acknowledge",
       phaseName,

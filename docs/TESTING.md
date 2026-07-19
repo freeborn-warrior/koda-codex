@@ -1207,6 +1207,35 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   result is preserved in the
   [final durable transcript](test-results/2026-07-19-pre-handoff-manifest-pushed.md),
   now bound by toolkit capability `ghostty-pre-handoff-v3`.
+
+## 2026-07-19 — Live partial-recovery failure and correction
+
+- **Observed:** Guide reopened the same Reviewer at the unacknowledged Brief review,
+  then Producer exited because it saw that `formal brief (AWAITING_OWNER)` job and
+  attempted to create a separate acknowledgement job. Kristian stopped immediately.
+- **Integrity result:** The reviewer-job identity guard refused the conflicting write.
+  No receipt, approval, or advancement occurred; Reviewer remained open and the
+  session stayed at Brief.
+- **Cause:** Restarted Producer reconstructed the missing approval but did not
+  reconstruct ownership of the already-open formal-review handover. The prior mocked
+  window-order test did not run this process interleaving.
+- **Correction:** Producer now waits on the exact existing formal/repair/fresh job and
+  refuses changed identity. Guide detects this exact partial state, offers one
+  Producer-only recovery, requires a live Reviewer, refuses duplicate retry, and
+  waits for Producer's disk readiness before reporting success.
+- **Development test failures:** The first focused relay run passed **17/18**; its new
+  assertion raced streamed stdout after already observing the correct disk state, so
+  it gained a bounded wait for both signals. The next combined run passed **58/59**;
+  one old assertion expected future tense even though Guide now reports recovery only
+  after it happened, so the same requirement was corrected to truthful past tense.
+- **Corrected results:** Relay window **18/18**; combined Guide, relay, security, and
+  integrity **59/59**; complete living suite **199/199**; coverage suite **199/199**
+  at **89.32% lines, 69.05% branches, and 87.43% functions** overall.
+- **Evidence:** [Live incident](verification-runs/2026-07-19-markdown-headings-01/PRODUCER-RECOVERY-INCIDENT.md),
+  [security audit 09](security-runs/2026-07-19-partial-recovery-audit-09/RESULT.md),
+  and [first-use UX audit 04](quality-runs/2026-07-19-partial-recovery-ux-audit-04/RESULT.md).
+- **Verdict:** DETERMINISTIC REPAIR PASS; PUSHED INTEGRITY BINDING AND OWNER
+  OBSERVATION STILL REQUIRED.
 - **Reports:** [Security audit 08](security-runs/2026-07-19-pre-handoff-audit-08/RESULT.md)
   and [first-use UX audit 03](quality-runs/2026-07-19-first-use-ux-audit-03/RESULT.md).
 - **Verdict:** MECHANICAL, FRESH-CONTEXT, PACKAGE, AND SECURITY PRE-HANDOFF PASS.

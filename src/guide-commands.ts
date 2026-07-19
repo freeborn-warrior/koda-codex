@@ -13,7 +13,12 @@ import {
   verifyGuideLaunch,
 } from "./guide.ts";
 import { currentGuideRuntime, listGuideRuntimes, prepareGuideRuntime } from "./guide-runtime.ts";
-import { requestGhosttyRecoveryWindows, requestGhosttyWindows, type GhosttyWindowRequest } from "./ghostty.ts";
+import {
+  producerOnlyRecoveryReady,
+  requestGhosttyRecoveryWindows,
+  requestGhosttyWindows,
+  type GhosttyWindowRequest,
+} from "./ghostty.ts";
 import { evaluateSessionClosure } from "./close.ts";
 import { evaluateSessionHalt } from "./halt.ts";
 import { currentPhase, displayPath, latestSessionId, listSessionIds, loadSessionState, sessionRoot } from "./project.ts";
@@ -208,6 +213,16 @@ export async function runGuideCli(
           io.out("The prior session ended through pushed halt. Reconcile it and confirm a fresh Brief before launching again.");
         }
       } else {
+        if (await producerOnlyRecoveryReady(runtime)) {
+          io.out("REVIEWER RECOVERED — the existing owner decision is still open and nothing advanced.");
+          io.out("The Producer window failed to rejoin that decision and may be closed.");
+          io.out("");
+          io.out("SESSION RECOVERY READY");
+          io.out("1. Reopen only the missing Producer — Koda will make it wait on the existing Reviewer decision without creating another job.");
+          io.out("2. Not now — keep the Reviewer open and the session safely paused.");
+          io.out("Choose in the Guide conversation. Do not paste or reconstruct a technical command.");
+          continue;
+        }
         if (runtime.run.status === "PAUSED_REVIEWER_FAILURE" && runtime.run.lastError === "Owner acknowledgement exited 1.") {
           io.out("OWNER INPUT WAS NOT RECORDED — the receipt did not match. Nothing advanced and the gate remains closed.");
           io.out("");
@@ -305,10 +320,15 @@ export async function runGuideCli(
     const toolkit = await verifyToolkitIntegrity();
     const requests = await (dependencies.recoverGhostty ?? requestGhosttyRecoveryWindows)(root, runtime, toolkit);
     io.out(`SESSION RECOVERY REQUESTED — ${runtime.run.launchId}`);
-    io.out("✓ The same Reviewer context will reopen at the unacknowledged review.");
-    io.out("✓ Producer opens only after Reviewer reaches the owner decision point.");
-    io.out(`✓ ${requests[0]!.title} requested first.`);
-    io.out(`✓ ${requests[1]!.title} requested second.`);
+    if (requests.length === 1 && requests[0]?.role === "producer") {
+      io.out("✓ The recovered Reviewer stays open at the same owner decision.");
+      io.out(`✓ ${requests[0].title} rejoined that existing decision.`);
+    } else {
+      io.out("✓ The same Reviewer context reopened at the unacknowledged review.");
+      io.out("✓ Producer opened only after Reviewer reached the owner decision point.");
+      io.out(`✓ ${requests[0]!.title} requested first.`);
+      io.out(`✓ ${requests[1]!.title} requested second.`);
+    }
     io.out("No receipt was recorded and no phase advanced during recovery.");
     return;
   }

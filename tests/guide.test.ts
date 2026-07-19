@@ -778,6 +778,10 @@ test("GUIDE GHOSTTY OWNER-ERROR RECOVERY: one action reopens Reviewer first and 
           assert.equal(opened.length, 1, "Producer must wait until the recovered Reviewer is ready");
           return true;
         },
+        async waitForRecoveredProducer() {
+          assert.equal(opened.length, 2, "Recovery must verify Producer after its window is requested");
+          return true;
+        },
       });
     },
   });
@@ -785,7 +789,7 @@ test("GUIDE GHOSTTY OWNER-ERROR RECOVERY: one action reopens Reviewer first and 
   assert.match(opened[0]!, /Reviewer/);
   assert.match(opened[1]!, /Producer/);
   assert.match(output.join("\n"), /SESSION RECOVERY REQUESTED/);
-  assert.match(output.join("\n"), /same Reviewer context will reopen/);
+  assert.match(output.join("\n"), /same Reviewer context reopened at the unacknowledged review/);
   const recovery = JSON.parse(await readFile(path.join(prepared.runRoot, "RECOVERY.json"), "utf8"));
   assert.equal(recovery.reason, "owner-receipt-input-retry");
   assert.equal(recovery.toolkit.version, 1);
@@ -793,6 +797,99 @@ test("GUIDE GHOSTTY OWNER-ERROR RECOVERY: one action reopens Reviewer first and 
 
   await assert.rejects(
     runGuideCli(["recover", "--open", "ghostty"], h.root, { out() {} }),
+    /visible recovery was already requested/,
+  );
+});
+
+test("GUIDE GHOSTTY PARTIAL RECOVERY: an existing Reviewer permits exactly one missing Producer retry", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm partial recovery fixture"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  await requestGhosttyWindows(h.root, prepared, {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open() { return { status: 0, stderr: "" }; },
+  });
+  prepared.run.status = "PAUSED_REVIEWER_FAILURE";
+  prepared.run.lastError = "Owner acknowledgement exited 1.";
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+  const job = {
+    version: 1,
+    id: "22222222-2222-4222-8222-222222222222",
+    kind: "formal",
+    phase: "brief",
+    purpose: "formal review of brief",
+    prompt: "Use the shared reviewer skill.",
+    expectedPath: "docs/sessions/2026-07-19-01/reviews/01-brief-review.md",
+    status: "FAILED",
+    createdAt: new Date(0).toISOString(),
+    updatedAt: new Date(0).toISOString(),
+    error: "Owner acknowledgement exited 1.",
+    completion: null,
+  };
+  await writeJsonAtomic(path.join(prepared.runRoot, "REVIEWER-JOB.json"), job);
+  await requestGhosttyRecoveryWindows(h.root, (await currentGuideRuntime(h.root))!, await verifyToolkitIntegrity(), {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open() { return { status: 0, stderr: "" }; },
+    async waitForRecoveredReviewer() { return true; },
+    async waitForRecoveredProducer() { return true; },
+  });
+
+  job.status = "AWAITING_OWNER";
+  job.error = null;
+  await writeJsonAtomic(path.join(prepared.runRoot, "REVIEWER-JOB.json"), job);
+  prepared.run.status = "PAUSED_ERROR";
+  prepared.run.lastError = "A different reviewer job is already active: formal brief (AWAITING_OWNER).";
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+  await mkdir(path.join(prepared.runRoot, ".reviewer-window.lock"));
+  await writeJsonAtomic(path.join(prepared.runRoot, ".reviewer-window.lock", "OWNER.json"), {
+    version: 1,
+    pid: process.pid,
+    startedAt: new Date().toISOString(),
+  });
+
+  const status: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { status.push(message); } });
+  assert.match(status.join("\n"), /REVIEWER RECOVERED/);
+  assert.match(status.join("\n"), /1\. Reopen only the missing Producer/);
+  assert.doesNotMatch(status.join("\n"), /execute-relay-run\.ts/);
+
+  const opened: string[] = [];
+  const output: string[] = [];
+  await runGuideCli(["recover", "--open", "ghostty"], h.root, { out(message) { output.push(message); } }, {
+    async openGhostty() { throw new Error("ordinary launch must not run during partial recovery"); },
+    async recoverGhostty(project, runtime, toolkit) {
+      return requestGhosttyRecoveryWindows(project, runtime, toolkit, {
+        platform: "darwin",
+        codexExecutable: process.execPath,
+        open(args) {
+          opened.push(args.find((item) => item.startsWith("--title=")) ?? "missing title");
+          return { status: 0, stderr: "" };
+        },
+        async waitForRecoveredProducer() { return true; },
+      });
+    },
+  });
+  assert.equal(opened.length, 1);
+  assert.match(opened[0]!, /Producer/);
+  assert.match(output.join("\n"), /rejoined that existing decision/);
+  const recovery = JSON.parse(await readFile(path.join(prepared.runRoot, "RECOVERY.json"), "utf8"));
+  assert.equal(typeof recovery.producerRetryAt, "string");
+  await assert.rejects(
+    requestGhosttyRecoveryWindows(h.root, (await currentGuideRuntime(h.root))!, await verifyToolkitIntegrity(), {
+      platform: "darwin",
+      codexExecutable: process.execPath,
+      open() { return { status: 0, stderr: "" }; },
+    }),
     /visible recovery was already requested/,
   );
 });
