@@ -6,6 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
+- [ ] Owner-select the first Guide live-test target. `koda-c-session-prompt` correctly refused before drafting because this build repository intentionally has no `koda.config.json` or Guide manifest. Recommended: initialize Koda-C now for one forward-only self-hosted UX session without retrofitting its construction history; alternative: use a separate disposable Guide project with weaker real-product value. See [the dated preflight decision note](design-notes/2026-07-19-first-guide-live-test-target.md).
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
 - [ ] Owner-test the new one-action Ghostty adapter against a genuine Guide-confirmed session. Deterministic tests prove labeled Reviewer-first/Producer-second requests, no shell evaluation, partial-open recovery, and duplicate refusal; they do not prove macOS displayed the windows.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
@@ -28,7 +29,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Consider a thin interface over the plain-file CLI contract.
 - [ ] Consider an RLM-style evidence query layer only after a guide-context fixture proves ordinary file search, summaries, and compaction are insufficient.
 - [ ] Add machine-readable status for future interfaces after the human CLI contract is stable.
-- [ ] Consider a clean-boundary Koda-C self-hosting session only as later validation; do not let it displace the producer/reviewer relay work.
+- [ ] If the owner approves the concrete live-test target above, begin Koda-C self-hosting only at that clean, dated boundary; never retrofit the earlier construction history.
 - [ ] Package Koda-C as an installable plugin only after repo-local skill discovery and the core relay are proved; evaluate trusted hooks without making the CLI depend on them.
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 

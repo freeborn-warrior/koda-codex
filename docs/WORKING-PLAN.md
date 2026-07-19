@@ -22,7 +22,7 @@ Turn the proved two-context session relay into a project-level experience that c
 10. [x] Make the session-prompter preflight every start request and refuse conceptually competing sessions before a draft exists.
 11. [x] Make Ctrl-C a named, fail-closed operational stop: kill the in-flight child, preserve partial evidence, distrust possible handbacks, resume the same context for reconciliation, and refuse context replacement when identity is missing.
 12. [x] Audit the whole product, package, and new interruption surface; consolidate recovery validation, preserve 157/157 deterministic checks with coverage, and publish the current security boundaries.
-13. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test, under the current documented single-writer project boundary.
+13. [ ] Prove the complete three-context experience with Kristian when he is available to test, using exact write claims and the short Git-operation lock rather than a whole-project single-writer boundary.
 14. [x] Settle the top-level mutation ruling: an active Produce session may not lock the whole project; Guide and unrelated project work may continue changing files.
 15. [x] Implement exact per-workstream write sets, before/after hashes, same-path conflict refusal, exact-path staging, and a short recoverable Git-operation lock; mutation-test attribution, rename/delete, unrelated-dirt close, and dead-lock recovery.
 16. [x] Confirm the project/session model: Produce is one session kind; independent Explore, Research, Architecture, Triage, Produce, and later sibling sessions may be active concurrently.

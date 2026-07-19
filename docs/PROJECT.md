@@ -29,7 +29,7 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - Normal session closure is an immutable artifact with Git between preparation and verification. Explicit halt is the only other terminal state. A dependent successor cannot open until its prerequisite has pushed close or halt; an independent sibling session kind may run concurrently.
 - The current target keeps owner receipt acknowledgement at every gate. Exception-only owner attention is a distinct open policy decision and must not be introduced silently.
 - Active-phase direction has only two owner-ruled transitions: wait by default or halt. Wait records immediately but enters Producer input only through the next successful gate; halt terminates the session attempt and requires pushed immutable halt evidence before a new session starts from a fresh Brief. Pause-inject-resume is forbidden.
-- Explicit `$koda-c-session-prompt` use is the only owner-facing route from Guide conversation toward a bounded session. Its preflight judges declared dependencies: unresolved successors refuse, while explicitly classified independent sibling session kinds may launch. Write-claim conflict checks remain the unfinished part.
+- Explicit `$koda-c-session-prompt` use is the only owner-facing route from Guide conversation toward a bounded session. Its preflight judges declared dependencies: unresolved successors refuse, while explicitly classified independent sibling session kinds may launch. Exact Guide/session write claims and same-path conflict refusal are implemented and revalidated from disk.
 - The competition entry is licensed under GPLv3 only, with `Copyright (C) 2026 Kristian Bengtsson` as the sole project copyright line.
 - The product name remains **Koda-C**. The CLI command is `koda`; `koda-codex` is the lowercase repository and package slug for this Codex-built competition implementation.
 - New reviewer fixtures are scored only by contracts committed before their first model run. The final model program stopped at its declared cap: two Luna baseline repeats and nine medium runs across the three new fixtures and models. All inference-chain cells passed, so no unique winner existed and the conditional low-effort confirmation was not run.
@@ -62,7 +62,7 @@ owner contract
 - A **Codex task** is one agent context/window. The producer and reviewer should use separate tasks so the review does not inherit producer reasoning.
 - Runtime continuity is session-scoped: the same producer task and the same reviewer task traverse every configured phase. Fresh reviewer tasks remain fixture/testing tools, not the intended owner session experience.
 - Context handover happens through artifacts, cited evidence, reviews, receipts, and state—not through copied chat summaries.
-- Kristian deliberately starts a session in the producer window by invoking `koda-c-session` with a written prompt prepared beforehand. After that opening handoff, he speaks only with the owner-facing reviewer until close. Every producer request enters that reviewer task, and every actionable handback returns as a named disk artifact.
+- Kristian deliberately starts a session from Guide by invoking `koda-c-session-prompt`, reviewing the bounded draft, and explicitly confirming it. The trusted supervisor then starts the separate Reviewer and input-closed Producer; Producer invokes `koda-c-session` from the confirmed prompt without owner interaction. During the bounded session Kristian discusses session work only with its Reviewer, and every actionable handback returns as a named disk artifact.
 - A dependent session reads the pushed close/summary of every declared prerequisite and records deliberate carry-forward items. An independent sibling records why it does not depend on active sessions instead of inheriting an arbitrary "latest" session.
 
 ## Current implementation
@@ -153,6 +153,8 @@ owner contract
 - [Plural runtime 177-check result](test-results/2026-07-19-plural-runtime-final.md)
 - [Plural runtime post-push 177-check result](test-results/2026-07-19-plural-runtime-pushed-final.md)
 - [Plural runtime security audit](security-runs/2026-07-19-plural-runtime-audit-04/RESULT.md)
+- [First Guide live-test target and entry-check result](design-notes/2026-07-19-first-guide-live-test-target.md)
+- [First Guide live-test preflight 177-check result](test-results/2026-07-19-live-test-preflight-docs-final.md)
 - [Whole-product quality audit](quality-runs/2026-07-19-whole-product-01/RESULT.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
 - [Always-open Reviewer 135-check result](test-results/2026-07-19-reviewer-open-conversation-final.md)

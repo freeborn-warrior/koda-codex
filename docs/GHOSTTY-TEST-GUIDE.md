@@ -1,6 +1,33 @@
 # Koda-C terminal testing in Ghostty
 
-## New Guide-launched route — built, not owner-tested yet
+## First real three-window test — built, not owner-tested yet
+
+This is the route Kristian will use. It is written for someone who should not
+need to understand shell state, environment variables, run directories, or
+process locks.
+
+### Before Kristian types anything
+
+Koda-C must already be initialized as a Guide project, and Guide must have:
+
+1. drafted one session prompt through `koda-c-session-prompt`;
+2. shown Kristian that exact prompt in plain language;
+3. received Kristian's explicit confirmation;
+4. committed and pushed the prompt, Guide snapshot, and launch request; and
+5. passed `node dist/cli.js guide verify`.
+
+If any item is missing, do not improvise a terminal command. Guide fixes or
+names the missing evidence first.
+
+### What the three windows mean
+
+- **Window G — Guide:** already open. Kristian talks here about the project,
+  future direction, and future sessions.
+- **Window B — Reviewer:** opened by Koda. Kristian talks here about the active
+  bounded session, reviews, questions, and product decisions.
+- **Window A — Producer:** opened by Koda. Kristian watches but never types here.
+
+### The one launch action
 
 The intended three-context start now has one opt-in command after Guide has created, confirmed, committed, and pushed a fresh `READY_TO_LAUNCH` prompt:
 
@@ -8,9 +35,44 @@ The intended three-context start now has one opt-in command after Guide has crea
 node dist/cli.js guide launch --producer-model gpt-5.6-sol --producer-effort medium --reviewer-model gpt-5.6-terra --reviewer-effort medium --open ghostty
 ```
 
-Run it from the target project's existing Guide conversation. It should leave that Guide open, then request a labeled Reviewer window and a labeled Producer window. Do not run it in this repository merely to experiment when no fresh confirmed prompt exists; the entry checks will refuse.
+Guide gives Kristian this exact command only when the five checks above pass.
+Kristian pastes it into Window G and presses Return once. It should leave Guide
+open, then request a labeled Reviewer window first and a labeled Producer window
+second.
 
-The automatic path has deterministic argument/order/failure tests but has not yet been watched by Kristian on screen. If either requested window does not appear, do not repeat the command. Run `node dist/cli.js guide status` and use only the exact recovery command it prints. A blind retry refuses because one window may already exist.
+After pressing Return:
+
+1. Do not type the command again.
+2. Wait for Window B to say `KODA-C REVIEWER WINDOW` and `Owner input: OPEN`.
+3. Wait for Window A to say `KODA-C PRODUCER WINDOW` and `Owner input: CLOSED`.
+4. Leave Window A alone. Watching is safe; typing is not part of the workflow.
+5. Speak about the active session only in Window B.
+6. Keep Window G available for project-level conversation and future ideas.
+
+Do not run the launch command in this repository merely to experiment when no
+fresh confirmed prompt exists; the entry checks will refuse.
+
+The automatic path has deterministic argument/order/failure tests but has not
+yet been watched by Kristian on screen. If either requested window does not
+appear, do not repeat the launch command. In Window G, paste exactly:
+
+```bash
+node dist/cli.js guide status
+```
+
+Then use only the one recovery command Koda prints. A blind retry refuses because
+one window may already exist.
+
+### What Kristian does after both windows appear
+
+Nothing is required while Producer is working. When Reviewer needs Kristian,
+Window B presents the review or question and explains the available keys. The
+detailed receipt ceremony is documented below, but the human rule is simple:
+
+1. read what Window B opens;
+2. ask questions in Window B if needed;
+3. acknowledge in Window B only after reading; and
+4. never paste a real receipt into Guide, Producer, chat, or documentation.
 
 ## Historical manual two-window proof
 
@@ -83,9 +145,15 @@ The reviewer can explain findings, evidence, implications, and `DISCUSS` options
 
 For an in-phase owner question, Window B displays the reviewer's recorded question, accepts Kristian's answer there, resumes the same reviewer context, and requires the answer to be written into the consultation response before Window A continues.
 
-## One-session and one-reviewer invariants
+## Runtime-selection and one-reviewer invariants
 
-The two commands discover rather than guess. They refuse if more than one unfinished run exists. A lock directory refuses a second Window B process for the same run. Producer and reviewer share the run and session only through files; their Codex context IDs must remain distinct. A new Koda session cannot open until the prior immutable close or explicit halt is committed and pushed.
+Unqualified historical commands discover rather than guess and refuse if more
+than one unfinished run exists. Guide-launched commands contain the exact run
+root, so several independent session pairs may coexist without selecting by
+recency. A lock directory refuses a second Window B process for the same run.
+Producer and Reviewer share the run and session only through files; their Codex
+context IDs must remain distinct. A dependent successor waits for its named
+predecessor's pushed close or halt; an explicitly independent sibling may run.
 
 ## Stopping and resuming
 
@@ -137,4 +205,6 @@ Ordinary explanation between handoffs is deliberately non-mutating. Product deci
 - Never paste a review receipt into Codex chat or documentation.
 - Do not manually edit artifacts or reviews while either role is working.
 - Use the Koda prompt in Window B for acknowledgement; do not edit the ledger.
-- Do not start another run while this one is active.
+- During the first owner-observed test, do not start a second run; plural runtime
+  is already mechanically proved and would add human complexity without helping
+  this usability test.
