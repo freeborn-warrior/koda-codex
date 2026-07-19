@@ -9,6 +9,7 @@ test("JUDGE JOURNEY SUITE: the committed binary runs without rebuilding", () => 
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /Koda — phase gates with proof the review was read/);
   assert.match(result.stdout, /koda session close/);
+  assert.match(result.stdout, /--open ghostty/);
 });
 
 test("JUDGE JOURNEY SUITE: video and submission documents preserve every live rule", async () => {
@@ -21,7 +22,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(readme, /node dist\/cli\.js --help/);
   assert.match(
     readme,
-    /\[pushed 130-check transcript\]\(test-results\/2026-07-18-guide-real-project-runtime-pushed-final\.md\)/,
+    /\[132-check transcript\]\(test-results\/2026-07-18-ghostty-launcher-final\.md\)/,
   );
   assert.match(video, /Hard maximum:\*\* under 3:00/);
   assert.match(video, /GATE CLOSED — BRIEF/);

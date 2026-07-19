@@ -429,7 +429,8 @@ function help(io: CliIo): void {
   io.out("Commands:");
   io.out("  koda init [directory] [--demo]");
   io.out("  koda session new <prompt-file>");
-  io.out("  koda guide <status|confirm|cancel|bind|verify>");
+  io.out("  koda guide <status|confirm|cancel|bind|verify|launch>");
+  io.out("  koda guide launch ... [--open ghostty]");
   io.out("  koda status");
   io.out("  koda review new <phase>");
   io.out("  koda approve <phase> [quoted-receipt] [--approver <name>]");

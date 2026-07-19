@@ -13,13 +13,19 @@ import {
   verifyGuideLaunch,
 } from "./guide.js";
 import { currentGuideRuntime, prepareGuideRuntime } from "./guide-runtime.js";
+import { requestGhosttyWindows,                           } from "./ghostty.js";
 import { displayPath, latestSessionId } from "./project.js";
 
 
 
 
 
+
+
+
+
 const defaultIo             = { out: (message) => console.log(message) };
+const defaultDependencies                       = { openGhostty: requestGhosttyWindows };
 
 function option(args          , name        )                {
   const index = args.indexOf(name);
@@ -44,10 +50,15 @@ function help(io            )       {
   io.out("  koda guide cancel <launch-id> --owner <name> --reason <text>");
   io.out("  koda guide bind <launch-id> <session-id>");
   io.out("  koda guide verify");
-  io.out("  koda guide launch --producer-model <model> --producer-effort <effort> --reviewer-model <model> --reviewer-effort <effort>");
+  io.out("  koda guide launch --producer-model <model> --producer-effort <effort> --reviewer-model <model> --reviewer-effort <effort> [--open ghostty]");
 }
 
-export async function runGuideCli(args          , cwd = process.cwd(), io             = defaultIo)                {
+export async function runGuideCli(
+  args          ,
+  cwd = process.cwd(),
+  io             = defaultIo,
+  dependencies                       = defaultDependencies,
+)                {
   const [verb, ...rest] = args;
   if (!verb || verb === "help" || verb === "--help" || verb === "-h") return help(io);
   const root = await findProjectRoot(cwd);
@@ -71,6 +82,10 @@ export async function runGuideCli(args          , cwd = process.cwd(), io       
       io.out("");
       io.out(`${runtime.run.status === "COMPLETE" ? "LAST SESSION RUNTIME" : "ACTIVE SESSION RUNTIME"} — ${runtime.run.launchId}`);
       io.out(`State: ${runtime.run.status}`);
+      if (runtime.run.terminalLaunch) {
+        io.out(`Visible launch: ${runtime.run.terminalLaunch.adapter} requested at ${runtime.run.terminalLaunch.requestedAt}`);
+      }
+      if (runtime.run.lastError) io.out(`Last error: ${runtime.run.lastError}`);
       if (runtime.run.status === "COMPLETE") {
         io.out(`Guide return: ${runtime.run.guideReturn}`);
         io.out(`Durable evidence: ${runtime.run.archive}`);
@@ -137,9 +152,13 @@ export async function runGuideCli(args          , cwd = process.cwd(), io       
     const reviewerModel = option(rest, "--reviewer-model");
     const reviewerEffort = option(rest, "--reviewer-effort");
     const maxTurnsText = option(rest, "--max-turns");
+    const openTerminal = option(rest, "--open");
     rejectUnknownOptions(rest);
+    if (openTerminal !== null && openTerminal !== "ghostty") {
+      throw new Error("--open currently accepts only ghostty.");
+    }
     if (rest.length || !producerModel || !producerEffort || !reviewerModel || !reviewerEffort) {
-      throw new Error("Usage: koda guide launch --producer-model <model> --producer-effort <effort> --reviewer-model <model> --reviewer-effort <effort> [--max-turns <1-100>]");
+      throw new Error("Usage: koda guide launch --producer-model <model> --producer-effort <effort> --reviewer-model <model> --reviewer-effort <effort> [--max-turns <1-100>] [--open ghostty]");
     }
     const prepared = await prepareGuideRuntime(root, config, {
       producerModel,
@@ -159,6 +178,15 @@ export async function runGuideCli(args          , cwd = process.cwd(), io       
     io.out("");
     io.out("READ-ONLY STATUS");
     io.out(prepared.statusCommand);
+    if (openTerminal === "ghostty") {
+      const requests = await dependencies.openGhostty(root, prepared);
+      io.out("");
+      io.out("THREE-CONTEXT START REQUESTED");
+      io.out("✓ This Guide conversation stays open.");
+      io.out(`✓ ${requests[0] .title} requested first.`);
+      io.out(`✓ ${requests[1] .title} requested second.`);
+      io.out("If either window does not appear, run koda guide status; never repeat automatic opening blindly.");
+    }
     return;
   }
 

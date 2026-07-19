@@ -16,7 +16,8 @@ Turn the proved two-context session relay into a project-level experience that c
 4. [x] Make `koda-c-session` consume and bind that verified request while preserving the existing producer/reviewer separation.
 5. [x] Mutate every new refusal condition, record the results, and keep prior tests intact.
 6. [x] Prove the Guide-to-session transition against a real Git project with separate deterministic processes, injected return-stage interruption, pushed close, pushed Guide return, and unchanged repository identity.
-7. [ ] Replace the two printed context commands with one visible-context launcher, then prove the complete experience with Kristian when he is rested and available to test.
+7. [x] Add one opt-in macOS Ghostty action that requests the two labeled session contexts while preserving exact manual recovery commands.
+8. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
 
 ## Submission cut
 

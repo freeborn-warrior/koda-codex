@@ -80,6 +80,7 @@ owner contract
 - `koda guide` now provides the first deterministic project-level continuity slice. A project manifest indexes its steering files; explicit owner confirmation binds their hashes, the exact session prompt, and prior pushed session evidence. Unconfirmed or stale prompts refuse, cancellation is immutable evidence, and successful session open records the launch-to-session binding.
 - `koda guide launch` prepares one real-project runtime from that pushed binding. Ignored `.koda/runs/` holds recoverable rendezvous state; producer, reviewer, and status share one hardened path resolver; immutable close remains an ordinary pushed project commit; and tracked `docs/guide/runs/` plus `docs/guide/returns/` return the result to Guide without deleting or replacing the real repository's `.git` directory.
 - A deterministic two-process integration proves confirmed prompt → separate context identities → Brief gate and owner receipt → pushed close → injected return-stage interruption → exact resume → pushed Guide return. No live model was called, so automatic visible context launch and Kristian's owner-observed run remain owed.
+- The first macOS terminal adapter adds explicit `--open ghostty`: it records one launch request, asks for labeled Reviewer then Producer windows using direct argument arrays, preserves Guide as the existing conversation, and refuses duplicate automatic opening after success or partial failure. Deterministic injection tests do not substitute for Kristian's live visible proof.
 - At a formal decision point, Window B can resume the same reviewer context in `owner explanation` mode so Kristian may ask questions, reread, acknowledge, or pause. Explanation alters no files. New product direction stays paused until Kristian explicitly sends or discards it. A sent direction becomes a bound owner-via-reviewer artifact, keeps the receipt mandatory, reaches the producer before advancement, and forces a fresh review after revision.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
 - The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.
@@ -103,6 +104,8 @@ owner contract
 - [Three-context human experience](design-notes/2026-07-18-three-context-human-experience.md)
 - [Guide-launched real-project runtime](design-notes/2026-07-18-guide-real-project-runtime.md)
 - [Guide real-project runtime development failures](test-results/2026-07-18-guide-runtime-development-failures.md)
+- [Ghostty launcher development failures](test-results/2026-07-18-ghostty-launcher-development-failures.md)
+- [Ghostty launcher 132-check result](test-results/2026-07-18-ghostty-launcher-final.md)
 - [Guide continuity development failures](test-results/2026-07-18-guide-continuity-development-failures.md)
 - [Guide continuity 123-check result](test-results/2026-07-18-guide-continuity-security-final.md)
 - [Guide continuity documentation-final result](test-results/2026-07-18-guide-continuity-docs-final.md)

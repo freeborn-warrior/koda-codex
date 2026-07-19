@@ -21,6 +21,11 @@ export interface GuideRuntimeRole {
   turns: number;
 }
 
+export interface GuideTerminalLaunch {
+  adapter: "ghostty-macos";
+  requestedAt: string;
+}
+
 export interface GuideRuntimeRecord {
   version: 1;
   mode: "guide-project";
@@ -38,6 +43,9 @@ export interface GuideRuntimeRecord {
   guideReturn: string;
   initialCommit: string;
   maxTurns: number;
+  terminalLaunch?: GuideTerminalLaunch;
+  lastAction?: string;
+  lastError?: string;
 }
 
 export interface PrepareGuideRuntimeOptions {
@@ -137,6 +145,11 @@ function runtimeRecord(value: unknown, source: string): GuideRuntimeRecord {
     (role.threadId === null || typeof role.threadId === "string") &&
     Number.isInteger(role.turns) && (role.turns ?? -1) >= 0,
   );
+  const validTerminalLaunch = item.terminalLaunch === undefined || (
+    item.terminalLaunch.adapter === "ghostty-macos" &&
+    typeof item.terminalLaunch.requestedAt === "string" &&
+    item.terminalLaunch.requestedAt.trim() !== ""
+  );
   if (
     item.version !== 1 || item.mode !== "guide-project" || item.scenario !== "guide-confirmed" ||
     typeof item.status !== "string" || typeof item.preparedAt !== "string" ||
@@ -146,6 +159,9 @@ function runtimeRecord(value: unknown, source: string): GuideRuntimeRecord {
     typeof item.cli !== "string" || typeof item.prompt !== "string" ||
     typeof item.archive !== "string" || typeof item.guideReturn !== "string" ||
     typeof item.initialCommit !== "string" || !/^[a-f0-9]{40,64}$/.test(item.initialCommit) ||
+    !validTerminalLaunch ||
+    !(item.lastAction === undefined || typeof item.lastAction === "string") ||
+    !(item.lastError === undefined || typeof item.lastError === "string") ||
     !Number.isInteger(item.maxTurns) || (item.maxTurns ?? 0) < 1 || (item.maxTurns ?? 0) > 100
   ) throw new Error(`${source} has invalid guide-project runtime data.`);
   return item as GuideRuntimeRecord;

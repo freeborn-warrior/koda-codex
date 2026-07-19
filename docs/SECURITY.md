@@ -29,6 +29,9 @@ parent, and ignored project-local runtime under `.koda/`:
 - `guide confirm`, `cancel`, and `bind` write their named durable evidence;
 - `guide launch` writes only ignored `.koda/runs/<launch-id>/` rendezvous state
   after verifying a clean pushed project and one exact confirmed request.
+- explicit `guide launch ... --open ghostty` additionally invokes macOS
+  `/usr/bin/open` twice with argument arrays to request labeled Reviewer then
+  Producer windows. It does not build or evaluate a shell command string.
 
 Koda refuses a configured sessions directory that resolves outside the project.
 Session state must retain valid configured phase names. Artifacts, reviews,
@@ -96,12 +99,21 @@ Run those scripts only against a run folder created by `relay:prepare` or a
 pushed `koda guide launch` in a trusted project. Do not execute a modified
 `RUN.json` received from someone else. Codex subprocesses inherit the launcher's environment because they
 must inherit Codex authentication; do not launch the harness from a shell holding
-unrelated secrets. The core `koda` CLI itself never launches a model.
+unrelated secrets. Without the explicit Ghostty option, the core `koda` CLI
+does not launch a model. With it, Koda asks Ghostty to run the same documented
+role commands that would otherwise be started manually.
 
 Git commit and push may execute hooks already configured in a repository. The
 core close command only prints Git instructions; the explicitly started relay
 supervisor executes its documented commits and pushes. Inspect unfamiliar
 repository hooks and remotes before starting a real-project relay.
+
+The Ghostty adapter is deliberately opt-in. It records launch intent before the
+first GUI request and refuses automatic opening for an existing runtime, even if
+only one prior request appeared to succeed. It passes only the current `PATH` and
+the resolved Codex executable location explicitly to the role command; it never
+serializes arbitrary environment variables into a shell line. A failed request
+leaves the runtime prepared and names `koda guide status` as manual recovery.
 
 ## Concurrency and recovery
 

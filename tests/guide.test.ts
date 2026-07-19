@@ -14,6 +14,7 @@ import {
   verifyGuideLaunch,
 } from "../src/guide.ts";
 import { prepareGuideRuntime } from "../src/guide-runtime.ts";
+import { requestGhosttyWindows } from "../src/ghostty.ts";
 import { createSession, writeJsonAtomic } from "../src/project.ts";
 import { temporaryRoot } from "./helpers.ts";
 
@@ -389,4 +390,98 @@ test("GUIDE RUNTIME STATUS TRUTH: corrupt live state refuses instead of hiding b
     runGuideCli(["status"], h.root, { out() {} }),
     /Guide runtime state is corrupt: .*RUN\.json is not valid JSON/,
   );
+});
+
+test("GUIDE GHOSTTY START: one explicit action requests Reviewer then Producer without shell evaluation", async (t) => {
+  const h = await guideHarness(t, true);
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm visible Ghostty route"]);
+  h.git(h.root, ["push"]);
+  const opened: Array<{ args: string[]; cwd: string }> = [];
+  const output: string[] = [];
+  const args = [
+    "launch",
+    "--producer-model", "gpt-5.6-sol",
+    "--producer-effort", "medium",
+    "--reviewer-model", "gpt-5.6-terra",
+    "--reviewer-effort", "medium",
+    "--open", "ghostty",
+  ];
+  const dependencies = {
+    async openGhostty(project: string, prepared: Awaited<ReturnType<typeof prepareGuideRuntime>>) {
+      return requestGhosttyWindows(project, prepared, {
+        platform: "darwin",
+        codexExecutable: process.execPath,
+        open(openArgs, cwd) {
+          opened.push({ args: openArgs, cwd });
+          return { status: 0, stderr: "" };
+        },
+      });
+    },
+  };
+  await runGuideCli(args, h.root, { out(message) { output.push(message); } }, dependencies);
+  assert.equal(opened.length, 2);
+  assert.match(opened[0]!.args.join("\n"), /Koda-C Reviewer/);
+  assert.match(opened[1]!.args.join("\n"), /Koda-C Producer/);
+  for (const request of opened) {
+    assert.equal(request.cwd, h.root);
+    assert.equal(request.args[0], "-na");
+    assert.equal(request.args[1], "Ghostty.app");
+    assert.ok(request.args.includes("--wait-after-command=true"));
+    assert.ok(request.args.includes("/usr/bin/env"));
+    assert.ok(request.args.includes(`KODA_CODEX_BIN=${process.execPath}`));
+    assert.ok(!request.args.includes("/bin/zsh"));
+    assert.ok(!request.args.includes("-lc"));
+  }
+  assert.match(output.join("\n"), /THREE-CONTEXT START REQUESTED/);
+  assert.match(output.join("\n"), /This Guide conversation stays open/);
+  const runFile = path.join(h.root, ".koda", "runs", confirmed.launch.id, "RUN.json");
+  const run = JSON.parse(await readFile(runFile, "utf8"));
+  assert.equal(run.terminalLaunch.adapter, "ghostty-macos");
+
+  await assert.rejects(
+    runGuideCli([...args], h.root, { out() {} }, dependencies),
+    /automatic Ghostty opening refuses to create duplicate Producer or Reviewer processes/,
+  );
+  assert.equal(opened.length, 2);
+});
+
+test("GUIDE GHOSTTY MUTATION: a failed Producer request refuses duplicate automatic recovery", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm partial Ghostty refusal"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  const opened: string[] = [];
+  await assert.rejects(requestGhosttyWindows(h.root, prepared, {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open(args) {
+      const title = args.find((item) => item.startsWith("--title="))!;
+      opened.push(title);
+      return opened.length === 1
+        ? { status: 0, stderr: "" }
+        : { status: 1, stderr: "injected Producer open failure" };
+    },
+  }), /Ghostty refused the producer window request: injected Producer open failure.*runtime remains recoverable/);
+  assert.equal(opened.length, 2);
+  const run = JSON.parse(await readFile(path.join(prepared.runRoot, "RUN.json"), "utf8"));
+  assert.equal(run.status, "PREPARED");
+  assert.equal(run.terminalLaunch.adapter, "ghostty-macos");
+  assert.match(run.lastError, /producer window request/);
+
+  const status: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { status.push(message); } });
+  assert.match(status.join("\n"), /Visible launch: ghostty-macos requested/);
+  assert.match(status.join("\n"), /Last error: Ghostty refused the producer window request/);
+  assert.match(status.join("\n"), /Window B — reviewer \/ owner:[\s\S]*Window A — producer:[\s\S]*Read-only detail:/);
+  await assert.rejects(requestGhosttyWindows(h.root, { ...prepared, reused: true }), /refuses to create duplicate Producer or Reviewer processes/);
+  assert.equal(opened.length, 2);
 });

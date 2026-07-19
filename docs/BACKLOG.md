@@ -7,7 +7,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 ## In progress
 
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
-- [ ] Replace the now-tested Guide launch plan's two printed session-window commands with one supervisor/terminal-adapter action that arranges the full three-context experience. Keep exact commands as recovery and preserve the disk gate as the only authority.
+- [ ] Owner-test the new one-action Ghostty adapter against a genuine Guide-confirmed session. Deterministic tests prove labeled Reviewer-first/Producer-second requests, no shell evaluation, partial-open recovery, and duplicate refusal; they do not prove macOS displayed the windows.
 - [ ] Make the CLI ceremony legible without reading implementation logs: permanent context labels, owner-input state, phase progress and artifact/handover summaries, conversational reviewer notifications, one named reason per refusal, and one safe recovery action. Never present hidden chain-of-thought as product output.
 - [ ] Design and test an explicit Guide-to-Reviewer transfer for a project-level decision that must affect an already active session. Conversation or steering-file mutation alone must never alter the confirmed session snapshot.
 
@@ -36,6 +36,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
+- [x] Add an opt-in `koda guide launch --open ghostty` adapter that keeps Guide open, requests labeled Reviewer then Producer windows, persists intent before GUI mutation, passes only explicit argument arrays, retains exact manual commands, and refuses duplicate automatic opening. Owner-observed live proof remains owed.
 - [x] Connect pushed Guide confirmation to an explicit real-project runtime: clean/pushed and ignored-runtime entry checks, shared path hardening, two-process relay compatibility, injected finalization recovery, unchanged project Git, pushed runtime archive, machine-readable Guide return, and disk-derived Guide status. Live visible context creation remains owed.
 - [x] Build the first disk-recoverable Guide slice: project-specific steering manifest, local `koda-c-session-prompt` skill, exact owner-confirmed prompt/project/prior-session hashes, immutable cancellation, pushed-handover verification, unconfirmed/stale refusal, and launch-to-session binding. Fresh discovery and visible two-context launch remain separate owed proofs.
 

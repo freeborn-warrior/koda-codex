@@ -60,6 +60,14 @@ const SAFE_ROLE_VALUE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 
 
+
+
+
+
+
+
+
+
 function git(root        , args          )                                                  {
   const result = spawnSync("git", args, { cwd: root, encoding: "utf8" });
   return {
@@ -137,6 +145,11 @@ function runtimeRecord(value         , source        )                     {
     (role.threadId === null || typeof role.threadId === "string") &&
     Number.isInteger(role.turns) && (role.turns ?? -1) >= 0,
   );
+  const validTerminalLaunch = item.terminalLaunch === undefined || (
+    item.terminalLaunch.adapter === "ghostty-macos" &&
+    typeof item.terminalLaunch.requestedAt === "string" &&
+    item.terminalLaunch.requestedAt.trim() !== ""
+  );
   if (
     item.version !== 1 || item.mode !== "guide-project" || item.scenario !== "guide-confirmed" ||
     typeof item.status !== "string" || typeof item.preparedAt !== "string" ||
@@ -146,6 +159,9 @@ function runtimeRecord(value         , source        )                     {
     typeof item.cli !== "string" || typeof item.prompt !== "string" ||
     typeof item.archive !== "string" || typeof item.guideReturn !== "string" ||
     typeof item.initialCommit !== "string" || !/^[a-f0-9]{40,64}$/.test(item.initialCommit) ||
+    !validTerminalLaunch ||
+    !(item.lastAction === undefined || typeof item.lastAction === "string") ||
+    !(item.lastError === undefined || typeof item.lastError === "string") ||
     !Number.isInteger(item.maxTurns) || (item.maxTurns ?? 0) < 1 || (item.maxTurns ?? 0) > 100
   ) throw new Error(`${source} has invalid guide-project runtime data.`);
   return item                      ;

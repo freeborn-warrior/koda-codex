@@ -1,6 +1,20 @@
-# Koda-C two-window relay in Ghostty
+# Koda-C terminal testing in Ghostty
 
-This is the current owner-facing runtime preview. Window A is the visible producer/supervisor. Its conversational input is closed. Window B owns one separate persistent reviewer context for the whole session and is the only place Kristian interacts.
+## New Guide-launched route — built, not owner-tested yet
+
+The intended three-context start now has one opt-in command after Guide has created, confirmed, committed, and pushed a fresh `READY_TO_LAUNCH` prompt:
+
+```bash
+node dist/cli.js guide launch --producer-model gpt-5.6-sol --producer-effort medium --reviewer-model gpt-5.6-terra --reviewer-effort medium --open ghostty
+```
+
+Run it from the target project's existing Guide conversation. It should leave that Guide open, then request a labeled Reviewer window and a labeled Producer window. Do not run it in this repository merely to experiment when no fresh confirmed prompt exists; the entry checks will refuse.
+
+The automatic path has deterministic argument/order/failure tests but has not yet been watched by Kristian on screen. If either requested window does not appear, do not repeat the command. Run `node dist/cli.js guide status` and use only the exact recovery command it prints. A blind retry refuses because one window may already exist.
+
+## Historical manual two-window proof
+
+The remainder of this guide preserves the earlier owner-observed session proof. Window A is the visible producer/supervisor. Its conversational input is closed. Window B owns one separate persistent reviewer context for the whole bounded session. The enclosing Guide context was not part of this historical run.
 
 The first completed relay remains preserved at [`relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01`](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md). Do not rerun that closed evidence. Prepare a new run for another live test.
 
