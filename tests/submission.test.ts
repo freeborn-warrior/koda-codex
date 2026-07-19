@@ -22,7 +22,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(readme, /node dist\/cli\.js --help/);
   assert.match(
     readme,
-    /\[146-check wait-or-halt transcript\]\(test-results\/2026-07-19-wait-or-halt-final\.md\)/,
+    /\[pushed 146-check wait-or-halt transcript\]\(test-results\/2026-07-19-wait-or-halt-pushed-final\.md\)/,
   );
   assert.match(video, /Hard maximum:\*\* under 3:00/);
   assert.match(video, /GATE CLOSED — BRIEF/);

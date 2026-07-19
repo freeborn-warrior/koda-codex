@@ -35,7 +35,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
-- [x] Implement the settled wait-or-halt transfer: immediate bound direction record, no current-phase consumption, atomic release in the next advancement record, required receiving-phase citation, early-use refusal, immutable pushed halt, and Guide-confirmed fresh Brief. The historical same-phase handback route was removed rather than retained as a hidden pause-inject-resume path. Commit/push evidence pending this milestone.
+- [x] Implement the settled wait-or-halt transfer: immediate bound direction record, no current-phase consumption, atomic release in the next advancement record, required receiving-phase citation, early-use refusal, immutable pushed halt, and Guide-confirmed fresh Brief. The historical same-phase handback route was removed rather than retained as a hidden pause-inject-resume path (`cde10de`; pushed 146-check proof).
 
 - [x] Keep the Reviewer conversational while Producer works: a real terminal prompt resumes the same persistent context, safe answers mutate no project file, project-scope thoughts return to Guide, and the later owner ruling makes active direction record immediately while still waiting for the boundary (`8ca8aab` is the earlier pushed conversation proof). Owner-observed proof remains part of the full three-context run.
 

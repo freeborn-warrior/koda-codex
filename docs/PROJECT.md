@@ -115,6 +115,8 @@ owner contract
 - [Ghostty launcher post-push 132-check result](test-results/2026-07-18-ghostty-launcher-pushed-final.md)
 - [Always-open Reviewer conversation design](design-notes/2026-07-19-always-open-reviewer-conversation.md)
 - [Wait-or-halt owner ruling](design-notes/2026-07-19-wait-or-halt-owner-ruling.md)
+- [Wait-or-halt development failures](test-results/2026-07-19-wait-or-halt-development-failures.md)
+- [Wait-or-halt post-push 146-check result](test-results/2026-07-19-wait-or-halt-pushed-final.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
 - [Always-open Reviewer 135-check result](test-results/2026-07-19-reviewer-open-conversation-final.md)
 - [Always-open Reviewer post-push 135-check result](test-results/2026-07-19-reviewer-open-conversation-pushed-final.md)
