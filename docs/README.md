@@ -15,7 +15,7 @@ This repository is the competition entry and the meta-harness, not a universal r
 1. **Run without rebuilding:** `node dist/cli.js --help`.
 2. **See the refusal:** follow the [one-minute fixture](DEMO.md#one-minute-mechanical-proof).
 3. **Inspect the real relay:** the [genuine six-phase result](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md) records distinct persistent producer/reviewer contexts, an unplanned Summary REVISE, seven owner acknowledgements, and pushed close.
-4. **Check the claims:** the [112-check transcript](test-results/2026-07-18-disk-role-handovers-final.md), [model matrix](MODEL-TEST-MATRIX.md), [fresh skill-discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md), and [safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md) are all committed evidence.
+4. **Check the claims:** the [124-check transcript](test-results/2026-07-18-guide-session-binding-final.md), [model matrix](MODEL-TEST-MATRIX.md), [fresh skill-discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md), and [safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md) are all committed evidence.
 
 Tested here on macOS 26.5.1 arm64 with Node.js 26.0.0 and Apple Git 2.50.1. The core requires Node.js 22.18+ and Git; other platforms are not claimed as tested. The current reviewer window uses macOS `less` and `pbcopy` for the owner-reading ceremony.
 
@@ -77,6 +77,11 @@ After the exact receipt is recorded, the same command reports `GATE OPEN — BRI
 
 ```text
 koda init [directory] [--demo]
+koda guide status
+koda guide confirm <prompt-file> --owner <name>
+koda guide cancel <launch-id> --owner <name> --reason <text>
+koda guide bind <launch-id> <session-id>
+koda guide verify
 koda session new <prompt-file>
 koda status
 koda review new <phase>
@@ -91,12 +96,15 @@ The CLI generates artifact hashes, review IDs, receipts, structured approval ent
 
 All skills live inside this repository under Codex's discoverable `.agents/skills/` path:
 
+- `koda-c-session-prompt` turns the Guide's project-level context into one owner-confirmed, hashed launch handoff.
 - `koda-c-session` opens from an owner contract and prior pushed summary.
 - `koda-c-brief`, `koda-c-orient`, `koda-c-plan`, `koda-c-produce`, `koda-c-live`, and `koda-c-summary` are producer relay legs.
 - `koda-c-review` is the only formal reviewer skill; its per-phase criteria never drift into copies.
 - `koda-c-close` performs the prepare → Git → verify ceremony outside the phase chain.
 
-A [fresh ephemeral Codex startup proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md) discovered all nine skills and root project guidance without any tool call or repository read. Discovery is therefore recorded behavior, not an assumption based only on folder placement.
+A [fresh ephemeral Codex startup proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md) discovered the original nine session-runtime skills and root project guidance without any tool call or repository read. The newer Guide-side session-prompt skill passes the same repository validator and deterministic contract suite; its own genuinely fresh startup discovery run remains visibly pending rather than being inferred from the historical proof.
+
+Between sessions, the Guide reconstructs the project from its configured steering files, prior pushed close, and carry-forward evidence. It may update those files as the project path evolves. Explicit owner confirmation writes one `READY_TO_LAUNCH` request binding the prompt, Guide manifest, steering snapshot, and prior-session evidence; edits make it stale, and cancellation is an immutable pushed artifact rather than deletion. A project with a Guide manifest cannot open a session from an unconfirmed prompt. The [Guide continuity protocol](GUIDE-CONTINUITY.md) documents the current mechanics and their limits.
 
 Every producer skill has three hard sections: ENTRY CHECK, ITS OWN JOB, and HANDOVER OBLIGATION. It refuses when required disk evidence is absent, writes only its own artifact, then hands to the shared reviewer without self-reviewing or advancing.
 
@@ -143,7 +151,7 @@ No external benchmark dataset is used. Deterministic tests are marked model-not-
 
 ## Project boundary and roadmap
 
-Koda-C stays a clean plain-file engine. Guide, explore, architect, and triage remain roadmap role lenses implemented as future skills, not new CLI machinery. A dashboard, editor extension, or bot can later consume the same files and a future machine-readable status mode without owning the process.
+Koda-C stays a clean plain-file engine. The first Guide continuity and confirmed-prompt mechanics now exist under the single `koda` executable. Explore, Research, Architecture, Triage, and a read-only Librarian remain roadmap role/session lenses rather than rushed parallel runtimes. A dashboard, editor extension, or bot can later consume the same files and a future machine-readable status mode without owning the process.
 
 The next adoption layer is project adaptation. It should help create project-local guidance and relay skills from the owner's actual purpose, with writing and software as initial profiles, while preserving any existing project instructions and keeping all generated material inside that project. That bootstrap layer is not implemented in the current entry and must not be confused with the already working gate.
 

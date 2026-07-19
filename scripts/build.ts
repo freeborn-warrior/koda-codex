@@ -20,7 +20,8 @@ for (const name of sources) {
   const javascript = stripTypeScriptTypes(source, { mode: "strip", sourceUrl: sourcePath })
     .replaceAll(/(from\s+["'][^"']+)\.ts(["'])/g, "$1.js$2")
     .replaceAll(/(import\s*\(["'][^"']+)\.ts(["']\))/g, "$1.js$2")
-    .replaceAll(/(["']\.{1,2}\/[^"']+)\.ts(["'])/g, "$1.js$2");
+    .replaceAll(/(["']\.{1,2}\/[^"']+)\.ts(["'])/g, "$1.js$2")
+    .replace(/[ \t]+$/gm, "");
   await writeFile(path.join(outputDir, name.replace(/\.ts$/, ".js")), javascript, "utf8");
 }
 

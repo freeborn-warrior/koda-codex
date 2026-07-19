@@ -6,7 +6,7 @@ import {
   receiptOccurrenceCount,
   sha256,
 } from "./receipt.js";
-                                                                     
+
 
 function issue(code        , message        )            {
   return { code, message };

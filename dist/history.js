@@ -1,10 +1,10 @@
 import { evaluateGate } from "./gate.js";
-                                               
 
-                               
-                
-                  
- 
+
+
+
+
+
 
 export async function validateAdvancedHistory(sessionDir        , state              )                          {
   const issues                 = [];

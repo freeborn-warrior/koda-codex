@@ -15,13 +15,14 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Finish submission-critical proof and polish only after the product runtime above is honest: final hygiene, owner recording, and external submission.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
-- [ ] Build the disk-recoverable Guide around the owner-approved separate `koda-c-session-prompt` skill: explicit drafting mode, owner-confirmed hashed prompt, single-session launch request, separate producer/reviewer contexts, and pushed Summary/close return.
+- [ ] Connect the now-working Guide confirmation/session binding to automatic launch of the separate producer and reviewer contexts, then return pushed Summary/close evidence to Guide reconciliation.
 - [ ] Finish the ruled side-by-side runtime beyond the first job relay with always-available owner/reviewer discussion. Preserve the shipped disk-derived turn summaries; never claim hidden chain-of-thought, leak receipts, or let rendered status outrank disk truth.
 - [ ] Add abort/recovery semantics before claiming the producer can run unattended; Ctrl-C must leave named recoverable state.
 
 ## Later, only after target (a) is secure
 
-- [ ] Consider guide, explore, architect, and triage role skills without expanding the CLI.
+- [ ] Prove project-level session kinds after the standard Guide handoff: Explore, Research, Architecture, Triage, and Produce share one session/close/receipt discipline while loading kind-specific phases and review criteria.
+- [ ] Evaluate a read-only Guide-side Librarian/recall skill that answers where the project has been, is now, and is heading with citations, without becoming another authority or hidden truth store.
 - [ ] Consider a thin interface over the plain-file CLI contract.
 - [ ] Consider an RLM-style evidence query layer only after a guide-context fixture proves ordinary file search, summaries, and compaction are insufficient.
 - [ ] Add machine-readable status for future interfaces after the human CLI contract is stable.
@@ -31,6 +32,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Build the first disk-recoverable Guide slice: project-specific steering manifest, local `koda-c-session-prompt` skill, exact owner-confirmed prompt/project/prior-session hashes, immutable cancellation, pushed-handover verification, unconfirmed/stale refusal, and launch-to-session binding. Fresh discovery and visible two-context launch remain separate owed proofs.
 
 - [x] Let Kristian discuss an active formal review in the same reviewer context; ordinary explanation changes no file, while new direction pauses without an explicit owner send (`f68f5d7`, evidence at `9610429`).
 - [x] Add the general owner-direction handback: explicit send, verbatim owner statement, reviewer relay, artifact/review/hash binding, mandatory receipt, producer citation, stale-review refusal, and fresh-review route. Deterministic two-process proof covers the full path through pushed close.

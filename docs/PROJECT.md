@@ -77,6 +77,7 @@ owner contract
 - The historical owner reader reduced Window B to `npm run relay:review`. The first real two-window slice now uses `npm run relay:producer` and `npm run relay:reviewer`: Window A posts an atomic disk job and waits; Window B owns a single persistent reviewer context, automatically receives formal reviews and consultations, streams readable activity with receipts redacted, opens the complete review, and keeps exact owner receipt acknowledgement in that same window.
 - The reviewer-window lock prevents two Window B processes from claiming the same run. Unsafe job paths, ambiguous unfinished runs, wrong receipts, changed reviews, and missing persistent context identity all refuse with named disk state.
 - `npm run relay:status` is a read-only owner view derived from current run, session, job, reviewer state, and process lock files. It names both windows and the next safe command, refuses corrupt/ambiguous runs, and offers explicit stale-lock recovery only after the recorded reviewer process is no longer alive.
+- `koda guide` now provides the first deterministic project-level continuity slice. A project manifest indexes its steering files; explicit owner confirmation binds their hashes, the exact session prompt, and prior pushed session evidence. Unconfirmed or stale prompts refuse, cancellation is immutable evidence, and successful session open records the launch-to-session binding.
 - At a formal decision point, Window B can resume the same reviewer context in `owner explanation` mode so Kristian may ask questions, reread, acknowledge, or pause. Explanation alters no files. New product direction stays paused until Kristian explicitly sends or discards it. A sent direction becomes a bound owner-via-reviewer artifact, keeps the receipt mandatory, reaches the producer before advancement, and forces a fresh review after revision.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
 - The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.
@@ -93,6 +94,15 @@ owner contract
 - [First implemented two-window runtime slice](design-notes/2026-07-18-first-two-window-runtime-slice.md)
 - [Long-lived guide context research](design-notes/2026-07-18-long-lived-guide-context.md)
 - [Guide-to-session prompt thesis](design-notes/2026-07-18-guide-to-session-thesis.md)
+- [Guide continuity protocol](GUIDE-CONTINUITY.md)
+- [Current working plan](WORKING-PLAN.md)
+- [Project-level Guide and session kinds](design-notes/2026-07-18-project-level-session-kinds.md)
+- [Guide continuity development failures](test-results/2026-07-18-guide-continuity-development-failures.md)
+- [Guide continuity 123-check result](test-results/2026-07-18-guide-continuity-security-final.md)
+- [Guide continuity documentation-final result](test-results/2026-07-18-guide-continuity-docs-final.md)
+- [Session-local Guide binding 124-check result](test-results/2026-07-18-guide-session-binding-final.md)
+- [Session-local Guide binding documentation-final result](test-results/2026-07-18-guide-session-binding-docs-final.md)
+- [Guide generated-build hygiene 124-check result](test-results/2026-07-18-guide-build-hygiene-final.md)
 - [Completed genuine six-phase relay](relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
 - [Completed reviewer model and effort matrix](MODEL-TEST-MATRIX.md)
 - [Owner-readable bounded reviewer program report](test-results/2026-07-18-bounded-reviewer-model-program.md)
@@ -113,6 +123,7 @@ owner contract
 - **Owner-approved extension:** Mid-phase input now has an explicit request/response artifact. The producer sends everything to the reviewer; reviewer authority covers evidence and technical questions, while owner authority is obtained through the reviewer window. The persistent reviewer may later formally review because it did not author the artifact and must disclose its consultation.
 - **Owner-approved runtime ruling:** The mature session is two visible persistent contexts side by side. Producer output is observable but its input is closed; only the full-session reviewer is conversational. Independent review means separation from producer context, not a new reviewer at every phase.
 - **Owner-approved guide direction:** A long-lived Guide hosts a distinct `koda-c-session-prompt` skill. Only an explicitly confirmed, hashed prompt may ask the supervisor to launch the separate producer/reviewer session; pushed Summary and close evidence return to the Guide afterward.
+- **Owner-approved project-level clarification:** The Guide is the path-maker above many bounded sessions. Its project document, backlog, working plan, decisions, and risks evolve on disk after closed sessions and during between-session discussion. Explore, Research, Architecture, Triage, and Produce are candidate bounded session kinds; a Guide-side Librarian may later provide read-only cited recall without becoming another authority.
 - **Transparency extension:** `PROJECT.md` and `BACKLOG.md` expose work that would otherwise live only in Codex's internal plan.
 - **Codex-native packaging correction:** Skills first existed under top-level `skills/`; official discovery requires `.agents/skills/`. They were moved without duplication, and root `AGENTS.md` now holds durable repository guidance.
 - **State-namespace correction:** The abandoned build attempt was removed from `docs/sessions/` after its meaningful owner contract and design note were moved to `docs/origin/` and `docs/design-notes/`. Git history retains the discarded brief and review without exposing them as live session state.
@@ -126,15 +137,15 @@ Any future contradiction—not merely an extension—requires Kristian's explici
 
 ## Roadmap vocabulary
 
-Guide, explore, architect, and triage remain named role lenses for later skills. They do not expand the core CLI and are not part of the current target until the gate, skill relay, closure, dogfood run, and judge demo are complete.
+Explore, Research, Architecture, Triage, Produce, and Librarian are now explicit roadmap vocabulary. They do not expand into separate rushed runtimes for the current submission. The shared gate, receipt, close, and reviewer invariants remain the base beneath any later kind-specific phase and review criteria.
 
 Self-hosting Koda-C development remains an optional later validation, not the current goal. The current goal is to make the two-context producer/reviewer/owner relay strong across every phase and prove that relay in genuinely fresh tasks.
 
 The later adoption layer must turn an owner's project purpose into project-local operating material without weakening the invariant gate. Likely starting profiles are writing and software, but a profile is only a starting point: the resulting `AGENTS.md`, producer artifacts, live checks, and shared-reviewer criteria must be adapted to the actual project and remain in that project's repository. The exact bootstrap command and authoring ceremony are not yet settled.
 
-Between sessions, the leading owner-facing role is a long-lived Guide whose continuity is reconstructed from project state, prior pushed close, summary, backlog, and design notes rather than trusted to chat memory alone. Owner direction now places a distinct `koda-c-session-prompt` skill inside that Guide conversation. It drafts one bounded prompt with Kristian, requires explicit launch confirmation, and hands a hashed ready artifact to the supervisor; the existing `koda-c-session` ceremony then validates and consumes it without interviewing him. The Guide remains separate from the launched producer and reviewer contexts and resumes from their pushed Summary and close evidence.
+Between sessions, the owner-facing Guide is the path-maker whose continuity is reconstructed from a project-specific manifest, steering files, prior pushed close, carry-forward artifact, and selectively cited history rather than trusted to chat memory alone. The repository-local `koda-c-session-prompt` skill drafts one bounded prompt with Kristian. `koda guide confirm` binds the exact prompt and project snapshot; `koda session new` refuses an unconfirmed or stale Guide prompt and binds a verified request to the resulting session. The Guide remains separate from the launched producer and reviewer contexts and resumes from their pushed evidence.
 
-The mature runtime should remove even the current prepare/start terminal actions: after `koda-c-session-prompt` records Kristian's explicit confirmation in the Guide, a supervisor revalidates the prior pushed close, opens the session, and launches a non-interactive producer plus the owner-facing reviewer. The first two-window job relay is now implemented, but Guide launch and general project adaptation remain roadmap orchestration rather than current behavior or new gate authority.
+The mature runtime should remove even the current prepare/start terminal actions: after `koda-c-session-prompt` records Kristian's explicit confirmation in the Guide, a supervisor revalidates the pushed handoff, opens the session, and launches a non-interactive producer plus the owner-facing reviewer. Prompt confirmation and session binding now work; automatic creation of the two visible contexts from that binding remains the next orchestration layer, not a capability claimed here.
 
 ## Open owner decision
 

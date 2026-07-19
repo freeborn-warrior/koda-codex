@@ -2,10 +2,44 @@ import { spawnSync } from "node:child_process";
 import { readdirSync, realpathSync } from "node:fs";
 import path from "node:path";
 
-                               
-                  
-                    
- 
+
+
+
+
+
+export function checkGitFilesPushed(projectRoot        , projectRelativeFiles          )               {
+  const reasons           = [];
+  const top = git(projectRoot, ["rev-parse", "--show-toplevel"]);
+  if (!top.ok) return { closed: false, reasons: ["The project is not inside a Git repository."] };
+
+  const resolvedTop = realpathSync(top.stdout);
+  for (const file of projectRelativeFiles) {
+    if (path.isAbsolute(file) || file.split(/[\\/]/).includes("..")) {
+      reasons.push(`Guide launch evidence path is unsafe: ${file}.`);
+      continue;
+    }
+    const absolute = realpathSync(path.resolve(projectRoot, file));
+    const relative = path.relative(resolvedTop, absolute);
+    if (relative.startsWith("..") || path.isAbsolute(relative)) {
+      reasons.push(`Guide launch evidence is outside the Git repository: ${file}.`);
+      continue;
+    }
+    if (!git(projectRoot, ["ls-files", "--error-unmatch", "--", relative]).ok) {
+      reasons.push(`Guide launch evidence is not committed: ${file}.`);
+      continue;
+    }
+    const dirty = git(projectRoot, ["status", "--porcelain", "--untracked-files=all", "--", relative]);
+    if (!dirty.ok || dirty.stdout !== "") reasons.push(`Guide launch evidence has uncommitted changes: ${file}.`);
+  }
+
+  const upstream = git(projectRoot, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
+  if (!upstream.ok) reasons.push("The current branch has no pushed upstream branch.");
+  else {
+    const ahead = git(projectRoot, ["rev-list", "--count", "@{u}..HEAD"]);
+    if (!ahead.ok || ahead.stdout !== "0") reasons.push("The Guide launch commit has not been pushed.");
+  }
+  return { closed: reasons.length === 0, reasons };
+}
 
 export function pushCommandArgs(projectRoot        )                  {
   const upstream = git(projectRoot, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);

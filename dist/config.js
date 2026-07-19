@@ -1,7 +1,7 @@
 import { access, readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 
-                                                             
+
 
 export const CONFIG_FILE = "koda.config.json";
 

@@ -5,13 +5,13 @@ import path from "node:path";
 import { pathExists } from "./config.js";
 import { artifactPath, ledgerPath, nowIso, readRegularText, reviewPath, writeTextAtomic } from "./project.js";
 import { VERDICTS } from "./types.js";
-             
-                
-               
-              
-                 
-          
-                    
+
+
+
+
+
+
+
 
 const REVIEW_MARKER = "KODA_REVIEW";
 const APPROVAL_MARKER = "KODA_APPROVAL";
@@ -32,7 +32,7 @@ export function parseReview(content        )               {
   const verdictMatch = /^VERDICT: (.+)$/.exec(first);
   const verdictText = verdictMatch?.[1] ?? null;
   const verdict = verdictText && (VERDICTS                     ).includes(verdictText)
-    ? verdictText           
+    ? verdictText
     : null;
 
   const withoutTrailingWhitespace = normalized.trimEnd();
@@ -64,10 +64,10 @@ export function parseReview(content        )               {
   return { verdict, verdictText, receipt, metadata };
 }
 
-                                      
-                    
-                
- 
+
+
+
+
 
 export async function createFreshReview(
   sessionDir        ,
@@ -175,10 +175,10 @@ export function parseApprovalEntries(content        )                  {
   return parseApprovalLedger(content).entries;
 }
 
-                                       
-                           
-                         
- 
+
+
+
+
 
 export function parseApprovalLedger(content        )                       {
   const entries                  = [];

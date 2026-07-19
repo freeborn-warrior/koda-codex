@@ -74,6 +74,22 @@ test("PACKAGED NPX SUITE: a real tarball installs and runs the plain-JavaScript 
   assert.match(executed.stdout, /Koda — phase gates with proof the review was read/);
   assert.match(executed.stdout, /koda advance/);
 
+  const guideHelp = spawnSync("npm", [
+    "exec",
+    "--yes",
+    `--package=${tarball}`,
+    "--",
+    "koda",
+    "guide",
+    "--help",
+  ], {
+    cwd: temporary,
+    encoding: "utf8",
+    env: environment,
+  });
+  assert.equal(guideHelp.status, 0, guideHelp.stderr);
+  assert.match(guideHelp.stdout, /Koda Guide — disk-backed continuity between Koda sessions/);
+
   const demo = path.join(temporary, "demo-project");
   const initialized = spawnSync("npm", [
     "exec",

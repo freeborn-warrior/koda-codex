@@ -13,6 +13,8 @@ import {
 import { closePath, evaluateSessionClosure, prepareCloseArtifact } from "./close.ts";
 import { evaluateGate } from "./gate.ts";
 import { pushCommandArgs } from "./git.ts";
+import { bindGuideLaunch, hasGuideManifest, verifyGuideLaunch } from "./guide.ts";
+import { runGuideCli } from "./guide-commands.ts";
 import { requireAdvancedHistory, validateAdvancedHistory } from "./history.ts";
 import {
   artifactPath,
@@ -144,7 +146,7 @@ async function sessionNewCommand(args: string[], cwd: string, io: CliIo): Promis
   const config = await readProjectConfig(root);
   const promptPath = path.resolve(cwd, args[0]);
   if (!(await pathExists(promptPath))) throw new Error(`Prompt file not found: ${promptPath}`);
-  const prompt = await readFile(promptPath, "utf8");
+  const prompt = await readRegularText(promptPath, "The session prompt");
   if (prompt.trim() === "") throw new Error("The session prompt must be non-empty.");
 
   const previousId = await latestSessionId(root, config);
@@ -157,7 +159,11 @@ async function sessionNewCommand(args: string[], cwd: string, io: CliIo): Promis
     }
   }
 
+  const guideLaunch = await hasGuideManifest(root, config)
+    ? await verifyGuideLaunch(root, config, promptPath)
+    : null;
   const session = await createSession(root, config, prompt);
+  if (guideLaunch) await bindGuideLaunch(root, config, guideLaunch, session.id, session.state);
   io.out(`✓ Opened session ${session.id}`);
   io.out(`Prompt: ${displayPath(root, path.join(session.directory, "session-prompt.md"))}`);
   io.out(`Current phase: ${session.state.phases[0].name}`);
@@ -423,6 +429,7 @@ function help(io: CliIo): void {
   io.out("Commands:");
   io.out("  koda init [directory] [--demo]");
   io.out("  koda session new <prompt-file>");
+  io.out("  koda guide <status|confirm|cancel|bind|verify>");
   io.out("  koda status");
   io.out("  koda review new <phase>");
   io.out("  koda approve <phase> [quoted-receipt] [--approver <name>]");
@@ -440,6 +447,7 @@ export async function runCli(args: string[], cwd = process.cwd(), io: CliIo = de
   }
   if (verb === "init") return initCommand(rest, cwd, io);
   if (verb === "status") return statusCommand(rest, cwd, io);
+  if (verb === "guide") return runGuideCli(rest, cwd, { out: io.out });
   if (verb === "review" && rest[0] === "new") return reviewNewCommand(rest.slice(1), cwd, io);
   if (verb === "approve") return approveCommand(rest, cwd, io);
   if (verb === "advance") return advanceCommand(rest, cwd, io);

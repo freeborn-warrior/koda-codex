@@ -1,7 +1,7 @@
 import { lstat, mkdir, readdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-                                                                           
+
 import { assertSafeSessionsDirectory, pathExists, validatePhaseChain } from "./config.js";
 
 const SESSION_PATTERN = /^(\d{4}-\d{2}-\d{2})-(\d{2})$/;

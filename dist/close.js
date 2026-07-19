@@ -6,7 +6,7 @@ import { pathExists } from "./config.js";
 import { checkGitClosure } from "./git.js";
 import { validateAdvancedHistory } from "./history.js";
 import { nowIso, readRegularText, writeTextAtomic } from "./project.js";
-                                                              
+
 
 const CLOSE_MARKER = "KODA_CLOSE";
 

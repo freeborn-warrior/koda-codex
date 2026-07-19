@@ -2,7 +2,7 @@
 
 ## Start here
 
-- Read `docs/PROJECT.md`, `docs/BACKLOG.md`, and the latest entries in `docs/TESTING.md` before changing the product.
+- Read `docs/PROJECT.md`, `docs/BACKLOG.md`, `docs/WORKING-PLAN.md`, and the latest entries in `docs/TESTING.md` before changing the product. Read `docs/GUIDE-CONTINUITY.md` before changing between-session behavior.
 - Treat `docs/origin/2026-07-18-owner-contract.md` as the settled source contract. The abandoned build brief and unused REVISE review exist only in Git history and must never become active gate evidence.
 - Kristian is the product owner. Ask him when a real product decision is not already settled on disk; choose implementation order and engineering method independently.
 - Keep owner acknowledgement at every gate for the current target. Exception-only owner routing is documented as an open decision and must not be introduced without Kristian's ruling.
@@ -25,6 +25,7 @@
 - Reviewer-fixture runs must record the real date, fixture, model variant, effort, actual verdict, CATCH score, and VERDICT score. A vague block never counts as a catch; execution behavior stays secondary. Never imply an unrun model test passed.
 - Treat fresh-task reviewer isolation as test evidence, not as a permission guarantee supplied by `SKILL.md`.
 - In Koda's product relay, the owner initiates a session by invoking `koda-c-session` with a written prompt. Once the session is active, the producer never solicits the owner: every request goes to the owner-facing reviewer, and every actionable reviewer handback exists as a named disk artifact before producer use.
+- When a project has a Guide manifest, the owner confirms the exact prompt through `koda-c-session-prompt` before `koda-c-session` may open it. The Guide owns project direction and reconciles its configured steering files between sessions; a changed confirmed input is stale and requires an immutable pushed cancellation before reconfirmation.
 - Preserve the owner-ruled runtime: one visible persistent producer context and one separate visible persistent reviewer context span the full session. Owner input to producer is closed; owner conversation happens only with the reviewer. Do not replace the reviewer with fresh per-phase contexts.
 
 ## Git

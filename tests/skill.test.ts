@@ -4,12 +4,13 @@ import path from "node:path";
 import test from "node:test";
 
 const producerPhases = ["brief", "orient", "plan", "produce", "live", "summary"];
-const skillNames = [
+const historicalSessionSkillNames = [
   "koda-c-session",
   ...producerPhases.map((phase) => `koda-c-${phase}`),
   "koda-c-review",
   "koda-c-close",
 ];
+const skillNames = ["koda-c-session-prompt", ...historicalSessionSkillNames];
 
 test("every Koda-C skill has valid relay sections and four-line Codex metadata", async () => {
   for (const name of skillNames) {
@@ -103,10 +104,14 @@ test("in-phase consultation is disk-backed and cannot impersonate formal review"
 });
 
 test("session open and close remain ceremonies outside producer phase routing", async () => {
-  const [session, close] = await Promise.all([
+  const [prompt, session, close] = await Promise.all([
+    readFile(".agents/skills/koda-c-session-prompt/SKILL.md", "utf8"),
     readFile(".agents/skills/koda-c-session/SKILL.md", "utf8"),
     readFile(".agents/skills/koda-c-close/SKILL.md", "utf8"),
   ]);
+  assert.match(prompt, /project-level perspective across many bounded sessions/i);
+  assert.match(prompt, /`koda guide verify` succeeds.*committed and pushed/is);
+  assert.match(prompt, /Do not run `koda session new`/);
   assert.match(session, /currentPhaseIndex: 0/);
   assert.match(session, /first phase.*state\.json/i);
   assert.match(session, /owner-facing guide\/session-prompter/i);
@@ -117,7 +122,7 @@ test("session open and close remain ceremonies outside producer phase routing", 
   assert.match(close, /writes nothing/);
 });
 
-test("fresh Codex startup discovers all nine local skills and root guidance without reading disk", async () => {
+test("historical fresh Codex startup discovered the original nine local skills and root guidance without reading disk", async () => {
   const runRoot = "docs/discovery-runs/2026-07-18-fresh-codex-startup-01";
   const [runText, result, eventsText] = await Promise.all([
     readFile(path.join(runRoot, "RUN.json"), "utf8"),
@@ -139,7 +144,7 @@ test("fresh Codex startup discovers all nine local skills and root guidance with
   assert.equal(run.sandbox, "read-only");
   assert.equal(run.toolsPermittedByPrompt, false);
   assert.equal(run.repositoryReadsPermittedByPrompt, false);
-  for (const name of skillNames) assert.doesNotMatch(run.prompt, new RegExp(name));
+  for (const name of historicalSessionSkillNames) assert.doesNotMatch(run.prompt, new RegExp(name));
   assert.doesNotMatch(run.prompt, /\b9\b/);
 
   const events = eventsText.trim().split("\n").map((line) => JSON.parse(line)) as Array<{
@@ -150,7 +155,7 @@ test("fresh Codex startup discovers all nine local skills and root guidance with
   assert.deepEqual(toolEvents, []);
   const answer = events.find((event) => event.item?.type === "agent_message")?.item?.text ?? "";
   const discovered = [...answer.matchAll(/\bkoda-c-[a-z]+\b/g)].map((match) => match[0]).sort();
-  assert.deepEqual(discovered, [...skillNames].sort());
+  assert.deepEqual(discovered, [...historicalSessionSkillNames].sort());
   assert.match(answer, /Total: 9/);
   assert.match(answer, /\.agents\/skills\//);
   assert.match(answer, /never install Koda-C skills globally/i);
