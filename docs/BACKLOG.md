@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Prepare a fresh representative Guide project for the complete owner-observed three-window test. Keep every durable input and result under this repository, isolate live mutation from the submission source, and do not pre-script the model verdicts.
+- [ ] Receive Kristian's explicit confirmation or requested revision of the exact verification [session prompt draft](verification-runs/2026-07-19-markdown-headings-01/SESSION-PROMPT-DRAFT.md). Do not create launch evidence or start a model beforehand.
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
 - [ ] Owner-test the new one-action Ghostty adapter against a genuine Guide-confirmed session. Deterministic tests prove labeled Reviewer-first/Producer-second requests, no shell evaluation, partial-open recovery, and duplicate refusal; they do not prove macOS displayed the windows.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
@@ -34,6 +34,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Prepare the representative three-window verification project in the repository-local ignored runtime area: clean pushed initial Git state, ten local skills, six phases, Guide manifest, committed continuity, verified restorable bundle, unscripted task contract, successful between-session entry check, and an exact prompt draft awaiting owner confirmation ([run contract](verification-runs/2026-07-19-markdown-headings-01/CONTRACT.md)).
 
 - [x] Settle the first live-test target: Kristian deferred Koda-C self-hosting until after submission and chose a repository-contained representative verification project so current product claims can be tested without changing the submission repository's operating model ([owner ruling](design-notes/2026-07-19-pre-submission-verification-ruling.md)).
 

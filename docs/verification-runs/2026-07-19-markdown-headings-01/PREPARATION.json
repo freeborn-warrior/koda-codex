@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "runId": "2026-07-19-markdown-headings-01",
+  "status": "AWAITING_OWNER_CONFIRMATION",
+  "preparedAt": "2026-07-19T18:28:31Z",
+  "liveProject": ".koda/verification-projects/2026-07-19-markdown-headings-01/project",
+  "initialCommit": "f3d99323f7df8bf308d0f26ea9cc5eb7a9a3256d",
+  "initialBundle": "docs/verification-runs/2026-07-19-markdown-headings-01/INITIAL-PROJECT.bundle",
+  "entryCheck": {
+    "command": "node /Users/freeborn/Dev/koda-codex/dist/cli.js guide status",
+    "result": "BETWEEN SESSIONS — Guide discussion or one next-session draft may continue."
+  },
+  "promptDraft": "docs/guide/prompts/2026-07-19-markdown-heading-reporter.md",
+  "promptSha256": "864058a56f4738a707265be8e72c6df667ecb64ee60b830d7051bca6a4d01845",
+  "producer": {
+    "model": "gpt-5.6-sol",
+    "effort": "medium"
+  },
+  "reviewer": {
+    "model": "gpt-5.6-terra",
+    "effort": "medium"
+  },
+  "ownerConfirmed": false,
+  "modelRunStarted": false
+}

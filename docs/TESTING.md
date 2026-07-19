@@ -802,3 +802,15 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Post-push verification:** After the owner ruling, repairs, mutations, failures, and first passing transcript were committed and pushed at `4117c9a`, the unchanged suite passed **179/179** again with that commit recorded as its base in [the pushed transcript](test-results/2026-07-19-pre-submission-concurrency-repairs-pushed-final.md).
 - **Boundary:** Deterministic concurrency is stronger, but this still does not prove live Codex behavior, Ghostty window creation, or owner usability. Those remain the purpose of the isolated three-window verification project.
 - **Verdict:** CONCURRENCY REPAIRS PASS; REPRESENTATIVE LIVE PROJECT PREPARATION NEXT.
+
+## 2026-07-19 — Representative three-window project preparation
+
+- **Variant:** Repository-contained isolated Git project and Guide/session-prompt entry check. No model, Codex task, Ghostty window, launch request, Koda session, formal review, receipt, or close was created.
+- **Owner boundary:** This implements Kristian's pre-submission ruling without initializing Koda-C itself. The live project exists physically under this repository's ignored `.koda/verification-projects/` area; the tracked contract, initial bundle, prompt copy, preparation metadata, and eventual results live under `docs/verification-runs/`.
+- **Project ground:** The project declares all six native phases, ten repository-local skills, project-specific `AGENTS.md`, three Guide continuity files, an in-phase consultation contract, and one plausible dependency-free Markdown heading reporter task. No expected verdict, revision count, planted defect, or preferred story exists.
+- **Git proof:** Initial project commit `f3d99323f7df8bf308d0f26ea9cc5eb7a9a3256d` is clean and matches its local upstream. `INITIAL-PROJECT.bundle` verifies as complete restorable history containing local and upstream `main` plus `HEAD`.
+- **Skill entry check:** From the isolated project, `koda-c-session-prompt` required `koda guide status`. It returned `KODA GUIDE — no sessions yet`, named the manifest and three continuity files, and permitted exactly one between-session draft.
+- **Prompt state:** The exact draft hashes to `864058a56f4738a707265be8e72c6df667ecb64ee60b830d7051bca6a4d01845`. The live draft and tracked owner-readable copy are byte-identical. It is not confirmed, committed in the live project, or runnable; model execution remains false in `PREPARATION.json`.
+- **Regression:** The unchanged complete deterministic suite passed **179/179** after preparation. Every named result is preserved in [the project-preparation transcript](test-results/2026-07-19-three-window-project-preparation-final.md).
+- **Boundary:** The next action is a real owner decision on the exact prompt. Until Kristian confirms or revises it, the skill forbids `koda guide confirm`, launch preparation, Producer/Reviewer creation, and session opening.
+- **Verdict:** PREPARATION PASS; OWNER PROMPT CONFIRMATION REQUIRED.
