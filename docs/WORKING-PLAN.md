@@ -17,7 +17,7 @@ Turn the proved two-context session relay into a project-level experience that c
 5. [x] Mutate every new refusal condition, record the results, and keep prior tests intact.
 6. [x] Prove the Guide-to-session transition against a real Git project with separate deterministic processes, injected return-stage interruption, pushed close, pushed Guide return, and unchanged repository identity.
 7. [x] Add one opt-in macOS Ghostty action that requests the two labeled session contexts while preserving exact manual recovery commands.
-8. [ ] Keep the persistent Reviewer conversational between formal handoffs without turning conversation into Producer input. Implementation and focused deterministic proof are complete; durable full-suite evidence and push remain.
+8. [x] Keep the persistent Reviewer conversational between formal handoffs without turning conversation into Producer input; pushed deterministic proof covers captured input, active-direction mutation, and a real pseudo-terminal.
 9. [ ] Prove the complete three-context experience with Kristian when he is rested and available to test.
 
 ## Submission cut

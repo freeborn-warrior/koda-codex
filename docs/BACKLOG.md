@@ -10,7 +10,6 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Owner-test the new one-action Ghostty adapter against a genuine Guide-confirmed session. Deterministic tests prove labeled Reviewer-first/Producer-second requests, no shell evaluation, partial-open recovery, and duplicate refusal; they do not prove macOS displayed the windows.
 - [ ] Make the CLI ceremony legible without reading implementation logs: permanent context labels, owner-input state, phase progress and artifact/handover summaries, conversational reviewer notifications, one named reason per refusal, and one safe recovery action. Never present hidden chain-of-thought as product output.
 - [ ] Design and test an explicit Guide-to-Reviewer transfer for a project-level decision that must affect an already active session. Conversation or steering-file mutation alone must never alter the confirmed session snapshot.
-- [ ] Keep the Reviewer conversational while Producer works: a real terminal prompt resumes the same persistent context, safe answers mutate no project file, project-scope thoughts return to Guide, and active direction is named but remains unsent. Deterministic tests pass; commit, push, and owner-observed proof are still pending.
 
 ## Next
 
@@ -35,6 +34,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Keep the Reviewer conversational while Producer works: a real terminal prompt resumes the same persistent context, safe answers mutate no project file, project-scope thoughts return to Guide, and active direction is named but remains unsent (`8ca8aab`; pushed 135-check proof). Owner-observed proof remains part of the full three-context run.
 
 - [x] Add an opt-in `koda guide launch --open ghostty` adapter that keeps Guide open, requests labeled Reviewer then Producer windows, persists intent before GUI mutation, passes only explicit argument arrays, retains exact manual commands, and refuses duplicate automatic opening. Owner-observed live proof remains owed.
 - [x] Connect pushed Guide confirmation to an explicit real-project runtime: clean/pushed and ignored-runtime entry checks, shared path hardening, two-process relay compatibility, injected finalization recovery, unchanged project Git, pushed runtime archive, machine-readable Guide return, and disk-derived Guide status. Live visible context creation remains owed.
