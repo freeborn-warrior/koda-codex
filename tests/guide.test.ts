@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
@@ -13,6 +13,7 @@ import {
   guideLaunchesDir,
   verifyGuideLaunch,
 } from "../src/guide.ts";
+import { prepareGuideRuntime } from "../src/guide-runtime.ts";
 import { createSession, writeJsonAtomic } from "../src/project.ts";
 import { temporaryRoot } from "./helpers.ts";
 
@@ -54,6 +55,7 @@ async function guideHarness(t: Parameters<typeof temporaryRoot>[0], withGit = fa
   await mkdir(path.join(root, "docs", "sessions"), { recursive: true });
   await mkdir(path.join(root, "docs", "guide", "prompts"), { recursive: true });
   await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
+  await writeFile(path.join(root, ".gitignore"), ".koda/\n.DS_Store\n", "utf8");
   await writeFile(path.join(root, "docs", "PROJECT.md"), "# Project\n\nBuild the right thing.\n", "utf8");
   await writeFile(path.join(root, "docs", "BACKLOG.md"), "# Backlog\n\n- [ ] Next bounded step.\n", "utf8");
   await writeFile(path.join(root, "docs", "WORKING-PLAN.md"), "# Working plan\n\n1. Prove the next step.\n", "utf8");
@@ -243,5 +245,148 @@ test("GUIDE STATUS TRUTH: corrupt launch evidence refuses instead of guessing", 
   await assert.rejects(
     runGuideCli(["status"], h.root, { out() {} }),
     /is not valid JSON/,
+  );
+});
+
+test("GUIDE RUNTIME: one command binds a pushed launch and prints executable session-context commands", async (t) => {
+  const h = await guideHarness(t, true);
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm runtime route"]);
+  h.git(h.root, ["push"]);
+
+  const output: string[] = [];
+  await runGuideCli([
+    "launch",
+    "--producer-model", "gpt-5.6-sol",
+    "--producer-effort", "medium",
+    "--reviewer-model", "gpt-5.6-terra",
+    "--reviewer-effort", "medium",
+  ], h.root, { out(message) { output.push(message); } });
+  assert.match(output.join("\n"), new RegExp(`GUIDE SESSION PREPARED — ${confirmed.launch.id}`));
+  assert.match(output.join("\n"), /WINDOW B — REVIEWER \/ OWNER \(start this first\)/);
+  assert.match(output.join("\n"), /WINDOW A — PRODUCER \(then start this\)/);
+  const runRoot = path.join(h.root, ".koda", "runs", confirmed.launch.id);
+  const run = JSON.parse(await readFile(path.join(runRoot, "RUN.json"), "utf8"));
+  assert.equal(run.mode, "guide-project");
+  assert.equal(run.prompt, "docs/guide/prompts/next-session.md");
+  assert.equal(run.initialCommit, spawnSync("git", ["rev-parse", "HEAD"], { cwd: h.root, encoding: "utf8" }).stdout.trim());
+  assert.equal(spawnSync("git", ["status", "--porcelain", "--untracked-files=all"], { cwd: h.root, encoding: "utf8" }).stdout, "");
+
+  const statusLine = output.at(-1)!;
+  const status = spawnSync("/bin/zsh", ["-c", statusLine], { cwd: h.root, encoding: "utf8" });
+  assert.equal(status.status, 0, status.stderr);
+  assert.match(status.stdout, /Run state: PREPARED/);
+  assert.match(status.stdout, new RegExp(confirmed.launch.id));
+
+  const again = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  assert.equal(again.reused, true);
+  assert.equal(again.runRoot, runRoot);
+
+  await writeJsonAtomic(path.join(runRoot, "RUN.json"), { ...run, status: "PAUSED_BY_OWNER" });
+  const guideStatus: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { guideStatus.push(message); } });
+  assert.match(guideStatus.join("\n"), new RegExp(`ACTIVE SESSION RUNTIME — ${confirmed.launch.id}`));
+  assert.match(guideStatus.join("\n"), /State: PAUSED_BY_OWNER/);
+  assert.match(guideStatus.join("\n"), /Window B — reviewer \/ owner:[\s\S]*Window A — producer:[\s\S]*Read-only detail:/);
+});
+
+test("GUIDE RUNTIME MUTATION: an unignored runtime refuses by name", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm ignored runtime route"]);
+  h.git(h.root, ["push"]);
+  await writeFile(path.join(h.root, ".gitignore"), ".DS_Store\n", "utf8");
+  await assert.rejects(prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  }), /refuses until \.koda\/ is ignored by Git/);
+});
+
+test("GUIDE RUNTIME MUTATION: another unfinished runtime blocks a new session", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm single runtime route"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  const otherId = "00000000-0000-4000-8000-000000000001";
+  const otherRoot = path.join(h.root, ".koda", "runs", otherId);
+  await mkdir(otherRoot);
+  await writeJsonAtomic(path.join(otherRoot, "RUN.json"), { ...prepared.run, launchId: otherId });
+  await assert.rejects(prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  }), new RegExp(`Guide runtime ${otherId} is still PREPARED; a new session cannot start`));
+});
+
+test("GUIDE RUNTIME MUTATION: a linked RUN.json refuses as unsafe state", async (t) => {
+  const h = await guideHarness(t, true);
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm linked-runtime refusal"]);
+  h.git(h.root, ["push"]);
+  const runs = path.join(h.root, ".koda", "runs");
+  const runRoot = path.join(runs, confirmed.launch.id);
+  await mkdir(runRoot, { recursive: true });
+  const target = path.join(h.root, ".koda", "outside-run.json");
+  await writeJsonAtomic(target, {
+    version: 1,
+    mode: "guide-project",
+    scenario: "guide-confirmed",
+    status: "PREPARED",
+    preparedAt: new Date().toISOString(),
+    launchId: confirmed.launch.id,
+    producer: { model: "gpt-5.6-sol", effort: "medium", threadId: null, turns: 0 },
+    reviewer: { model: "gpt-5.6-terra", effort: "medium", threadId: null, turns: 0 },
+    project: "../../..",
+    runtime: ".",
+    cli: path.join(process.cwd(), "src", "cli.ts"),
+    prompt: "docs/guide/prompts/next-session.md",
+    archive: `docs/guide/runs/${confirmed.launch.id}`,
+    guideReturn: `docs/guide/returns/${confirmed.launch.id}.json`,
+    initialCommit: h.git(h.root, ["rev-parse", "HEAD"]),
+    maxTurns: 60,
+  });
+  await symlink(target, path.join(runRoot, "RUN.json"));
+  await assert.rejects(prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  }), /RUN\.json is missing or not a regular file/);
+});
+
+test("GUIDE RUNTIME STATUS TRUTH: corrupt live state refuses instead of hiding behind launch state", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm status-truth route"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  await writeFile(path.join(prepared.runRoot, "RUN.json"), "{ corrupt runtime\n", "utf8");
+  await assert.rejects(
+    runGuideCli(["status"], h.root, { out() {} }),
+    /Guide runtime state is corrupt: .*RUN\.json is not valid JSON/,
   );
 });

@@ -15,11 +15,12 @@ Turn the proved two-context session relay into a project-level experience that c
 3. [x] Bind explicit owner confirmation to the prompt, steering snapshot, prior pushed close, and Git handover.
 4. [x] Make `koda-c-session` consume and bind that verified request while preserving the existing producer/reviewer separation.
 5. [x] Mutate every new refusal condition, record the results, and keep prior tests intact.
-6. [ ] Prove the resulting Guide-to-session transition in a fresh visible runtime with Kristian when he is rested and available to test.
+6. [x] Prove the Guide-to-session transition against a real Git project with separate deterministic processes, injected return-stage interruption, pushed close, pushed Guide return, and unchanged repository identity.
+7. [ ] Replace the two printed context commands with one visible-context launcher, then prove the complete experience with Kristian when he is rested and available to test.
 
 ## Submission cut
 
-The submission needs to show one strong standard session moving from durable Guide state into the existing two-context relay. Explore, research, architecture, triage, and other session kinds are recorded product direction, but do not block this proof and will not be rushed into separate runtimes.
+The product needs one strong standard session moving from durable Guide state into the existing two-context relay while all three human-facing contexts are visible: ongoing project Guide, non-interactive Producer, and conversational session Reviewer. Explore, research, architecture, triage, and other session kinds are recorded product direction, but do not block this proof and will not be rushed into separate runtimes.
 
 ## Current constraints
 
@@ -34,4 +35,5 @@ The submission needs to show one strong standard session moving from durable Gui
 ## Proof still owed
 
 - Fresh Codex discovery of the new repository-local session-prompt skill.
-- One owner-observed Guide confirmation launching the two separate session contexts.
+- One owner-observed Guide confirmation arranging the complete three-context experience while preserving two independent session contexts.
+- Cross-model continuation evidence before the org-chart staffing design becomes executable per-phase config.

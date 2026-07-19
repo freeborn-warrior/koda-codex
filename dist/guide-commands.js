@@ -12,6 +12,7 @@ import {
   snapshotContinuity,
   verifyGuideLaunch,
 } from "./guide.js";
+import { currentGuideRuntime, prepareGuideRuntime } from "./guide-runtime.js";
 import { displayPath, latestSessionId } from "./project.js";
 
 
@@ -43,6 +44,7 @@ function help(io            )       {
   io.out("  koda guide cancel <launch-id> --owner <name> --reason <text>");
   io.out("  koda guide bind <launch-id> <session-id>");
   io.out("  koda guide verify");
+  io.out("  koda guide launch --producer-model <model> --producer-effort <effort> --reviewer-model <model> --reviewer-effort <effort>");
 }
 
 export async function runGuideCli(args          , cwd = process.cwd(), io             = defaultIo)                {
@@ -58,12 +60,29 @@ export async function runGuideCli(args          , cwd = process.cwd(), io       
     const continuity = await snapshotContinuity(root, manifest);
     await requireGuideCancellationsPushed(root, config);
     const pending = await pendingGuideLaunches(root, config);
+    const runtime = await currentGuideRuntime(root);
     if (pending.length > 1) throw new Error(`${pending.length} prompts claim READY_TO_LAUNCH; Guide state is ambiguous.`);
     io.out(`KODA GUIDE — ${await latestSessionId(root, config) ?? "no sessions yet"}`);
     io.out(`Manifest: ${displayPath(root, guideManifestPath(root, config))}`);
     io.out(`Project: ${manifest.project} — ${continuity.length} continuity file(s)`);
     if (pending.length === 0) io.out("NO PROMPT READY — Guide discussion or drafting may continue.");
     else if (pending.length === 1) io.out(`READY TO LAUNCH — ${pending[0] .id}`);
+    if (runtime) {
+      io.out("");
+      io.out(`${runtime.run.status === "COMPLETE" ? "LAST SESSION RUNTIME" : "ACTIVE SESSION RUNTIME"} — ${runtime.run.launchId}`);
+      io.out(`State: ${runtime.run.status}`);
+      if (runtime.run.status === "COMPLETE") {
+        io.out(`Guide return: ${runtime.run.guideReturn}`);
+        io.out(`Durable evidence: ${runtime.run.archive}`);
+      } else {
+        io.out("Window B — reviewer / owner:");
+        io.out(runtime.reviewerCommand);
+        io.out("Window A — producer:");
+        io.out(runtime.producerCommand);
+        io.out("Read-only detail:");
+        io.out(runtime.statusCommand);
+      }
+    }
     return;
   }
 
@@ -109,6 +128,37 @@ export async function runGuideCli(args          , cwd = process.cwd(), io       
     io.out(`READY TO LAUNCH — ${launch.id}`);
     io.out(`Prompt: ${launch.prompt}`);
     io.out("✓ Prompt, project continuity, and prior-session evidence still match owner confirmation.");
+    return;
+  }
+
+  if (verb === "launch") {
+    const producerModel = option(rest, "--producer-model");
+    const producerEffort = option(rest, "--producer-effort");
+    const reviewerModel = option(rest, "--reviewer-model");
+    const reviewerEffort = option(rest, "--reviewer-effort");
+    const maxTurnsText = option(rest, "--max-turns");
+    rejectUnknownOptions(rest);
+    if (rest.length || !producerModel || !producerEffort || !reviewerModel || !reviewerEffort) {
+      throw new Error("Usage: koda guide launch --producer-model <model> --producer-effort <effort> --reviewer-model <model> --reviewer-effort <effort> [--max-turns <1-100>]");
+    }
+    const prepared = await prepareGuideRuntime(root, config, {
+      producerModel,
+      producerEffort,
+      reviewerModel,
+      reviewerEffort,
+      ...(maxTurnsText === null ? {} : { maxTurns: Number(maxTurnsText) }),
+    });
+    io.out(`${prepared.reused ? "GUIDE SESSION RECOVERED" : "GUIDE SESSION PREPARED"} — ${prepared.launch.id}`);
+    io.out("The confirmed prompt and both role assignments are bound on disk.");
+    io.out("");
+    io.out("WINDOW B — REVIEWER / OWNER (start this first)");
+    io.out(prepared.reviewerCommand);
+    io.out("");
+    io.out("WINDOW A — PRODUCER (then start this)");
+    io.out(prepared.producerCommand);
+    io.out("");
+    io.out("READ-ONLY STATUS");
+    io.out(prepared.statusCommand);
     return;
   }
 

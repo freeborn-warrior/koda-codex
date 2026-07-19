@@ -16,8 +16,9 @@ directory, then makes the CLI binary executable. The public-checkout proof shows
 that the final tracked and untracked state remains clean. A packed installation
 has no `preinstall`, `install`, or `postinstall` script and no runtime dependency.
 
-Core writes are limited to the directory given to `koda init` and the active
-project's configured session folder:
+Core writes are limited to the directory given to `koda init`, the active
+project's configured session folder, Guide evidence under the configured docs
+parent, and ignored project-local runtime under `.koda/`:
 
 - `init` creates `koda.config.json` and the sessions directory;
 - `session new` creates one dated session, its copied prompt, ledger, and state;
@@ -25,6 +26,9 @@ project's configured session folder:
   state artifacts atomically;
 - the first `session close` writes immutable `close.md`; the second only verifies
   disk and Git state.
+- `guide confirm`, `cancel`, and `bind` write their named durable evidence;
+- `guide launch` writes only ignored `.koda/runs/<launch-id>/` rendezvous state
+  after verifying a clean pushed project and one exact confirmed request.
 
 Koda refuses a configured sessions directory that resolves outside the project.
 Session state must retain valid configured phase names. Artifacts, reviews,
@@ -70,26 +74,34 @@ loop complete.
 
 ## Relay and test-harness boundary
 
-`relay:*` and `reviewer:*` are competition/development harnesses, not quiet core
-commands. They can launch Codex models, incur model usage, and—in the prepared
-disposable relay project—commit and push to its nested test remote. The relay also
-removes only its verified nested runtime `.git` and `.runtime` directories after
-capturing a restorable bundle. Resolved-path checks now refuse a run project,
-runtime, review, or CLI that escapes its prepared run folder or this checkout.
-Owner-direction handbacks add the same containment rule inside the active session:
+The relay scripts are not quiet core commands. They can launch Codex models,
+incur model usage, commit, and push. In `fixture-copy` mode they operate on the
+prepared disposable project and remove only that verified nested `.git` and
+`.runtime` after capturing a restorable bundle. In `guide-project` mode they
+operate on the actual project: they commit and push produced output, immutable
+close, the tracked runtime archive, and the machine-readable Guide return. That
+mode never removes or replaces the project's `.git` directory.
+
+Producer, reviewer, and status use one resolved-path implementation. Fixture
+paths must remain inside the prepared run. A real-project run must be one direct
+child of that project's ignored `.koda/runs/`, resolve back to that exact project,
+and use the trusted CLI shipped by the same Koda-C package. Archive and return
+parents must be real contained directories; linked or changed recovery evidence
+refuses. Owner-direction handbacks add the same containment rule inside the active session:
 their root and phase directory must be real directories resolving beneath that
 session, and every handback must be a regular file. A linked parent directory
 cannot redirect even the initial atomic write.
 
-Run those scripts only against a run folder created by the matching preparation
-command in a trusted checkout. Do not execute a modified `RUN.json` received from
-someone else. Codex subprocesses inherit the launcher's environment because they
+Run those scripts only against a run folder created by `relay:prepare` or a
+pushed `koda guide launch` in a trusted project. Do not execute a modified
+`RUN.json` received from someone else. Codex subprocesses inherit the launcher's environment because they
 must inherit Codex authentication; do not launch the harness from a shell holding
 unrelated secrets. The core `koda` CLI itself never launches a model.
 
-Git commit and push may execute hooks already configured in a repository. That is
-normal Git behavior, but it is why the core prints those commands instead of
-silently running them. Inspect unfamiliar repository hooks and remotes first.
+Git commit and push may execute hooks already configured in a repository. The
+core close command only prints Git instructions; the explicitly started relay
+supervisor executes its documented commits and pushes. Inspect unfamiliar
+repository hooks and remotes before starting a real-project relay.
 
 ## Concurrency and recovery
 
@@ -101,14 +113,18 @@ them. A mature two-window interface must add recoverable mutation serialization
 before claiming safe concurrent operation.
 
 Ctrl-C may leave a prepared or paused relay, but its status and thread IDs remain
-on disk for the documented resume path. Never delete or recreate a paused run to
-make its state look cleaner.
+on disk for the documented resume path. `FINALIZING_GUIDE_RETURN` stages ignored
+evidence before tracked mutation and resumes only when tracked bytes and unrelated
+project state still match. It also binds the exact pushed close commit and refuses
+if project history moves before recovery. Linked runtime records refuse as unsafe
+state. Never delete or recreate a paused run to make its state
+look cleaner.
 
 ## Current audit result
 
 The dated local audit checks package lifecycle metadata, dependency absence,
 tracked symbolic links, common committed credential signatures, destructive
-call sites, real package contents, and all 93 functional/security checks.
+call sites, real package contents, and the then-current functional/security suite.
 The result and limitations live in
 [`security-runs/2026-07-18-local-audit-01/RESULT.md`](security-runs/2026-07-18-local-audit-01/RESULT.md).
 Later evidence classes retain their own adversarial checks in the current full

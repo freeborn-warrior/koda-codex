@@ -6,8 +6,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Run one genuine full-session live-model test of the new two-window runtime with Kristian present for the receipt actions; deterministic separate-process simulation is complete.
-- [ ] Replace the current test-harness-only owner experience with one simple, recoverable start procedure and named pause/abort states. Preserve the disk gate as the only authority.
+- [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
+- [ ] Replace the now-tested Guide launch plan's two printed session-window commands with one supervisor/terminal-adapter action that arranges the full three-context experience. Keep exact commands as recovery and preserve the disk gate as the only authority.
+- [ ] Make the CLI ceremony legible without reading implementation logs: permanent context labels, owner-input state, phase progress and artifact/handover summaries, conversational reviewer notifications, one named reason per refusal, and one safe recovery action. Never present hidden chain-of-thought as product output.
+- [ ] Design and test an explicit Guide-to-Reviewer transfer for a project-level decision that must affect an already active session. Conversation or steering-file mutation alone must never alter the confirmed session snapshot.
 
 ## Next
 
@@ -15,7 +17,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Finish submission-critical proof and polish only after the product runtime above is honest: final hygiene, owner recording, and external submission.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
-- [ ] Connect the now-working Guide confirmation/session binding to automatic launch of the separate producer and reviewer contexts, then return pushed Summary/close evidence to Guide reconciliation.
+- [ ] Add project staffing config after proving cross-model thread continuation: Guide assignment, session-kind reviewer/defaults, and per-phase producer model/effort must resolve independently and snapshot into the session. Use sealed matrix evidence, not skill frontmatter, for recommendations.
+- [ ] Add monotonic owner-attention escalation before any delegated acknowledgement mode: config may authorize routine flow, but `OWNER_ATTENTION_REQUIRED` must always stop at the Guide and no agent may waive stricter configured attention.
 - [ ] Finish the ruled side-by-side runtime beyond the first job relay with always-available owner/reviewer discussion. Preserve the shipped disk-derived turn summaries; never claim hidden chain-of-thought, leak receipts, or let rendered status outrank disk truth.
 - [ ] Add abort/recovery semantics before claiming the producer can run unattended; Ctrl-C must leave named recoverable state.
 
@@ -33,6 +36,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
+- [x] Connect pushed Guide confirmation to an explicit real-project runtime: clean/pushed and ignored-runtime entry checks, shared path hardening, two-process relay compatibility, injected finalization recovery, unchanged project Git, pushed runtime archive, machine-readable Guide return, and disk-derived Guide status. Live visible context creation remains owed.
 - [x] Build the first disk-recoverable Guide slice: project-specific steering manifest, local `koda-c-session-prompt` skill, exact owner-confirmed prompt/project/prior-session hashes, immutable cancellation, pushed-handover verification, unconfirmed/stale refusal, and launch-to-session binding. Fresh discovery and visible two-context launch remain separate owed proofs.
 
 - [x] Let Kristian discuss an active formal review in the same reviewer context; ordinary explanation changes no file, while new direction pauses without an explicit owner send (`f68f5d7`, evidence at `9610429`).

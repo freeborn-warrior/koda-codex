@@ -11,7 +11,7 @@ The Guide is Kristian's long-lived project conversation between sessions. It hel
 When Kristian is ready, he explicitly invokes a distinct `koda-c-session-prompt` skill inside the Guide conversation. That skill turns the discussion into one bounded, owner-approved session-prompt artifact. Once the artifact is ready and Kristian explicitly confirms launch, a supervisor starts exactly one Koda session containing:
 
 - one new persistent producer context, visible but closed to owner input;
-- one new separate persistent reviewer context, which is Kristian's only conversational interface during the session.
+- one new separate persistent reviewer context, which is Kristian's only conversational interface about the bounded session; the enclosing Guide remains available for the ongoing project conversation.
 
 The producer and reviewer remain separate from each other and persist across every configured phase. The Guide does not become a third in-session authority. It hands over through the approved prompt artifact, then remains idle while the reviewer owns the owner-facing session conversation.
 

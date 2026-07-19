@@ -119,9 +119,10 @@ test("FULL RELAY RUNNER: preparation creates a clean pushed project with local s
 });
 
 test("FULL RELAY RUNNER: execution preserves two contexts and never automates owner receipt proof", async () => {
-  const [prepare, execute, reviewerWindow, reviewHelper, reviewerExecute, protocol, ghostty, packageJson] = await Promise.all([
+  const [prepare, execute, location, reviewerWindow, reviewHelper, reviewerExecute, protocol, ghostty, packageJson] = await Promise.all([
     readFile("scripts/prepare-relay-run.ts", "utf8"),
     readFile("scripts/execute-relay-run.ts", "utf8"),
+    readFile("scripts/relay-run-location.ts", "utf8"),
     readFile("scripts/run-relay-reviewer-window.ts", "utf8"),
     readFile("scripts/read-relay-review.ts", "utf8"),
     readFile("scripts/execute-reviewer-run.ts", "utf8"),
@@ -155,8 +156,10 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(execute, /verify immutable session close/);
   assert.match(execute, /"bundle", "create"/);
   assert.match(execute, /path\.join\(project, "\.git"\)/);
-  assert.match(execute, /const project = await realpath\(projectCandidate\)/);
-  assert.match(execute, /trusted Koda CLI/);
+  assert.match(execute, /resolveRelayRunPaths/);
+  assert.match(location, /const \[project, runtime\] = await Promise\.all\(\[realpath\(projectCandidate\), realpath\(runtimeCandidate\)\]\)/);
+  assert.match(location, /Guide run paths resolve through a symbolic link or outside their containing project/);
+  assert.match(location, /trusted Koda CLI/);
   assert.match(reviewHelper, /run\.status !== "AWAITING_OWNER_RECEIPT"/);
   assert.match(reviewHelper, /candidates\.length > 1/);
   assert.match(reviewHelper, /after\.hash !== before\.hash/);

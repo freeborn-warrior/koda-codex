@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { pathExists, readProjectConfig } from "../src/config.ts";
 import { artifactPath, currentPhase, loadSessionState, reviewPath, sessionRoot } from "../src/project.ts";
 import { pendingOwnerHandbacks, readOwnerHandbacks } from "./owner-handback.ts";
+import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
   readReviewerJob,
   readReviewerWindowState,
@@ -15,9 +16,12 @@ import {
 
 type RunRecord = {
   version: number;
+  mode?: "fixture-copy" | "guide-project";
   status: string;
   scenario: string;
   project: string;
+  runtime: string;
+  cli: string;
   sessionId?: string;
   lastAction?: string;
   lastError?: string;
@@ -50,7 +54,8 @@ async function readRun(candidate: string): Promise<RunRecord | null> {
     );
     if (
       run.version !== 1 || typeof run.status !== "string" || typeof run.scenario !== "string" ||
-      typeof run.project !== "string" || !validRole(run.producer) || !validRole(run.reviewer) ||
+      typeof run.project !== "string" || typeof run.runtime !== "string" || typeof run.cli !== "string" ||
+      !validRole(run.producer) || !validRole(run.reviewer) ||
       !(run.sessionId === undefined || /^\d{4}-\d{2}-\d{2}-\d{2}$/.test(run.sessionId))
     ) return null;
     return run;
@@ -77,14 +82,20 @@ async function discoverRun(): Promise<string> {
 const runRoot = requested
   ? await realpath(path.resolve(root, requested)).catch(() => refuse(`Run not found: ${requested}`))
   : await discoverRun();
-if (path.dirname(runRoot) !== runsRoot) refuse(`The run must be one direct child of ${runsRoot}.`);
 const run = await readRun(runRoot);
 if (!run) refuse("RUN.json is missing, corrupt, or unsafe.");
-
-const projectCandidate = path.resolve(runRoot, run.project);
-if (!projectCandidate.startsWith(`${runRoot}${path.sep}`)) refuse("The project path escapes the relay run.");
-const project = await realpath(projectCandidate).catch(() => refuse("The relay project does not exist."));
-if (!project.startsWith(`${runRoot}${path.sep}`)) refuse("The project path resolves outside the relay run.");
+const resolved = await resolveRelayRunPaths({ packageRoot: root, configuredRunsRoot: runsRoot, runRoot, run })
+  .catch((error) => refuse(error instanceof Error ? error.message : String(error)));
+const { project } = resolved;
+const reviewerCommand = resolved.mode === "guide-project"
+  ? formatRelayCommand(path.join(root, "scripts", "run-relay-reviewer-window.ts"), runRoot)
+  : "npm run relay:reviewer";
+const reviewerRecoveryCommand = resolved.mode === "guide-project"
+  ? formatRelayCommand(path.join(root, "scripts", "run-relay-reviewer-window.ts"), runRoot, ["--recover-stale-lock"])
+  : "npm run relay:reviewer -- --recover-stale-lock";
+const producerCommand = resolved.mode === "guide-project"
+  ? formatRelayCommand(path.join(root, "scripts", "execute-relay-run.ts"), runRoot, ["--reviewer-window"])
+  : "npm run relay:producer";
 
 const reviewerState = await readReviewerWindowState(runRoot);
 const job = await readReviewerJob(runRoot);
@@ -166,21 +177,26 @@ if (run.status === "COMPLETE") {
   console.log("Read the named reviewer job error. Do not delete or retry it by guessing.");
 } else if (lock && !lock.alive) {
   console.log("Recover the stopped reviewer window explicitly:");
-  console.log("  npm run relay:reviewer -- --recover-stale-lock");
+  console.log(`  ${reviewerRecoveryCommand}`);
 } else if (!lock) {
   console.log("Start or resume Window B:");
-  console.log("  npm run relay:reviewer");
+  console.log(`  ${reviewerCommand}`);
   if (run.status === "PREPARED" || run.status.startsWith("PAUSED")) {
     console.log("Start or resume Window A in the other pane:");
-    console.log("  npm run relay:producer");
+    console.log(`  ${producerCommand}`);
   } else {
     console.log(`Window A is recorded as ${run.status}. Check that pane; do not start a second producer blindly.`);
   }
 } else if (job?.status === "AWAITING_OWNER") {
   console.log("Return to Window B. The reviewer is waiting for Kristian.");
+} else if (run.status === "FINALIZING_GUIDE_RETURN" && run.lastError) {
+  console.log("Window B is preserving the closed session. Resume Window A to finish the Guide return:");
+  console.log(`  ${producerCommand}`);
+} else if (run.status === "FINALIZING_GUIDE_RETURN") {
+  console.log("Window A is returning the closed session to Guide. Do not start another producer.");
 } else if (run.status === "PREPARED" || run.status.startsWith("PAUSED")) {
   console.log("Window B is ready. Start or resume Window A:");
-  console.log("  npm run relay:producer");
+  console.log(`  ${producerCommand}`);
 } else {
   console.log("Leave both windows open. The current handover is automatic.");
 }

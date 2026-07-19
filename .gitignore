@@ -1,4 +1,5 @@
 .DS_Store
+.koda/
 node_modules/
 coverage/
 *.tgz

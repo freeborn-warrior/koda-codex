@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn, spawnSync } from "node:child_process";
-import { appendFile, lstat, readFile, readdir, realpath, rm } from "node:fs/promises";
+import { appendFile, cp, lstat, mkdir, readFile, readdir, realpath, rm } from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
@@ -22,7 +22,9 @@ import {
 } from "../src/project.ts";
 import { readApprovalEntries, sha256 } from "../src/receipt.ts";
 import { pendingOwnerHandbacks, type OwnerHandback } from "./owner-handback.ts";
+import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
+  REVIEWER_LOCK_DIR,
   newReviewerJob,
   readReviewerJob,
   readReviewerWindowState,
@@ -43,6 +45,7 @@ type RoleRecord = {
 
 type RunRecord = {
   version: number;
+  mode?: "fixture-copy" | "guide-project";
   scenario: string;
   status: string;
   preparedAt: string;
@@ -53,11 +56,17 @@ type RunRecord = {
   cli: string;
   initialCommit: string;
   maxTurns: number;
+  launchId?: string;
+  prompt?: string;
+  archive?: string;
+  guideReturn?: string;
   startedAt?: string;
   completedAt?: string;
+  returnPreparedAt?: string;
   ownerAcknowledgements?: number;
   sessionId?: string;
   finalCommit?: string;
+  archiveCommit?: string;
   lastAction?: string;
   lastError?: string;
 };
@@ -93,10 +102,6 @@ const runRoot = await (requested ? realpath(path.resolve(root, requested)) : dis
   console.error(`RELAY REFUSED — ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
 });
-if (path.dirname(runRoot) !== runsRoot) {
-  throw new Error(`Relay run must be one direct child of ${runsRoot}`);
-}
-
 const runPath = path.join(runRoot, "RUN.json");
 const transcriptPath = path.join(runRoot, "TRANSCRIPT.md");
 if (!(await lstat(runPath)).isFile() || !(await lstat(transcriptPath)).isFile()) {
@@ -117,20 +122,19 @@ if (
   throw new Error("Relay RUN.json has invalid paths or turn limit.");
 }
 
-const projectCandidate = path.resolve(runRoot, run.project);
-const runtimeCandidate = path.resolve(runRoot, run.runtime);
-if (!projectCandidate.startsWith(`${runRoot}${path.sep}`) || !runtimeCandidate.startsWith(`${projectCandidate}${path.sep}`)) {
-  throw new Error("Relay run paths escape their prepared run folder.");
-}
-const project = await realpath(projectCandidate);
-const runtime = await realpath(runtimeCandidate);
-if (!project.startsWith(`${runRoot}${path.sep}`) || !runtime.startsWith(`${project}${path.sep}`)) {
-  throw new Error("Relay run paths resolve outside their prepared run folder.");
-}
-const expectedCli = await realpath(path.join(root, "src", "cli.ts"));
-if (await realpath(run.cli) !== expectedCli) {
-  throw new Error("Relay RUN.json does not name this checkout's trusted Koda CLI.");
-}
+const resolved = await resolveRelayRunPaths({ packageRoot: root, configuredRunsRoot: runsRoot, runRoot, run });
+const { project, runtime, cli } = resolved;
+run.cli = cli;
+if (resolved.mode === "guide-project" && (
+  !run.launchId || !run.prompt || !run.archive || !run.guideReturn ||
+  path.isAbsolute(run.prompt) || run.prompt.split(/[\\/]/).includes("..")
+)) throw new Error("Guide relay RUN.json has missing or unsafe launch evidence paths.");
+const reviewerResumeCommand = resolved.mode === "guide-project"
+  ? formatRelayCommand(path.join(root, "scripts", "run-relay-reviewer-window.ts"), runRoot)
+  : "npm run relay:reviewer";
+const producerResumeCommand = resolved.mode === "guide-project"
+  ? formatRelayCommand(path.join(root, "scripts", "execute-relay-run.ts"), runRoot, ["--reviewer-window"])
+  : `npm run ${twoWindow ? "relay:producer" : "relay:execute"} -- ${path.relative(root, runRoot)}`;
 
 function timestamp(): string {
   return new Date().toISOString();
@@ -388,7 +392,7 @@ async function dispatchReviewerWindowJob(
   console.log(`\nHANDOVER TO WINDOW B — ${purpose}`);
   console.log("The persistent reviewer window receives this automatically. Window A will wait here.");
   if (!(await readReviewerWindowState(runRoot))) {
-    console.log("If Window B is not open yet, run: npm run relay:reviewer");
+    console.log(`If Window B is not open yet, run: ${reviewerResumeCommand}`);
   }
 
   for (;;) {
@@ -429,9 +433,11 @@ async function dispatchReviewerWindowJob(
 }
 
 async function openSession(): Promise<void> {
+  const ownerPrompt = path.resolve(project, run.prompt ?? "owner-prompt.md");
+  if (!ownerPrompt.startsWith(`${project}${path.sep}`)) throw new Error("Relay session prompt escapes the project.");
   await modelTurn("producer", "open the Koda session", [
     `Read ${producerSkill("session")} completely and explicitly use koda-c-session.`,
-    `The owner-authored prompt is ${path.join(project, "owner-prompt.md")}.`,
+    `The owner-authored prompt is ${ownerPrompt}.`,
     `Use node ${run.cli} wherever the skill says koda.`,
     "You are the non-interactive producer. Do not ask or address the owner, create a phase artifact, review, approval, or advancement.",
     "Verify the disk-backed handover and stop.",
@@ -641,11 +647,205 @@ async function closeSession(): Promise<void> {
   ].join(" "));
 }
 
+function safeProjectRelative(value: string | undefined, label: string): string {
+  if (!value || path.isAbsolute(value) || value.split(/[\\/]/).includes("..")) {
+    throw new Error(`${label} must be a safe project-relative path.`);
+  }
+  return value.split(path.sep).join("/");
+}
+
+async function ensureProjectDirectory(relative: string, label: string): Promise<string> {
+  const parts = safeProjectRelative(relative, label).split("/").filter(Boolean);
+  let current = project;
+  for (const part of parts) {
+    current = path.join(current, part);
+    if (await pathExists(current)) {
+      const metadata = await lstat(current);
+      if (!metadata.isDirectory()) throw new Error(`${label} contains a symbolic link or non-directory: ${path.relative(project, current)}.`);
+      const resolvedCurrent = await realpath(current);
+      if (!resolvedCurrent.startsWith(`${project}${path.sep}`)) throw new Error(`${label} resolves outside the project.`);
+    } else {
+      await mkdir(current);
+    }
+  }
+  return current;
+}
+
+async function sameRegularFile(left: string, right: string): Promise<boolean> {
+  if (!(await pathExists(left)) || !(await pathExists(right))) return false;
+  const [leftMetadata, rightMetadata] = await Promise.all([lstat(left), lstat(right)]);
+  if (!leftMetadata.isFile() || !rightMetadata.isFile()) return false;
+  const [leftContent, rightContent] = await Promise.all([readFile(left), readFile(right)]);
+  return leftContent.equals(rightContent);
+}
+
+async function buildGuideReturnStage(session: NonNullable<Awaited<ReturnType<typeof latest>>>, head: string): Promise<string> {
+  const archiveRelative = safeProjectRelative(run.archive, "Guide evidence archive");
+  const guideReturnRelative = safeProjectRelative(run.guideReturn, "Guide return artifact");
+  if (!run.launchId || !/^[a-f0-9-]{36}$/.test(run.launchId)) throw new Error("Guide run has no valid launch identity.");
+  if (!run.prompt) throw new Error("Guide run has no bound session prompt.");
+
+  const firstPreparation = run.status !== "FINALIZING_GUIDE_RETURN";
+  run.status = "FINALIZING_GUIDE_RETURN";
+  run.finalCommit = head;
+  run.completedAt ??= timestamp();
+  run.returnPreparedAt ??= timestamp();
+  run.lastAction = "return pushed close evidence to Guide";
+  run.lastError = undefined;
+  await saveRun();
+  await writeTextAtomic(path.join(runRoot, "RESULT.md"), [
+    `# Guide relay result — ${run.launchId}`,
+    "",
+    "- Status: COMPLETE",
+    `- Session: ${session.id}`,
+    `- Confirmed prompt: ${run.prompt}`,
+    `- Producer: ${run.producer.model} / ${run.producer.effort}`,
+    `- Producer context: ${run.producer.threadId}`,
+    `- Producer turns: ${run.producer.turns}`,
+    `- Reviewer: ${run.reviewer.model} / ${run.reviewer.effort}`,
+    `- Reviewer context: ${run.reviewer.threadId}`,
+    `- Reviewer turns: ${run.reviewer.turns}`,
+    `- Completed phases: ${session.state.currentPhaseIndex}/${session.state.phases.length}`,
+    `- Owner acknowledgements: ${run.ownerAcknowledgements ?? 0}`,
+    `- Close: SESSION CLOSED at pushed commit ${head}`,
+    `- Guide return: ${guideReturnRelative}`,
+    "",
+  ].join("\n"));
+  if (firstPreparation) {
+    await note("session closed; preparing Guide return", [
+      `- Session: ${session.id}`,
+      `- Producer / reviewer contexts remained distinct: ${run.producer.threadId !== run.reviewer.threadId}`,
+      `- Pushed close commit: \`${head}\``,
+      `- Durable Guide archive: \`${archiveRelative}\``,
+      `- Durable Guide return: \`${guideReturnRelative}\``,
+    ]);
+  }
+
+  const stage = path.join(runRoot, "GUIDE-RETURN-STAGE");
+  await rm(stage, { recursive: true, force: true });
+  const stageArchive = path.join(stage, "archive");
+  await mkdir(stageArchive, { recursive: true });
+  const { archiveCommit: _archiveCommit, lastError: _lastError, ...stableRun } = run;
+  await writeJsonAtomic(path.join(stageArchive, "RUN.json"), {
+    ...stableRun,
+    status: "COMPLETE",
+    completedAt: run.completedAt,
+    cli: "trusted Koda-C package CLI (machine-local path omitted from archive)",
+  });
+  for (const entry of await readdir(runRoot, { withFileTypes: true })) {
+    if (entry.name === "RUN.json" || entry.name === "GUIDE-RETURN-STAGE") continue;
+    if (entry.name === REVIEWER_LOCK_DIR && entry.isDirectory()) continue;
+    if (entry.isDirectory()) throw new Error(`Guide runtime contains unexpected directory ${entry.name}; evidence archival refuses.`);
+    if (!entry.isFile()) throw new Error(`Guide runtime contains symbolic link or special entry ${entry.name}; evidence archival refuses.`);
+    await cp(path.join(runRoot, entry.name), path.join(stageArchive, entry.name), { errorOnExist: true });
+  }
+  const closeFile = closePath(session.directory);
+  const closeContent = await readFile(closeFile, "utf8");
+  await writeJsonAtomic(path.join(stage, "guide-return.json"), {
+    version: 1,
+    status: "CLOSED_SESSION_RETURNED",
+    launchId: run.launchId,
+    sessionId: session.id,
+    prompt: run.prompt,
+    close: path.relative(project, closeFile).split(path.sep).join("/"),
+    closeSha256: sha256(closeContent),
+    closeCommit: head,
+    archive: archiveRelative,
+    producer: run.producer,
+    reviewer: run.reviewer,
+    ownerAcknowledgements: run.ownerAcknowledgements ?? 0,
+    returnedAt: run.returnPreparedAt,
+  });
+  return stage;
+}
+
+async function finishGuideReturn(stage: string): Promise<void> {
+  const archiveRelative = safeProjectRelative(run.archive, "Guide evidence archive");
+  const guideReturnRelative = safeProjectRelative(run.guideReturn, "Guide return artifact");
+  const stageArchive = path.join(stage, "archive");
+  const stageReturn = path.join(stage, "guide-return.json");
+  if (!(await pathExists(stageArchive)) || !(await lstat(stageArchive)).isDirectory() || !(await pathExists(stageReturn)) || !(await lstat(stageReturn)).isFile()) {
+    throw new Error("Guide return staging evidence is incomplete; rebuild it from the verified closed session.");
+  }
+  const archiveParent = await ensureProjectDirectory(path.dirname(archiveRelative), "Guide evidence archive parent");
+  const archiveTarget = path.join(project, archiveRelative);
+  if (!(await pathExists(archiveTarget))) await mkdir(archiveTarget);
+  else if (!(await lstat(archiveTarget)).isDirectory()) throw new Error("Guide evidence archive target is not a real directory.");
+
+  const stagedNames = (await readdir(stageArchive, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name));
+  const targetNames = new Set(await readdir(archiveTarget));
+  for (const entry of stagedNames) {
+    if (!entry.isFile()) throw new Error(`Guide return staging contains unsafe entry ${entry.name}.`);
+    const source = path.join(stageArchive, entry.name);
+    const target = path.join(archiveTarget, entry.name);
+    if (await pathExists(target)) {
+      if (!(await sameRegularFile(source, target))) throw new Error(`Guide archive recovery found changed evidence: ${entry.name}.`);
+    } else {
+      await cp(source, target, { errorOnExist: true });
+    }
+    targetNames.delete(entry.name);
+  }
+  if (targetNames.size > 0) throw new Error(`Guide archive recovery found unexpected evidence: ${[...targetNames].join(", ")}.`);
+  if (path.dirname(archiveTarget) !== archiveParent) throw new Error("Guide evidence archive parent mismatch.");
+
+  await ensureProjectDirectory(path.dirname(guideReturnRelative), "Guide return parent");
+  const guideReturnTarget = path.join(project, guideReturnRelative);
+  if (await pathExists(guideReturnTarget)) {
+    if (!(await sameRegularFile(stageReturn, guideReturnTarget))) throw new Error("Guide return recovery found a changed return artifact.");
+  } else {
+    await cp(stageReturn, guideReturnTarget, { errorOnExist: true });
+  }
+
+  const changed = git(["status", "--porcelain", "--untracked-files=all"]).stdout.trim().split(/\r?\n/).filter(Boolean);
+  for (const line of changed) {
+    const changedPath = line.slice(3).replace(/^"|"$/g, "");
+    if (changedPath !== guideReturnRelative && !changedPath.startsWith(`${archiveRelative}/`) && changedPath !== `${archiveRelative}/`) {
+      throw new Error(`Guide return recovery refuses unrelated project change: ${line}.`);
+    }
+  }
+
+  const trackedReturn = git(["ls-files", "--error-unmatch", "--", guideReturnRelative], [0, 1]).status === 0;
+  if (!trackedReturn) {
+    git(["add", "--", archiveRelative, guideReturnRelative]);
+    const staged = git(["diff", "--cached", "--name-only"]).stdout.trim().split(/\r?\n/).filter(Boolean);
+    if (!staged.length || staged.some((name) => name !== guideReturnRelative && !name.startsWith(`${archiveRelative}/`))) {
+      throw new Error("Guide return staging contains missing or unrelated Git paths.");
+    }
+    git(["commit", "-m", `guide: return closed session ${run.sessionId}`]);
+  }
+  const ahead = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
+  if (ahead !== "0") git(["push"]);
+  const remaining = git(["status", "--porcelain", "--untracked-files=all"]).stdout.trim();
+  if (remaining !== "") throw new Error(`Guide return left the project dirty: ${remaining}`);
+  run.status = "COMPLETE";
+  run.completedAt = timestamp();
+  run.archiveCommit = git(["rev-parse", "HEAD"]).stdout.trim();
+  run.lastAction = "closed session evidence returned to Guide and pushed";
+  run.lastError = undefined;
+  await saveRun();
+  console.log(`\nRELAY COMPLETE — ${run.sessionId}`);
+  console.log(`Guide return: ${path.join(project, guideReturnRelative)}`);
+  console.log(`Durable evidence: ${path.join(project, archiveRelative)}`);
+}
+
 async function finalize(): Promise<void> {
   const session = await latest();
   if (!session) throw new Error("No session exists at finalization.");
   const closure = await evaluateSessionClosure(project, session.directory, session.state);
   if (!closure.closed) throw new Error(`Close verification failed: ${closure.reasons.join("; ")}`);
+
+  if (resolved.mode === "guide-project" && run.status === "FINALIZING_GUIDE_RETURN") {
+    if (!run.finalCommit || !/^[a-f0-9]{40,64}$/.test(run.finalCommit)) {
+      throw new Error("Interrupted Guide return has no valid bound close commit.");
+    }
+    const recoveryHead = git(["rev-parse", "HEAD"]).stdout.trim();
+    if (recoveryHead !== run.finalCommit) {
+      throw new Error("Guide return recovery refuses because the project commit changed after return staging.");
+    }
+    const stage = await buildGuideReturnStage(session, run.finalCommit);
+    await finishGuideReturn(stage);
+    return;
+  }
 
   const status = git(["status", "--porcelain", "--untracked-files=all"]).stdout.trim();
   if (status !== "") throw new Error(`Relay project is not clean at close: ${status}`);
@@ -653,11 +853,39 @@ async function finalize(): Promise<void> {
   const branch = git(["branch", "--show-current"]).stdout.trim();
   const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]).stdout.trim();
   const ahead = git(["rev-list", "--count", "@{u}..HEAD"]).stdout.trim();
-  const remoteHead = git(["rev-parse", "refs/remotes/origin/main"]).stdout.trim();
+  const remoteHead = git(["rev-parse", upstream]).stdout.trim();
   const log = git(["log", "--oneline", "--decorate", "--all"]).stdout;
   const kodaStatus = koda(["status"]);
   if (kodaStatus.status !== 0 || !kodaStatus.stdout.includes("SESSION CLOSED")) {
     throw new Error(`Final Koda status did not derive SESSION CLOSED: ${kodaStatus.stdout}${kodaStatus.stderr}`);
+  }
+
+  if (resolved.mode === "guide-project") {
+    await Promise.all([
+      writeJsonAtomic(path.join(runRoot, "GIT-EVIDENCE.json"), {
+        version: 1,
+        mode: "guide-project",
+        launchId: run.launchId,
+        sessionId: session.id,
+        branch,
+        upstream,
+        head,
+        remoteHead,
+        aheadCount: Number(ahead),
+        projectStatus: status,
+        kodaStatus: kodaStatus.stdout.trim(),
+        capturedAt: timestamp(),
+      }),
+      writeTextAtomic(path.join(runRoot, "GIT-LOG.txt"), log),
+    ]);
+    const stage = await buildGuideReturnStage(session, head);
+    if (process.env.KODA_RELAY_TEST_PAUSE_AFTER_GUIDE_STAGE === "1") {
+      run.lastError = "Injected interruption after Guide return staging and before project mutation.";
+      await saveRun();
+      throw new PausedRun(run.lastError);
+    }
+    await finishGuideReturn(stage);
+    return;
   }
 
   const bundle = path.join(runRoot, "PROJECT-HISTORY.bundle");
@@ -723,7 +951,7 @@ async function finalize(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  run.status = "RUNNING";
+  if (run.status !== "FINALIZING_GUIDE_RETURN") run.status = "RUNNING";
   run.startedAt ??= timestamp();
   run.ownerAcknowledgements ??= 0;
   run.lastError = undefined;
@@ -865,11 +1093,11 @@ try {
   await main();
 } catch (error) {
   if (!(error instanceof PausedRun)) {
-    run.status = "PAUSED_ERROR";
+    if (run.status !== "FINALIZING_GUIDE_RETURN") run.status = "PAUSED_ERROR";
     run.lastError = error instanceof Error ? error.message : String(error);
     await saveRun();
   }
   console.error(`\nRELAY PAUSED — ${run.lastError ?? String(error)}`);
-  console.error(`Resume with: npm run ${twoWindow ? "relay:producer" : "relay:execute"} -- ${path.relative(root, runRoot)}`);
+  console.error(`Resume with: ${producerResumeCommand}`);
   process.exitCode = error instanceof PausedRun ? 2 : 1;
 }

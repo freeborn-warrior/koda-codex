@@ -12,6 +12,7 @@ import { pathExists } from "../src/config.ts";
 import { writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
 import { createOwnerHandback } from "./owner-handback.ts";
+import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
   acquireReviewerWindow,
   readReviewerJob,
@@ -26,8 +27,10 @@ import {
 
 type RunRecord = {
   version: number;
+  mode?: "fixture-copy" | "guide-project";
   status: string;
   project: string;
+  runtime: string;
   cli: string;
   reviewer: { model: string; effort: string; threadId: string | null; turns: number };
 };
@@ -66,7 +69,6 @@ async function discoverRun(): Promise<string> {
 }
 
 const runRoot = requested ? await realpath(path.resolve(root, requested)) : await discoverRun();
-if (path.dirname(runRoot) !== runsRoot) refuse(`The run must be one direct child of ${runsRoot}.`);
 const runPath = path.join(runRoot, "RUN.json");
 if (!(await lstat(runPath)).isFile()) refuse("RUN.json must be a regular file.");
 
@@ -76,6 +78,7 @@ async function readRun(): Promise<RunRecord> {
     value.version !== 1 ||
     typeof value.status !== "string" ||
     typeof value.project !== "string" ||
+    typeof value.runtime !== "string" ||
     typeof value.cli !== "string" ||
     !value.reviewer ||
     typeof value.reviewer.model !== "string" ||
@@ -87,13 +90,16 @@ async function readRun(): Promise<RunRecord> {
 }
 
 const initialRun = await readRun();
-const projectCandidate = path.resolve(runRoot, initialRun.project);
-if (!projectCandidate.startsWith(`${runRoot}${path.sep}`)) refuse("The project path escapes the relay run.");
-const project = await realpath(projectCandidate);
-if (!project.startsWith(`${runRoot}${path.sep}`)) refuse("The project path resolves outside the relay run.");
-const expectedCli = await realpath(path.join(root, "src", "cli.ts"));
-const cli = await realpath(initialRun.cli);
-if (cli !== expectedCli) refuse("RUN.json does not name this checkout's trusted Koda CLI.");
+const resolved = await resolveRelayRunPaths({ packageRoot: root, configuredRunsRoot: runsRoot, runRoot, run: {
+  mode: initialRun.mode,
+  project: initialRun.project,
+  runtime: initialRun.runtime,
+  cli: initialRun.cli,
+} }).catch((error) => refuse(error instanceof Error ? error.message : String(error)));
+const { project, cli } = resolved;
+const reviewerResumeCommand = resolved.mode === "guide-project"
+  ? formatRelayCommand(path.join(root, "scripts", "run-relay-reviewer-window.ts"), runRoot)
+  : "npm run relay:reviewer";
 
 const releaseLock = await acquireReviewerWindow(runRoot, { recoverStale: recoverStaleLock })
   .catch((error) => refuse(error instanceof Error ? error.message : String(error)));
@@ -445,7 +451,7 @@ try {
         state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: message });
         await writeReviewerWindowState(runRoot, state);
         console.error(`\nREVIEWER PAUSED SAFELY — ${message}`);
-        console.error("Resume with: npm run relay:reviewer");
+        console.error(`Resume with: ${reviewerResumeCommand}`);
         process.exitCode = 2;
         break;
       }
