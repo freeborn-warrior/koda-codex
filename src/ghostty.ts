@@ -199,38 +199,49 @@ function processAlive(pid: number): boolean {
   }
 }
 
-async function reviewerLockAlive(runRoot: string): Promise<boolean> {
-  const lock = path.join(runRoot, ".reviewer-window.lock");
+async function roleLockAlive(runRoot: string, role: "Reviewer" | "Producer"): Promise<boolean> {
+  const lock = path.join(runRoot, `.${role.toLowerCase()}-window.lock`);
   const metadata = await lstat(lock).catch(() => null);
   if (!metadata) return false;
-  if (!metadata.isDirectory() || metadata.isSymbolicLink()) throw new Error("Reviewer recovery lock is unsafe.");
+  if (!metadata.isDirectory() || metadata.isSymbolicLink()) throw new Error(`${role} recovery lock is unsafe.`);
   const ownerFile = path.join(lock, "OWNER.json");
-  const ownerMetadata = await lstat(ownerFile).catch(() => null);
-  if (!ownerMetadata || !ownerMetadata.isFile() || ownerMetadata.isSymbolicLink()) {
-    throw new Error("Reviewer recovery lock owner is unsafe.");
+  let ownerMetadata;
+  try {
+    ownerMetadata = await lstat(ownerFile);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      const lockStillExists = await lstat(lock).then(() => true).catch(() => false);
+      if (!lockStillExists) return false;
+      throw new Error(`${role} recovery lock owner is unsafe.`);
+    }
+    throw error;
   }
-  const owner = JSON.parse(await readFile(ownerFile, "utf8")) as { version?: number; pid?: number };
+  if (!ownerMetadata || !ownerMetadata.isFile() || ownerMetadata.isSymbolicLink()) {
+    throw new Error(`${role} recovery lock owner is unsafe.`);
+  }
+  let owner: { version?: number; pid?: number };
+  try {
+    owner = JSON.parse(await readFile(ownerFile, "utf8")) as { version?: number; pid?: number };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      const lockStillExists = await lstat(lock).then(() => true).catch(() => false);
+      if (!lockStillExists) return false;
+      throw new Error(`${role} recovery lock owner is unsafe.`);
+    }
+    throw new Error(`${role} recovery lock owner is invalid.`, { cause: error });
+  }
   if (owner.version !== 1 || !Number.isInteger(owner.pid) || owner.pid! < 1) {
-    throw new Error("Reviewer recovery lock owner is invalid.");
+    throw new Error(`${role} recovery lock owner is invalid.`);
   }
   return processAlive(owner.pid!);
 }
 
+async function reviewerLockAlive(runRoot: string): Promise<boolean> {
+  return roleLockAlive(runRoot, "Reviewer");
+}
+
 async function producerLockAlive(runRoot: string): Promise<boolean> {
-  const lock = path.join(runRoot, ".producer-window.lock");
-  const metadata = await lstat(lock).catch(() => null);
-  if (!metadata) return false;
-  if (!metadata.isDirectory() || metadata.isSymbolicLink()) throw new Error("Producer recovery lock is unsafe.");
-  const ownerFile = path.join(lock, "OWNER.json");
-  const ownerMetadata = await lstat(ownerFile).catch(() => null);
-  if (!ownerMetadata || !ownerMetadata.isFile() || ownerMetadata.isSymbolicLink()) {
-    throw new Error("Producer recovery lock owner is unsafe.");
-  }
-  const owner = JSON.parse(await readFile(ownerFile, "utf8")) as { version?: number; pid?: number };
-  if (owner.version !== 1 || !Number.isInteger(owner.pid) || owner.pid! < 1) {
-    throw new Error("Producer recovery lock owner is invalid.");
-  }
-  return processAlive(owner.pid!);
+  return roleLockAlive(runRoot, "Producer");
 }
 
 export async function visibleRoleHealth(runRoot: string): Promise<VisibleRoleHealth> {
@@ -317,23 +328,37 @@ async function readRecoveryRecord(file: string): Promise<Record<string, unknown>
   if (record.version !== 1 || record.reason !== "owner-receipt-input-retry" || typeof record.requestedAt !== "string") {
     throw new Error("Visible recovery evidence does not match the owner-receipt recovery contract.");
   }
+  if (record.attempts !== undefined && !Array.isArray(record.attempts)) {
+    throw new Error("Visible recovery evidence has an invalid attempt history.");
+  }
   return record;
 }
 
 export async function producerOnlyRecoveryReady(runtime: GuideRuntimeView): Promise<boolean> {
+  const roles = await partialRecoveryRoles(runtime);
+  return roles?.length === 1 && roles[0] === "producer";
+}
+
+export async function partialRecoveryRoles(
+  runtime: GuideRuntimeView,
+): Promise<Array<GhosttyWindowRequest["role"]> | null> {
   const recoveryFile = path.join(runtime.runRoot, "RECOVERY.json");
-  if (!(await lstat(recoveryFile).then(() => true).catch(() => false))) return false;
+  if (!(await lstat(recoveryFile).then(() => true).catch(() => false))) return null;
   const recovery = await readRecoveryRecord(recoveryFile);
   const job = await receiptRecoveryJob(runtime.runRoot);
   const jobRecord = job as unknown as Record<string, unknown>;
   const expectedError = `A different reviewer job is already active: ${String(jobRecord.kind)} ${String(jobRecord.phase)} (${job.status}).`;
-  return runtime.run.status === "PAUSED_ERROR" &&
-    runtime.run.lastError === expectedError &&
+  const failedRejoin = runtime.run.status === "PAUSED_ERROR" && runtime.run.lastError === expectedError;
+  const stableOwnerHandover = runtime.run.status === "AWAITING_REVIEWER_WINDOW" && runtime.run.lastError === undefined;
+  const exactPartialState = (failedRejoin || stableOwnerHandover) &&
     job.status === "AWAITING_OWNER" &&
-    ["formal", "repair", "fresh"].includes(String(jobRecord.kind)) &&
-    recovery.producerRetryAt === undefined &&
-    await reviewerLockAlive(runtime.runRoot) &&
-    !(await producerLockAlive(runtime.runRoot));
+    ["formal", "repair", "fresh"].includes(String(jobRecord.kind));
+  if (!exactPartialState) return null;
+  const health = await visibleRoleHealth(runtime.runRoot);
+  const missing: Array<GhosttyWindowRequest["role"]> = [];
+  if (!health.reviewerRunning) missing.push("reviewer");
+  if (!health.producerRunning) missing.push("producer");
+  return missing.length > 0 ? missing : null;
 }
 
 export async function requestGhosttyRecoveryWindows(
@@ -344,36 +369,55 @@ export async function requestGhosttyRecoveryWindows(
 ): Promise<GhosttyWindowRequest[]> {
   const recoveryFile = path.join(runtime.runRoot, "RECOVERY.json");
   const priorRecovery = await lstat(recoveryFile).then(() => true).catch(() => false);
-  if (priorRecovery) {
+  const partialRoles = priorRecovery ? await partialRecoveryRoles(runtime) : null;
+  if (partialRoles) {
     const recovery = await readRecoveryRecord(recoveryFile);
-    if (!(await producerOnlyRecoveryReady(runtime))) {
-      throw new Error("A visible recovery was already requested. Return to the Guide conversation; do not open duplicate windows.");
-    }
+    const retryRequestedAt = nowIso();
     const prepared = {
       ...runtime,
       launch: { id: runtime.run.launchId },
     } as PreparedGuideRuntime;
-    const producerRequest = (await ghosttyWindowRequests(project, prepared, dependencies))[1]!;
-    runtime.run.lastAction = "reopen only the missing Producer after Reviewer recovery";
+    const allRequests = await ghosttyWindowRequests(project, prepared, dependencies);
+    const requests = allRequests.filter((request) => partialRoles.includes(request.role));
+    runtime.run.lastAction = `reopen missing ${partialRoles.join(" and ")} after partial recovery`;
     runtime.run.lastError = undefined;
     await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
     const open = dependencies.open ?? defaultOpen;
-    const producer = open(producerRequest.args, project);
-    if (producer.status !== 0) {
-      runtime.run.lastError = `Ghostty refused the recovered Producer window${producer.stderr ? `: ${producer.stderr}` : "."}`;
-      await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
-      throw new Error(runtime.run.lastError);
+    for (const request of requests) {
+      const result = open(request.args, project);
+      if (result.status !== 0) {
+        runtime.run.lastError = `Ghostty refused the recovered ${request.role === "reviewer" ? "Reviewer" : "Producer"} window${result.stderr ? `: ${result.stderr}` : "."}`;
+        await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+        throw new Error(runtime.run.lastError);
+      }
+      const ready = request.role === "reviewer"
+        ? await (dependencies.waitForRecoveredReviewer ?? waitForRecoveredReviewer)(runtime.runRoot)
+        : await (dependencies.waitForRecoveredProducer ?? waitForRecoveredProducer)(runtime.runRoot);
+      if (!ready) {
+        const current = await recoveredRunState(runtime.runRoot);
+        runtime.run.status = current?.status ?? "PAUSED_ERROR";
+        runtime.run.lastError = current?.lastError ?? (request.role === "reviewer"
+          ? "Recovered Reviewer did not reach the existing owner decision point; the Producer was not opened."
+          : "Recovered Producer did not rejoin the existing Reviewer decision point.");
+        await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+        throw new Error(runtime.run.lastError);
+      }
     }
-    const producerReady = await (dependencies.waitForRecoveredProducer ?? waitForRecoveredProducer)(runtime.runRoot);
-    if (!producerReady) {
-      const current = await recoveredRunState(runtime.runRoot);
-      runtime.run.status = current?.status ?? "PAUSED_ERROR";
-      runtime.run.lastError = current?.lastError ?? "Recovered Producer did not rejoin the existing Reviewer decision point.";
-      await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
-      throw new Error(runtime.run.lastError);
-    }
-    await writeJsonAtomic(recoveryFile, { ...recovery, producerRetryAt: nowIso() });
-    return [producerRequest];
+    const completedAt = nowIso();
+    await writeJsonAtomic(recoveryFile, {
+      ...recovery,
+      rolesRetried: partialRoles,
+      completedAt,
+      attempts: [
+        ...(Array.isArray(recovery.attempts) ? recovery.attempts : []),
+        { roles: partialRoles, requestedAt: retryRequestedAt, completedAt },
+      ],
+      ...(partialRoles.includes("producer") ? { producerRetryAt: completedAt } : {}),
+    });
+    return requests;
+  }
+  if (priorRecovery) {
+    throw new Error("A visible recovery was already requested. Return to the Guide conversation; do not open duplicate windows.");
   }
   if (runtime.run.status !== "PAUSED_REVIEWER_FAILURE" || runtime.run.lastError !== "Owner acknowledgement exited 1.") {
     throw new Error("Automatic recovery is limited to the named owner-receipt failure. Return to Guide for an exact diagnosis; do not run a role command.");

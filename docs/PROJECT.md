@@ -119,6 +119,13 @@ owner contract
   Repair commits `153814a` and `9e2f8e4` pass pushed 204/204 transcripts; the current
   toolkit capability `ghostty-owner-surface-v6` also forbids raw recovery commands
   in low-level owner-visible refusal messages. Owner observation is still owed.
+- A final pre-observation state-matrix audit found that the partial recovery still
+  depended on Reviewer remaining alive. The current candidate restores Reviewer
+  first and Producer second when both disappeared, handles a Reviewer-only absence,
+  and permits a genuinely missing role to recover again at the same owner handover
+  while refusing live duplicates. Recovery attempts are preserved on disk. Focused,
+  complete, and coverage runs pass locally at 35/35 and 206/206; pushed toolkit
+  binding and owner observation remain before this becomes a shipped claim.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.
@@ -157,6 +164,8 @@ owner contract
 - [One-key first-use UX audit](quality-runs/2026-07-19-first-use-ux-audit-05/RESULT.md)
 - [First-use recovery development record](test-results/2026-07-19-first-use-recovery-polish-development-failures.md)
 - [Pushed 204-check first-use recovery proof](test-results/2026-07-19-first-use-recovery-polish-pushed.md)
+- [Repeatable-recovery first-use UX audit](quality-runs/2026-07-19-repeatable-recovery-ux-audit-06/RESULT.md)
+- [Repeatable-recovery security audit](security-runs/2026-07-19-repeatable-recovery-audit-11/RESULT.md)
 - [Pushed 204-check owner-surface proof](test-results/2026-07-19-owner-surface-pushed.md)
 - [Ghostty launcher development failures](test-results/2026-07-18-ghostty-launcher-development-failures.md)
 - [Ghostty launcher 132-check result](test-results/2026-07-18-ghostty-launcher-final.md)

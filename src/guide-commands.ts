@@ -14,7 +14,7 @@ import {
 } from "./guide.ts";
 import { currentGuideRuntime, listGuideRuntimes, prepareGuideRuntime } from "./guide-runtime.ts";
 import {
-  producerOnlyRecoveryReady,
+  partialRecoveryRoles,
   requestGhosttyRecoveryWindows,
   requestGhosttyWindows,
   visibleRoleHealth,
@@ -214,13 +214,30 @@ export async function runGuideCli(
           io.out("The prior session ended through pushed halt. Reconcile it and confirm a fresh Brief before launching again.");
         }
       } else {
-        if (await producerOnlyRecoveryReady(runtime)) {
-          io.out("REVIEWER RECOVERED — the existing owner decision is still open and nothing advanced.");
-          io.out("The Producer window failed to rejoin that decision and may be closed.");
+        const partialRoles = await partialRecoveryRoles(runtime);
+        if (partialRoles) {
+          const reviewerMissing = partialRoles.includes("reviewer");
+          const producerMissing = partialRoles.includes("producer");
+          if (!reviewerMissing && producerMissing) {
+            io.out("REVIEWER RECOVERED — the existing owner decision is still open and nothing advanced.");
+            io.out("The Producer window failed to rejoin that decision and may be closed.");
+          } else if (reviewerMissing && producerMissing) {
+            io.out("SESSION WINDOWS CLOSED — the saved owner decision is still open and nothing advanced.");
+            io.out("Both visible role windows are gone. Koda can restore the Reviewer first, then the Producer, from the same disk state.");
+          } else {
+            io.out("REVIEWER WINDOW CLOSED — the saved owner decision is still open and nothing advanced.");
+            io.out("The Producer remains present. Koda can restore only the missing Reviewer at that same decision.");
+          }
           io.out("");
           io.out("SESSION RECOVERY READY");
-          io.out("1. Reopen only the missing Producer — Koda will make it wait on the existing Reviewer decision without creating another job.");
-          io.out("2. Not now — keep the Reviewer open and the session safely paused.");
+          if (!reviewerMissing && producerMissing) {
+            io.out("1. Reopen only the missing Producer — Koda will make it wait on the existing Reviewer decision without creating another job.");
+          } else if (reviewerMissing && producerMissing) {
+            io.out("1. Reopen this session — Koda will restore the Reviewer first and open the Producer only after that decision is ready.");
+          } else {
+            io.out("1. Reopen only the missing Reviewer — Koda will restore the same owner decision without creating another job.");
+          }
+          io.out("2. Not now — keep the session safely paused without changing the saved decision.");
           io.out("Choose in the Guide conversation. Do not paste or reconstruct a technical command.");
           continue;
         }
@@ -343,6 +360,9 @@ export async function runGuideCli(
     if (requests.length === 1 && requests[0]?.role === "producer") {
       io.out("✓ The recovered Reviewer stays open at the same owner decision.");
       io.out(`✓ ${requests[0].title} rejoined that existing decision.`);
+    } else if (requests.length === 1 && requests[0]?.role === "reviewer") {
+      io.out("✓ The same Reviewer context reopened at the unacknowledged review.");
+      io.out("✓ The existing Producer stays bound to that decision.");
     } else {
       io.out("✓ The same Reviewer context reopened at the unacknowledged review.");
       io.out("✓ Producer opened only after Reviewer reached the owner decision point.");

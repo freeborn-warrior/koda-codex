@@ -43,6 +43,11 @@ Turn the proved two-context session relay into a project-level experience that c
     no raw role commands on the ordinary owner surface. The pushed suite passes
     204/204 under toolkit capability `ghostty-owner-surface-v6`; human
     observation follows.
+24. [ ] Promote repeatable role recovery: restore Reviewer before Producer when both
+    disappear, recover a later missing role without blind duplication, preserve an
+    append-only attempt history, and keep the ordinary owner surface at two Guide
+    choices. The local candidate passes 206/206 plus coverage; pushed binding and
+    Kristian's observation remain.
 
 ## Submission cut
 

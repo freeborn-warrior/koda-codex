@@ -1,6 +1,6 @@
 # Koda-C terminal testing in Ghostty
 
-## Current status — clean retry paused at a recoverable Brief decision
+## Current status — clean retry preserved at its Brief decision
 
 This is the route Kristian will use. It is written for someone who should not
 need to understand shell state, environment variables, run directories, or
@@ -13,9 +13,19 @@ acknowledgement prompt caused an empty receipt and exited both role processes. T
 gate stayed shut: zero ledger entries and zero advanced phases.
 
 Session `2026-07-19-02` remains safely recoverable with the same review and context
-identities. Do not create another session or manually start either role. Until the
-194-check repair is committed, pushed, and post-push verified, Kristian should do
-nothing in Producer or Reviewer. See the [sanitized receipt UX incident](verification-runs/2026-07-19-markdown-headings-01/RECEIPT-UX-INCIDENT.md).
+identities. Do not create another session or manually start either role. The current
+mechanical proof covers the exact recovery shapes that the live attempt exposed:
+
+- if Reviewer is still running, Koda opens only the missing Producer;
+- if Reviewer also disappeared, Koda restores Reviewer first and opens Producer only
+  after Reviewer reaches the saved owner decision;
+- if either readiness check fails, the later role stays closed and Guide names the
+  unchanged pause; and
+- if a restored role later disappears from the same owner handover, the same
+  disk-bound recovery remains available instead of becoming a one-shot dead end.
+
+The gate remains unchanged throughout recovery. See the
+[sanitized receipt UX incident](verification-runs/2026-07-19-markdown-headings-01/RECEIPT-UX-INCIDENT.md).
 
 ### Before Kristian types anything
 
@@ -51,10 +61,11 @@ Window G is recorded in that run's `OWNER-STEPS.md`. It starts Guide only; it do
 not launch the session. The current halted run's owner steps intentionally contain
 no launch command.
 
-Once Guide verifies a fresh launch, it shows `1` launch / `2` not now. Once Guide
-detects the exact recoverable receipt failure, it shows `1` reopen / `2` not now.
-Kristian presses or types only the number. Guide invokes the bound technical action;
-Kristian never pastes a command, path, launch ID, receipt, commit, or test count.
+Once Guide verifies a fresh launch, it shows `1` launch / `2` not now. When Guide
+detects a recoverable session, it shows `1` reopen / `2` not now and explains which
+window or windows are missing. Kristian presses or types only the number. Guide
+invokes the bound technical action; Kristian never pastes a command, path, launch
+ID, receipt, commit, or test count.
 
 Codex may display one host permission asking whether to run Koda's local launcher.
 Choosing yes should leave Guide open, request one labeled Reviewer first, wait for its
@@ -77,17 +88,11 @@ Do not run the launch command in this repository merely to experiment when no
 fresh confirmed prompt exists; the entry checks will refuse.
 
 The repaired automatic path has deterministic argument, executable-launcher,
-environment, order, failure, and halt-race tests. Those do not predict macOS
-permission behavior. If either requested window does not appear, do not repeat
-the launch command. In Window G, ask Guide to report current Koda status; Guide
-may run the read-only command:
-
-```bash
-koda guide status
-```
-
-Guide will show the applicable numbered recovery choice. A blind retry refuses
-because one window may already exist.
+environment, order, repeated-recovery, failure, and halt-race tests. Those do not
+predict macOS permission behavior. If either requested window does not appear, do
+not repeat anything yourself. In Window G, ask: **“What is the current session
+state?”** Guide performs the read-only check and shows the applicable numbered
+choice. A blind retry refuses because one window may already exist.
 
 ### What Kristian does after both windows appear
 

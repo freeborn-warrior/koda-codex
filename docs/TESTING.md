@@ -1298,3 +1298,33 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   Toolkit capability `ghostty-owner-surface-v6` binds it and the changed launch
   surface.
 - **Verdict:** PUSHED MECHANICS AND SECURITY PASS; HUMAN RECOVERY REMAINS.
+
+## 2026-07-19 — Both-window and repeatable owner-decision recovery
+
+- **Why:** The owner-observed partial recovery left Reviewer open and Producer
+  missing. Before returning that flow to Kristian, a state-matrix review found that
+  the repair depended on Reviewer staying alive and that the Ghostty guide still
+  described the superseded 194-check state. If Reviewer closed while Kristian was
+  away, the saved decision remained intact but automatic recovery had no valid route.
+- **Correction:** Recovery now derives the missing role set from live disk evidence.
+  It restores only Producer when Reviewer is alive, only Reviewer when Producer is
+  alive, or Reviewer first and Producer second when both are absent. A stable
+  `AWAITING_REVIEWER_WINDOW` handover can recover again after a later role loss;
+  successful attempts append to `RECOVERY.json` rather than turning the mechanism
+  into a one-shot dead end. Role-lock observation also tolerates the lock disappearing
+  during either owner-file probe while still refusing an extant unsafe owner.
+- **Mutation:** The new readiness mutation makes restored Reviewer fail. Exactly one
+  Reviewer request occurs, Producer is never opened or checked, and the saved run
+  names that refusal. Existing duplicate recovery still refuses when both role locks
+  are live.
+- **Local results:** Focused Guide suite **35/35**; complete living suite **206/206**;
+  coverage suite **206/206** at **89.03% lines, 69.12% branches, and 86.46%
+  functions** overall. No existing assertion was weakened.
+- **Live-state check:** The preserved verification project was read only. It remains
+  at Brief with the same `AWAITING_OWNER` formal review, zero acknowledgements, and
+  zero advancements. No role was launched and no runtime file was changed.
+- **Evidence:** [Repeatable-recovery UX audit](quality-runs/2026-07-19-repeatable-recovery-ux-audit-06/RESULT.md)
+  and [security audit 11](security-runs/2026-07-19-repeatable-recovery-audit-11/RESULT.md).
+- **Pending:** Commit, push, rerun the unchanged suite from the pushed code, bind the
+  transcript into the toolkit manifest, rerun final package/security checks, then
+  ask Kristian for the remaining Ghostty observation.
