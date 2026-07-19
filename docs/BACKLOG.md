@@ -34,8 +34,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
-- [x] Make `$koda-c-session-prompt` the sole skill route toward a future session and force a disk preflight before drafting. Active sessions and prepared runtimes print a named `NEXT SESSION BLOCKED` explanation; the honest control permits one draft between sessions, pushed halt reopens the path, and a sealed fresh Sol/medium task refused the conceptually-ahead request without changing a file. Owner-observed proof remains owed.
-- [x] Re-run fresh startup discovery against the current repository: Sol/low reported all ten Koda-C skills and repository-local placement guidance from startup context with zero tools or repository reads.
+- [x] Make `$koda-c-session-prompt` the sole skill route toward a future session and force a disk preflight before drafting. Active sessions and prepared runtimes print a named `NEXT SESSION BLOCKED` explanation; the honest control permits one draft between sessions, and pushed halt reopens the path (`c94799a`; pushed 151-check deterministic proof).
+- [x] Re-run fresh startup discovery and active refusal against the sealed contract. Sol/low reported all ten Koda-C skills and repository-local placement guidance with zero tools or reads; Sol/medium refused the conceptually-ahead request without changing a file (`bc8f746`; pushed 152-check regression proof). Owner-observed three-window proof remains owed.
 
 - [x] Make the CLI ceremony legible without implementation logs: permanent Guide/Producer/Reviewer labels, explicit owner-input state, frozen phase-entry progress, artifact and gate-pass handovers, Reviewer phase position, and sequential status that prints only Reviewer first and only then Producer. All summaries derive from exposed disk/process facts; hidden reasoning is never claimed (`d57d3fd`; pushed 147-check proof).
 

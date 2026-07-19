@@ -130,6 +130,7 @@ owner contract
 - [Fresh ten-skill startup discovery](discovery-runs/2026-07-19-fresh-codex-startup-02/RESULT.md)
 - [Fresh active-session Guide refusal](guide-preflight-runs/2026-07-19-sol-medium-01/RESULT.md)
 - [Fresh Guide preflight 152-check result](test-results/2026-07-19-guide-preflight-fresh-model-final.md)
+- [Fresh Guide preflight post-push 152-check result](test-results/2026-07-19-guide-preflight-fresh-model-pushed-final.md)
 - [Always-open Reviewer development failures](test-results/2026-07-18-reviewer-open-conversation-development-failures.md)
 - [Always-open Reviewer 135-check result](test-results/2026-07-19-reviewer-open-conversation-final.md)
 - [Always-open Reviewer post-push 135-check result](test-results/2026-07-19-reviewer-open-conversation-pushed-final.md)
