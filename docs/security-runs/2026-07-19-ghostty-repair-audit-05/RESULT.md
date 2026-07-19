@@ -79,6 +79,7 @@ Guide-launched product route.
 | Coverage complete suite | PASS — 181/181; 89.08% lines overall |
 | Durable complete suite | PASS — [181/181 transcript](../../test-results/2026-07-19-ghostty-integrity-repair-complete.md) |
 | Ready-to-push repetition | PASS — ordinary 181/181 plus [durable 181/181](../../test-results/2026-07-19-ghostty-integrity-repair-ready-to-push.md) after final docs and quoted-path control |
+| Post-push complete suite | PASS — commit `963a76b` pushed, then [181/181](../../test-results/2026-07-19-ghostty-integrity-repair-pushed-final.md) |
 | Real package lifecycle | PASS — the complete suite builds, packs, installs, and runs the dependency-free JavaScript package with no install hook |
 | Whitespace and symlinks | PASS — `git diff --check` and repair-surface link scan found no issue |
 | Credential signatures | PASS — no common live credential signature was found in repository files; the exposed value was never saved |
@@ -104,7 +105,7 @@ Guide-launched product route.
 ## Verdict
 
 No new unmitigated code-level critical or high finding remains in the repair
-surface. Mechanical containment and regression evidence pass. Release readiness
-still requires the fresh owner-visible Ghostty run, followed by post-push tests;
-until then the product must say **repaired but not human-reverified**, never
+surface. Mechanical containment and post-push regression evidence pass. Release
+readiness still requires the fresh owner-visible Ghostty run; until then the
+product must say **repaired but not human-reverified**, never
 **incident closed**.

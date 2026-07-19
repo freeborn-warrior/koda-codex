@@ -108,10 +108,12 @@ Before another owner run:
 - After the hostile quoted-path control and final documentation were added, a
   second ordinary and durable repetition each passed **181/181**; the latter is
   preserved in the [ready-to-push transcript](../../test-results/2026-07-19-ghostty-integrity-repair-ready-to-push.md).
+- The complete repair was committed and pushed at `963a76b`; the unchanged suite
+  then passed **181/181** again in the [post-push transcript](../../test-results/2026-07-19-ghostty-integrity-repair-pushed-final.md).
 - Repository whitespace, symlink, credential-signature, package/install, and Git
   connectivity checks passed. Full Git object inspection found only recoverable
   unreachable objects from prior development operations, not reachable corruption.
-- Post-push proof and a fresh owner-observed launch remain pending. Mechanical
-  repair is verified; human usability and real Ghostty permission behavior are
+- A fresh owner-observed launch remains pending. Mechanical repair is pushed and
+  verified; human usability and real Ghostty permission behavior are
   intentionally not inferred from deterministic tests, so the incident remains
   a release blocker until that fresh run succeeds.

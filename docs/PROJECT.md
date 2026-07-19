@@ -164,6 +164,7 @@ owner contract
 - [Ghostty repair and whole-product delta security audit](security-runs/2026-07-19-ghostty-repair-audit-05/RESULT.md)
 - [Ghostty integrity repair 181-check result](test-results/2026-07-19-ghostty-integrity-repair-complete.md)
 - [Ghostty integrity repair ready-to-push 181-check result](test-results/2026-07-19-ghostty-integrity-repair-ready-to-push.md)
+- [Ghostty integrity repair post-push 181-check result](test-results/2026-07-19-ghostty-integrity-repair-pushed-final.md)
 - [First prompt-confirmation mismatch and pushed cancellation](verification-runs/2026-07-19-markdown-headings-01/CONFIRMATION-ATTEMPT-01.md)
 - [Corrected prompt confirmation and verified pushed launch](verification-runs/2026-07-19-markdown-headings-01/CONFIRMATION-ATTEMPT-02.md)
 - [One-action owner steps for the current three-window run](verification-runs/2026-07-19-markdown-headings-01/OWNER-STEPS.md)

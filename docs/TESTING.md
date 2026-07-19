@@ -894,11 +894,14 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   project, README, owner-step, and security-report updates landed, the ordinary
   suite passed **181/181** again and a second durable run passed **181/181** in
   [the ready-to-push transcript](test-results/2026-07-19-ghostty-integrity-repair-ready-to-push.md).
+- **Post-push verification:** The complete repair milestone was committed and
+  pushed at `963a76b`. The unchanged complete suite then passed **181/181** again
+  with that commit recorded as its base in [the post-push transcript](test-results/2026-07-19-ghostty-integrity-repair-pushed-final.md).
 - **Security checks:** Diff whitespace, repair-surface symlinks, repository
   credential signatures, real package installation, and reachable Git object
   integrity passed. `git fsck --full` named only recoverable unreachable objects
   left by prior development operations, not reachable corruption.
-- **Boundary:** Deterministic mechanics are repaired. Post-push verification and
-  one fresh owner-observed run remain required because tests cannot prove Ghostty's
+- **Boundary:** Deterministic mechanics are repaired and post-push verified. One
+  fresh owner-observed run remains required because tests cannot prove Ghostty's
   real window count, permission prompts, or Kristian's human clarity.
 - **Verdict:** MECHANICAL REPAIR PASS; RELEASE BLOCKER REMAINS UNTIL FRESH HUMAN RUN.
