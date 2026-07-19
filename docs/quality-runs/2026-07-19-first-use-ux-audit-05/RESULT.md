@@ -23,6 +23,9 @@ proof boundary.
 - Active, paused, missing-role, and saved-error states give the owner numbered Guide
   choices. Raw `node`, npm, path, and relay-resume commands are hidden from the
   ordinary owner journey.
+- Duplicate launch and unsupported-recovery errors also route back to the Guide
+  conversation. Strengthened tests forbid their earlier `koda guide status` and
+  “recovery commands” wording.
 - Review-file and clipboard failures no longer end both role processes. Reviewer
   stays at the same decision point and offers numbered retry, back, or safe-stop
   choices.

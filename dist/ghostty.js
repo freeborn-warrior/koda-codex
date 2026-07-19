@@ -347,7 +347,7 @@ export async function requestGhosttyRecoveryWindows(
   if (priorRecovery) {
     const recovery = await readRecoveryRecord(recoveryFile);
     if (!(await producerOnlyRecoveryReady(runtime))) {
-      throw new Error("A visible recovery was already requested. Run koda guide status instead of opening duplicate windows.");
+      throw new Error("A visible recovery was already requested. Return to the Guide conversation; do not open duplicate windows.");
     }
     const prepared = {
       ...runtime,
@@ -376,7 +376,7 @@ export async function requestGhosttyRecoveryWindows(
     return [producerRequest];
   }
   if (runtime.run.status !== "PAUSED_REVIEWER_FAILURE" || runtime.run.lastError !== "Owner acknowledgement exited 1.") {
-    throw new Error("Automatic recovery is limited to the named owner-receipt failure. Run koda guide status for other states.");
+    throw new Error("Automatic recovery is limited to the named owner-receipt failure. Return to Guide for an exact diagnosis; do not run a role command.");
   }
   if (!runtime.run.terminalLaunch) throw new Error("No prior visible launch exists to recover.");
   if (await reviewerLockAlive(runtime.runRoot)) {
@@ -441,7 +441,7 @@ export async function requestGhosttyWindows(
   dependencies                            = {},
 )                                  {
   if (prepared.reused || prepared.run.terminalLaunch) {
-    throw new Error("This Guide runtime already exists; automatic Ghostty opening refuses to create duplicate Producer or Reviewer processes. Use koda guide status for exact recovery commands.");
+    throw new Error("This Guide runtime already exists; automatic Ghostty opening refuses to create duplicate Producer or Reviewer processes. Return to Guide for the exact next choice.");
   }
   const requests = await ghosttyWindowRequests(project, prepared, dependencies);
   prepared.run.terminalLaunch = { adapter: "ghostty-macos", requestedAt: nowIso() };

@@ -673,7 +673,13 @@ test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Review
 
   await assert.rejects(
     runGuideCli([...args], h.root, { out() {} }, dependencies),
-    /automatic Ghostty opening refuses to create duplicate Producer or Reviewer processes/,
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.match(error.message, /automatic Ghostty opening refuses to create duplicate Producer or Reviewer processes/);
+      assert.match(error.message, /Return to Guide/);
+      assert.doesNotMatch(error.message, /koda guide status|recovery commands/);
+      return true;
+    },
   );
   assert.equal(opened.length, 2);
 
@@ -728,7 +734,13 @@ test("GUIDE GHOSTTY MUTATION: a failed Producer request refuses duplicate automa
   assert.match(status.join("\n"), /SESSION NEEDS GUIDE ATTENTION/);
   assert.match(status.join("\n"), /1\. Ask Guide to diagnose this exact saved session/);
   assert.doesNotMatch(status.join("\n"), /run-relay-reviewer-window|execute-relay-run/);
-  await assert.rejects(requestGhosttyWindows(h.root, { ...prepared, reused: true }), /refuses to create duplicate Producer or Reviewer processes/);
+  await assert.rejects(requestGhosttyWindows(h.root, { ...prepared, reused: true }), (error: unknown) => {
+    assert.ok(error instanceof Error);
+    assert.match(error.message, /refuses to create duplicate Producer or Reviewer processes/);
+    assert.match(error.message, /Return to Guide/);
+    assert.doesNotMatch(error.message, /koda guide status|recovery commands/);
+    return true;
+  });
   assert.equal(opened.length, 2);
 });
 
@@ -911,7 +923,13 @@ test("GUIDE GHOSTTY OWNER-ERROR RECOVERY: one action reopens Reviewer first and 
 
   await assert.rejects(
     runGuideCli(["recover", "--open", "ghostty"], h.root, { out() {} }),
-    /visible recovery was already requested/,
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.match(error.message, /visible recovery was already requested/);
+      assert.match(error.message, /Return to the Guide conversation/);
+      assert.doesNotMatch(error.message, /koda guide status|recovery commands/);
+      return true;
+    },
   );
 });
 

@@ -1286,4 +1286,10 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Final manifest regression:** After the transcript, manifest, current README,
   backlog, project document, and submission checklist were assembled, the complete
   suite passed **204/204** again.
+- **Post-bind owner-surface scan:** Three low-level Ghostty refusal messages still
+  exposed a raw `koda guide status` instruction. They now route the owner back to the
+  Guide conversation, and strengthened existing assertions forbid raw status or
+  recovery-command wording. The first focused run correctly refused **0/6** on the
+  stale v5 integrity hash; after a local hash bootstrap it passed **6/6**, and the
+  complete suite passed **204/204**.
 - **Verdict:** PUSHED MECHANICS AND SECURITY PASS; HUMAN RECOVERY REMAINS.

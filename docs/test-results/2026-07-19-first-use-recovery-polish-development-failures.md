@@ -45,6 +45,14 @@ the stack—Producer rejoin—not a loss of project-level Guide truth.
    status observed the directory but before status read `OWNER.json`. Role status now
    returns “not running” only when the lock itself disappeared during that probe; an
    existing lock with missing/corrupt owner evidence still refuses.
+6. **Post-bind owner-surface scan: 0/6 before integrity bootstrap.** Three low-level
+   duplicate/recovery errors still told the caller to run `koda guide status`, even
+   though the ordinary owner contract says to return to Guide. The wording was
+   corrected and existing mutation assertions were strengthened to forbid both the
+   raw status command and “recovery commands.” The first focused execution then
+   refused all six cases because the v5 manifest correctly detected changed
+   `src/ghostty.ts`; after a temporary local hash bootstrap, the focused set passed
+   **6/6** and the complete suite passed **204/204**.
 
 ## Corrected local results
 
