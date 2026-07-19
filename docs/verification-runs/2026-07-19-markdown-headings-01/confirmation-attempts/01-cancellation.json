@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "launchId": "1cf9d706-666e-4891-97a7-f33ecf5506ac",
+  "status": "CANCELLED",
+  "cancelledBy": "Kristian",
+  "reason": "Prompt relationship says continuation while first-session launch is independently classified; revise and reconfirm exact wording.",
+  "cancelledAt": "2026-07-19T18:33:16.119Z"
+}

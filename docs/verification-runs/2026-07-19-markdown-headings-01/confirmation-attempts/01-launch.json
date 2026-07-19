@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "id": "1cf9d706-666e-4891-97a7-f33ecf5506ac",
+  "status": "READY_TO_LAUNCH",
+  "prompt": "docs/guide/prompts/2026-07-19-markdown-heading-reporter.md",
+  "promptSha256": "864058a56f4738a707265be8e72c6df667ecb64ee60b830d7051bca6a4d01845",
+  "manifest": {
+    "path": "docs/guide/project.json",
+    "sha256": "fb76198965b824e1bc2f31b4bf664445e49daadd5f7d8b8271472c029a9c3727"
+  },
+  "continuity": [
+    {
+      "path": "docs/PROJECT.md",
+      "sha256": "9ff61de5e762b466a4594659f45ef466d6ac83391dffa29fa1a8c5779f673384"
+    },
+    {
+      "path": "docs/BACKLOG.md",
+      "sha256": "a0955fddb3286a8bc14888562a3658f3c69f21b7705f6eb81fa3443129a46148"
+    },
+    {
+      "path": "docs/WORKING-PLAN.md",
+      "sha256": "b896d437d5064dbc969187ed9fb51ab879ee92a4e47be0b3fdaf56a6269047b7"
+    }
+  ],
+  "previousSessionId": null,
+  "previousCloseSha256": null,
+  "previousCarryForward": null,
+  "sessionKind": "produce",
+  "launchMode": "independent",
+  "dependencies": [],
+  "confirmedBy": "Kristian",
+  "confirmedAt": "2026-07-19T18:32:49.161Z"
+}

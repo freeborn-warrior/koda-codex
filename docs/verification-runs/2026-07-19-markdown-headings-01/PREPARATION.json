@@ -1,7 +1,7 @@
 {
   "version": 1,
   "runId": "2026-07-19-markdown-headings-01",
-  "status": "AWAITING_OWNER_CONFIRMATION",
+  "status": "AWAITING_OWNER_RECONFIRMATION",
   "preparedAt": "2026-07-19T18:28:31Z",
   "liveProject": ".koda/verification-projects/2026-07-19-markdown-headings-01/project",
   "initialCommit": "f3d99323f7df8bf308d0f26ea9cc5eb7a9a3256d",
@@ -11,7 +11,7 @@
     "result": "BETWEEN SESSIONS — Guide discussion or one next-session draft may continue."
   },
   "promptDraft": "docs/guide/prompts/2026-07-19-markdown-heading-reporter.md",
-  "promptSha256": "864058a56f4738a707265be8e72c6df667ecb64ee60b830d7051bca6a4d01845",
+  "promptSha256": "d2a72f1b018eddc936ef1d0a9a355788f749ffb0aed57da199ad0a17e4cd9c8a",
   "producer": {
     "model": "gpt-5.6-sol",
     "effort": "medium"
@@ -19,6 +19,14 @@
   "reviewer": {
     "model": "gpt-5.6-terra",
     "effort": "medium"
+  },
+  "priorConfirmation": {
+    "launchId": "1cf9d706-666e-4891-97a7-f33ecf5506ac",
+    "promptSha256": "864058a56f4738a707265be8e72c6df667ecb64ee60b830d7051bca6a4d01845",
+    "cliLaunchMode": "independent",
+    "promptLaunchRelationship": "continuation (first session with no predecessor)",
+    "status": "CANCELLED_AND_PUSHED",
+    "cancellationCommit": "df3fea05447c119164d6b4a5ea69e8b5494ca102"
   },
   "ownerConfirmed": false,
   "modelRunStarted": false

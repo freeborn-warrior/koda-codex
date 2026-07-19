@@ -36,9 +36,8 @@ Build and verify the first bounded Markdown heading reporter now, so Koda-C's co
 
 ## Relay handover
 - Session kind: produce
-- Launch relationship: continuation (first session with no predecessor)
+- Launch relationship: independent first session (no predecessor or active sibling)
 - Dependencies: none; this is the first session and no sibling is active
 - Configured receiver: brief
 - Ground prepared: `AGENTS.md`, `docs/PROJECT.md`, `docs/BACKLOG.md`, `docs/WORKING-PLAN.md`, and `docs/IN-PHASE-CONSULTATION.md`
 - Open items: none
-

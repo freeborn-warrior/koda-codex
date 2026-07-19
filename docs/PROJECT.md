@@ -159,6 +159,7 @@ owner contract
 - [Prepared three-window verification contract](verification-runs/2026-07-19-markdown-headings-01/CONTRACT.md)
 - [Exact unconfirmed verification session prompt](verification-runs/2026-07-19-markdown-headings-01/SESSION-PROMPT-DRAFT.md)
 - [Current three-window verification result](verification-runs/2026-07-19-markdown-headings-01/RESULT.md)
+- [First prompt-confirmation mismatch and pushed cancellation](verification-runs/2026-07-19-markdown-headings-01/CONFIRMATION-ATTEMPT-01.md)
 - [Three-window project preparation 179-check result](test-results/2026-07-19-three-window-project-preparation-final.md)
 - [First Guide live-test preflight 177-check result](test-results/2026-07-19-live-test-preflight-docs-final.md)
 - [Pre-submission concurrency development failures](test-results/2026-07-19-pre-submission-concurrency-development-failures.md)

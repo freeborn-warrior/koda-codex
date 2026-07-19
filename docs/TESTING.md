@@ -814,3 +814,12 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Regression:** The unchanged complete deterministic suite passed **179/179** after preparation. Every named result is preserved in [the project-preparation transcript](test-results/2026-07-19-three-window-project-preparation-final.md).
 - **Boundary:** The next action is a real owner decision on the exact prompt. Until Kristian confirms or revises it, the skill forbids `koda guide confirm`, launch preparation, Producer/Reviewer creation, and session opening.
 - **Verdict:** PREPARATION PASS; OWNER PROMPT CONFIRMATION REQUIRED.
+
+## 2026-07-19 — First verification-prompt confirmation refused by semantic handover
+
+- **Variant:** Guide confirmation and immutable cancellation only. No model, Ghostty window, Koda session, review, receipt, phase artifact, or close was created.
+- **What happened:** Kristian approved the sealed prompt if it worked. The required fresh Guide status passed. `koda guide confirm` bound the exact prompt hash and three continuity files but classified the first dependency-free session as `independent`, while the prompt said `continuation (first session with no predecessor)`.
+- **Refusal:** The CLI request was mechanically valid, but the `koda-c-session-prompt` handover requires prompt and launch relationship to agree. The mismatch was not ignored or reinterpreted after confirmation.
+- **Recovery:** Launch `1cf9d706-666e-4891-97a7-f33ecf5506ac` was cancelled through Koda, then prompt, request, and cancellation were committed and pushed together at `df3fea05447c119164d6b4a5ea69e8b5494ca102`. The complete history is preserved in the run bundle and the two JSON artifacts are copied under `confirmation-attempts/`.
+- **Correction:** Only the relationship line changed, from `continuation (first session with no predecessor)` to `independent first session (no predecessor or active sibling)`. Its new exact SHA-256 is `d2a72f1b018eddc936ef1d0a9a355788f749ffb0aed57da199ad0a17e4cd9c8a`.
+- **Verdict:** HANDOVER CORRECTLY REFUSED; FRESH OWNER CONFIRMATION REQUIRED. Model execution remains false.
