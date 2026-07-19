@@ -1349,6 +1349,13 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   files, and zero bundled dependencies; credential-signature, committed-symlink,
   diff-whitespace, and reachable-object checks passed. Git reports only dangling
   development objects, not corrupt or missing reachable history.
-- **Pending:** Commit and push the manifest, transcripts, corrected judge assertion,
-  and final audit; rerun a small post-push integrity slice; then Kristian's Ghostty
-  observation is the remaining runtime proof.
+- **Evidence push:** Manifest, transcripts, corrected judge assertion, and final
+  audits were pushed at `42476f7`. The post-push security, submission, and toolkit
+  integrity slice passed **14/14**, and local `HEAD` matched `origin/main`.
+- **Real paused-project preflight:** The current shipped CLI read the preserved
+  verification project without mutation. It reported toolkit capability
+  `ghostty-repeatable-recovery-v7` at **206/206**, session `2026-07-19-02` at Brief
+  1/6, the existing owner decision still open, Reviewer present, Producer missing,
+  and only `1` reopen Producer / `2` not now. No role was launched.
+- **Remaining proof:** Kristian's Ghostty observation and continuation through the
+  remaining gates and pushed close.

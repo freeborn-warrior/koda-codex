@@ -70,3 +70,8 @@ The first final-manifest regression failed closed because its timestamp did not
 exactly match the transcript and the judge assertion still named older evidence.
 That failure is [preserved per test](../../test-results/2026-07-19-repeatable-recovery-manifest-assembly-failure.md);
 the corrected contract requires the current 206-check proof and security audit.
+
+After evidence commit `42476f7` was pushed, the shipped CLI performed a read-only
+preflight of the real paused project. It reported the same open Brief decision,
+Reviewer present, Producer missing, and only `1` reopen Producer / `2` not now. It
+did not require Kristian to supply the session ID, path, command, or error history.
