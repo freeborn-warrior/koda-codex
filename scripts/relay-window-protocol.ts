@@ -8,6 +8,7 @@ import { writeJsonAtomic } from "../src/project.ts";
 export const REVIEWER_JOB_FILE = "REVIEWER-JOB.json";
 export const REVIEWER_STATE_FILE = "REVIEWER-STATE.json";
 export const REVIEWER_LOCK_DIR = ".reviewer-window.lock";
+export const PRODUCER_LOCK_DIR = ".producer-window.lock";
 
 export type ReviewerJobKind = "formal" | "repair" | "fresh" | "consultation" | "acknowledge";
 export type ReviewerJobStatus = "PENDING" | "RUNNING" | "AWAITING_OWNER" | "COMPLETE" | "FAILED";
@@ -149,9 +150,14 @@ export async function reviewerWindowLockStatus(
 ): Promise<{ pid: number; startedAt: string; alive: boolean } | null> {
   const lock = path.join(runRoot, REVIEWER_LOCK_DIR);
   if (!(await pathExists(lock))) return null;
-  if (!(await lstat(lock)).isDirectory()) throw new Error(`Reviewer lock must be a directory: ${lock}`);
-  const owner = await reviewerLockOwner(lock);
-  return { pid: owner.pid, startedAt: owner.startedAt, alive: processIsAlive(owner.pid) };
+  try {
+    if (!(await lstat(lock)).isDirectory()) throw new Error(`Reviewer lock must be a directory: ${lock}`);
+    const owner = await reviewerLockOwner(lock);
+    return { pid: owner.pid, startedAt: owner.startedAt, alive: processIsAlive(owner.pid) };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT" && !(await pathExists(lock))) return null;
+    throw error;
+  }
 }
 
 export async function acquireReviewerWindow(
@@ -163,6 +169,10 @@ export async function acquireReviewerWindow(
     await mkdir(lock, { recursive: false });
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+      const metadata = await lstat(lock);
+      if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
+        throw new Error(`Reviewer lock must be a real directory: ${lock}`);
+      }
       const owner = await reviewerLockOwner(lock);
       if (processIsAlive(owner.pid)) {
         throw new Error(`A reviewer window already owns this run as process ${owner.pid}. Lock: ${lock}`);
@@ -181,6 +191,59 @@ export async function acquireReviewerWindow(
       }
     } else {
       throw error;
+    }
+  }
+  await writeJsonAtomic(path.join(lock, "OWNER.json"), {
+    version: 1,
+    pid: process.pid,
+    startedAt: now(),
+  });
+  return async () => rm(lock, { recursive: true, force: true });
+}
+
+export async function producerWindowLockStatus(
+  runRoot: string,
+): Promise<{ pid: number; startedAt: string; alive: boolean } | null> {
+  const lock = path.join(runRoot, PRODUCER_LOCK_DIR);
+  if (!(await pathExists(lock))) return null;
+  try {
+    if (!(await lstat(lock)).isDirectory()) throw new Error(`Producer lock must be a directory: ${lock}`);
+    const owner = await reviewerLockOwner(lock);
+    return { pid: owner.pid, startedAt: owner.startedAt, alive: processIsAlive(owner.pid) };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT" && !(await pathExists(lock))) return null;
+    throw error;
+  }
+}
+
+export async function acquireProducerWindow(
+  runRoot: string,
+  options: { recoverStale?: boolean } = {},
+): Promise<() => Promise<void>> {
+  const lock = path.join(runRoot, PRODUCER_LOCK_DIR);
+  try {
+    await mkdir(lock, { recursive: false });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    const metadata = await lstat(lock);
+    if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
+      throw new Error(`Producer lock must be a real directory: ${lock}`);
+    }
+    const owner = await reviewerLockOwner(lock);
+    if (processIsAlive(owner.pid)) {
+      throw new Error(`A producer window already owns this run as process ${owner.pid}. Lock: ${lock}`);
+    }
+    if (!options.recoverStale) {
+      throw new Error(`The producer-window lock belongs to stopped process ${owner.pid}. Explicit recovery is required.`);
+    }
+    await rm(lock, { recursive: true, force: true });
+    try {
+      await mkdir(lock, { recursive: false });
+    } catch (recoveryError) {
+      if ((recoveryError as NodeJS.ErrnoException).code === "EEXIST") {
+        throw new Error(`Another producer window claimed the run during stale-lock recovery. Lock: ${lock}`);
+      }
+      throw recoveryError;
     }
   }
   await writeJsonAtomic(path.join(lock, "OWNER.json"), {

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdir, readFile, readdir, stat, symlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
@@ -471,7 +471,9 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   assert.match(guideStatus.join("\n"), /current READY_TO_LAUNCH request must bind or be cancelled before another confirmation/);
   assert.match(guideStatus.join("\n"), new RegExp(`ACTIVE SESSION RUNTIME — ${confirmed.launch.id}`));
   assert.match(guideStatus.join("\n"), /State: PAUSED_BY_OWNER/);
-  assert.match(guideStatus.join("\n"), /Window B — reviewer \/ owner:[\s\S]*Window A — producer:[\s\S]*Read-only detail:/);
+  assert.match(guideStatus.join("\n"), /SESSION IS PAUSED SAFELY/);
+  assert.match(guideStatus.join("\n"), /1\. Ask Guide to inspect this exact pause/);
+  assert.doesNotMatch(guideStatus.join("\n"), /run-relay-reviewer-window|execute-relay-run/);
 });
 
 test("GUIDE RUNTIME MUTATION: an unignored runtime refuses by name", async (t) => {
@@ -623,6 +625,14 @@ test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Review
           opened.push({ args: openArgs, cwd });
           return { status: 0, stderr: "" };
         },
+        async waitForStartedReviewer() {
+          assert.equal(opened.length, 1, "Producer must not open before Reviewer is ready");
+          return true;
+        },
+        async waitForStartedProducer() {
+          assert.equal(opened.length, 2, "Launch must verify Producer after its window is requested");
+          return true;
+        },
       });
     },
   };
@@ -656,6 +666,7 @@ test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Review
   assert.equal((await stat(path.join(runRoot, "launch-producer.sh"))).mode & 0o777, 0o700);
   assert.match(output.join("\n"), /THREE-CONTEXT START REQUESTED/);
   assert.match(output.join("\n"), /This Guide conversation stays open/);
+  assert.doesNotMatch(output.join("\n"), /run-relay-reviewer-window|execute-relay-run/);
   const runFile = path.join(runRoot, "RUN.json");
   const run = JSON.parse(await readFile(runFile, "utf8"));
   assert.equal(run.terminalLaunch.adapter, "ghostty-macos");
@@ -702,6 +713,7 @@ test("GUIDE GHOSTTY MUTATION: a failed Producer request refuses duplicate automa
         ? { status: 0, stderr: "" }
         : { status: 1, stderr: "injected Producer open failure" };
     },
+    async waitForStartedReviewer() { return true; },
   }), /Ghostty refused the producer window request: injected Producer open failure.*runtime remains recoverable/);
   assert.equal(opened.length, 2);
   const run = JSON.parse(await readFile(path.join(prepared.runRoot, "RUN.json"), "utf8"));
@@ -713,9 +725,109 @@ test("GUIDE GHOSTTY MUTATION: a failed Producer request refuses duplicate automa
   await runGuideCli(["status"], h.root, { out(message) { status.push(message); } });
   assert.match(status.join("\n"), /Visible launch: ghostty-macos requested/);
   assert.match(status.join("\n"), /Last error: Ghostty refused the producer window request/);
-  assert.match(status.join("\n"), /Window B — reviewer \/ owner:[\s\S]*Window A — producer:[\s\S]*Read-only detail:/);
+  assert.match(status.join("\n"), /SESSION NEEDS GUIDE ATTENTION/);
+  assert.match(status.join("\n"), /1\. Ask Guide to diagnose this exact saved session/);
+  assert.doesNotMatch(status.join("\n"), /run-relay-reviewer-window|execute-relay-run/);
   await assert.rejects(requestGhosttyWindows(h.root, { ...prepared, reused: true }), /refuses to create duplicate Producer or Reviewer processes/);
   assert.equal(opened.length, 2);
+});
+
+test("GUIDE GHOSTTY REVIEWER READINESS MUTATION: a window request without a live Reviewer never opens Producer", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm Reviewer readiness mutation"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  const opened: string[] = [];
+  await assert.rejects(requestGhosttyWindows(h.root, prepared, {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open(args) {
+      opened.push(args.find((item) => item.startsWith("--title=")) ?? "missing title");
+      return { status: 0, stderr: "" };
+    },
+    async waitForStartedReviewer() { return false; },
+    async waitForStartedProducer() { throw new Error("Producer readiness must not run"); },
+  }), /Reviewer window request returned, but Reviewer did not become ready; the Producer was not opened/);
+  assert.equal(opened.length, 1);
+  assert.match(opened[0]!, /Reviewer/);
+  const run = JSON.parse(await readFile(path.join(prepared.runRoot, "RUN.json"), "utf8"));
+  assert.match(run.lastError, /Reviewer did not become ready/);
+});
+
+test("GUIDE GHOSTTY PRODUCER READINESS MUTATION: a window request without a live Producer refuses success", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm Producer readiness mutation"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  const opened: string[] = [];
+  await assert.rejects(requestGhosttyWindows(h.root, prepared, {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open(args) {
+      opened.push(args.find((item) => item.startsWith("--title=")) ?? "missing title");
+      return { status: 0, stderr: "" };
+    },
+    async waitForStartedReviewer() { return true; },
+    async waitForStartedProducer() { return false; },
+  }), /Producer window request returned, but Producer did not become ready/);
+  assert.equal(opened.length, 2);
+  assert.match(opened[0]!, /Reviewer/);
+  assert.match(opened[1]!, /Producer/);
+  const run = JSON.parse(await readFile(path.join(prepared.runRoot, "RUN.json"), "utf8"));
+  assert.match(run.lastError, /Producer did not become ready/);
+});
+
+test("GUIDE VISIBLE ROLE STATUS: disk liveness reports a missing Producer instead of pretending the session is active", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm visible role status"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  prepared.run.status = "AWAITING_REVIEWER_WINDOW";
+  prepared.run.terminalLaunch = { adapter: "ghostty-macos", requestedAt: new Date().toISOString() };
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+  for (const lock of [".reviewer-window.lock", ".producer-window.lock"]) {
+    await mkdir(path.join(prepared.runRoot, lock));
+    await writeJsonAtomic(path.join(prepared.runRoot, lock, "OWNER.json"), {
+      version: 1,
+      pid: process.pid,
+      startedAt: new Date().toISOString(),
+    });
+  }
+
+  const healthy: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { healthy.push(message); } });
+  assert.match(healthy.join("\n"), /Visible roles: Reviewer running; Producer running/);
+  assert.match(healthy.join("\n"), /SESSION IS ACTIVE/);
+
+  await rm(path.join(prepared.runRoot, ".producer-window.lock"), { recursive: true });
+  const missing: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { missing.push(message); } });
+  const ownerView = missing.join("\n");
+  assert.match(ownerView, /Visible roles: Reviewer running; Producer not running/);
+  assert.match(ownerView, /SESSION WINDOW RECOVERY NEEDED/);
+  assert.match(ownerView, /1\. Ask Guide to inspect this exact state and reopen only the missing role or roles when safe/);
+  assert.doesNotMatch(ownerView, /run-relay-reviewer-window|execute-relay-run/);
 });
 
 test("GUIDE GHOSTTY OWNER-ERROR RECOVERY: one action reopens Reviewer first and Producer only after it is ready", async (t) => {
@@ -734,6 +846,8 @@ test("GUIDE GHOSTTY OWNER-ERROR RECOVERY: one action reopens Reviewer first and 
     platform: "darwin",
     codexExecutable: process.execPath,
     open() { return { status: 0, stderr: "" }; },
+    async waitForStartedReviewer() { return true; },
+    async waitForStartedProducer() { return true; },
   });
   prepared.run.status = "PAUSED_REVIEWER_FAILURE";
   prepared.run.lastError = "Owner acknowledgement exited 1.";
@@ -817,6 +931,8 @@ test("GUIDE GHOSTTY PARTIAL RECOVERY: an existing Reviewer permits exactly one m
     platform: "darwin",
     codexExecutable: process.execPath,
     open() { return { status: 0, stderr: "" }; },
+    async waitForStartedReviewer() { return true; },
+    async waitForStartedProducer() { return true; },
   });
   prepared.run.status = "PAUSED_REVIEWER_FAILURE";
   prepared.run.lastError = "Owner acknowledgement exited 1.";

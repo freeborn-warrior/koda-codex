@@ -19,13 +19,22 @@ export interface GhosttyOpenResult {
   stderr: string;
 }
 
+export interface VisibleRoleHealth {
+  reviewerRunning: boolean;
+  producerRunning: boolean;
+}
+
 export interface GhosttyLaunchDependencies {
   platform?: string;
   codexExecutable?: string;
   open?: (args: string[], cwd: string) => GhosttyOpenResult;
+  waitForStartedReviewer?: (runRoot: string) => Promise<boolean>;
+  waitForStartedProducer?: (runRoot: string) => Promise<boolean>;
   waitForRecoveredReviewer?: (runRoot: string) => Promise<boolean>;
   waitForRecoveredProducer?: (runRoot: string) => Promise<boolean>;
 }
+
+const ROLE_START_ATTEMPTS = 900;
 
 function packageRoot(): string {
   return path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -207,8 +216,33 @@ async function reviewerLockAlive(runRoot: string): Promise<boolean> {
   return processAlive(owner.pid!);
 }
 
+async function producerLockAlive(runRoot: string): Promise<boolean> {
+  const lock = path.join(runRoot, ".producer-window.lock");
+  const metadata = await lstat(lock).catch(() => null);
+  if (!metadata) return false;
+  if (!metadata.isDirectory() || metadata.isSymbolicLink()) throw new Error("Producer recovery lock is unsafe.");
+  const ownerFile = path.join(lock, "OWNER.json");
+  const ownerMetadata = await lstat(ownerFile).catch(() => null);
+  if (!ownerMetadata || !ownerMetadata.isFile() || ownerMetadata.isSymbolicLink()) {
+    throw new Error("Producer recovery lock owner is unsafe.");
+  }
+  const owner = JSON.parse(await readFile(ownerFile, "utf8")) as { version?: number; pid?: number };
+  if (owner.version !== 1 || !Number.isInteger(owner.pid) || owner.pid! < 1) {
+    throw new Error("Producer recovery lock owner is invalid.");
+  }
+  return processAlive(owner.pid!);
+}
+
+export async function visibleRoleHealth(runRoot: string): Promise<VisibleRoleHealth> {
+  const [reviewerRunning, producerRunning] = await Promise.all([
+    reviewerLockAlive(runRoot),
+    producerLockAlive(runRoot),
+  ]);
+  return { reviewerRunning, producerRunning };
+}
+
 async function waitForRecoveredReviewer(runRoot: string): Promise<boolean> {
-  for (let attempt = 0; attempt < 100; attempt += 1) {
+  for (let attempt = 0; attempt < ROLE_START_ATTEMPTS; attempt += 1) {
     if (await reviewerLockAlive(runRoot)) {
       const job = await receiptRecoveryJob(runRoot).catch(() => null);
       if (job?.status === "AWAITING_OWNER") return true;
@@ -232,9 +266,35 @@ async function recoveredRunState(runRoot: string): Promise<{ status?: string; la
 }
 
 async function waitForRecoveredProducer(runRoot: string): Promise<boolean> {
-  for (let attempt = 0; attempt < 100; attempt += 1) {
+  for (let attempt = 0; attempt < ROLE_START_ATTEMPTS; attempt += 1) {
     const state = await recoveredRunState(runRoot);
-    if (state?.status === "AWAITING_REVIEWER_WINDOW" && !state.lastError) return true;
+    if (state?.status === "AWAITING_REVIEWER_WINDOW" && !state.lastError && await producerLockAlive(runRoot)) return true;
+    if (["PAUSED_ERROR", "PAUSED_REVIEWER_FAILURE"].includes(String(state?.status))) return false;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return false;
+}
+
+async function waitForStartedReviewer(runRoot: string): Promise<boolean> {
+  for (let attempt = 0; attempt < ROLE_START_ATTEMPTS; attempt += 1) {
+    if (await reviewerLockAlive(runRoot)) {
+      const state = path.join(runRoot, "REVIEWER-STATE.json");
+      const metadata = await lstat(state).catch(() => null);
+      if (metadata?.isFile() && !metadata.isSymbolicLink()) return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return false;
+}
+
+async function waitForStartedProducer(runRoot: string): Promise<boolean> {
+  for (let attempt = 0; attempt < ROLE_START_ATTEMPTS; attempt += 1) {
+    const state = await recoveredRunState(runRoot);
+    if (
+      await producerLockAlive(runRoot) &&
+      !["PREPARED", "PAUSED_ERROR", "PAUSED_REVIEWER_FAILURE"].includes(String(state?.status)) &&
+      !state?.lastError
+    ) return true;
     if (["PAUSED_ERROR", "PAUSED_REVIEWER_FAILURE"].includes(String(state?.status))) return false;
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
@@ -272,7 +332,8 @@ export async function producerOnlyRecoveryReady(runtime: GuideRuntimeView): Prom
     job.status === "AWAITING_OWNER" &&
     ["formal", "repair", "fresh"].includes(String(jobRecord.kind)) &&
     recovery.producerRetryAt === undefined &&
-    await reviewerLockAlive(runtime.runRoot);
+    await reviewerLockAlive(runtime.runRoot) &&
+    !(await producerLockAlive(runtime.runRoot));
 }
 
 export async function requestGhosttyRecoveryWindows(
@@ -389,13 +450,31 @@ export async function requestGhosttyWindows(
   await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
 
   const open = dependencies.open ?? defaultOpen;
-  for (const request of requests) {
-    const result = open(request.args, project);
-    if (result.status !== 0) {
-      prepared.run.lastError = `Ghostty refused the ${request.role} window request${result.stderr ? `: ${result.stderr}` : "."}`;
-      await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
-      throw new Error(`${prepared.run.lastError} The runtime remains recoverable through koda guide status.`);
-    }
+  const reviewer = open(requests[0]!.args, project);
+  if (reviewer.status !== 0) {
+    prepared.run.lastError = `Ghostty refused the reviewer window request${reviewer.stderr ? `: ${reviewer.stderr}` : "."}`;
+    await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+    throw new Error(`${prepared.run.lastError} The Producer was not opened.`);
+  }
+  const reviewerReady = await (dependencies.waitForStartedReviewer ?? waitForStartedReviewer)(prepared.runRoot);
+  if (!reviewerReady) {
+    prepared.run.lastError = "The Reviewer window request returned, but Reviewer did not become ready; the Producer was not opened.";
+    await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+    throw new Error(prepared.run.lastError);
+  }
+  const producer = open(requests[1]!.args, project);
+  if (producer.status !== 0) {
+    prepared.run.lastError = `Ghostty refused the producer window request${producer.stderr ? `: ${producer.stderr}` : "."}`;
+    await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+    throw new Error(`${prepared.run.lastError} The Reviewer remains open. The runtime remains recoverable through Guide.`);
+  }
+  const producerReady = await (dependencies.waitForStartedProducer ?? waitForStartedProducer)(prepared.runRoot);
+  if (!producerReady) {
+    const current = await recoveredRunState(prepared.runRoot);
+    prepared.run.status = current?.status ?? prepared.run.status;
+    prepared.run.lastError = current?.lastError ?? "The Producer window request returned, but Producer did not become ready. The Reviewer remains open.";
+    await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+    throw new Error(prepared.run.lastError);
   }
   return requests;
 }

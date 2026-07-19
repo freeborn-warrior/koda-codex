@@ -10,6 +10,7 @@ import { currentPhase, loadSessionState, sessionRoot } from "../src/project.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import { validateModelTurnInterruption, type ModelTurnInterruption } from "./relay-interruption.ts";
 import {
+  producerWindowLockStatus,
   readReviewerJob,
   readReviewerWindowState,
   reviewerWindowLockStatus,
@@ -117,6 +118,7 @@ const producerCommand = resolved.mode === "guide-project"
 const reviewerState = await readReviewerWindowState(runRoot);
 const job = await readReviewerJob(runRoot);
 const lock = await reviewerWindowLockStatus(runRoot);
+const producerLock = await producerWindowLockStatus(runRoot);
 const retryableReceiptAttempt = job?.status === "FAILED" &&
   job.error === "Owner acknowledgement exited 1." &&
   job.completion === null;
@@ -160,6 +162,9 @@ console.log(`Model: ${run.producer.model} / ${run.producer.effort}`);
 console.log(`Context: ${run.producer.threadId ?? "not started"}`);
 console.log(`Turns: ${run.producer.turns}`);
 console.log("Owner input: CLOSED — watch only; speak in Window B");
+if (!producerLock) console.log("Console process: not running");
+else if (producerLock.alive) console.log(`Console process: running as ${producerLock.pid}`);
+else console.log(`Console process: stopped; stale lock belongs to ${producerLock.pid}`);
 
 console.log("\nWINDOW B — REVIEWER / OWNER");
 console.log(`Model: ${reviewerState?.model ?? run.reviewer.model} / ${reviewerState?.effort ?? run.reviewer.effort}`);

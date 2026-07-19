@@ -42,7 +42,9 @@ import {
   type RelaySignal,
 } from "./relay-interruption.ts";
 import {
+  PRODUCER_LOCK_DIR,
   REVIEWER_LOCK_DIR,
+  acquireProducerWindow,
   newReviewerJob,
   readReviewerJob,
   readReviewerWindowState,
@@ -184,6 +186,12 @@ const reviewerResumeCommand = resolved.mode === "guide-project"
 const producerResumeCommand = resolved.mode === "guide-project"
   ? formatRelayCommand(path.join(root, "scripts", "execute-relay-run.ts"), runRoot, ["--reviewer-window"])
   : `npm run ${twoWindow ? "relay:producer" : "relay:execute"} -- ${path.relative(root, runRoot)}`;
+const releaseProducerLock = twoWindow
+  ? await acquireProducerWindow(runRoot, { recoverStale: true }).catch((error) => {
+      console.error(`RELAY REFUSED — ${error instanceof Error ? error.message : String(error)}`);
+      process.exit(1);
+    })
+  : async () => {};
 
 function timestamp(): string {
   return new Date().toISOString();
@@ -593,7 +601,9 @@ async function waitForReviewerWindowJob(job: ReviewerJob, expectedFile: string):
   console.log(`\nHANDOVER TO WINDOW B — ${purpose}`);
   console.log("The persistent reviewer window receives this automatically. Window A will wait here.");
   if (!(await readReviewerWindowState(runRoot))) {
-    console.log(`If Window B is not open yet, run: ${reviewerResumeCommand}`);
+    console.log(resolved.mode === "guide-project"
+      ? "Window B is not ready. Return to Guide for recovery; do not start a role command yourself."
+      : `If Window B is not open yet, run: ${reviewerResumeCommand}`);
   }
 
   for (;;) {
@@ -982,7 +992,7 @@ async function buildGuideReturnStage(session: NonNullable<Awaited<ReturnType<typ
   });
   for (const entry of await readdir(runRoot, { withFileTypes: true })) {
     if (entry.name === "RUN.json" || entry.name === "GUIDE-RETURN-STAGE") continue;
-    if (entry.name === REVIEWER_LOCK_DIR && entry.isDirectory()) continue;
+    if ((entry.name === REVIEWER_LOCK_DIR || entry.name === PRODUCER_LOCK_DIR) && entry.isDirectory()) continue;
     if (entry.isDirectory()) throw new Error(`Guide runtime contains unexpected directory ${entry.name}; evidence archival refuses.`);
     if (!entry.isFile()) throw new Error(`Guide runtime contains symbolic link or special entry ${entry.name}; evidence archival refuses.`);
     await cp(path.join(runRoot, entry.name), path.join(stageArchive, entry.name), { errorOnExist: true });
@@ -1401,6 +1411,12 @@ try {
     await saveRun();
   }
   console.error(`\nRELAY PAUSED — ${run.lastError ?? String(error)}`);
-  console.error(`Resume with: ${producerResumeCommand}`);
+  if (resolved.mode === "guide-project") {
+    console.error("Return to Guide and say: Recover this session. This Producer window may be closed.");
+  } else {
+    console.error(`Resume with: ${producerResumeCommand}`);
+  }
   process.exitCode = error instanceof PausedRun ? 2 : 1;
+} finally {
+  await releaseProducerLock();
 }

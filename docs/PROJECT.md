@@ -110,6 +110,14 @@ owner contract
   occurred. Producer now rejoins the existing formal-review job; Guide can reopen
   only that missing role and waits for its disk readiness before reporting success.
   The expanded living suite passes 199/199; owner observation is still owed.
+- The subsequent first-use audit extends process ownership to Producer as well as
+  Reviewer. Initial launch is now mechanically ordered Reviewer first, Producer
+  second, with bounded readiness at both steps; Guide derives the exact running or
+  missing role from disk and offers numbered recovery without exposing raw commands.
+  Review-reader, clipboard, and halt mistakes remain at the owner decision instead
+  of terminating the role processes. Duplicate and linked role locks fail closed.
+  The expanded local suite passes 204/204; pushed binding and owner observation are
+  still owed.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.
@@ -144,6 +152,9 @@ owner contract
 - [Owner ceremony security audit](security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md)
 - [Final pre-handoff security audit](security-runs/2026-07-19-pre-handoff-audit-08/RESULT.md)
 - [Partial recovery security audit](security-runs/2026-07-19-partial-recovery-audit-09/RESULT.md)
+- [Visible-role security audit](security-runs/2026-07-19-role-liveness-audit-10/RESULT.md)
+- [One-key first-use UX audit](quality-runs/2026-07-19-first-use-ux-audit-05/RESULT.md)
+- [First-use recovery development record](test-results/2026-07-19-first-use-recovery-polish-development-failures.md)
 - [Ghostty launcher development failures](test-results/2026-07-18-ghostty-launcher-development-failures.md)
 - [Ghostty launcher 132-check result](test-results/2026-07-18-ghostty-launcher-final.md)
 - [Ghostty launcher post-push 132-check result](test-results/2026-07-18-ghostty-launcher-pushed-final.md)

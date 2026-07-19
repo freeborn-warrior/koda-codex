@@ -143,7 +143,15 @@ async function activeSession() {
 }
 
 const releaseLock = await acquireReviewerWindow(runRoot, { recoverStale: recoverStaleLock })
-  .catch((error) => refuse(error instanceof Error ? error.message : String(error)));
+  .catch((error) => {
+    const message = error instanceof Error ? error.message : String(error);
+    if (resolved.mode === "guide-project") {
+      refuse(message.includes("already owns this run")
+        ? "The Reviewer is already open for this session. Return to that window; no duplicate was created."
+        : "The Reviewer could not safely open. Return to Guide and say: Recover this session.");
+    }
+    refuse(message);
+  });
 let state = await readReviewerWindowState(runRoot) ?? reviewerWindowState({
   status: "READY",
   model: initialRun.reviewer.model,
@@ -333,7 +341,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
       throw new Error("The review changed during owner reading or discussion. Nothing was acknowledged.");
     }
   };
-  const openReview = async () => {
+  const openReview = async (): Promise<boolean> => {
     if (!testMode) {
       console.log("\nREAD THE COMPLETE REVIEW");
       console.log("Press Return to open it. Scroll as needed; when you reach (END), press q to return here.");
@@ -345,8 +353,12 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
       [review],
       { stdio: "inherit" },
     ));
-    if (pager.status !== 0) throw new Error(`The review reader exited ${pager.status ?? -1}; nothing was acknowledged.`);
+    if (pager.status !== 0) {
+      console.log(`REVIEW DID NOT OPEN — the reader exited ${pager.status ?? -1}. Nothing was acknowledged.`);
+      return false;
+    }
     await requireUnchangedReview();
+    return true;
   };
   const haltSession = async (ownerDirectionInput: string) => {
     const ownerDirection = ownerDirectionInput.trim();
@@ -425,7 +437,14 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   console.log(`Review: ${path.relative(project, review)}`);
   console.log(`Binding: artifact SHA-256 ${parsed.metadata.artifactSha256.slice(0, 12)}…; review ID ${parsed.metadata.id}`);
   console.log("Nothing has advanced. The numbered choices and their consequences appear after you read.");
-  await openReview();
+  while (!(await openReview())) {
+    console.log("1. Try opening the review again.");
+    console.log("2. Stop for now — preserve this decision point.");
+    const readerChoice = (await promptOwner("Choose 1 or 2: ")).trim();
+    if (readerChoice === "1") continue;
+    if (readerChoice === "2") throw new OwnerPaused("Kristian stopped after the review reader failed; the review remains ready and unacknowledged.");
+    console.log("Nothing changed. Choose 1 to retry or 2 to stop safely.");
+  }
 
   const configuredTestQuestion = testMode ? process.env.KODA_RELAY_TEST_DISCUSSION_QUESTION?.trim() : undefined;
   const testQuestion = configuredTestQuestion && (
@@ -463,19 +482,31 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
         continue;
       }
       if (choice === "3") {
-        await openReview();
+        if (!(await openReview())) {
+          console.log("The review remains unchanged. Returning to the numbered choices.");
+        }
         continue;
       }
       if (choice === "4") throw new OwnerPaused("Kristian chose to stop for now; the review remains ready and unacknowledged.");
       if (choice === "5") {
         console.log("HALT ENDS THIS SESSION ATTEMPT. No phase from it will count; later work must start from a fresh Brief.");
+        console.log("1. Continue toward a permanent halt.");
+        console.log("2. Go back — nothing changes.");
+        const haltChoice = (await promptOwner("Choose 1 or 2: ")).trim();
+        if (haltChoice !== "1") {
+          console.log("Halt was not prepared. Nothing changed.");
+          continue;
+        }
         const ownerDirection = await promptOwner("Type the direction the fresh Brief must carry, or press Return to go back: ");
         if (!ownerDirection.trim()) {
           console.log("Halt was not prepared. Nothing changed.");
           continue;
         }
-        const confirmation = (await promptOwner("Type HALT to confirm, or press Return to go back: ")).trim();
-        if (confirmation !== "HALT") {
+        console.log("FINAL HALT CONFIRMATION");
+        console.log("1. Permanently halt this session attempt.");
+        console.log("2. Go back — nothing changes.");
+        const confirmation = (await promptOwner("Choose 1 or 2: ")).trim();
+        if (confirmation !== "1") {
           console.log("Halt was not confirmed. Nothing changed.");
           continue;
         }
@@ -494,7 +525,22 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
         await writeFile(testClipboard, parsed.receipt, "utf8");
       } else {
         const copied = spawnSync("pbcopy", [], { input: parsed.receipt, encoding: "utf8" });
-        if (copied.status !== 0) throw new Error("macOS could not copy the receipt; nothing was acknowledged.");
+        if (copied.status !== 0) {
+          console.log("COPY FAILED — macOS did not copy the receipt. Nothing was acknowledged and the gate is still closed.");
+          console.log("1. Try copying again.");
+          console.log("2. Return to the full review choices.");
+          console.log("3. Stop for now and preserve this decision point.");
+          const copyChoice = (await promptOwner("Choose 1, 2, or 3: ")).trim();
+          if (copyChoice === "1") continue;
+          if (copyChoice === "2") {
+            acknowledgementSelected = false;
+            continue;
+          }
+          if (copyChoice === "3") throw new OwnerPaused("Kristian stopped after the receipt copy failed; the review remains ready and unacknowledged.");
+          console.log("Nothing changed. Returning to the full review choices.");
+          acknowledgementSelected = false;
+          continue;
+        }
       }
       receiptCopied = true;
     }
@@ -781,7 +827,9 @@ try {
         await writeReviewerWindowState(runRoot, state);
         console.error(`\nREVIEWER INTERRUPTED SAFELY — ${message}`);
         console.error("The job returned to PENDING; its partial handback is untrusted.");
-        console.error(`Resume the same reviewer context with: ${reviewerResumeCommand}`);
+        console.error(resolved.mode === "guide-project"
+          ? "Return to Guide and say: Recover this session. This Reviewer window may be closed."
+          : `Resume the same reviewer context with: ${reviewerResumeCommand}`);
         process.exitCode = 2;
         break;
       }
@@ -791,7 +839,9 @@ try {
         state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: message });
         await writeReviewerWindowState(runRoot, state);
         console.error(`\nREVIEWER PAUSED SAFELY — ${message}`);
-        console.error(`Resume with: ${reviewerResumeCommand}`);
+        console.error(resolved.mode === "guide-project"
+          ? "Return to Guide when you are ready and say: Recover this session. This Reviewer window may be closed."
+          : `Resume with: ${reviewerResumeCommand}`);
         process.exitCode = 2;
         break;
       }
@@ -818,7 +868,9 @@ try {
   console.error(error instanceof ReviewerTurnInterrupted
     ? `\nREVIEWER INTERRUPTED SAFELY — ${message}`
     : `\nREVIEWER PAUSED — ${message}`);
-  console.error(`Resume with: ${reviewerResumeCommand}`);
+  console.error(resolved.mode === "guide-project"
+    ? "Return to Guide and say: Recover this session. This Reviewer window may be closed."
+    : `Resume with: ${reviewerResumeCommand}`);
   process.exitCode = error instanceof ReviewerTurnInterrupted ? 2 : 1;
 } finally {
   ownerConsole?.close();

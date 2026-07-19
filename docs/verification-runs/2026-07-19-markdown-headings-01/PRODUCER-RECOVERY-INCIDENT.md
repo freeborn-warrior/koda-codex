@@ -7,6 +7,11 @@
 
 ## What Kristian saw
 
+Before Kristian pasted any recovery wording, the still-open Guide independently
+reported from disk that a session was paused. This is positive evidence for the
+project-level continuity contract: Guide knew the active session state without
+chat-memory prompting or a technical report carried from another window.
+
 Guide accepted the one-action recovery. The same Reviewer reopened successfully and
 restored the unacknowledged Brief review at its owner decision point. The Producer
 window then exited with:

@@ -17,6 +17,7 @@ import {
   producerOnlyRecoveryReady,
   requestGhosttyRecoveryWindows,
   requestGhosttyWindows,
+  visibleRoleHealth,
 
 } from "./ghostty.js";
 import { evaluateSessionClosure } from "./close.js";
@@ -232,12 +233,31 @@ export async function runGuideCli(
           io.out("Choose in the Guide conversation. Do not paste or reconstruct a technical command.");
           continue;
         }
-        io.out("Window B — reviewer / owner:");
-        io.out(runtime.reviewerCommand);
-        io.out("Window A — producer:");
-        io.out(runtime.producerCommand);
-        io.out("Read-only detail:");
-        io.out(runtime.statusCommand);
+        const roles = runtime.run.terminalLaunch ? await visibleRoleHealth(runtime.runRoot) : null;
+        if (roles) {
+          io.out(`Visible roles: Reviewer ${roles.reviewerRunning ? "running" : "not running"}; Producer ${roles.producerRunning ? "running" : "not running"}.`);
+        }
+        if (runtime.run.lastError) {
+          io.out("SESSION NEEDS GUIDE ATTENTION — nothing advances while this saved error is unresolved.");
+          io.out("1. Ask Guide to diagnose this exact saved session and name the safe recovery.");
+          io.out("2. Not now — leave the session safely unchanged.");
+        } else if (roles && (!roles.reviewerRunning || !roles.producerRunning)) {
+          io.out("SESSION WINDOW RECOVERY NEEDED — Koda will not pretend a requested window is still running.");
+          io.out("1. Ask Guide to inspect this exact state and reopen only the missing role or roles when safe.");
+          io.out("2. Not now — preserve the session without opening anything.");
+        } else if (runtime.run.status === "PREPARED" && !runtime.run.terminalLaunch) {
+          io.out("SESSION IS PREPARED — its role windows have not been requested yet.");
+          io.out("1. Ask Guide to launch this verified session.");
+          io.out("2. Not now — keep the prepared session unchanged.");
+        } else if (runtime.run.status.startsWith("PAUSED")) {
+          io.out("SESSION IS PAUSED SAFELY — its disk state is preserved and nothing is advancing.");
+          io.out("1. Ask Guide to inspect this exact pause and resume only if it is safe.");
+          io.out("2. Not now — keep the session paused.");
+        } else {
+          io.out("SESSION IS ACTIVE — watch Producer and speak only in Reviewer for session work.");
+          io.out("If a role window disappears, return to Guide. Do not reconstruct or rerun a role command yourself.");
+        }
+        io.out("Choose in the Guide conversation; technical role commands stay behind Guide.");
       }
     }
     return;
@@ -356,23 +376,24 @@ export async function runGuideCli(
     });
     io.out(`${prepared.reused ? "GUIDE SESSION RECOVERED" : "GUIDE SESSION PREPARED"} — ${prepared.launch.id}`);
     io.out("The confirmed prompt and both role assignments are bound on disk.");
-    io.out("");
-    io.out("WINDOW B — REVIEWER / OWNER (start this first)");
-    io.out(prepared.reviewerCommand);
-    io.out("");
-    io.out("WINDOW A — PRODUCER (then start this)");
-    io.out(prepared.producerCommand);
-    io.out("");
-    io.out("READ-ONLY STATUS");
-    io.out(prepared.statusCommand);
-    if (openTerminal === "ghostty") {
+    if (openTerminal === null) {
+      io.out("");
+      io.out("WINDOW B — REVIEWER / OWNER (start this first)");
+      io.out(prepared.reviewerCommand);
+      io.out("");
+      io.out("WINDOW A — PRODUCER (then start this)");
+      io.out(prepared.producerCommand);
+      io.out("");
+      io.out("READ-ONLY STATUS");
+      io.out(prepared.statusCommand);
+    } else {
       const requests = await dependencies.openGhostty(root, prepared);
       io.out("");
       io.out("THREE-CONTEXT START REQUESTED");
       io.out("✓ This Guide conversation stays open.");
       io.out(`✓ ${requests[0] .title} requested first.`);
       io.out(`✓ ${requests[1] .title} requested second.`);
-      io.out("If either window does not appear, run koda guide status; never repeat automatic opening blindly.");
+      io.out("If either window does not appear, return to this Guide conversation. Never repeat automatic opening blindly.");
     }
     return;
   }

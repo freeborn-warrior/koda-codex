@@ -11,12 +11,15 @@ import { evaluateSessionHalt } from "../src/halt.ts";
 import { artifactPath, createSession, loadSessionState, reviewPath, writeJsonAtomic } from "../src/project.ts";
 import { createFreshReview, readApprovalEntries, sha256 } from "../src/receipt.ts";
 import {
+  acquireProducerWindow,
   acquireReviewerWindow,
   newReviewerJob,
+  PRODUCER_LOCK_DIR,
   REVIEWER_JOB_FILE,
   REVIEWER_LOCK_DIR,
   readReviewerJob,
   readReviewerWindowState,
+  producerWindowLockStatus,
   redactRelayOutput,
   renderCodexEvent,
   validateReviewerJob,
@@ -220,6 +223,45 @@ test("TWO-WINDOW PROTOCOL: reviewer jobs are bounded and duplicate reviewer wind
   await assert.rejects(acquireReviewerWindow(temporary), /stopped process.*recover-stale-lock/);
   const releaseRecovered = await acquireReviewerWindow(temporary, { recoverStale: true });
   await releaseRecovered();
+
+  const releaseProducer = await acquireProducerWindow(temporary);
+  await assert.rejects(acquireProducerWindow(temporary), /producer window already owns this run/);
+  assert.equal((await producerWindowLockStatus(temporary))?.pid, process.pid);
+  await releaseProducer();
+
+  const staleProducerLock = path.join(temporary, PRODUCER_LOCK_DIR);
+  await mkdir(staleProducerLock);
+  await writeJsonAtomic(path.join(staleProducerLock, "OWNER.json"), {
+    version: 1,
+    pid: 2_147_483_647,
+    startedAt: new Date(0).toISOString(),
+  });
+  await assert.rejects(acquireProducerWindow(temporary), /stopped process.*Explicit recovery/);
+  const releaseRecoveredProducer = await acquireProducerWindow(temporary, { recoverStale: true });
+  await releaseRecoveredProducer();
+
+  const outsideReviewer = path.join(temporary, "outside-reviewer-lock");
+  await mkdir(outsideReviewer);
+  await writeJsonAtomic(path.join(outsideReviewer, "OWNER.json"), {
+    version: 1,
+    pid: 2_147_483_647,
+    startedAt: new Date(0).toISOString(),
+  });
+  await symlink(outsideReviewer, path.join(temporary, REVIEWER_LOCK_DIR));
+  await assert.rejects(acquireReviewerWindow(temporary, { recoverStale: true }), /Reviewer lock must be a real directory/);
+  assert.equal(await pathExists(path.join(outsideReviewer, "OWNER.json")), true);
+  await rm(path.join(temporary, REVIEWER_LOCK_DIR));
+
+  const outsideProducer = path.join(temporary, "outside-producer-lock");
+  await mkdir(outsideProducer);
+  await writeJsonAtomic(path.join(outsideProducer, "OWNER.json"), {
+    version: 1,
+    pid: 2_147_483_647,
+    startedAt: new Date(0).toISOString(),
+  });
+  await symlink(outsideProducer, path.join(temporary, PRODUCER_LOCK_DIR));
+  await assert.rejects(acquireProducerWindow(temporary, { recoverStale: true }), /Producer lock must be a real directory/);
+  assert.equal(await pathExists(path.join(outsideProducer, "OWNER.json")), true);
 });
 
 test("TWO-WINDOW VISIBILITY: progress is readable without exposing review receipts", () => {
@@ -445,6 +487,12 @@ test("TWO-WINDOW PRODUCER RECOVERY: an awaiting formal review is rejoined instea
   assert.equal(producer.exitCode, null, `Producer exited instead of waiting:\n${stderr}`);
   assert.equal(producerState.status, "AWAITING_REVIEWER_WINDOW");
   assert.equal(producerState.lastError, undefined);
+  let producerLock = await producerWindowLockStatus(result.runRoot);
+  for (let attempt = 0; attempt < 40 && !producerLock; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    producerLock = await producerWindowLockStatus(result.runRoot);
+  }
+  assert.equal(producerLock?.pid, producer.pid);
   assert.equal((await readReviewerJob(result.runRoot))?.id, job.id);
   assert.equal((await readReviewerJob(result.runRoot))?.kind, "formal");
   for (let attempt = 0; attempt < 40 && !stdout.includes("RESTORING WINDOW B HANDOVER"); attempt += 1) {
@@ -452,6 +500,18 @@ test("TWO-WINDOW PRODUCER RECOVERY: an awaiting formal review is rejoined instea
   }
   assert.match(stdout, /RESTORING WINDOW B HANDOVER — formal review of brief/);
   assert.doesNotMatch(stderr, /different reviewer job is already active/);
+
+  const duplicate = spawnSync(process.execPath, [
+    "scripts/execute-relay-run.ts",
+    "--reviewer-window",
+    result.runRoot,
+  ], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    env: { ...process.env, KODA_RELAY_RUNS_ROOT: result.temporary },
+  });
+  assert.equal(duplicate.status, 1);
+  assert.match(duplicate.stderr, /producer window already owns this run/);
 
   const exitPromise = new Promise<{ code: number | null; signal: NodeJS.Signals | null }>((resolve) => {
     producer.once("exit", (code, signal) => resolve({ code, signal }));
@@ -461,6 +521,7 @@ test("TWO-WINDOW PRODUCER RECOVERY: an awaiting formal review is rejoined instea
   assert.equal(exit.code, 2);
   assert.equal(exit.signal, null);
   assert.match(stderr, /Window A was stopped while a disk-backed reviewer job remained pending/);
+  assert.equal(await producerWindowLockStatus(result.runRoot), null);
 });
 
 test("TWO-WINDOW OWNER CEREMONY TTY: numbered choices disclose the receipt step before acknowledgement", {
@@ -487,15 +548,20 @@ test("TWO-WINDOW OWNER CEREMONY TTY: numbered choices disclose the receipt step 
     "send -- \"\\r\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"5\\r\"",
+    "expect \"Choose 1 or 2: \"",
+    "send -- \"1\\r\"",
     "expect \"Type the direction the fresh Brief must carry, or press Return to go back: \"",
     "send -- \"\\r\"",
     "expect \"Halt was not prepared. Nothing changed.\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"5\\r\"",
+    "expect \"Choose 1 or 2: \"",
+    "send -- \"1\\r\"",
     "expect \"Type the direction the fresh Brief must carry, or press Return to go back: \"",
     "send -- \"Carry this only if I confirm.\\r\"",
-    "expect \"Type HALT to confirm, or press Return to go back: \"",
-    "send -- \"no\\r\"",
+    "expect \"FINAL HALT CONFIRMATION\"",
+    "expect \"Choose 1 or 2: \"",
+    "send -- \"2\\r\"",
     "expect \"Halt was not confirmed. Nothing changed.\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"1\\r\"",
@@ -578,6 +644,92 @@ test("TWO-WINDOW OWNER CEREMONY TTY: stop for now preserves an explicit resumabl
   const job = await readReviewerJob(result.runRoot);
   assert.equal(job?.status, "AWAITING_OWNER");
   assert.equal(job?.completion, null);
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
+});
+
+test("TWO-WINDOW OWNER ERROR: a failed review reader offers numbered retry or safe stop", {
+  skip: process.platform !== "darwin",
+}, async (t) => {
+  const result = await preparedAcknowledgementRun("wrong");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  const expectProgram = [
+    "set timeout 10",
+    "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT) $env(KODA_TEST_RUN_ROOT)",
+    "expect \"Press Return to read the review: \"",
+    "send -- \"\\r\"",
+    "expect \"REVIEW DID NOT OPEN\"",
+    "expect \"Choose 1 or 2: \"",
+    "send -- \"2\\r\"",
+    "expect eof",
+    "set result [wait]",
+    "exit [lindex $result 3]",
+  ].join("\n");
+  const executed = spawnSync("/usr/bin/expect", ["-c", expectProgram], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 15_000,
+    env: {
+      ...process.env,
+      KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
+      KODA_RELAY_REVIEWER_ONCE: "1",
+      KODA_RELAY_REVIEW_PAGER: "/usr/bin/false",
+      KODA_TEST_NODE: process.execPath,
+      KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
+      KODA_TEST_RUN_ROOT: result.runRoot,
+    },
+  });
+  assert.equal(executed.status, 2, `${executed.stdout}\n${executed.stderr}`);
+  assert.match(executed.stdout, /1\. Try opening the review again/);
+  assert.match(executed.stdout, /2\. Stop for now — preserve this decision point/);
+  assert.match(`${executed.stdout}\n${executed.stderr}`, /REVIEWER PAUSED SAFELY/);
+  assert.equal((await readReviewerJob(result.runRoot))?.status, "AWAITING_OWNER");
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
+});
+
+test("TWO-WINDOW OWNER ERROR: a failed receipt copy offers only numbered recovery choices", {
+  skip: process.platform !== "darwin",
+}, async (t) => {
+  const result = await preparedAcknowledgementRun("wrong");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  const fakeBin = path.join(result.temporary, "fake-bin");
+  await mkdir(fakeBin);
+  await writeFile(path.join(fakeBin, "pbcopy"), "#!/bin/sh\nexit 1\n", "utf8");
+  await chmod(path.join(fakeBin, "pbcopy"), 0o755);
+  const expectProgram = [
+    "set timeout 10",
+    "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT) $env(KODA_TEST_RUN_ROOT)",
+    "expect \"Press Return to read the review: \"",
+    "send -- \"\\r\"",
+    "expect \"Choose 1, 2, 3, 4, or 5: \"",
+    "send -- \"1\\r\"",
+    "expect \"COPY FAILED\"",
+    "expect \"Choose 1, 2, or 3: \"",
+    "send -- \"3\\r\"",
+    "expect eof",
+    "set result [wait]",
+    "exit [lindex $result 3]",
+  ].join("\n");
+  const executed = spawnSync("/usr/bin/expect", ["-c", expectProgram], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 15_000,
+    env: {
+      ...process.env,
+      PATH: `${fakeBin}:/usr/bin:/bin`,
+      KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
+      KODA_RELAY_REVIEWER_ONCE: "1",
+      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
+      KODA_TEST_NODE: process.execPath,
+      KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
+      KODA_TEST_RUN_ROOT: result.runRoot,
+    },
+  });
+  assert.equal(executed.status, 2, `${executed.stdout}\n${executed.stderr}`);
+  assert.match(executed.stdout, /1\. Try copying again/);
+  assert.match(executed.stdout, /2\. Return to the full review choices/);
+  assert.match(executed.stdout, /3\. Stop for now and preserve this decision point/);
+  assert.match(`${executed.stdout}\n${executed.stderr}`, /REVIEWER PAUSED SAFELY/);
+  assert.equal((await readReviewerJob(result.runRoot))?.status, "AWAITING_OWNER");
   assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
 });
 

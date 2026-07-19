@@ -1244,3 +1244,39 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Verdict:** MECHANICAL, FRESH-CONTEXT, PACKAGE, AND SECURITY PRE-HANDOFF PASS.
   Same-context Ghostty recovery, visual clarity, and the remaining phase decisions
   are still owner-observed proof; they are not represented as passed.
+
+## 2026-07-19 — Visible-role ownership and one-key recovery polish
+
+- **Owner observation preserved:** Before Kristian pasted recovery wording, Guide
+  independently reported the paused session from disk. This is positive Guide
+  continuity evidence even though the later Producer rejoin failed.
+- **Scope:** Add Producer process ownership beside the existing Reviewer lock; order
+  initial launch on real Reviewer and Producer readiness; derive missing-role truth
+  in Guide; keep ordinary failures at numbered owner choices; hide raw role commands
+  from the ordinary Guide surface.
+- **Development failures:** The first owner-error slice passed **4/6** because
+  `/usr/bin/expect` merged child stderr into its captured stream while two assertions
+  inspected stdout alone. Corrected combined-stream assertions passed **2/2**. The
+  first complete suite passed **203/204** because finalization did not yet recognize
+  the exact new ephemeral Producer lock. The allowlist was expanded by that one
+  named path; single and plural integrations then passed **2/2**. A later rerun with
+  the deliberately stale pushed manifest refused Guide setup as designed and also
+  found a real status race: Producer retired its lock between the directory and owner
+  probes. Status now treats that exact disappearance as not running while preserving
+  refusal for an existing lock with missing or corrupt evidence.
+- **Corrected results:** Focused relay/status **24/24**; combined Guide, relay,
+  security, and integrity **71/71**; complete suite **204/204**; coverage suite
+  **204/204** at 89.03% lines, 68.92% branches, and 86.94% functions overall.
+- **Security/package:** Linked or non-directory role locks refuse without touching
+  outside evidence. Private-cache `npm pack --dry-run` passed at 896,230 compressed
+  bytes, 4,289,377 unpacked bytes, and 760 files. An isolated dependency-free
+  lockfile audit reported zero vulnerabilities. Diff whitespace and reachable Git
+  object checks passed.
+- **Invalid environment attempts:** The first package check failed on a root-owned
+  user npm cache. The first audit command lacked a lockfile. Neither is promoted;
+  both and their corrected executions are preserved in the
+  [development record](test-results/2026-07-19-first-use-recovery-polish-development-failures.md).
+- **Evidence:** [One-key UX audit](quality-runs/2026-07-19-first-use-ux-audit-05/RESULT.md)
+  and [role-liveness security audit](security-runs/2026-07-19-role-liveness-audit-10/RESULT.md).
+- **Verdict:** LOCAL MECHANICS AND SECURITY PASS; PUSHED BINDING AND HUMAN RECOVERY
+  REMAIN.
