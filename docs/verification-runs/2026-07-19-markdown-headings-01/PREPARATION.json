@@ -1,7 +1,7 @@
 {
   "version": 1,
   "runId": "2026-07-19-markdown-headings-01",
-  "status": "AWAITING_OWNER_RECONFIRMATION",
+  "status": "READY_TO_LAUNCH",
   "preparedAt": "2026-07-19T18:28:31Z",
   "liveProject": ".koda/verification-projects/2026-07-19-markdown-headings-01/project",
   "initialCommit": "f3d99323f7df8bf308d0f26ea9cc5eb7a9a3256d",
@@ -28,6 +28,16 @@
     "status": "CANCELLED_AND_PUSHED",
     "cancellationCommit": "df3fea05447c119164d6b4a5ea69e8b5494ca102"
   },
-  "ownerConfirmed": false,
+  "confirmedLaunch": {
+    "id": "bf91c29d-a7a3-4cd5-8118-80b186d7a790",
+    "sessionKind": "produce",
+    "launchMode": "independent",
+    "confirmedBy": "Kristian",
+    "confirmedAt": "2026-07-19T18:36:06.442Z",
+    "commit": "ae2255c7d738644eb6a92e58ed3bae41f3c77bfa",
+    "verified": true,
+    "pushed": true
+  },
+  "ownerConfirmed": true,
   "modelRunStarted": false
 }

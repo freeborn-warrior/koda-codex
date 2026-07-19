@@ -823,3 +823,12 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Recovery:** Launch `1cf9d706-666e-4891-97a7-f33ecf5506ac` was cancelled through Koda, then prompt, request, and cancellation were committed and pushed together at `df3fea05447c119164d6b4a5ea69e8b5494ca102`. The complete history is preserved in the run bundle and the two JSON artifacts are copied under `confirmation-attempts/`.
 - **Correction:** Only the relationship line changed, from `continuation (first session with no predecessor)` to `independent first session (no predecessor or active sibling)`. Its new exact SHA-256 is `d2a72f1b018eddc936ef1d0a9a355788f749ffb0aed57da199ad0a17e4cd9c8a`.
 - **Verdict:** HANDOVER CORRECTLY REFUSED; FRESH OWNER CONFIRMATION REQUIRED. Model execution remains false.
+
+## 2026-07-19 — Corrected verification prompt confirmed and pushed
+
+- **Variant:** Guide confirmation, inner-project Git handover, and `koda guide verify`. No model, Ghostty window, runtime record, Koda session, review, receipt, phase artifact, or close was created.
+- **Owner confirmation:** Kristian explicitly confirmed the corrected exact prompt. Fresh status showed no session or competing request. Launch `bf91c29d-a7a3-4cd5-8118-80b186d7a790` binds prompt SHA-256 `d2a72f1b018eddc936ef1d0a9a355788f749ffb0aed57da199ad0a17e4cd9c8a`, kind `produce`, mode `independent`, zero dependencies, Kristian, and three continuity hashes.
+- **Git handover:** The prompt and launch request were committed and pushed at `ae2255c7d738644eb6a92e58ed3bae41f3c77bfa`. The inner project is clean, zero ahead, and matches its local upstream. `READY-TO-LAUNCH-HISTORY.bundle` verifies as complete history.
+- **Verification:** `koda guide verify` returned `READY TO LAUNCH` and confirmed prompt, continuity, and prior-session evidence still match owner confirmation.
+- **Boundary:** Runtime preparation and automatic Ghostty opening remain deliberately unstarted. The next step requires Kristian to be present and receive one human action at a time.
+- **Verdict:** GUIDE HANDOVER PASS; OWNER-OBSERVED THREE-WINDOW LAUNCH NEXT.
