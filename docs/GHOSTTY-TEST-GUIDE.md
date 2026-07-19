@@ -1,5 +1,11 @@
 # Koda-C terminal testing in Ghostty
 
+Ghostty is the optional macOS window-opening adapter used for this human test, not a
+Koda-C requirement. The gate, disk relay, and separate contexts also work when a
+user opens terminal windows manually. This guide focuses on Ghostty because the
+competition demonstration uses it and because its convenience path must be safe;
+other terminal applications are not excluded by the workflow.
+
 ## Current status — clean retry preserved at its Brief decision
 
 This is the route Kristian will use. It is written for someone who should not

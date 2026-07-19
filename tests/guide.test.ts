@@ -815,7 +815,7 @@ test("GUIDE VISIBLE ROLE STATUS: disk liveness reports a missing Producer instea
     reviewerModel: "gpt-5.6-terra",
     reviewerEffort: "medium",
   });
-  prepared.run.status = "AWAITING_REVIEWER_WINDOW";
+  prepared.run.status = "RUNNING";
   prepared.run.terminalLaunch = { adapter: "ghostty-macos", requestedAt: new Date().toISOString() };
   await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
   for (const lock of [".reviewer-window.lock", ".producer-window.lock"]) {
@@ -930,6 +930,167 @@ test("GUIDE GHOSTTY OWNER-ERROR RECOVERY: one action reopens Reviewer first and 
       assert.doesNotMatch(error.message, /koda guide status|recovery commands/);
       return true;
     },
+  );
+});
+
+async function stableOwnerHandover(t: Parameters<typeof guideHarness>[0], withJob = true) {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm stable handover recovery fixture"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  await requestGhosttyWindows(h.root, prepared, {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open() { return { status: 0, stderr: "" }; },
+    async waitForStartedReviewer() { return true; },
+    async waitForStartedProducer() { return true; },
+  });
+  prepared.run.status = "AWAITING_REVIEWER_WINDOW";
+  delete prepared.run.lastError;
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+  if (withJob) {
+    await writeJsonAtomic(path.join(prepared.runRoot, "REVIEWER-JOB.json"), {
+      version: 1,
+      id: "44444444-4444-4444-8444-444444444444",
+      kind: "formal",
+      phase: "orient",
+      purpose: "formal review of orient",
+      prompt: "Use the shared reviewer skill.",
+      expectedPath: "docs/sessions/2026-07-19-01/reviews/02-orient-review.md",
+      status: "AWAITING_OWNER",
+      createdAt: new Date(0).toISOString(),
+      updatedAt: new Date(0).toISOString(),
+      error: null,
+      completion: null,
+    });
+  }
+  return { h, prepared };
+}
+
+test("GUIDE GHOSTTY STABLE-HANDOVER RECOVERY: any formal owner decision can restore both missing roles", async (t) => {
+  const { h, prepared } = await stableOwnerHandover(t);
+  const status: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { status.push(message); } });
+  assert.match(status.join("\n"), /SESSION WINDOWS CLOSED/);
+  assert.match(status.join("\n"), /1\. Reopen this session.*Reviewer first.*Producer only after/);
+
+  const opened: string[] = [];
+  await runGuideCli(["recover", "--open", "ghostty"], h.root, { out() {} }, {
+    async openGhostty() { throw new Error("ordinary launch must not run during stable-handover recovery"); },
+    async recoverGhostty(project, runtime, toolkit) {
+      return requestGhosttyRecoveryWindows(project, runtime, toolkit, {
+        platform: "darwin",
+        codexExecutable: process.execPath,
+        open(args) {
+          opened.push(args.find((item) => item.startsWith("--title=")) ?? "missing title");
+          return { status: 0, stderr: "" };
+        },
+        async waitForRecoveredReviewer() {
+          assert.equal(opened.length, 1);
+          return true;
+        },
+        async waitForRecoveredProducer() {
+          assert.equal(opened.length, 2);
+          return true;
+        },
+      });
+    },
+  });
+  assert.equal(opened.length, 2);
+  assert.match(opened[0]!, /Reviewer/);
+  assert.match(opened[1]!, /Producer/);
+  const recovery = JSON.parse(await readFile(path.join(prepared.runRoot, "RECOVERY.json"), "utf8"));
+  assert.equal(recovery.reason, "stable-owner-handover-role-recovery");
+  assert.deepEqual(recovery.reviewerJob, {
+    id: "44444444-4444-4444-8444-444444444444",
+    kind: "formal",
+    phase: "orient",
+    expectedPath: "docs/sessions/2026-07-19-01/reviews/02-orient-review.md",
+  });
+  assert.deepEqual(recovery.rolesRetried, ["reviewer", "producer"]);
+
+  const running = JSON.parse(await readFile(path.join(prepared.runRoot, "RUN.json"), "utf8"));
+  running.status = "RUNNING";
+  delete running.lastError;
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), running);
+  await rm(path.join(prepared.runRoot, "REVIEWER-JOB.json"));
+  const afterHandover: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { afterHandover.push(message); } });
+  assert.match(afterHandover.join("\n"), /SESSION WINDOW RECOVERY NEEDED/);
+});
+
+test("GUIDE GHOSTTY STABLE-HANDOVER MUTATION: a missing reviewer job refuses instead of guessing", async (t) => {
+  const { h } = await stableOwnerHandover(t, false);
+  await assert.rejects(
+    runGuideCli(["status"], h.root, { out() {} }),
+    /Receipt recovery requires a real REVIEWER-JOB\.json file/,
+  );
+});
+
+test("GUIDE GHOSTTY STABLE-HANDOVER RETRY: a Reviewer startup miss stays safely recoverable", async (t) => {
+  const { h, prepared } = await stableOwnerHandover(t);
+  const firstOpened: string[] = [];
+  await assert.rejects(
+    requestGhosttyRecoveryWindows(h.root, (await currentGuideRuntime(h.root))!, await verifyToolkitIntegrity(), {
+      platform: "darwin",
+      codexExecutable: process.execPath,
+      open(args) {
+        firstOpened.push(args.find((item) => item.startsWith("--title=")) ?? "missing title");
+        return { status: 0, stderr: "" };
+      },
+      async waitForRecoveredReviewer() { return false; },
+      async waitForRecoveredProducer() { throw new Error("Producer must stay closed after a Reviewer startup miss"); },
+    }),
+    /Recovered Reviewer did not reach the existing owner decision point; the Producer was not opened/,
+  );
+  assert.equal(firstOpened.length, 1);
+  assert.match(firstOpened[0]!, /Reviewer/);
+
+  const retryStatus: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { retryStatus.push(message); } });
+  assert.match(retryStatus.join("\n"), /SESSION WINDOWS CLOSED/);
+  assert.match(retryStatus.join("\n"), /1\. Reopen this session.*Reviewer first.*Producer only after/);
+
+  const retried: string[] = [];
+  await requestGhosttyRecoveryWindows(h.root, (await currentGuideRuntime(h.root))!, await verifyToolkitIntegrity(), {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open(args) {
+      retried.push(args.find((item) => item.startsWith("--title=")) ?? "missing title");
+      return { status: 0, stderr: "" };
+    },
+    async waitForRecoveredReviewer() { return true; },
+    async waitForRecoveredProducer() { return true; },
+  });
+  assert.equal(retried.length, 2);
+  const recovery = JSON.parse(await readFile(path.join(prepared.runRoot, "RECOVERY.json"), "utf8"));
+  assert.equal(recovery.attempts.length, 1);
+  assert.deepEqual(recovery.rolesRetried, ["reviewer", "producer"]);
+});
+
+test("GUIDE GHOSTTY STABLE-HANDOVER BINDING MUTATION: a changed Reviewer job refuses recovery", async (t) => {
+  const { h, prepared } = await stableOwnerHandover(t);
+  await requestGhosttyRecoveryWindows(h.root, (await currentGuideRuntime(h.root))!, await verifyToolkitIntegrity(), {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open() { return { status: 0, stderr: "" }; },
+    async waitForRecoveredReviewer() { return true; },
+    async waitForRecoveredProducer() { return true; },
+  });
+  const jobFile = path.join(prepared.runRoot, "REVIEWER-JOB.json");
+  const job = JSON.parse(await readFile(jobFile, "utf8"));
+  job.id = "55555555-5555-4555-8555-555555555555";
+  await writeJsonAtomic(jobFile, job);
+  await assert.rejects(
+    runGuideCli(["status"], h.root, { out() {} }),
+    /Visible recovery evidence is bound to a different Reviewer job/,
   );
 });
 

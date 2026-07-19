@@ -163,7 +163,15 @@ export async function ghosttyWindowRequests(
 
 type ReceiptRecoveryJob = {
   version: 1;
+  id: string;
+  kind: "formal" | "repair" | "fresh";
+  phase: string;
+  purpose: string;
+  prompt: string;
+  expectedPath: string;
   status: "FAILED" | "AWAITING_OWNER";
+  createdAt: string;
+  updatedAt: string;
   error: string | null;
   completion: null;
 };
@@ -184,7 +192,19 @@ async function receiptRecoveryJob(runRoot: string): Promise<ReceiptRecoveryJob> 
   const job = value as Partial<ReceiptRecoveryJob>;
   const retryableLegacyFailure = job.status === "FAILED" && job.error === "Owner acknowledgement exited 1.";
   const retryableCurrentState = job.status === "AWAITING_OWNER" && job.error === null;
-  if (job.version !== 1 || job.completion !== null || (!retryableLegacyFailure && !retryableCurrentState)) {
+  if (
+    job.version !== 1 ||
+    typeof job.id !== "string" || !/^[0-9a-f-]{36}$/.test(job.id) ||
+    !["formal", "repair", "fresh"].includes(String(job.kind)) ||
+    typeof job.phase !== "string" || !/^[a-z0-9][a-z0-9-]*$/.test(job.phase) ||
+    typeof job.purpose !== "string" || job.purpose.trim() === "" ||
+    typeof job.prompt !== "string" || job.prompt.trim() === "" ||
+    typeof job.expectedPath !== "string" || job.expectedPath.trim() === "" || path.isAbsolute(job.expectedPath) || job.expectedPath.split(/[\\/]/).includes("..") ||
+    typeof job.createdAt !== "string" ||
+    typeof job.updatedAt !== "string" ||
+    job.completion !== null ||
+    (!retryableLegacyFailure && !retryableCurrentState)
+  ) {
     throw new Error("This Reviewer state is not a retryable owner-receipt attempt. Koda refuses to guess.");
   }
   return job as ReceiptRecoveryJob;
@@ -325,8 +345,23 @@ async function readRecoveryRecord(file: string): Promise<Record<string, unknown>
   }
   if (!value || typeof value !== "object") throw new Error("Visible recovery evidence is invalid.");
   const record = value as Record<string, unknown>;
-  if (record.version !== 1 || record.reason !== "owner-receipt-input-retry" || typeof record.requestedAt !== "string") {
-    throw new Error("Visible recovery evidence does not match the owner-receipt recovery contract.");
+  if (
+    record.version !== 1 ||
+    !["owner-receipt-input-retry", "stable-owner-handover-role-recovery"].includes(String(record.reason)) ||
+    typeof record.requestedAt !== "string"
+  ) {
+    throw new Error("Visible recovery evidence does not match the session-recovery contract.");
+  }
+  const reviewerJob = record.reviewerJob as Record<string, unknown> | undefined;
+  if (record.reason === "stable-owner-handover-role-recovery" && (
+    !reviewerJob ||
+    typeof reviewerJob.id !== "string" || !/^[0-9a-f-]{36}$/.test(reviewerJob.id) ||
+    !["formal", "repair", "fresh"].includes(String(reviewerJob.kind)) ||
+    typeof reviewerJob.phase !== "string" || !/^[a-z0-9][a-z0-9-]*$/.test(reviewerJob.phase) ||
+    typeof reviewerJob.expectedPath !== "string" || reviewerJob.expectedPath.trim() === "" ||
+    path.isAbsolute(reviewerJob.expectedPath) || reviewerJob.expectedPath.split(/[\\/]/).includes("..")
+  )) {
+    throw new Error("Visible recovery evidence has an invalid reviewer-job binding.");
   }
   if (record.attempts !== undefined && !Array.isArray(record.attempts)) {
     throw new Error("Visible recovery evidence has an invalid attempt history.");
@@ -343,16 +378,33 @@ export async function partialRecoveryRoles(
   runtime: GuideRuntimeView,
 ): Promise<Array<GhosttyWindowRequest["role"]> | null> {
   const recoveryFile = path.join(runtime.runRoot, "RECOVERY.json");
-  if (!(await lstat(recoveryFile).then(() => true).catch(() => false))) return null;
-  const recovery = await readRecoveryRecord(recoveryFile);
-  const job = await receiptRecoveryJob(runtime.runRoot);
-  const jobRecord = job as unknown as Record<string, unknown>;
-  const expectedError = `A different reviewer job is already active: ${String(jobRecord.kind)} ${String(jobRecord.phase)} (${job.status}).`;
-  const failedRejoin = runtime.run.status === "PAUSED_ERROR" && runtime.run.lastError === expectedError;
+  const recoveryExists = await lstat(recoveryFile).then(() => true).catch(() => false);
+  const recovery = recoveryExists ? await readRecoveryRecord(recoveryFile) : null;
   const stableOwnerHandover = runtime.run.status === "AWAITING_REVIEWER_WINDOW" && runtime.run.lastError === undefined;
-  const exactPartialState = (failedRejoin || stableOwnerHandover) &&
-    job.status === "AWAITING_OWNER" &&
-    ["formal", "repair", "fresh"].includes(String(jobRecord.kind));
+  const possibleFailedRejoin = recoveryExists &&
+    runtime.run.status === "PAUSED_ERROR" &&
+    runtime.run.lastError?.startsWith("A different reviewer job is already active:") === true;
+  const possibleFailedRecovery = recoveryExists &&
+    (runtime.run.lastAction === "recover visible Reviewer and Producer after retryable owner receipt input" ||
+      runtime.run.lastAction?.startsWith("reopen missing ") === true) &&
+    (runtime.run.lastError === "Recovered Reviewer did not reach its owner decision point; the Producer was not opened." ||
+      runtime.run.lastError === "Recovered Reviewer did not reach the existing owner decision point; the Producer was not opened." ||
+      runtime.run.lastError === "Recovered Producer did not rejoin the existing Reviewer decision point." ||
+      runtime.run.lastError?.startsWith("Ghostty refused the recovered Reviewer window") === true ||
+      runtime.run.lastError?.startsWith("Ghostty refused the recovered Producer window") === true);
+  if (!stableOwnerHandover && !possibleFailedRejoin && !possibleFailedRecovery) return null;
+  const job = await receiptRecoveryJob(runtime.runRoot);
+  const boundJob = recovery?.reviewerJob as Record<string, unknown> | undefined;
+  if (boundJob && (
+    boundJob.id !== job.id || boundJob.kind !== job.kind ||
+    boundJob.phase !== job.phase || boundJob.expectedPath !== job.expectedPath
+  )) {
+    throw new Error("Visible recovery evidence is bound to a different Reviewer job. Koda refuses to guess.");
+  }
+  const expectedError = `A different reviewer job is already active: ${job.kind} ${job.phase} (${job.status}).`;
+  const failedRejoin = possibleFailedRejoin && runtime.run.lastError === expectedError;
+  const exactPartialState = ((failedRejoin || stableOwnerHandover) && job.status === "AWAITING_OWNER") ||
+    (possibleFailedRecovery && ["FAILED", "AWAITING_OWNER"].includes(job.status));
   if (!exactPartialState) return null;
   const health = await visibleRoleHealth(runtime.runRoot);
   const missing: Array<GhosttyWindowRequest["role"]> = [];
@@ -369,9 +421,19 @@ export async function requestGhosttyRecoveryWindows(
 ): Promise<GhosttyWindowRequest[]> {
   const recoveryFile = path.join(runtime.runRoot, "RECOVERY.json");
   const priorRecovery = await lstat(recoveryFile).then(() => true).catch(() => false);
-  const partialRoles = priorRecovery ? await partialRecoveryRoles(runtime) : null;
+  const partialRoles = await partialRecoveryRoles(runtime);
   if (partialRoles) {
-    const recovery = await readRecoveryRecord(recoveryFile);
+    const job = await receiptRecoveryJob(runtime.runRoot);
+    const recovery = priorRecovery
+      ? await readRecoveryRecord(recoveryFile)
+      : {
+          version: 1,
+          reason: "stable-owner-handover-role-recovery",
+          requestedAt: nowIso(),
+          toolkit,
+          reviewerJob: { id: job.id, kind: job.kind, phase: job.phase, expectedPath: job.expectedPath },
+        };
+    if (!priorRecovery) await writeJsonAtomic(recoveryFile, recovery);
     const retryRequestedAt = nowIso();
     const prepared = {
       ...runtime,
@@ -426,7 +488,7 @@ export async function requestGhosttyRecoveryWindows(
   if (await reviewerLockAlive(runtime.runRoot)) {
     throw new Error("The Reviewer window is already running; automatic recovery refuses a duplicate.");
   }
-  await receiptRecoveryJob(runtime.runRoot);
+  const job = await receiptRecoveryJob(runtime.runRoot);
 
   const prepared = {
     ...runtime,
@@ -439,6 +501,7 @@ export async function requestGhosttyRecoveryWindows(
     priorError: runtime.run.lastError,
     requestedAt: nowIso(),
     toolkit,
+    reviewerJob: { id: job.id, kind: job.kind, phase: job.phase, expectedPath: job.expectedPath },
   });
   runtime.run.lastAction = "recover visible Reviewer and Producer after retryable owner receipt input";
   runtime.run.lastError = undefined;

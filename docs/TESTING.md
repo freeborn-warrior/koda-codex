@@ -1359,3 +1359,29 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   and only `1` reopen Producer / `2` not now. No role was launched.
 - **Remaining proof:** Kristian's Ghostty observation and continuation through the
   remaining gates and pushed close.
+
+## 2026-07-19 — Stable owner-handover recovery
+
+- **Why:** Repeatable recovery was proved only after the historical receipt error.
+  A later ordinary Orient, Plan, Produce, Live, or Summary owner decision could still
+  lose one or both visible windows without that incident marker and fall back to a
+  technical dead end.
+- **Correction:** Any stable formal, repair, or fresh `AWAITING_OWNER` handover may
+  now restore exactly the missing roles. Reviewer opens before Producer. Recovery
+  binds the Reviewer job identity, validates its full schema, and refuses if the job
+  changes. An exact Koda launch/readiness failure remains recoverable instead of
+  making recovery itself a one-shot failure.
+- **Mutations:** A missing Reviewer job refuses; changing only the bound Reviewer job
+  refuses; and an unready restored Reviewer opens no Producer. No receipt, approval,
+  or advancement path was relaxed.
+- **Development failures:** One inconsistent old liveness fixture and one deliberately
+  stale local integrity hash produced named refusals before correction. Both are
+  preserved in the [development record](test-results/2026-07-19-stable-handover-recovery-development-failures.md).
+- **Local corrected results:** Focused Guide **39/39**; complete suite **210/210**;
+  coverage **210/210** at **89.08% lines, 69.65% branches, and 86.65% functions**.
+  Dependency-free package dry-run, whitespace, tracked-symlink, and reachable Git
+  checks pass.
+- **Audits:** [Security audit 12](security-runs/2026-07-19-stable-handover-recovery-audit-12/RESULT.md)
+  and [first-use UX audit 07](quality-runs/2026-07-19-stable-handover-recovery-ux-audit-07/RESULT.md).
+- **State:** LOCAL DETERMINISTIC PASS. Pushed-code transcript, release-manifest
+  binding, and owner observation remain pending.
