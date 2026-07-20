@@ -2217,4 +2217,7 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   runnable core, tests, and evidence archive; the primary judge path still needs
   neither npm nor this cache.
 - **State:** INDEPENDENT APPROVE. The only remaining proof for this repair is a
-  clean owner-visible Ghostty run.
+  clean owner-visible Ghostty run. After the review record strengthened submission
+  assertions, pushed commit `ca198d3` passed a final
+  [252/252 review-record release suite](test-results/2026-07-20-reviewer-session-binding-review-release.md),
+  SHA-256 `734abc4fac9fb215e779a95e3e1ff8e46a93810c66ddb91d3fae3724d7227e3e`.
