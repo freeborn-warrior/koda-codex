@@ -50,5 +50,6 @@ the existing clean-environment and content-integrity protections. A named mutati
 proves the old relative token changes meaning after a directory change while the
 new absolute Reviewer and Producer tokens do not.
 
-This record does not claim a fresh Ghostty window launch passed. That human-visible
-proof remains owed after complete and post-push verification.
+The complete local and unchanged post-push suites now pass 245/245. This record
+still does not claim a fresh Ghostty window launch passed; that human-visible proof
+remains owed.

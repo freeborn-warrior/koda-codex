@@ -119,7 +119,7 @@ Turn the proved two-context session relay into a project-level experience that c
     `/usr/bin/login` cannot resolve it from the owner's home directory. Reverse the
     old test that required a relative command and add a named directory-change
     mutation. Focused Guide/Ghostty coverage passes **82/82** and the complete local
-    suite passes **245/245**; pushed proof remains in progress.
+    and unchanged post-push suites pass **245/245**.
 
 ## Submission cut
 

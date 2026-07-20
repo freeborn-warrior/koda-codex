@@ -31,5 +31,6 @@ The change does not alter:
 - Each returned command is an existing mode-700 file below the exact run directory.
 - Focused Guide, Quick Start, role-security, and integrity slice: **82/82 passed**.
 - Complete local suite: **245/245 passed**.
+- Unchanged post-push suite: **245/245 passed**.
 
 The fresh owner-visible Ghostty launch remains a separate product proof.

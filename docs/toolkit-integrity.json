@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "ghostty-absolute-role-command-v19",
-  "verifiedAt": "2026-07-20T19:33:37.468Z",
+  "verifiedAt": "2026-07-20T19:37:21.618Z",
   "repairCommit": "59d6267704d4b489fc8cafdd656cf9d421ef2259",
-  "testedCommit": "0756c01cb1efee462378ac4c9518c0ce3db35fc5",
+  "testedCommit": "ff0a7b86d005a351f03ea483f361906a878f624c",
   "testCount": 245,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-ghostty-absolute-role-command-local.md",
-    "sha256": "bd43a0c8520c91e2862611138e40b82ae4f692de26478dd1c1878069b1d30e9b"
+    "path": "docs/test-results/2026-07-20-ghostty-absolute-role-command-pushed.md",
+    "sha256": "aeb009681d9e055c887e326741ac46153e0d39ac1f63755a80289086c65a427b"
   },
   "files": [
     {

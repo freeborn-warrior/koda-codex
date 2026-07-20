@@ -2024,7 +2024,9 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   and [security audit](security-runs/2026-07-20-ghostty-login-resolution-audit-22/RESULT.md).
 - **Complete local result:** Every one of **245** named tests passed in the
   [local transcript](test-results/2026-07-20-ghostty-absolute-role-command-local.md).
-- **State:** LOCAL COMPLETE PASS. Capability
-  `ghostty-absolute-role-command-v19` binds repair commit `59d6267`, tested commit
-  `0756c01`, and the 245-check local transcript. Post-push and fresh owner-visible
-  window proof remain; they are not represented as passed.
+- **Post-push result:** The unchanged complete suite passed **245/245** in the
+  [post-push transcript](test-results/2026-07-20-ghostty-absolute-role-command-pushed.md).
+- **State:** POST-PUSH PASS. Capability `ghostty-absolute-role-command-v19` binds
+  repair commit `59d6267`, pushed tested commit `ff0a7b8`, the 245-check post-push
+  transcript, and every critical launch file. Fresh owner-visible window proof
+  remains and is not represented as passed.
