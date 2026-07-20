@@ -68,8 +68,20 @@ export function relayRoleEnvironment(
   codexExecutable: string,
   source: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv {
+  // Launcher bytes must not depend on whether Guide was opened from Ghostty,
+  // Codex Desktop, Finder, or another terminal. Identity and temporary-storage
+  // paths remain explicit; display/locale values are fixed for reproducibility.
   return {
-    ...copySafe(source),
+    ...(source.HOME ? { HOME: source.HOME } : {}),
+    ...(source.USER ? { USER: source.USER } : {}),
+    ...(source.LOGNAME ? { LOGNAME: source.LOGNAME } : {}),
+    ...(source.TMPDIR ? { TMPDIR: source.TMPDIR } : {}),
+    LANG: "C.UTF-8",
+    LC_ALL: "C.UTF-8",
+    LC_CTYPE: "C.UTF-8",
+    TERM: "xterm-256color",
+    NO_COLOR: "1",
+    PATH: DEFAULT_PATH,
     KODA_CODEX_BIN: codexExecutable,
   };
 }

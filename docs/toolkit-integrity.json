@@ -12,11 +12,11 @@
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "d219021e12448776454fde689043ebd2e25237e95f6ec3e9e5dd5351d7b693d6"
+      "sha256": "ed7967202a8830c8a7623de8e67912392afef8214a245b1d51dcbadbac0c8e21"
     },
     {
       "path": "src/relay-environment.ts",
-      "sha256": "3baee8031828a8b1d5b4ab693f9e9d85e815bedaecd75ee8d0917d8db9ccbae1"
+      "sha256": "3945dea6fc660fe9f44ecdfac2e615cff9bca08cbea7aa19aea2ea8800fc150b"
     },
     {
       "path": "src/guide-runtime.ts",
@@ -44,11 +44,11 @@
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "d685b7d6fa7adadd8ddfa5928c4ec925b6871090c81b5e1c6d37bcb0ed4b35ae"
+      "sha256": "f643159260cf0378d4f70a456784e2da1b23015c56399daca24cf6f25a83bfa6"
     },
     {
       "path": "dist/relay-environment.js",
-      "sha256": "b513988b0c7eeafbc1b3a34eabb9abcd17aa5bf93fa32ecdf52c639687905801"
+      "sha256": "77d0716e612f22e0dc65cdbe2fd1f229b7090ec291fa5a1d4270bb7f1aca4083"
     },
     {
       "path": "dist/guide-runtime.js",

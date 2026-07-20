@@ -11,10 +11,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
   rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex
   resume, and live boundary probe now pass pushed capability
   `secure-persistent-guide-v10` at **229/229**. The preserved production session
-  remains untouched until Kristian chooses to resume it.
+  exposed one launcher-context mismatch on recovery; the deterministic legacy
+  migration repair passes locally at **230/230** and must be pushed before retry.
 - [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, hardened Git locking, dynamic owner binding, strict role containment, and the secure persistent Guide now pass a pushed 229/229 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
-- [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
-  quality and security audit is pushed. Reopen the same contexts and same
+- [ ] Resume the preserved `2026-07-19-02` session only after the deterministic
+  launcher-migration repair and its full audit are pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
   either role.
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.

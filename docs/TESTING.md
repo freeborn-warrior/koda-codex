@@ -1506,3 +1506,33 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   Ghostty observation remains. After the manifest, current judge links, backlog,
   project record, and failure ledger were assembled, the unchanged complete suite
   passed **229/229** again.
+
+## 2026-07-19 — Deterministic role launchers and bounded legacy migration
+
+- **Observed failure:** The secure Guide found the correct saved Brief decision,
+  but two owner recovery selections refused because the clean Ghostty-generated
+  launcher did not byte-match a launcher reconstructed under the managed Guide's
+  different `LANG`, `TERM`, and `COLORTERM`. Guide stayed open; no role opened,
+  receipt was written, or phase advanced. The event is preserved in the
+  [launcher-context incident](verification-runs/2026-07-19-markdown-headings-01/LAUNCHER-CONTEXT-MISMATCH-INCIDENT.md).
+- **Correction:** Role launcher locale, terminal, color, and executable-search
+  path are now fixed.
+  Koda accepts an older mismatch only when a strict parser proves the whole
+  generated shell form, allowlisted environment order, project, Node/Codex
+  executables, role script, and runtime arguments. Both launchers are inspected
+  before mutation; valid migration is atomic and records old/new hashes. Tampered,
+  linked, malformed, concurrently changed, or command-divergent files still refuse.
+- **Development failures:** The first focused run passed 15/56 because the prior
+  integrity seal correctly rejected changed launch code. The exact failure and
+  correction are in the
+  [development record](test-results/2026-07-19-launcher-context-migration-development-failures.md).
+- **Corrected local results:** Guide/security **56/56**; complete suite **230/230**.
+  Coverage passed **230/230** at **87.70% lines, 70.84% branches, and 85.94%
+  functions** overall. The dependency-free package dry-run passed at 994,236
+  compressed bytes, 4,750,526 unpacked bytes, 794 files, and zero bundled
+  dependencies. An isolated production lockfile audit found zero vulnerabilities;
+  whitespace, tracked-symlink, and reachable-object checks passed.
+  A read-only check proves both preserved production launchers match the bounded
+  legacy form. Neither production launcher nor active session evidence was changed.
+- **State:** LOCAL PASS. Pushed-code transcript, final capability binding, and the
+  owner's next recovery observation remain.

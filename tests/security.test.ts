@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { ghosttyRoleLauncherSource } from "../src/ghostty.ts";
+import { compatibleGhosttyRoleLauncherSource, ghosttyRoleLauncherSource } from "../src/ghostty.ts";
 import { codexProjectPermissionArgs, codexRolePermissionArgs } from "../src/codex-role-permissions.ts";
 import {
   relayCodexEnvironment,
@@ -129,6 +129,10 @@ test("SECURITY INTEGRITY SUITE: relay roles and model children never inherit amb
     HOME: "/safe/home",
     TMPDIR: "/safe/tmp",
     LANG: "C.UTF-8",
+    LC_ALL: "C.UTF-8",
+    LC_CTYPE: "C.UTF-8",
+    TERM: "xterm-256color",
+    NO_COLOR: "1",
     PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
     KODA_CODEX_BIN: "/safe/codex",
   });
@@ -143,6 +147,35 @@ test("SECURITY INTEGRITY SUITE: relay roles and model children never inherit amb
     GIT_TERMINAL_PROMPT: "0",
     KODA_SESSION_ID: "2026-07-19-01",
   });
+});
+
+test("SECURITY INTEGRITY SUITE: role launcher bytes ignore ambient terminal locale and color", () => {
+  const base = {
+    executable: "/safe/codex",
+    project: "/safe/project",
+    script: "/safe/koda/scripts/producer.ts",
+    scriptArgs: ["/safe/project/.koda/runs/11111111-1111-4111-8111-111111111111"],
+  };
+  const fromGhostty = ghosttyRoleLauncherSource({
+    ...base,
+    environmentSource: { HOME: "/safe/home", LANG: "en_US.UTF-8", TERM: "xterm-ghostty", COLORTERM: "truecolor" },
+  });
+  const fromDesktop = ghosttyRoleLauncherSource({
+    ...base,
+    environmentSource: { HOME: "/safe/home", LANG: "C.UTF-8", TERM: "dumb" },
+  });
+  assert.equal(fromGhostty, fromDesktop);
+  assert.match(fromGhostty, /LANG=C\.UTF-8/);
+  assert.match(fromGhostty, /TERM=xterm-256color/);
+  assert.doesNotMatch(fromGhostty, /COLORTERM/);
+
+  const legacy = fromGhostty
+    .replace("'LANG=C.UTF-8'", "'LANG=en_US.UTF-8'")
+    .replace("'TERM=xterm-256color'", "'TERM=xterm-ghostty'")
+    .replace("  'NO_COLOR=1' \\", "  'COLORTERM=truecolor' \\\n  'NO_COLOR=1' \\");
+  assert.equal(compatibleGhosttyRoleLauncherSource(legacy, base), true);
+  assert.equal(compatibleGhosttyRoleLauncherSource("#!/bin/sh\necho injected\n", base), false);
+  assert.equal(compatibleGhosttyRoleLauncherSource(legacy.replace("/safe/koda/scripts/producer.ts", "/tmp/evil.ts"), base), false);
 });
 
 test("SECURITY INTEGRITY SUITE: owner receipt and ruling data never enter child-process arguments or environment", async () => {

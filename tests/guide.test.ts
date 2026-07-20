@@ -735,14 +735,37 @@ test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Review
     },
   );
   assert.equal(opened.length, 2);
-
-  await writeFile(path.join(runRoot, "launch-reviewer.sh"), "tampered launcher\n", "utf8");
   const reused = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
     producerModel: "gpt-5.6-sol",
     producerEffort: "medium",
     reviewerModel: "gpt-5.6-terra",
     reviewerEffort: "medium",
   });
+
+  const legacyTerminalLauncher = (source: string) => source
+    .replace("'LANG=C.UTF-8'", "'LANG=en_US.UTF-8'")
+    .replace("'TERM=xterm-256color'", "'TERM=xterm-ghostty'")
+    .replace("  'NO_COLOR=1' \\", "  'COLORTERM=truecolor' \\\n  'NO_COLOR=1' \\");
+  await writeFile(path.join(runRoot, "launch-reviewer.sh"), legacyTerminalLauncher(reviewerLauncher), "utf8");
+  await writeFile(path.join(runRoot, "launch-producer.sh"), legacyTerminalLauncher(producerLauncher), "utf8");
+  await ghosttyWindowRequests(h.root, reused, { platform: "darwin", codexExecutable: process.execPath });
+  assert.equal(await readFile(path.join(runRoot, "launch-reviewer.sh"), "utf8"), reviewerLauncher);
+  assert.equal(await readFile(path.join(runRoot, "launch-producer.sh"), "utf8"), producerLauncher);
+  const migration = JSON.parse(await readFile(path.join(runRoot, "LAUNCHER-MIGRATION.json"), "utf8"));
+  assert.equal(migration.launchId, confirmed.launch.id);
+  assert.deepEqual(migration.launchers.map((item: { role: string }) => item.role), ["reviewer", "producer"]);
+
+  const compatibleReviewer = legacyTerminalLauncher(reviewerLauncher);
+  await writeFile(path.join(runRoot, "launch-reviewer.sh"), compatibleReviewer, "utf8");
+  await writeFile(path.join(runRoot, "launch-producer.sh"), "tampered launcher\n", "utf8");
+  await assert.rejects(
+    ghosttyWindowRequests(h.root, reused, { platform: "darwin", codexExecutable: process.execPath }),
+    /Existing Ghostty role launcher is unsafe or changed/,
+  );
+  assert.equal(await readFile(path.join(runRoot, "launch-reviewer.sh"), "utf8"), compatibleReviewer);
+
+  await writeFile(path.join(runRoot, "launch-producer.sh"), producerLauncher, "utf8");
+  await writeFile(path.join(runRoot, "launch-reviewer.sh"), "tampered launcher\n", "utf8");
   await assert.rejects(
     ghosttyWindowRequests(h.root, reused, { platform: "darwin", codexExecutable: process.execPath }),
     /Existing Ghostty role launcher is unsafe or changed/,

@@ -31,6 +31,13 @@ shapes that the live attempt exposed:
 - if a restored role later disappears from the same owner handover, the same
   disk-bound recovery remains available instead of becoming a one-shot dead end.
 
+The first secure-Guide recovery then exposed that legacy launcher bytes still
+captured the terminal which created them. Koda refused safely and left Guide open.
+The repair uses deterministic launcher bytes and migrates an older file only after
+validating its complete generated structure and exact role command; arbitrary or
+changed launchers remain refusals. See the
+[launcher-context incident](verification-runs/2026-07-19-markdown-headings-01/LAUNCHER-CONTEXT-MISMATCH-INCIDENT.md).
+
 The same mechanism applies at every stable formal, repair, or fresh owner decision,
 not only the Brief incident that first exposed the recovery need. Its recovery
 record binds the exact Reviewer job; changed or missing job evidence refuses.

@@ -237,8 +237,13 @@ only one prior request appeared to succeed. The first live implementation proved
 that a mocked argument vector was insufficient: loose tokens created extra tabs
 and an ambient credential was rendered. The repaired adapter passes one private
 launcher path after `-e`. That file uses fixed shell quoting and an explicit clean
-environment before starting the exact role command. Changed, linked, or replaced
-launchers refuse during request construction. A failed request leaves the runtime
+environment before starting the exact role command. Locale, terminal, color, and
+executable-search path values are deterministic rather than inherited from whichever
+surface opens Guide. An older launcher is replaced only after strict full-structure parsing proves
+its exact project, executables, script, arguments, quoting, and allowlisted
+environment order; both roles are inspected first, replacement is atomic, and the
+old/new hashes are recorded. Changed, linked, arbitrary, or replaced launchers still
+refuse during request construction. A failed request leaves the runtime
 prepared and returns the owner to Guide, which derives the safe numbered recovery
 choice without asking the owner to reconstruct a role command. Same-user replacement
 between the final content check and external execution remains a local TOCTOU
@@ -326,4 +331,7 @@ proved in
 The managed persistent Guide's narrower claimed-write boundary and real same-context
 resume are proved in
 [`security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md`](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md).
+The live terminal-context launcher mismatch and its fail-closed migration contract
+are preserved in
+[`verification-runs/2026-07-19-markdown-headings-01/LAUNCHER-CONTEXT-MISMATCH-INCIDENT.md`](verification-runs/2026-07-19-markdown-headings-01/LAUNCHER-CONTEXT-MISMATCH-INCIDENT.md).
 The latest named full-suite transcript is linked from the README.

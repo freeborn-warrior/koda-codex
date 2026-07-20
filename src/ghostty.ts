@@ -1,10 +1,11 @@
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { chmod, lstat, readFile, realpath, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 import type { GuideRuntimeView, PreparedGuideRuntime } from "./guide-runtime.ts";
-import { nowIso, writeJsonAtomic } from "./project.ts";
+import { nowIso, writeJsonAtomic, writeTextAtomic } from "./project.ts";
 import { relayRoleEnvironment } from "./relay-environment.ts";
 import type { ToolkitIntegritySnapshot } from "./toolkit-integrity.ts";
 
@@ -107,17 +108,118 @@ export function ghosttyRoleLauncherSource(options: {
   ].join("\n");
 }
 
-async function ensureLauncher(file: string, content: string): Promise<void> {
+const LEGACY_ROLE_ENVIRONMENT_ORDER = [
+  "HOME", "USER", "LOGNAME", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE",
+  "TERM", "COLORTERM", "NO_COLOR", "PATH", "KODA_CODEX_BIN",
+] as const;
+
+type LauncherOptions = Parameters<typeof ghosttyRoleLauncherSource>[0];
+type LauncherResult = { status: "created" | "current" | "migrated"; priorSha256?: string; sha256: string };
+type LauncherPlan = LauncherResult & { observedSha256?: string };
+
+function sha256(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function shellWord(value: string): string {
+  return `'${value.replaceAll("'", `'"'"'`)}'`;
+}
+
+function decodeGeneratedShellWord(value: string): string | null {
+  if (!value.startsWith("'") || !value.endsWith("'")) return null;
+  const decoded = value.slice(1, -1).replaceAll(`'"'"'`, "'");
+  return shellWord(decoded) === value ? decoded : null;
+}
+
+/**
+ * A prior Koda launcher may differ in terminal-derived environment values after
+ * an upgrade. It is safe to replace only when its complete shell structure,
+ * allowlisted environment keys, and executable/script/argument tail still match
+ * this exact runtime. The legacy file is never executed during validation.
+ */
+export function compatibleGhosttyRoleLauncherSource(content: string, options: LauncherOptions): boolean {
+  const lines = content.split("\n");
+  if (lines.at(-1) !== "") return false;
+  lines.pop();
+  if (
+    lines[0] !== "#!/bin/sh" ||
+    lines[1] !== "set -eu" ||
+    lines[2] !== `cd ${shellWord(options.project)}` ||
+    lines[3] !== `exec ${shellWord("/usr/bin/env")} \\`
+  ) return false;
+  const tokenLines = lines.slice(4);
+  if (tokenLines.length < 5) return false;
+  const words: string[] = [];
+  for (let index = 0; index < tokenLines.length; index += 1) {
+    const continued = index < tokenLines.length - 1;
+    const line = tokenLines[index]!;
+    const suffix = continued ? " \\" : "";
+    if (!line.startsWith("  ") || !line.endsWith(suffix)) return false;
+    const token = line.slice(2, suffix ? -suffix.length : undefined);
+    const decoded = decodeGeneratedShellWord(token);
+    if (decoded === null) return false;
+    words.push(decoded);
+  }
+  if (words.shift() !== "-i") return false;
+  const expectedTail = [process.execPath, options.script, ...options.scriptArgs];
+  if (words.length < expectedTail.length + 2) return false;
+  const actualTail = words.slice(-expectedTail.length);
+  if (actualTail.some((word, index) => word !== expectedTail[index])) return false;
+  const environmentWords = words.slice(0, -expectedTail.length);
+  const seen = new Set<string>();
+  let priorOrder = -1;
+  const environment = new Map<string, string>();
+  for (const word of environmentWords) {
+    const separator = word.indexOf("=");
+    if (separator < 1) return false;
+    const key = word.slice(0, separator);
+    const value = word.slice(separator + 1);
+    const order = LEGACY_ROLE_ENVIRONMENT_ORDER.indexOf(key as typeof LEGACY_ROLE_ENVIRONMENT_ORDER[number]);
+    if (order < 0 || order <= priorOrder || seen.has(key) || /[\u0000-\u001f\u007f]/u.test(value)) return false;
+    seen.add(key);
+    environment.set(key, value);
+    priorOrder = order;
+  }
+  const expected = relayRoleEnvironment(options.executable, options.environmentSource);
+  return environment.get("PATH") === expected.PATH &&
+    environment.get("KODA_CODEX_BIN") === options.executable;
+}
+
+async function inspectLauncher(file: string, content: string, options: LauncherOptions): Promise<LauncherPlan> {
+  const currentSha256 = sha256(content);
+  let metadata;
   try {
-    await writeFile(file, content, { encoding: "utf8", mode: 0o700, flag: "wx" });
+    metadata = await lstat(file);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return { status: "created", sha256: currentSha256 };
+    throw error;
+  }
+  if (!metadata.isFile() || metadata.isSymbolicLink()) {
+    throw new Error(`Existing Ghostty role launcher is unsafe or changed: ${file}`);
+  }
+  const existing = await readFile(file, "utf8");
+  const observedSha256 = sha256(existing);
+  if (existing === content) return { status: "current", sha256: currentSha256, observedSha256 };
+  if (!compatibleGhosttyRoleLauncherSource(existing, options)) {
+    throw new Error(`Existing Ghostty role launcher is unsafe or changed: ${file}`);
+  }
+  return { status: "migrated", priorSha256: observedSha256, sha256: currentSha256, observedSha256 };
+}
+
+async function applyLauncherPlan(file: string, content: string, plan: LauncherPlan): Promise<LauncherResult> {
+  if (plan.status === "created") {
+    await writeFile(file, content, { encoding: "utf8", mode: 0o700, flag: "wx" });
+  } else {
     const metadata = await lstat(file);
-    if (!metadata.isFile() || metadata.isSymbolicLink() || await readFile(file, "utf8") !== content) {
-      throw new Error(`Existing Ghostty role launcher is unsafe or changed: ${file}`);
+    const existing = metadata.isFile() && !metadata.isSymbolicLink() ? await readFile(file, "utf8") : null;
+    if (existing === null || sha256(existing) !== plan.observedSha256) {
+      throw new Error(`Ghostty role launcher changed during verification: ${file}`);
     }
+    if (plan.status === "migrated") await writeTextAtomic(file, content);
   }
   await chmod(file, 0o700);
+  const { observedSha256: _observed, ...result } = plan;
+  return result;
 }
 
 export async function ghosttyWindowRequests(
@@ -133,18 +235,40 @@ export async function ghosttyWindowRequests(
   const shortId = prepared.launch.id.slice(0, 8);
   const reviewerLauncher = path.join(prepared.runRoot, "launch-reviewer.sh");
   const producerLauncher = path.join(prepared.runRoot, "launch-producer.sh");
-  await ensureLauncher(reviewerLauncher, ghosttyRoleLauncherSource({
+  const reviewerOptions: LauncherOptions = {
     executable,
     project,
     script: path.join(scripts, "run-relay-reviewer-window.ts"),
     scriptArgs: [prepared.runRoot],
-  }));
-  await ensureLauncher(producerLauncher, ghosttyRoleLauncherSource({
+  };
+  const producerOptions: LauncherOptions = {
     executable,
     project,
     script: path.join(scripts, "execute-relay-run.ts"),
     scriptArgs: ["--reviewer-window", prepared.runRoot],
-  }));
+  };
+  const reviewerContent = ghosttyRoleLauncherSource(reviewerOptions);
+  const producerContent = ghosttyRoleLauncherSource(producerOptions);
+  const [reviewerPlan, producerPlan] = await Promise.all([
+    inspectLauncher(reviewerLauncher, reviewerContent, reviewerOptions),
+    inspectLauncher(producerLauncher, producerContent, producerOptions),
+  ]);
+  const [reviewerResult, producerResult] = await Promise.all([
+    applyLauncherPlan(reviewerLauncher, reviewerContent, reviewerPlan),
+    applyLauncherPlan(producerLauncher, producerContent, producerPlan),
+  ]);
+  const migrated = [
+    { role: "reviewer", ...reviewerResult },
+    { role: "producer", ...producerResult },
+  ].filter((result) => result.status === "migrated");
+  if (migrated.length > 0) {
+    await writeJsonAtomic(path.join(prepared.runRoot, "LAUNCHER-MIGRATION.json"), {
+      version: 1,
+      migratedAt: nowIso(),
+      launchId: prepared.launch.id,
+      launchers: migrated,
+    });
+  }
   return [
     windowRequest({
       role: "reviewer",
