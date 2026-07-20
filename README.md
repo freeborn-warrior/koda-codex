@@ -107,7 +107,7 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The current [242-check Codex-permission transcript](docs/test-results/2026-07-20-codex-permission-profile-local.md)
+- The current [242-check post-push Codex-permission transcript](docs/test-results/2026-07-20-codex-permission-profile-pushed.md)
   is hash-bound by the toolkit integrity manifest.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It

@@ -189,8 +189,8 @@ owner contract
   filesystem overrides, asks the installed CLI to parse both Guide and role
   profiles before it creates any demo project, and reports primary Codex stderr
   ahead of a missing-context symptom. Toolkit capability
-  `codex-permission-preflight-v17` binds the **242/242** local suite; unchanged
-  post-push proof and a fresh owner-visible model connection remain.
+  `codex-permission-preflight-v17` binds the **242/242** post-push suite; a fresh
+  owner-visible model connection remains.
 - A real secure-Guide recovery then proved that the saved role launcher still
   depended on the terminal which created it. Guide refused safely twice with zero
   gate movement. Role launchers now use deterministic presentation/environment

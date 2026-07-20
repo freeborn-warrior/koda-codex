@@ -1950,3 +1950,8 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **State:** LOCAL PASS. Capability `codex-permission-preflight-v17` binds repair
   commit `35489f5` and the 242-check transcript. Push and an unchanged post-push
   suite remain before another owner attempt.
+- **Post-push result:** Repair and local evidence reached `origin/main` at
+  `52319c3`. The unchanged complete suite passed **242/242** in the
+  [post-push transcript](test-results/2026-07-20-codex-permission-profile-pushed.md).
+  Capability `codex-permission-preflight-v17` now binds that pushed commit,
+  transcript, and the exact permission/startup files.

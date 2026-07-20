@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "codex-permission-preflight-v17",
-  "verifiedAt": "2026-07-20T18:35:53.660Z",
+  "verifiedAt": "2026-07-20T18:38:56.921Z",
   "repairCommit": "35489f574dcf85e522f5f53f1ddc833d300a1755",
-  "testedCommit": "35489f574dcf85e522f5f53f1ddc833d300a1755",
+  "testedCommit": "52319c3a19a1da6dc884afcb051370426b220f89",
   "testCount": 242,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-codex-permission-profile-local.md",
-    "sha256": "2265c71f457798f1be242dddce520f46a92bd2e5b75184a9b7bf760da5abe8df"
+    "path": "docs/test-results/2026-07-20-codex-permission-profile-pushed.md",
+    "sha256": "cd920238a9b61dfa1cd1439d76e9096c50abdc65589cc7ce7a01203ee8ac1e34"
   },
   "files": [
     {

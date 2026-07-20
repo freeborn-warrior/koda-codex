@@ -40,7 +40,7 @@ truth for the exact submission requirements.
   are documented in [SECURITY.md](SECURITY.md).
 - [x] The current full suite passes 242/242 against the Codex permission-profile
   preflight repair and preserves its
-  [bound transcript](test-results/2026-07-20-codex-permission-profile-local.md).
+  [bound post-push transcript](test-results/2026-07-20-codex-permission-profile-pushed.md).
 - [x] A first-time user has one documented command for a complete session;
   confirmation, launch, owner choices, and safe recovery remain inside Koda.
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.
