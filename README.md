@@ -112,6 +112,13 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## How Codex and GPT-5.6 built it
 
+Koda-C was Kristian's first project built with Codex, created as an entry for
+OpenAI's Build Week. Work began Saturday morning, July 18, 2026; the state
+documented here was reached by Monday morning, July 20—roughly 51 elapsed
+hours, neither continuous work nor a controlled speed benchmark. The
+repository's dated decisions, failures, repairs, tests, and completed sessions
+preserve what that first collaboration actually produced.
+
 Kristian Bengtsson developed the underlying phase method while directing C++,
 Swift, and Rust products as a designer: session prompt, brief, orient, plan,
 produce, live, summary, then push, with independent review between phases. He
