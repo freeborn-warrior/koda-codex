@@ -38,9 +38,10 @@ truth for the exact submission requirements.
 - [x] The one-minute refusal fixture is documented in [DEMO.md](DEMO.md).
 - [x] Package safety, install hooks, dependencies, and model-harness boundaries
   are documented in [SECURITY.md](SECURITY.md).
-- [x] The current full suite passes 244/244 unchanged after push against the real Codex
-  permission-instantiation repair and preserves its
-  [bound post-push transcript](test-results/2026-07-20-codex-permission-instantiation-bounded-pushed.md).
+- [ ] The current full suite passes 245/245 locally against the Ghostty
+  absolute-role-command repair and preserves its
+  [bound local transcript](test-results/2026-07-20-ghostty-absolute-role-command-local.md).
+  Repeat unchanged after push before checking this item.
 - [x] A first-time user has one documented command for a complete session;
   confirmation, launch, owner choices, and safe recovery remain inside Koda.
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.

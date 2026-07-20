@@ -1,7 +1,7 @@
 # Quality audit 16 — Ghostty login command resolution
 
 **Date:** 2026-07-20  
-**Result:** LOCAL FOCUSED PASS; FRESH OWNER WINDOW RUN OWED
+**Result:** LOCAL COMPLETE PASS; POST-PUSH AND FRESH OWNER WINDOW RUN OWED
 
 ## Product failure
 
@@ -29,6 +29,7 @@ proved Koda's intended argument shape while missing Ghostty's real execution sha
 
 - Owner incident: [real-window record](../../verification-runs/2026-07-20-ghostty-login-resolution-01/RESULT.md).
 - Focused changed slice: **82/82 passed**.
+- Complete local suite: **245/245 passed**.
 - Real macOS login wrapper accepted a harmless absolute executable with exit 0.
 
-Complete-suite, post-push, and fresh owner-window proof remain open.
+Post-push and fresh owner-window proof remain open.

@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "ghostty-absolute-role-command-v19",
-  "verifiedAt": "2026-07-20T19:10:58.179Z",
+  "verifiedAt": "2026-07-20T19:33:37.468Z",
   "repairCommit": "59d6267704d4b489fc8cafdd656cf9d421ef2259",
-  "testedCommit": "b40f2df74f7081de4ba926b3a44c480a7ed41f42",
-  "testCount": 244,
+  "testedCommit": "0756c01cb1efee462378ac4c9518c0ce3db35fc5",
+  "testCount": 245,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-codex-permission-instantiation-bounded-pushed.md",
-    "sha256": "5b4c26d5c729c9678d889d29acb5271b144450c2a45999d476f7dbdaa5a4a883"
+    "path": "docs/test-results/2026-07-20-ghostty-absolute-role-command-local.md",
+    "sha256": "bd43a0c8520c91e2862611138e40b82ae4f692de26478dd1c1878069b1d30e9b"
   },
   "files": [
     {

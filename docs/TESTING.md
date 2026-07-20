@@ -2022,6 +2022,9 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [owner-observed incident](verification-runs/2026-07-20-ghostty-login-resolution-01/RESULT.md),
   [quality audit](quality-runs/2026-07-20-ghostty-login-resolution-16/RESULT.md),
   and [security audit](security-runs/2026-07-20-ghostty-login-resolution-audit-22/RESULT.md).
-- **State:** LOCAL FOCUSED PASS. Repair commit `59d6267` exists locally. Complete,
-  post-push, and fresh owner-visible window proof remain; they are not represented
-  as passed.
+- **Complete local result:** Every one of **245** named tests passed in the
+  [local transcript](test-results/2026-07-20-ghostty-absolute-role-command-local.md).
+- **State:** LOCAL COMPLETE PASS. Capability
+  `ghostty-absolute-role-command-v19` binds repair commit `59d6267`, tested commit
+  `0756c01`, and the 245-check local transcript. Post-push and fresh owner-visible
+  window proof remain; they are not represented as passed.

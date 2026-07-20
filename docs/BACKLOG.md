@@ -54,7 +54,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
   after Ghostty invokes `/usr/bin/login`. Reviewer failed before startup and
   Producer was withheld. Both role commands are now absolute, project-contained,
   and mode 700; the named login-resolution mutation and 82 focused checks pass.
-  Complete and pushed proof remain in progress.
+  The complete local suite passes **245/245**; pushed proof remains in progress.
 
 ## Next
 

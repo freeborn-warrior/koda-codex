@@ -190,7 +190,9 @@ owner contract
   CLI 0.144.6 through its offline `sandbox -P` execution path before creating a
   demo project. Both profiles deserialize and apply with exit 0; toolkit capability
   `codex-permission-instantiation-v18` binds the unchanged **244/244** post-push
-  suite. A fresh owner-visible model connection remains.
+  suite. The subsequent Ghostty login-resolution repair passes **245/245** locally
+  under `ghostty-absolute-role-command-v19`; unchanged post-push proof and a fresh
+  owner-visible launch remain.
 - A real secure-Guide recovery then proved that the saved role launcher still
   depended on the terminal which created it. Guide refused safely twice with zero
   gate movement. Role launchers now use deterministic presentation/environment

@@ -118,8 +118,8 @@ Turn the proved two-context session relay into a project-level experience that c
     single-token launcher design but pass its absolute, project-contained path so
     `/usr/bin/login` cannot resolve it from the owner's home directory. Reverse the
     old test that required a relative command and add a named directory-change
-    mutation. Focused Guide/Ghostty coverage passes **82/82**; full and pushed proof
-    remain in progress.
+    mutation. Focused Guide/Ghostty coverage passes **82/82** and the complete local
+    suite passes **245/245**; pushed proof remains in progress.
 
 ## Submission cut
 
