@@ -1792,3 +1792,8 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   evidence-version migration, not a hidden product failure.
 - **Corrected assembly result:** Package, security, skills, judge journey, and
   toolkit integrity passed **34/34** with the current 234-check claims and links.
+- **Final pushed-candidate result:** After the corrected judge assertions and all
+  release documents reached commit `e77c67c` on `origin/main`, the complete suite
+  passed **234/234** again. The durable
+  [submission-surface transcript](test-results/2026-07-20-submission-surface-final.md)
+  names that exact base commit. No product or test file changed after this run.
