@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "bounded-guide-startup-v15",
-  "verifiedAt": "2026-07-20T17:30:07.243Z",
-  "repairCommit": "8c126eaa01544beaf5c453e7691ba2bbb4149183",
-  "testedCommit": "104dbbeeea9496846e38d3b2f90d4098da6a4323",
-  "testCount": 238,
+  "capability": "self-guided-full-session-v16",
+  "verifiedAt": "2026-07-20T18:10:08.782Z",
+  "repairCommit": "410f6147b687975537c204f0bb001ff9fb139014",
+  "testedCommit": "410f6147b687975537c204f0bb001ff9fb139014",
+  "testCount": 241,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-bounded-guide-startup-pushed.md",
-    "sha256": "aae49611dd568fddcb215a9418bab4da1d8b47fcecd883d2dafddfa806a0c671"
+    "path": "docs/test-results/2026-07-20-self-guided-full-session-security-final.md",
+    "sha256": "ecd5cc443df9a694ec512d54f07b97fc40a97aecf9df14162ae64121216bfc16"
   },
   "files": [
     {
@@ -72,19 +72,19 @@
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "0cd6b5c207b33477f346b946e0ba75433a44b6cb880fe9b37490089879fb46aa"
+      "sha256": "fc3c103a4d685ea3a51f7689c9a1aff75c9cac28922413855d3e99da4c27320f"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "3f230c5786a64bef14a3c976bb971c0eaf12e483764c22219170d6bf7b2254ed"
+      "sha256": "5d727240c78a208be9a63344fd5cb57c5ddd7b6ae80a9de6986c03a61e12b56d"
     },
     {
       "path": "src/guide-console.ts",
-      "sha256": "5d6b4bf6ffda72b2bbd06d8e2232f2492b342abbc6055d3d576ffa6ed51c1956"
+      "sha256": "c79a25e8c765b5105dec345768b8d06d0b7399a5245049c228eeaa3280495052"
     },
     {
       "path": "dist/guide-console.js",
-      "sha256": "5eef2f4f72250e0b33f8fb273c8e097a0dfc1d6a519611a43e04d7caf9577e22"
+      "sha256": "81a60b81b07608e7c5ad90205b07cb8eb235773ea1b55d5e044d6637bfce2bc1"
     },
     {
       "path": "src/terminal-ui.ts",
@@ -96,11 +96,11 @@
     },
     {
       "path": "src/guide-console-cli.ts",
-      "sha256": "3af54b08eb43e0bb269c0deb02496dfad3e9aa98be96788402f97d7c5f4dd87f"
+      "sha256": "b48292f30da4d20c46ed9264938f38a7a9787b33d104342a1b5335f8b8181809"
     },
     {
       "path": "dist/guide-console-cli.js",
-      "sha256": "cd205c5922ffb7dc19ce2fad89be4988338c7715f0807a409d10426492d63ea3"
+      "sha256": "f2aae44313b4cf5a867333c08ed77925fd0e92a78b46e17ea147ed4e144fef42"
     },
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",
@@ -112,11 +112,11 @@
     },
     {
       "path": "src/commands.ts",
-      "sha256": "827b4a3ec7605714aa38bd5d56393ee7d69222ecda19233a756ad113d3a40fb5"
+      "sha256": "9f5d530b3d56254f955eeacf4d9bb47b32ca5d632018ee2aab3e4879d51483f6"
     },
     {
       "path": "dist/commands.js",
-      "sha256": "8c8d5bfbadeb388aeeb896ee2a62e008fe887916996e1ab7646ba16f70cb1904"
+      "sha256": "d8e3a6d078b18a5787d3c609dc0afa7cd39f8cb030263c220e280af057b9e628"
     },
     {
       "path": "scripts/show-relay-status.ts",
@@ -161,6 +161,34 @@
     {
       "path": "dist/workset.js",
       "sha256": "1a63742c59f7214548043cbe3437e652fd1b3c5239343b288af8f0e3bf4f5b36"
+    },
+    {
+      "path": "scripts/prepare-full-session-demo.ts",
+      "sha256": "3316daa6b404cfb066c82f4bd0477e7c9e71127b92a0db992a262a65535336ed"
+    },
+    {
+      "path": "package.json",
+      "sha256": "0f503b8485b37628cab4f4211312db30e1a7c7d99f2f73b1b80f607e3b3922c0"
+    },
+    {
+      "path": "docs/QUICKSTART.md",
+      "sha256": "d90cb091480baf305be52b85e4123ea672d4afb7f9d538a9936cef368d1fab09"
+    },
+    {
+      "path": "docs/COMMAND-MANUAL.md",
+      "sha256": "72df7f819117d1db140555e540206197c7d25bbdb091a19ed9a41b5bc1db706a"
+    },
+    {
+      "path": "demo/full-session-project/AGENTS.md",
+      "sha256": "4522d73f718630904141de08e4647fb2bd5d4d5f3d0591a1616a8dd8ee022187"
+    },
+    {
+      "path": "demo/full-session-project/koda.config.json",
+      "sha256": "195d31bee952cb250ad5aa7ba2d12bb1a27feb9711c1119a2abbe41504a79f96"
+    },
+    {
+      "path": "demo/full-session-project/docs/guide/prompts/first-session.md",
+      "sha256": "372284ad03445cb308327e14caf43bcacaf87dfd156ffe40523a140476a1f813"
     }
   ]
 }

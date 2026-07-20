@@ -38,6 +38,12 @@ This is the on-disk working queue for the build. A checked item means its eviden
   in-progress evidence, safe input loss, exclusive no-follow evidence files, and a
   real Sol/medium resume. Repair and evidence reached `origin/main`; the unchanged
   suite passes **238/238** under `bounded-guide-startup-v15`.
+- [x] Replace the fragmented first-use journey with one complete-session command.
+  It prepares an isolated pushed project, copies only repository-local skills,
+  confirms the owner prompt, verifies the launch, and opens a staffed Guide whose
+  numbered choice launches Reviewer and Producer. The living suite passes
+  **241/241** under `self-guided-full-session-v16`; the final fresh human run is
+  deliberately still listed as submission rehearsal, not automated proof.
 
 ## Next
 

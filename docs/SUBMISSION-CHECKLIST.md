@@ -38,9 +38,11 @@ truth for the exact submission requirements.
 - [x] The one-minute refusal fixture is documented in [DEMO.md](DEMO.md).
 - [x] Package safety, install hooks, dependencies, and model-harness boundaries
   are documented in [SECURITY.md](SECURITY.md).
-- [x] The current full suite passes 238/238 against the pushed bounded-Guide
-  implementation and preserves its
-  [bound transcript](test-results/2026-07-20-bounded-guide-startup-pushed.md).
+- [x] The current full suite passes 241/241 against the hardened self-guided
+  full-session entry and preserves its
+  [bound transcript](test-results/2026-07-20-self-guided-full-session-security-final.md).
+- [x] A first-time user has one documented command for a complete session;
+  confirmation, launch, owner choices, and safe recovery remain inside Koda.
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.
 
 ## Submission form

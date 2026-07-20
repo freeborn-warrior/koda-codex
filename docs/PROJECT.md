@@ -173,6 +173,15 @@ owner contract
   startup returned to `guide>` in about 41 seconds after seven bounded checks;
   pushed toolkit capability `bounded-guide-startup-v15` binds the unchanged
   **238/238** post-push suite.
+- The release now has one complete-session entry command rather than a command
+  relay through outside chat. It prepares a new isolated project and local upstream,
+  copies the project-local skill set, shows and confirms the exact session prompt,
+  verifies the immutable launch, and opens a staffed Guide. Guide choice `1` invokes
+  the trusted launcher; choice `2` leaves the launch untouched. Preparation uses an
+  isolated Git environment, and an adversarial test proves ambient `GIT_DIR` and
+  `GIT_INDEX_FILE` cannot redirect it. Toolkit capability
+  `self-guided-full-session-v16` binds the **241/241** hardened suite. A fresh
+  owner-observed run remains separate human evidence before submission.
 - A real secure-Guide recovery then proved that the saved role launcher still
   depended on the terminal which created it. Guide refused safely twice with zero
   gate movement. Role launchers now use deterministic presentation/environment

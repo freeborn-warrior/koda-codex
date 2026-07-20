@@ -1862,3 +1862,45 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   suite passed **238/238** again in the
   [release transcript](test-results/2026-07-20-bounded-guide-startup-release.md).
   No product or test file changed after that run.
+
+## 2026-07-20 — Self-guided complete-session entry
+
+- **Owner-observed gap:** The mechanics had deep component coverage and a genuine
+  completed session, but the public experience still depended on commands relayed
+  from an outside chat. That means the prior suite did not make the complete human
+  journey a release condition. This is recorded as a test-design failure, not an
+  owner mistake.
+- **Correction:** `npm run demo:session` now prepares an isolated pushed project,
+  shows the exact prompt for numbered confirmation, verifies the immutable launch,
+  and opens a staffed Guide. Guide's displayed choice `1` now enters the trusted
+  launch path and opens Reviewer then Producer; choice `2` changes nothing.
+- **First-use documentation:** [Quick Start](QUICKSTART.md) is the nontechnical
+  path. [Command Manual](COMMAND-MANUAL.md) preserves every lower-level command,
+  intended caller, consequence, and refusal without making the owner transport it.
+- **Development failures:** A missing empty sessions directory, target-copy
+  collision, correct old-integrity refusals, ambient Git control variables, and a
+  root-owned npm cache refusal are preserved in the
+  [development record](test-results/2026-07-20-self-guided-full-session-development-failures.md).
+- **Focused result:** Guide staffing/launch choice and the real temporary-project
+  Quick Start path passed. The starter test initializes and pushes a local upstream,
+  copies all ten skills, passes `guide verify`, and maps choice `1` through the real
+  launch command to exactly Reviewer then Producer.
+- **Adversarial result:** The starter test plants `GIT_DIR` and `GIT_INDEX_FILE`
+  pointing outside the target. The isolated Git ceremony ignores both, leaves the
+  external paths absent, and ends clean at `main...origin/main` with zero divergence.
+- **Complete result:** Every one of the **241** named tests passed in the
+  [hardened transcript](test-results/2026-07-20-self-guided-full-session-security-final.md).
+  Each test and subtest remains individually listed; no class is aggregated away.
+- **Coverage:** **241/241** passed at **86.68% lines, 71.47% branches, and 85.59%
+  functions** overall.
+- **Package result:** The first dry-run refused because the owner's normal npm cache
+  contains root-owned files. The repeated isolated-cache inspection passed with
+  **840 files**, zero bundled dependencies, and no install hook. The disposable
+  production dependency audit reports **0 vulnerabilities**.
+- **Audits:** The [quality audit](quality-runs/2026-07-20-self-guided-full-session-13/RESULT.md)
+  and [security audit](security-runs/2026-07-20-self-guided-full-session-audit-19/RESULT.md)
+  distinguish automated proof from the still-owed fresh owner-visible rehearsal.
+- **State:** LOCAL HARDENED PASS. Toolkit capability
+  `self-guided-full-session-v16` binds implementation commit `410f614` and the
+  241-check transcript. Documentation, audits, manifest promotion, push, and an
+  unchanged post-push suite remain before human handoff.

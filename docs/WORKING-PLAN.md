@@ -102,14 +102,22 @@ Turn the proved two-context session relay into a project-level experience that c
     evidence. The corrected real Sol/medium context returned in about 41 seconds;
     repair and evidence reached `origin/main`, and the unchanged product passes
     **238/238** under `bounded-guide-startup-v15`.
+33. [x] Close the first-use journey gap exposed by the recording attempt. Add one
+    complete-session entry command, a nontechnical Quick Start and consequence-led
+    command manual, controller-owned numbered launch, isolated Git preparation,
+    and adversarial proof that ambient Git settings cannot redirect writes. The
+    hardened implementation passes **241/241** under
+    `self-guided-full-session-v16`.
 
 ## Submission cut
 
-The submission demonstration exists: one isolated representative Produce session
-moved from durable Guide state through the two-context relay, all six gates, pushed
-close, and Guide return with Guide, Producer, and Reviewer visible. The remaining
-submission work is rehearsal, recording, form completion, and freezing the exact
-pushed commit—not another product feature or a retrofitted self-hosting run.
+The submission demonstration and its first-use entry now exist: one command creates
+an isolated pushed project and enters Guide, while the preserved representative
+Produce session proves the two-context relay, all six gates, pushed close, and Guide
+return with Guide, Producer, and Reviewer visible. The remaining submission work is
+a fresh human rehearsal, recording, repository publication, form completion, and
+freezing the exact pushed commit—not another product feature or a retrofitted
+self-hosting run.
 
 ## Current constraints
 
