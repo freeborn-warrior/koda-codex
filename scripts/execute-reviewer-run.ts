@@ -2,6 +2,13 @@ import { spawnSync } from "node:child_process";
 import { readFile, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { codexProjectPermissionArgs } from "../src/codex-role-permissions.ts";
+import {
+  relayCodexEnvironment,
+  relayNodeToolchainReadRoots,
+  resolveRelayCodexExecutable,
+} from "../src/relay-environment.ts";
+
 type RunRecord = {
   version: number;
   fixture: string;
@@ -51,6 +58,7 @@ const project = await realpath(path.join(runRoot, "project"));
 if (!project.startsWith(`${runRoot}${path.sep}`)) {
   throw new Error("Reviewer project resolves outside its prepared run folder.");
 }
+const codex = resolveRelayCodexExecutable();
 const args = [
   "--ask-for-approval", "never",
   "exec",
@@ -61,12 +69,22 @@ const args = [
   "-C", project,
   "-m", run.model,
   "-c", `model_reasoning_effort=\"${run.effort}\"`,
-  "-s", "workspace-write",
+  ...codexProjectPermissionArgs({
+    workspaceAccess: "write",
+    trustedReadRoots: [
+      path.join(root, ".agents", "skills", "koda-c-review"),
+      path.join(root, "src"),
+      path.join(root, "package.json"),
+      codex,
+      ...relayNodeToolchainReadRoots(),
+    ],
+  }),
   run.prompt,
 ];
-const executed = spawnSync("codex", args, {
+const executed = spawnSync(codex, args, {
   cwd: root,
   encoding: "utf8",
+  env: relayCodexEnvironment(process.env),
   maxBuffer: 50 * 1024 * 1024,
 });
 

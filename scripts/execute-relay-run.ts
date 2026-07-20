@@ -7,10 +7,12 @@ import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
 import { closePath, evaluateSessionClosure } from "../src/close.ts";
+import { codexRolePermissionArgs } from "../src/codex-role-permissions.ts";
 import { pathExists, readProjectConfig } from "../src/config.ts";
 import { evaluateGate } from "../src/gate.ts";
 import { acquireGitOperationLock } from "../src/git-operation-lock.ts";
 import { evaluateSessionHalt } from "../src/halt.ts";
+import { relayOwnerName } from "../src/owner.ts";
 import {
   artifactPath,
   currentPhase,
@@ -24,7 +26,11 @@ import {
   writeTextAtomic,
 } from "../src/project.ts";
 import { readApprovalEntries, sha256 } from "../src/receipt.ts";
-import { relayCodexEnvironment } from "../src/relay-environment.ts";
+import {
+  relayCodexEnvironment,
+  relayNodeToolchainReadRoots,
+  resolveRelayCodexExecutable,
+} from "../src/relay-environment.ts";
 import {
   claimSessionPaths,
   ownedSessionPaths,
@@ -66,6 +72,7 @@ type RoleRecord = {
 
 type RunRecord = {
   version: number;
+  owner?: string;
   mode?: "fixture-copy" | "guide-project";
   scenario: string;
   status: string;
@@ -135,7 +142,7 @@ async function discoverExecutableRun(): Promise<string> {
     const record = await readFile(path.join(candidate, "RUN.json"), "utf8")
       .then((content) => JSON.parse(content) as { version?: number; status?: string })
       .catch(() => null);
-    if (record?.version === 1 && record.status !== "COMPLETE" && record.status !== "HALTED") candidates.push(candidate);
+    if ((record?.version === 1 || record?.version === 2) && record.status !== "COMPLETE" && record.status !== "HALTED") candidates.push(candidate);
   }
   if (candidates.length === 0) throw new Error("No prepared or paused relay run exists. Prepare one first.");
   if (candidates.length > 1) throw new Error("More than one relay run is active. Koda will not guess which session you mean.");
@@ -152,9 +159,10 @@ if (!(await lstat(runPath)).isFile() || !(await lstat(transcriptPath)).isFile())
   throw new Error("Relay RUN.json and TRANSCRIPT.md must be regular files.");
 }
 const run = JSON.parse(await readFile(runPath, "utf8")) as RunRecord;
-if (run.version !== 1 || run.status === "COMPLETE" || run.status === "HALTED") {
+if ((run.version !== 1 && run.version !== 2) || run.status === "COMPLETE" || run.status === "HALTED") {
   throw new Error(`Relay run cannot execute from status ${run.status}.`);
 }
+const ownerName = relayOwnerName(run);
 if (
   typeof run.project !== "string" ||
   typeof run.runtime !== "string" ||
@@ -248,6 +256,7 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
   }
 
   const turn = roleRecord.turns + 1;
+  const codexExecutable = resolveRelayCodexExecutable();
   const prefix = `${role.toUpperCase()}-${String(turn).padStart(2, "0")}`;
   const eventFile = `${prefix}-EVENTS.jsonl`;
   const stderrFile = `${prefix}-STDERR.txt`;
@@ -260,17 +269,17 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
     "--json",
     "-m", roleRecord.model,
     "-c", `model_reasoning_effort=\"${roleRecord.effort}\"`,
-    "-c", 'sandbox_mode="workspace-write"',
+    ...codexRolePermissionArgs(run.cli, codexExecutable, relayNodeToolchainReadRoots()),
   ];
   const args = roleRecord.threadId
     ? [...base, "resume", ...common, roleRecord.threadId, prompt]
-    : [...base, ...common, "--color", "never", "-s", "workspace-write", prompt];
+    : [...base, ...common, "--color", "never", prompt];
 
   run.lastAction = `${role} turn ${turn}: ${purpose}`;
   await saveRun();
   console.log(`\n${role.toUpperCase()} ${turn}: ${purpose}`);
 
-  const child = spawn(process.env.KODA_CODEX_BIN ?? "codex", args, {
+  const child = spawn(codexExecutable, args, {
     cwd: project,
     env: relayCodexEnvironment(process.env, run.sessionId),
     stdio: ["ignore", "pipe", "pipe"],
@@ -635,8 +644,8 @@ async function waitForReviewerWindowJob(job: ReviewerJob, expectedFile: string):
         job.kind === "consultation"
           ? "- Consultation response was written before the producer resumed."
           : current.completion === "HALTED"
-            ? "- Kristian invoked the sole interrupt; pushed halt evidence voided the phase without acknowledging its review."
-            : "- Owner acknowledgement was recorded through Koda in Window B; Kristian's quote entered neither model chat.",
+            ? `- ${ownerName} invoked the sole interrupt; pushed halt evidence voided the phase without acknowledging its review.`
+            : `- Owner acknowledgement was recorded through Koda in Window B; ${ownerName}'s quote entered neither model chat.`,
       ]);
       await removeReviewerJob(runRoot);
       console.log("WINDOW B HANDOVER COMPLETE — deriving the next route from disk.");
@@ -719,7 +728,7 @@ async function answerConsultation(request: string): Promise<void> {
     `Read ${reviewerSkill()} completely and explicitly use koda-c-review in in-phase consultation mode for request ${request}.`,
     `Read ${path.join(project, "docs", "IN-PHASE-CONSULTATION.md")} completely.`,
     "Answer only from the request and its cited evidence. Write the response artifact before stopping.",
-    "If owner judgment is required, record AWAITING OWNER and the smallest clear owner question; never impersonate Kristian or create a formal verdict.",
+    "If owner judgment is required, record AWAITING OWNER and the smallest clear owner question; never impersonate the owner or create a formal verdict.",
   ].join(" ");
   if (twoWindow) {
     const response = request.replace(/-request\.md$/, "-response.md");
@@ -762,7 +771,7 @@ async function ownerAcknowledge(phaseName: string, reviewFile: string): Promise<
   console.log("\nOWNER ACKNOWLEDGEMENT REQUIRED");
   console.log(`Read the complete review through its final receipt: ${reviewFile}`);
   console.log("Koda will ask you to paste that exact final line. The relay does not read or print it for you.");
-  const result = koda(["approve", phaseName, "--approver", "Kristian"], true);
+  const result = koda(["approve", phaseName, "--approver", ownerName], true);
   if (result.status !== 0) {
     run.status = "PAUSED_OWNER_ACKNOWLEDGEMENT";
     run.lastError = `Owner acknowledgement exited ${result.status}.`;
@@ -775,7 +784,7 @@ async function ownerAcknowledge(phaseName: string, reviewFile: string): Promise<
   await note(`owner acknowledged ${phaseName} review`, [
     `- Review: \`${path.relative(project, reviewFile)}\``,
     "- Exact receipt: entered interactively and not copied into this transcript",
-    "- Approver recorded by Koda: Kristian",
+    `- Approver recorded by Koda: ${ownerName}`,
   ]);
 }
 
@@ -885,7 +894,7 @@ async function closeSession(): Promise<void> {
   await note("supervisor close commit and push", [
     `- Exact prepared session path: \`${relativeSession}\``,
     `- Commit message: \`close session ${session.id}\``,
-    "- Reason: Codex workspace-write intentionally protects `.git`; the supervisor is the trusted repository operator.",
+    "- Reason: Codex's project permission profile intentionally protects `.git`; the supervisor is the trusted repository operator.",
   ]);
 
   const closeResult = koda(["session", "close"]);

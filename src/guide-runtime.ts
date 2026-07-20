@@ -5,6 +5,7 @@ import path from "node:path";
 
 import { pathExists } from "./config.ts";
 import { guideReturnsDir, guideRunsDir, verifyGuideLaunch, type GuideLaunchRequest } from "./guide.ts";
+import { normalizeOwnerName, relayOwnerName } from "./owner.ts";
 import { nowIso, writeJsonAtomic, writeTextAtomic } from "./project.ts";
 import type { ProjectConfig } from "./types.ts";
 
@@ -27,12 +28,13 @@ export interface GuideTerminalLaunch {
 }
 
 export interface GuideRuntimeRecord {
-  version: 1;
+  version: 1 | 2;
   mode: "guide-project";
   scenario: "guide-confirmed";
   status: string;
   preparedAt: string;
   launchId: string;
+  owner?: string;
   producer: GuideRuntimeRole;
   reviewer: GuideRuntimeRole;
   project: "../../..";
@@ -154,8 +156,9 @@ function runtimeRecord(value: unknown, source: string): GuideRuntimeRecord {
     typeof item.terminalLaunch.requestedAt === "string" &&
     item.terminalLaunch.requestedAt.trim() !== ""
   );
+  relayOwnerName(item, source);
   if (
-    item.version !== 1 || item.mode !== "guide-project" || item.scenario !== "guide-confirmed" ||
+    (item.version !== 1 && item.version !== 2) || item.mode !== "guide-project" || item.scenario !== "guide-confirmed" ||
     typeof item.status !== "string" || typeof item.preparedAt !== "string" ||
     typeof item.launchId !== "string" || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(item.launchId) ||
     !validRole(item.producer) || !validRole(item.reviewer) ||
@@ -277,6 +280,7 @@ export async function prepareGuideRuntime(
     }
     if (
       existing.launchId !== launch.id || existing.prompt !== launch.prompt ||
+      relayOwnerName(existing) !== normalizeOwnerName(launch.confirmedBy, "Confirmed owner") ||
       existing.producer.model !== options.producerModel || existing.producer.effort !== options.producerEffort ||
       existing.reviewer.model !== options.reviewerModel || existing.reviewer.effort !== options.reviewerEffort ||
       existing.maxTurns !== maxTurns
@@ -289,12 +293,13 @@ export async function prepareGuideRuntime(
   if (!head.ok) throw new Error(`Unable to bind the Guide runtime to the current commit: ${head.stderr}`);
   const cli = await trustedCli();
   const run: GuideRuntimeRecord = {
-    version: 1,
+    version: 2,
     mode: "guide-project",
     scenario: "guide-confirmed",
     status: "PREPARED",
     preparedAt: nowIso(),
     launchId: launch.id,
+    owner: normalizeOwnerName(launch.confirmedBy, "Confirmed owner"),
     producer: { model: options.producerModel, effort: options.producerEffort, threadId: null, turns: 0 },
     reviewer: { model: options.reviewerModel, effort: options.reviewerEffort, threadId: null, turns: 0 },
     project: "../../..",
@@ -317,6 +322,7 @@ export async function prepareGuideRuntime(
       "",
       "- Status: PREPARED — NOT RUN",
       `- Prompt: ${launch.prompt}`,
+      `- Owner: ${normalizeOwnerName(launch.confirmedBy, "Confirmed owner")}`,
       `- Producer: ${options.producerModel} / ${options.producerEffort}`,
       `- Reviewer: ${options.reviewerModel} / ${options.reviewerEffort}`,
       "",

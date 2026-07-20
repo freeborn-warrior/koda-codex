@@ -9,13 +9,19 @@ import { createInterface as createPrompt } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 
 import { pathExists, readProjectConfig } from "../src/config.ts";
+import { codexRolePermissionArgs } from "../src/codex-role-permissions.ts";
 import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
 import { acquireGitOperationLock } from "../src/git-operation-lock.ts";
 import { pushCommandArgs } from "../src/git.ts";
 import { evaluateSessionHalt, prepareHaltArtifact } from "../src/halt.ts";
+import { relayOwnerName } from "../src/owner.ts";
 import { currentPhase, displayPath, loadSession, writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
-import { relayCodexEnvironment } from "../src/relay-environment.ts";
+import {
+  relayCodexEnvironment,
+  relayNodeToolchainReadRoots,
+  resolveRelayCodexExecutable,
+} from "../src/relay-environment.ts";
 import { stagedProjectPaths } from "../src/workset.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
@@ -32,6 +38,7 @@ import {
 
 type RunRecord = {
   version: number;
+  owner?: string;
   mode?: "fixture-copy" | "guide-project";
   status: string;
   project: string;
@@ -56,6 +63,7 @@ let stopping = false;
 let stopSignal: RelaySignal | null = null;
 let activeModelChild: ReturnType<typeof spawn> | null = null;
 let testDiscussionConsumed = false;
+let boundOwnerName: string | null = null;
 
 function requestStop(signal: RelaySignal): void {
   const repeated = stopping;
@@ -91,7 +99,7 @@ async function discoverRun(): Promise<string> {
       .catch(() => null);
     if (
       record &&
-      record.version === 1 &&
+      (record.version === 1 || record.version === 2) &&
       record.status !== "COMPLETE" &&
       record.status !== "HALTED"
     ) candidates.push(candidate);
@@ -108,7 +116,7 @@ if (!(await lstat(runPath)).isFile()) refuse("RUN.json must be a regular file.")
 async function readRun(): Promise<RunRecord> {
   const value = JSON.parse(await readFile(runPath, "utf8")) as RunRecord;
   if (
-    value.version !== 1 ||
+    (value.version !== 1 && value.version !== 2) ||
     typeof value.status !== "string" ||
     typeof value.project !== "string" ||
     typeof value.runtime !== "string" ||
@@ -120,10 +128,21 @@ async function readRun(): Promise<RunRecord> {
     !(value.reviewer.threadId === null || typeof value.reviewer.threadId === "string") ||
     !Number.isInteger(value.reviewer.turns) || value.reviewer.turns < 0
   ) refuse("RUN.json has invalid reviewer-window fields.");
+  let ownerName: string;
+  try {
+    ownerName = relayOwnerName(value);
+  } catch (error) {
+    refuse(error instanceof Error ? error.message : String(error));
+  }
+  if (boundOwnerName !== null && ownerName !== boundOwnerName) {
+    refuse("RUN.json owner identity changed after the Reviewer window opened.");
+  }
   return value;
 }
 
 const initialRun = await readRun();
+const ownerName = relayOwnerName(initialRun);
+boundOwnerName = ownerName;
 const resolved = await resolveRelayRunPaths({ packageRoot: root, configuredRunsRoot: runsRoot, runRoot, run: {
   mode: initialRun.mode,
   project: initialRun.project,
@@ -201,20 +220,21 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
   await writeReviewerWindowState(runRoot, state);
 
   const base = ["--ask-for-approval", "never", "exec"];
+  const activeRun = await readRun();
+  const codexExecutable = resolveRelayCodexExecutable();
   const common = [
     "--ignore-user-config",
     "--json",
     "-m", state.model,
     "-c", `model_reasoning_effort=\"${state.effort}\"`,
-    "-c", 'sandbox_mode="workspace-write"',
+    ...codexRolePermissionArgs(activeRun.cli, codexExecutable, relayNodeToolchainReadRoots()),
   ];
   const args = state.threadId
     ? [...base, "resume", ...common, state.threadId, prompt]
-    : [...base, ...common, "--color", "never", "-s", "workspace-write", prompt];
-  const activeRun = await readRun();
+    : [...base, ...common, "--color", "never", prompt];
 
   console.log(`\nREVIEWER ${turn} — ${purpose}`);
-  const child = spawn(process.env.KODA_CODEX_BIN ?? "codex", args, {
+  const child = spawn(codexExecutable, args, {
     cwd: project,
     env: relayCodexEnvironment(process.env, activeRun.sessionId),
     stdio: ["ignore", "pipe", "pipe"],
@@ -442,7 +462,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     console.log("2. Stop for now — preserve this decision point.");
     const readerChoice = (await promptOwner("Choose 1 or 2: ")).trim();
     if (readerChoice === "1") continue;
-    if (readerChoice === "2") throw new OwnerPaused("Kristian stopped after the review reader failed; the review remains ready and unacknowledged.");
+    if (readerChoice === "2") throw new OwnerPaused(`${ownerName} stopped after the review reader failed; the review remains ready and unacknowledged.`);
     console.log("Nothing changed. Choose 1 to retry or 2 to stop safely.");
   }
 
@@ -487,7 +507,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
         }
         continue;
       }
-      if (choice === "4") throw new OwnerPaused("Kristian chose to stop for now; the review remains ready and unacknowledged.");
+      if (choice === "4") throw new OwnerPaused(`${ownerName} chose to stop for now; the review remains ready and unacknowledged.`);
       if (choice === "5") {
         console.log("HALT ENDS THIS SESSION ATTEMPT. No phase from it will count; later work must start from a fresh Brief.");
         console.log("1. Continue toward a permanent halt.");
@@ -536,7 +556,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
             acknowledgementSelected = false;
             continue;
           }
-          if (copyChoice === "3") throw new OwnerPaused("Kristian stopped after the receipt copy failed; the review remains ready and unacknowledged.");
+          if (copyChoice === "3") throw new OwnerPaused(`${ownerName} stopped after the receipt copy failed; the review remains ready and unacknowledged.`);
           console.log("Nothing changed. Returning to the full review choices.");
           acknowledgementSelected = false;
           continue;
@@ -571,13 +591,13 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
         acknowledgementSelected = false;
         continue;
       }
-      if (retryChoice === "3") throw new OwnerPaused("Kristian chose to stop after an unmatched receipt; the review remains ready and unacknowledged.");
+      if (retryChoice === "3") throw new OwnerPaused(`${ownerName} chose to stop after an unmatched receipt; the review remains ready and unacknowledged.`);
       console.log("Nothing changed. Returning to the full review choices.");
       acknowledgementSelected = false;
       continue;
     }
 
-    const approvalArgs = [cli, "approve", job.phase, "--approver", "Kristian", "--session", progressSession.id];
+    const approvalArgs = [cli, "approve", job.phase, "--approver", ownerName, "--session", progressSession.id];
     const approvalInput = [receiptInput.trim()];
     if (parsed.verdict === "APPROVE WITH COMMENTS") {
       const comments = testMode
@@ -649,7 +669,7 @@ async function processJob(job: ReviewerJob): Promise<void> {
   if (job.status === "RUNNING") throw new Error("A prior reviewer process stopped mid-turn. The job is preserved; explicit recovery is required.");
   if (job.status === "FAILED") {
     if (job.error === "Owner acknowledgement exited 1." && job.completion === null) {
-      console.log("\nREVIEWER RECOVERY — the earlier receipt attempt changed nothing. Reopening the same bound review for Kristian.");
+      console.log(`\nREVIEWER RECOVERY — the earlier receipt attempt changed nothing. Reopening the same bound review for ${ownerName}.`);
       job.status = "AWAITING_OWNER";
       job.error = null;
       await writeReviewerJob(runRoot, job);

@@ -6,8 +6,9 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { DEFAULT_CONFIG } from "../src/config.ts";
+import { codexProjectPermissionArgs } from "../src/codex-role-permissions.ts";
 import { createSession, writeJsonAtomic } from "../src/project.ts";
-import { relayCodexEnvironment } from "../src/relay-environment.ts";
+import { relayCodexEnvironment, relayNodeToolchainReadRoots } from "../src/relay-environment.ts";
 
 const root = process.cwd();
 const date = "2026-07-19";
@@ -31,11 +32,14 @@ function runCodex(cwd: string, effort: "low" | "medium", prompt: string, skipGit
     "exec",
     "--ephemeral",
     "--ignore-user-config",
-    "--sandbox", "read-only",
     "--json",
     "--color", "never",
     "--model", model,
     "-c", `model_reasoning_effort=\"${effort}\"`,
+    ...codexProjectPermissionArgs({
+      workspaceAccess: "read",
+      trustedReadRoots: [codex, ...relayNodeToolchainReadRoots()],
+    }),
     ...(skipGit ? ["--skip-git-repo-check"] : []),
     prompt,
   ];
@@ -110,7 +114,7 @@ async function writeRunFiles(
       model,
       ephemeral: true,
       ignoredUserConfig: true,
-      sandbox: "read-only",
+      sandbox: "project-read-only",
       exitStatus: run.status,
       commandArgs: run.args,
       ...metadata,
@@ -154,7 +158,7 @@ async function discoveryRun(): Promise<void> {
     `- Model: \`${model}\``,
     "- Effort: low",
     "- Context: fresh ephemeral Codex task with user configuration ignored",
-    "- Sandbox: read-only",
+    "- Sandbox: strict project read-only permission profile",
     `- Koda-C skills discovered from startup context: ${discovered.length} of ${expected.length}`,
     `- Tool calls or repository reads: ${toolEvents.length}`,
     "- Raw events: [`CODEX-EVENTS.jsonl`](CODEX-EVENTS.jsonl)",

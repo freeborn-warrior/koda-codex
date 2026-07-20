@@ -22,6 +22,7 @@ import {
 } from "./ghostty.ts";
 import { evaluateSessionClosure } from "./close.ts";
 import { evaluateSessionHalt } from "./halt.ts";
+import { relayOwnerName } from "./owner.ts";
 import { currentPhase, displayPath, latestSessionId, listSessionIds, loadSessionState, sessionRoot } from "./project.ts";
 import { claimGuidePaths, loadGuideWorkSet } from "./workset.ts";
 import { verifyToolkitIntegrity } from "./toolkit-integrity.ts";
@@ -200,6 +201,7 @@ export async function runGuideCli(
       io.out("");
       const terminal = runtime.run.status === "COMPLETE" || runtime.run.status === "HALTED";
       io.out(`${terminal ? "LAST SESSION RUNTIME" : "ACTIVE SESSION RUNTIME"} — ${runtime.run.launchId}`);
+      io.out(`Owner: ${relayOwnerName(runtime.run)}`);
       io.out(`Session: ${runtime.run.sessionId ?? "not opened"}`);
       io.out(`State: ${runtime.run.status}`);
       if (runtime.run.terminalLaunch) {

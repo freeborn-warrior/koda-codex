@@ -16,19 +16,19 @@
     },
     {
       "path": "src/relay-environment.ts",
-      "sha256": "5035845519153e5e13a2c43f18549876c71f4e2c1e2c1f15dbea28b1946fa577"
+      "sha256": "4b74901296d8fdaec54c6b2f3992bede4334b22fecd304fb59044bb668764476"
     },
     {
       "path": "src/guide-runtime.ts",
-      "sha256": "266d6289cb5557c98afca306ac942fbdbe9880dc36bf4da6c6353529a3e724de"
+      "sha256": "e15b59b1f68d7de9c0b0a3cb4ab385c4bae2eda6f05abe0590a73d4d07f3e553"
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "43fbe0e2b87ee82841833b9f97eff259732e0dfc577c7bc2b1f860d58415a439"
+      "sha256": "6cecc2df1f82af61253cb2c5a55ade6db015c7425c99da94445e442d14a781a9"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "77634738de1871a86a96e19d609114c49a9f0f65947de2e666514f5f7abc121d"
+      "sha256": "2d47caf2685bff9f21ace61fabf4a98ba9eb76f6ae0b88db19fbf63235f5da22"
     },
     {
       "path": "scripts/relay-window-protocol.ts",
@@ -40,11 +40,11 @@
     },
     {
       "path": "dist/relay-environment.js",
-      "sha256": "1c5ea37f61385119db595941a3bd038d330e0eb5acfd34b438c205af392b277c"
+      "sha256": "5a7dca5044d32848f32374daae17557a65775dad01635a61939c7dba3228eb6c"
     },
     {
       "path": "dist/guide-runtime.js",
-      "sha256": "ffc9acde039ce0c65e3a312f58cd6bcce7a2615447953eac6c53828060195158"
+      "sha256": "3b89eddc61b095e436c3a4a8fe876eb5823266df5140a56259d24431a8ae59c5"
     },
     {
       "path": "src/toolkit-integrity.ts",
@@ -56,35 +56,35 @@
     },
     {
       "path": "src/guide.ts",
-      "sha256": "db25c5d1674e8efd056efdc6535b9174d2813607e806c2fe0ef088ad74676105"
+      "sha256": "cf23d653178d8ed122c1203677c9ec9ed1041519f6c319a95c2d4ea60c6ecf33"
     },
     {
       "path": "dist/guide.js",
-      "sha256": "7481cb377d4ac3435649cf03462aaab7549a89afb83f1b36e5e26eb3a1304c35"
+      "sha256": "8e6e0651a499d762b3de656821815c4c1e19ef87b029fa6ea5b208d5d35aa241"
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "ebf960237c0c0993e4817e6d0a9c8cb88faced6ca093c8f35fbdf439f415c8d3"
+      "sha256": "a8fa65de29e50c654003f5d905f56e9ee557bf10293f452d17df6e63702d345c"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "3e9dfe04268c42118e4153373afae9e07b4f2fec64f13af0f502906b50d2fbc3"
+      "sha256": "cabe7069ef9b503bd0ac1311abfc8047824ba8b57fbd53b4f1f3415398cf657c"
     },
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",
-      "sha256": "504c30253518546d5dadf7c6e528a3cfc00c997aa483d3d00762f57c3ee24088"
+      "sha256": "9fa96742f87c920699d7f96480dc80aaf486acff5a4170c1702d4c64f6996015"
     },
     {
       "path": "src/commands.ts",
-      "sha256": "445f7f64a586771dc6d4a6a7e3fef58a36a272df7b22f3d9172a7d0aa75eefd5"
+      "sha256": "ad35bbda27eab254bcec9aa01a9e05bdf7191e6e2d1d823200d1949a82c17f85"
     },
     {
       "path": "dist/commands.js",
-      "sha256": "1b8ed9111418927f8ed1bc4564ea9d529a35b08ea8d3d2459063a65e4ce31d62"
+      "sha256": "e50ea2b5f4d634d85b00d09395c61095c277a0fc9dc3a973f648e85dd5ee8108"
     },
     {
       "path": "scripts/show-relay-status.ts",
-      "sha256": "f839ce7ef533071ddbee7dff804040801da9def49568c52076142568396576e0"
+      "sha256": "df04fc586fd54d010002562066ebba8ecbfa6111b7b08bc06b858d414992af37"
     },
     {
       "path": "src/direction.ts",
@@ -101,6 +101,22 @@
     {
       "path": "dist/git-operation-lock.js",
       "sha256": "600ea5cfcc626d2dfd9a1e1b4c201bbe976cf46d96ea7c67d9fe98730fe669cb"
+    },
+    {
+      "path": "src/owner.ts",
+      "sha256": "da8f709bf85ec9a2ca462505b0d01781e00e11494ba5711229d0fe9c1ac6a1c8"
+    },
+    {
+      "path": "dist/owner.js",
+      "sha256": "a8df30ce21c69f26351062954f6bee2334bbf53d4ef5a8f850e05a5598993de3"
+    },
+    {
+      "path": "src/codex-role-permissions.ts",
+      "sha256": "ae175b56c112797b100daff4a3a375ef164e3e68d88e5908144004400fd0461f"
+    },
+    {
+      "path": "dist/codex-role-permissions.js",
+      "sha256": "9dc1f964a3a3cc1ea60e51078398030beb86ed971174854bae7208795ac1adaa"
     }
   ]
 }

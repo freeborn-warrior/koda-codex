@@ -1403,3 +1403,55 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   reopen Producer / `2` not now. No role or terminal was launched.
 - **Final state:** PUSHED MECHANICAL, SECURITY, PACKAGE, AND OWNER-SURFACE PASS.
   Kristian's Ghostty observation and continuation through pushed close remain.
+
+## 2026-07-19 — Dynamic owner identity and project-scoped Codex roles
+
+- **Why:** The Guide and relay still substituted the toolkit author's name in
+  several active owner messages, and the legacy `workspace-write` sandbox limited
+  writes but did not justify a project-only read claim.
+- **Owner binding:** New Guide runtimes are version 2 and bind the confirming
+  owner's validated display name through status, Reviewer prompts, approval ledger,
+  and relay transcript. Empty, overlong, and terminal-control-character names
+  refuse. Version-1 runtimes retain `Kristian` only as an explicit historical
+  migration fallback. The session-prompt skill now resolves owner identity from
+  project evidence or asks once; it never substitutes the toolkit author.
+- **Sandbox correction:** Managed Producer and Reviewer turns now use a strict
+  Codex permission profile: project read/write; read-only `.git`, `.agents`, and
+  `.codex`; denied project `.env`; no ordinary parent/sibling/home reads; disabled
+  network, web search, login shell, user config, and approval escape; exact
+  read-only Koda/Codex runtime files; and a read-only Node toolchain root. Older
+  unsupported config fails closed.
+- **Development failure 1:** The first focused run passed **46/86**. All forty
+  Guide failures named one cause: the integrity manifest correctly detected the
+  newly changed relay script. After a local development hash bootstrap, the exact
+  focused suite passed **86/86**. The final manifest remains owed pushed-code proof.
+- **Live probe 1:** Strict project write and parent-read denial passed.
+- **Live probe 2:** Project write, parent-read denial, Git write denial, and `.env`
+  read denial passed, but trusted Koda execution failed because the package
+  manifest and Codex self-executable were not yet allowed.
+- **Live probe 3:** Those exact files were allowed, but Koda execution still failed.
+  No-model diagnostics traced the failure through Homebrew Node, `libnode`, and a
+  linked `llhttp` library. The policy added the read-only Homebrew toolchain root;
+  no project or gate assertion changed.
+- **Final live probe:** Sol/low returned `INSIDE_WRITE=PASS`,
+  `OUTSIDE_READ=BLOCKED`, `GIT_WRITE=BLOCKED`,
+  `PROJECT_ENV_READ=BLOCKED`, and `TRUSTED_TOOLKIT_READ=PASS`. A real HTTPS command
+  failed DNS resolution under the same profile. A planted required project-local
+  MCP server did not load under `--ignore-user-config`.
+- **Corrected local deterministic results:** focused relay/Guide/security/skills
+  **86/86**, then the changed permission slice **13/13**, then the complete suite
+  **216/216**. Coverage also passed **216/216** at **89.23% lines, 70.25%
+  branches, and 86.86% functions** overall; the new permission-profile module is
+  at **100% lines, branches, and functions**. No assertion was weakened.
+- **Packaging and repository checks:** Dependency-free package dry-run passed at
+  955,624 compressed bytes, 4,587,696 unpacked bytes, 781 files, and zero bundled
+  dependencies. The isolated production dependency audit found zero
+  vulnerabilities. Credential-signature, whitespace, and reachable-object checks
+  passed. The repair commit, unchanged post-push transcript, and final integrity
+  binding remain pending and must not be reported as complete yet.
+- **Evidence:** [owner identity design note](design-notes/2026-07-19-owner-identity-binding.md),
+  [permission design note](design-notes/2026-07-19-project-scoped-codex-permissions.md),
+  and [live boundary result](security-runs/2026-07-19-project-boundary-probe-13/RESULT.md).
+- **Remaining boundary:** The separately started interactive Guide still uses the
+  permissions selected at its own Codex launch. Koda must design a simple secure
+  Guide opening experience before claiming whole-workflow containment.

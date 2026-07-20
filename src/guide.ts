@@ -7,6 +7,7 @@ import { pathExists } from "./config.ts";
 import { carryDirectionsForNextSession, carryPendingDirectionsAfterHalt } from "./direction.ts";
 import { checkGitFilesPushed } from "./git.ts";
 import { evaluateSessionHalt, haltPath } from "./halt.ts";
+import { normalizeOwnerName } from "./owner.ts";
 import {
   displayPath,
   latestSessionId,
@@ -236,6 +237,7 @@ function parseLaunch(value: unknown, source: string): GuideLaunchRequest {
     (item.launchMode !== undefined && item.launchMode !== "independent" && item.launchMode !== "dependent" && item.launchMode !== "continuation") ||
     (item.dependencies !== undefined && !Array.isArray(item.dependencies))
   ) throw new Error(`${source} has invalid READY_TO_LAUNCH data.`);
+  normalizeOwnerName(item.confirmedBy, `${source} confirming owner`);
   assertRelativeProjectPath(item.prompt, `${source} prompt`);
   assertRelativeProjectPath(item.manifest.path, `${source} manifest`);
   const hashPattern = /^[a-f0-9]{64}$/;
@@ -384,6 +386,7 @@ async function validCancellationExists(root: string, config: ProjectConfig, laun
     cancellation.reason.trim() === "" ||
     typeof cancellation.cancelledAt !== "string"
   ) throw new Error(`Guide cancellation ${launchId}.json is invalid.`);
+  normalizeOwnerName(cancellation.cancelledBy, `Guide cancellation ${launchId}.json owner`);
   return true;
 }
 
@@ -423,9 +426,7 @@ export async function cancelGuideLaunch(
   cancelledBy: string,
   reason: string,
 ): Promise<string> {
-  if (cancelledBy.trim() === "" || /[\r\n]/.test(cancelledBy)) {
-    throw new Error("The cancelling owner must be a non-empty single line.");
-  }
+  const ownerName = normalizeOwnerName(cancelledBy, "The cancelling owner");
   if (reason.trim() === "") throw new Error("Launch cancellation requires a reason.");
   const pending = await pendingGuideLaunches(root, config);
   const launch = pending.find((item) => item.id === launchId);
@@ -437,7 +438,7 @@ export async function cancelGuideLaunch(
     version: 1,
     launchId,
     status: "CANCELLED",
-    cancelledBy: cancelledBy.trim(),
+    cancelledBy: ownerName,
     reason: reason.trim(),
     cancelledAt: nowIso(),
   };
@@ -562,9 +563,7 @@ export async function confirmGuideLaunch(
   confirmedBy: string,
   options: GuideLaunchOptions = {},
 ): Promise<{ launch: GuideLaunchRequest; file: string }> {
-  if (confirmedBy.trim() === "" || /[\r\n]/.test(confirmedBy)) {
-    throw new Error("The confirming owner must be a non-empty single line.");
-  }
+  const ownerName = normalizeOwnerName(confirmedBy, "The confirming owner");
   const manifest = await loadGuideManifest(root, config);
   await requireGuideCancellationsPushed(root, config);
   const pending = await pendingGuideLaunches(root, config);
@@ -645,7 +644,7 @@ export async function confirmGuideLaunch(
     launchMode,
     dependencies,
     toolkit: await verifyToolkitIntegrity(),
-    confirmedBy: confirmedBy.trim(),
+    confirmedBy: ownerName,
     confirmedAt: nowIso(),
   };
   const directory = guideLaunchesDir(root, config);

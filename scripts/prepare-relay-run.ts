@@ -171,7 +171,7 @@ await writeFile(path.join(runRoot, "TRANSCRIPT.md"), `# Relay transcript — ${p
 
 const relativeRun = path.relative(root, runRoot);
 console.log(`Prepared full relay run: ${process.env.KODA_RELAY_RUNS_ROOT ? runRoot : relativeRun}`);
-console.log("This is a persistent two-context run. It will pause at every review for Kristian's exact receipt quote.");
+console.log("This is a persistent two-context run. It will pause at every review for the owner's exact receipt quote.");
 if (process.env.KODA_RELAY_RUNS_ROOT) {
   console.log("Test preparation complete; execution is intentionally disabled outside docs/relay-runs.");
 } else {

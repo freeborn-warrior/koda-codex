@@ -23,6 +23,7 @@ import { evaluateSessionHalt, haltPath, prepareHaltArtifact } from "./halt.ts";
 import { bindGuideLaunch, hasGuideManifest, verifyGuideLaunch } from "./guide.ts";
 import { runGuideCli } from "./guide-commands.ts";
 import { requireAdvancedHistory, validateAdvancedHistory } from "./history.ts";
+import { normalizeOwnerName } from "./owner.ts";
 import {
   artifactPath,
   createSession,
@@ -538,7 +539,7 @@ async function reviewNewCommand(args: string[], cwd: string, io: CliIo): Promise
 }
 
 async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<void> {
-  const approver = option(args, "--approver") ?? "Owner";
+  const approver = normalizeOwnerName(option(args, "--approver") ?? "Owner", "Approver");
   let comments = option(args, "--comments");
   let ruling = option(args, "--ruling");
   const sessionId = requestedSession(args);
@@ -546,8 +547,6 @@ async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<v
   if (args.length < 1 || args.length > 2) {
     throw new Error("Usage: koda approve <phase> [quoted-receipt] [--approver <name>] [--comments <text>] [--ruling <text>]");
   }
-  if (approver.trim() === "" || /[\r\n]/.test(approver)) throw new Error("Approver must be a non-empty single line.");
-
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
   const session = await selectedSession(root, config, sessionId);
@@ -591,8 +590,8 @@ async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<v
     if (!comments.trim()) throw new Error("APPROVE WITH COMMENTS requires comments in the ledger.");
   }
   if (parsed.verdict === "DISCUSS" && !ruling?.trim()) {
-    ruling = await io.prompt("Enter Kristian's ruling for the ledger: ");
-    if (!ruling.trim()) throw new Error("DISCUSS requires Kristian's ruling before a fresh review.");
+    ruling = await io.prompt("Enter the owner's ruling for the ledger: ");
+    if (!ruling.trim()) throw new Error("DISCUSS requires the owner's ruling before a fresh review.");
   }
 
   const entry: ApprovalEntry = {
@@ -602,7 +601,7 @@ async function approveCommand(args: string[], cwd: string, io: CliIo): Promise<v
     reviewSha256: sha256(reviewContent),
     verdict: parsed.verdict,
     receipt: parsed.receipt,
-    approver: approver.trim(),
+    approver,
     comments: comments?.trim() || null,
     ruling: ruling?.trim() || null,
     recordedAt: nowIso(),

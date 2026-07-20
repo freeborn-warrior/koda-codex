@@ -132,8 +132,9 @@ test("session open and close remain ceremonies outside producer phase routing", 
   assert.match(prompt, /conceptually later idea is a dependent successor and waits; a genuinely independent sibling may proceed/i);
   assert.match(prompt, /owner-via-guide.*`koda direction wait --session <session-id>`/is);
   assert.match(prompt, /Repeat the disk preflight and relationship classification for every later session request/is);
-  assert.match(prompt, /Kristian supplies intent, priorities, constraints, product judgments, and confirmation/is);
-  assert.match(prompt, /Never ask him to relay a filesystem path, shell command, hash, commit ID, test count, receipt, or evidence location/is);
+  assert.match(prompt, /The owner supplies intent, priorities, constraints, product judgments, identity for durable records, and confirmation/is);
+  assert.match(prompt, /Never ask the owner to relay a filesystem path, shell command, hash, commit ID, test count, receipt, or evidence location/is);
+  assert.match(prompt, /never guess or substitute the toolkit author's name/is);
   assert.match(prompt, /verified toolkit capability and integrity-manifest hash/is);
   assert.match(prompt, /no toolkit-owned technical prerequisite has been mislabeled as an owner question/is);
   assert.match(prompt, /`koda guide verify` succeeds.*committed and pushed/is);
@@ -141,7 +142,7 @@ test("session open and close remain ceremonies outside producer phase routing", 
   assert.match(prompt, /Treat `1` as explicit launch authority.*Treat `2` as no mutation/is);
   assert.match(prompt, /SESSION RECOVERY READY/);
   assert.match(prompt, /koda guide recover --open ghostty/);
-  assert.match(prompt, /Never ask Kristian to paste the recovery command/);
+  assert.match(prompt, /Never ask the owner to paste the recovery command/);
   assert.match(prompt, /Do not run `koda session new`/);
   assert.match(session, /currentPhaseIndex: 0/);
   assert.match(session, /first phase.*state\.json/i);
@@ -155,7 +156,8 @@ test("session open and close remain ceremonies outside producer phase routing", 
 
 test("the session-prompt skill is the sole skill route to a future session launch", async () => {
   const prompt = await readFile(".agents/skills/koda-c-session-prompt/SKILL.md", "utf8");
-  assert.match(prompt, /koda guide confirm <prompt-file> --owner Kristian/);
+  assert.match(prompt, /koda guide confirm <prompt-file> --owner "<owner-name>"/);
+  assert.doesNotMatch(prompt, /Kristian/);
   for (const name of historicalSessionSkillNames) {
     const skill = await readFile(`.agents/skills/${name}/SKILL.md`, "utf8");
     assert.doesNotMatch(skill, /koda guide confirm|READY_TO_LAUNCH/, name);
@@ -172,7 +174,8 @@ test("the fresh Guide preflight model run is sealed, blind, ephemeral, and read-
   assert.match(contract, /block-everything task also fails the deterministic honest control/);
   assert.match(runner, /"--ephemeral"/);
   assert.match(runner, /"--ignore-user-config"/);
-  assert.match(runner, /"--sandbox", "read-only"/);
+  assert.match(runner, /codexProjectPermissionArgs/);
+  assert.match(runner, /workspaceAccess: "read"/);
   assert.match(runner, /Use \$koda-c-session-prompt\. I want to start a new session that is conceptually ahead/);
   assert.match(runner, /const before = await snapshot\(fixture\)/);
   assert.match(runner, /const after = await snapshot\(fixture\)/);

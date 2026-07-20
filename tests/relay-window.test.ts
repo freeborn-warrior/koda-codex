@@ -28,7 +28,7 @@ import {
 
 async function preparedAcknowledgementRun(
   receiptInput: "correct" | "wrong",
-  options: { discussionResponse?: string; haltDirection?: string } = {},
+  options: { discussionResponse?: string; haltDirection?: string; ownerName?: string } = {},
 ) {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-reviewer-window-"));
   const prepared = spawnSync(process.execPath, [
@@ -57,6 +57,8 @@ async function preparedAcknowledgementRun(
   });
   const runPath = path.join(runRoot, "RUN.json");
   const run = JSON.parse(await readFile(runPath, "utf8"));
+  run.version = 2;
+  run.owner = options.ownerName ?? "Kristian";
   run.status = "AWAITING_REVIEWER_WINDOW";
   run.sessionId = session.id;
   run.reviewer.threadId = "019f0000-0000-7000-8000-000000000001";
@@ -329,7 +331,7 @@ test("REVIEWER OPEN CONVERSATION TTY: a real terminal line reaches the idle Revi
 });
 
 test("TWO-WINDOW RECEIPT: exact owner quote is recorded from Window B", async (t) => {
-  const result = await preparedAcknowledgementRun("correct");
+  const result = await preparedAcknowledgementRun("correct", { ownerName: "Ada Owner" });
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
   assert.equal(result.executed.status, 0, result.executed.stderr);
   assert.match(result.executed.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
@@ -340,7 +342,7 @@ test("TWO-WINDOW RECEIPT: exact owner quote is recorded from Window B", async (t
   const approvals = await readApprovalEntries(result.session.directory);
   assert.equal(approvals.length, 1);
   assert.equal(approvals[0].receipt, result.review.metadata.receipt);
-  assert.equal(approvals[0].approver, "Kristian");
+  assert.equal(approvals[0].approver, "Ada Owner");
 });
 
 test("TWO-WINDOW RECEIPT MUTATION: a wrong quote refuses, names the condition, and remains retryable", async (t) => {

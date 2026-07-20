@@ -136,11 +136,12 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.doesNotMatch(execute, /--ephemeral/);
   assert.match(execute, /"exec",\s*\n/);
   assert.match(execute, /"resume"/);
-  assert.match(execute, /'sandbox_mode="workspace-write"'/);
+  assert.match(execute, /codexRolePermissionArgs\(run\.cli, codexExecutable, relayNodeToolchainReadRoots\(\)\)/);
+  assert.doesNotMatch(execute, /sandbox_mode="workspace-write"/);
   assert.match(execute, /\? \[\.\.\.base, "resume", \.\.\.common/);
   assert.match(execute, /run\.producer\.threadId === run\.reviewer\.threadId/);
   assert.match(execute, /stdio: "inherit"/);
-  assert.match(execute, /\["approve", phaseName, "--approver", "Kristian"\]/);
+  assert.match(execute, /\["approve", phaseName, "--approver", ownerName\]/);
   assert.match(execute, /The relay does not read or print it for you/);
   assert.match(execute, /evaluateGate/);
   assert.match(execute, /evaluateSessionClosure/);
@@ -161,7 +162,7 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(execute, /git\(\["add", "--", \.\.\.owned\]\)/);
   assert.match(execute, /git\(\["add", "--", relativeClose\]\)/);
   assert.match(execute, /`close session \$\{session\.id\}`/);
-  assert.match(execute, /workspace-write intentionally protects `\.git`/);
+  assert.match(execute, /permission profile intentionally protects `\.git`/);
   assert.match(execute, /verify immutable session close/);
   assert.match(execute, /"bundle", "create"/);
   assert.match(execute, /path\.join\(project, "\.git"\)/);
@@ -183,7 +184,7 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(reviewerWindow, /stdio: \["ignore", "pipe", "pipe"\]/);
   assert.match(reviewerWindow, /parseReview\(before\)/);
   assert.match(reviewerWindow, /receiptInput\.trim\(\) !== parsed\.receipt\.trim\(\)/);
-  assert.match(reviewerWindow, /approvalArgs = \[cli, "approve", job\.phase, "--approver", "Kristian"/);
+  assert.match(reviewerWindow, /approvalArgs = \[cli, "approve", job\.phase, "--approver", ownerName/);
   assert.match(reviewerWindow, /input: `\$\{approvalInput\.join\("\\n"\)\}\\n`/);
   assert.match(reviewerWindow, /WHAT WOULD YOU LIKE TO DO\?/);
   assert.match(reviewerWindow, /NOT ACKNOWLEDGED.*gate is still closed/);

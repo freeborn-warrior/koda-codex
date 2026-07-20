@@ -5,7 +5,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { runCli } from "../src/commands.ts";
-import { DEFAULT_CONFIG } from "../src/config.ts";
+import { DEFAULT_CONFIG, pathExists } from "../src/config.ts";
 import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
 import { runGuideCli } from "../src/guide-commands.ts";
 import {
@@ -263,6 +263,15 @@ test("GUIDE CONFIRMATION: one request binds prompt, manifest, continuity, and ow
   assert.deepEqual((await readdir(guideLaunchesDir(h.root, DEFAULT_CONFIG))).sort(), [`${result.launch.id}.json`]);
 });
 
+test("GUIDE OWNER IDENTITY MUTATION: terminal control characters refuse before confirmation", async (t) => {
+  const h = await guideHarness(t);
+  await assert.rejects(
+    confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Alex\u001b[31m"),
+    /confirming owner must not contain control characters/,
+  );
+  assert.equal(await pathExists(guideLaunchesDir(h.root, DEFAULT_CONFIG)), false);
+});
+
 test("GUIDE VERIFIED HANDOVER: the owner receives a complete numbered launch choice", async (t) => {
   const h = await guideHarness(t, true);
   await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
@@ -423,7 +432,7 @@ test("GUIDE STATUS TRUTH: corrupt launch evidence refuses instead of guessing", 
 
 test("GUIDE RUNTIME: one command binds a pushed launch and prints executable session-context commands", async (t) => {
   const h = await guideHarness(t, true);
-  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Alex Morgan");
   h.git(h.root, ["add", "-A"]);
   h.git(h.root, ["commit", "-m", "guide: confirm runtime route"]);
   h.git(h.root, ["push"]);
@@ -441,6 +450,8 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   assert.match(output.join("\n"), /WINDOW A — PRODUCER \(then start this\)/);
   const runRoot = path.join(h.root, ".koda", "runs", confirmed.launch.id);
   const run = JSON.parse(await readFile(path.join(runRoot, "RUN.json"), "utf8"));
+  assert.equal(run.version, 2);
+  assert.equal(run.owner, "Alex Morgan");
   assert.equal(run.mode, "guide-project");
   assert.equal(run.prompt, "docs/guide/prompts/next-session.md");
   assert.equal(run.initialCommit, spawnSync("git", ["rev-parse", "HEAD"], { cwd: h.root, encoding: "utf8" }).stdout.trim());
@@ -450,6 +461,7 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   const status = spawnSync("/bin/zsh", ["-c", statusLine], { cwd: h.root, encoding: "utf8" });
   assert.equal(status.status, 0, status.stderr);
   assert.match(status.stdout, /Run state: PREPARED/);
+  assert.match(status.stdout, /Owner: Alex Morgan/);
   assert.match(status.stdout, new RegExp(confirmed.launch.id));
 
   const again = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
@@ -470,10 +482,50 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   assert.match(guideStatus.join("\n"), /Current bound launch: .* — PAUSED_BY_OWNER/);
   assert.match(guideStatus.join("\n"), /current READY_TO_LAUNCH request must bind or be cancelled before another confirmation/);
   assert.match(guideStatus.join("\n"), new RegExp(`ACTIVE SESSION RUNTIME — ${confirmed.launch.id}`));
+  assert.match(guideStatus.join("\n"), /Owner: Alex Morgan/);
   assert.match(guideStatus.join("\n"), /State: PAUSED_BY_OWNER/);
   assert.match(guideStatus.join("\n"), /SESSION IS PAUSED SAFELY/);
   assert.match(guideStatus.join("\n"), /1\. Ask Guide to inspect this exact pause/);
   assert.doesNotMatch(guideStatus.join("\n"), /run-relay-reviewer-window|execute-relay-run/);
+});
+
+test("GUIDE RUNTIME OWNER MUTATION: removing the bound owner refuses by name", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Alex Morgan");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm owner binding mutation fixture"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  const changed = { ...prepared.run } as Record<string, unknown>;
+  delete changed.owner;
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), changed);
+  await assert.rejects(
+    currentGuideRuntime(h.root, prepared.run.launchId),
+    /RUN\.json is missing its owner identity binding/,
+  );
+});
+
+test("GUIDE RUNTIME LEGACY: a version-1 Kristian runtime remains readable", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm legacy owner fixture"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  const legacy = { ...prepared.run, version: 1 } as Record<string, unknown>;
+  delete legacy.owner;
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), legacy);
+  assert.equal((await currentGuideRuntime(h.root, prepared.run.launchId))?.run.version, 1);
 });
 
 test("GUIDE RUNTIME MUTATION: an unignored runtime refuses by name", async (t) => {

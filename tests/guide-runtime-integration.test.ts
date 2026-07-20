@@ -10,6 +10,7 @@ import { runGuideCli } from "../src/guide-commands.ts";
 import { confirmGuideLaunch } from "../src/guide.ts";
 import { prepareGuideRuntime } from "../src/guide-runtime.ts";
 import { createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
+import { readApprovalEntries } from "../src/receipt.ts";
 
 const sessionPrompt = [
   "# Session prompt",
@@ -101,7 +102,7 @@ test("GUIDE REAL-PROJECT RELAY: an independent sibling uses two bound contexts a
   git(project, ["add", "-A"]);
   git(project, ["commit", "-m", "session: preserve active Produce sibling"]);
   git(project, ["push"]);
-  const confirmed = await confirmGuideLaunch(project, relayConfig, promptFile, "Kristian", {
+  const confirmed = await confirmGuideLaunch(project, relayConfig, promptFile, "Ada Owner", {
     kind: "explore",
     independent: true,
   });
@@ -247,9 +248,13 @@ test("GUIDE REAL-PROJECT RELAY: an independent sibling uses two bound contexts a
   assert.notEqual(run.producer.threadId, run.reviewer.threadId);
   assert.notEqual(run.finalCommit, run.archiveCommit);
   assert.notEqual(run.sessionId, existing.id);
+  assert.equal(run.owner, "Ada Owner");
   const existingState = await loadSessionState(existing.directory, existing.id);
   assert.equal(existingState.currentPhaseIndex, 0);
   const completedState = await loadSessionState(path.join(project, "docs", "sessions", run.sessionId), run.sessionId);
+  const approvals = await readApprovalEntries(path.join(project, "docs", "sessions", run.sessionId));
+  assert.equal(approvals.length, 1);
+  assert.equal(approvals[0]?.approver, "Ada Owner");
   assert.equal(completedState.kind, "explore");
   assert.equal(completedState.launchMode, "independent");
   const guideReturnFile = path.join(project, run.guideReturn);

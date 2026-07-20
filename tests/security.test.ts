@@ -6,7 +6,60 @@ import path from "node:path";
 import test from "node:test";
 
 import { ghosttyRoleLauncherSource } from "../src/ghostty.ts";
-import { relayCodexEnvironment, relayRoleEnvironment } from "../src/relay-environment.ts";
+import { codexProjectPermissionArgs, codexRolePermissionArgs } from "../src/codex-role-permissions.ts";
+import {
+  relayCodexEnvironment,
+  relayNodeToolchainReadRoots,
+  relayRoleEnvironment,
+} from "../src/relay-environment.ts";
+
+test("PROJECT SANDBOX SUITE: role turns fail closed with project-scoped read and write access", () => {
+  const args = codexRolePermissionArgs(
+    "/trusted/koda/dist/cli.js",
+    "/trusted/codex/bin/codex",
+    ["/trusted/toolchain"],
+  );
+  const joined = args.join("\n");
+  assert.match(joined, /--strict-config/);
+  assert.match(joined, /web_search="disabled"/);
+  assert.match(joined, /allow_login_shell=false/);
+  assert.match(joined, /default_permissions="koda_project"/);
+  assert.match(joined, /":minimal"="read"/);
+  assert.match(joined, /"\/trusted\/koda\/dist"="read"/);
+  assert.match(joined, /"\/trusted\/koda\/package\.json"="read"/);
+  assert.match(joined, /"\/trusted\/codex\/bin\/codex"="read"/);
+  assert.match(joined, /"\/trusted\/toolchain"="read"/);
+  assert.match(joined, /":workspace_roots"=\{"\."="write"/);
+  assert.match(joined, /"\.git"="read"/);
+  assert.match(joined, /"\.agents"="read"/);
+  assert.match(joined, /"\.codex"="read"/);
+  assert.match(joined, /"\*\*\/\*\.env"="deny"/);
+  assert.match(joined, /permissions\.koda_project\.network\.enabled=false/);
+  assert.doesNotMatch(joined, /workspace-write/);
+  assert.throws(() => codexRolePermissionArgs("relative/dist/cli.js", "/trusted/codex", []), /must be absolute/);
+  assert.throws(() => codexRolePermissionArgs("/trusted/koda/dist/cli.js", "relative/codex", []), /must be absolute/);
+});
+
+test("PROJECT SANDBOX SUITE: the Node toolchain root is a narrow explicit read capability", () => {
+  assert.deepEqual(
+    relayNodeToolchainReadRoots("/opt/homebrew/Cellar/node/26.0.0/bin/node"),
+    ["/opt/homebrew"],
+  );
+  assert.deepEqual(
+    relayNodeToolchainReadRoots("/Users/example/.nvm/versions/node/v22.18.0/bin/node"),
+    ["/Users/example/.nvm/versions/node/v22.18.0"],
+  );
+});
+
+test("PROJECT SANDBOX SUITE: read-only probes cannot mutate their workspace", () => {
+  const joined = codexProjectPermissionArgs({ workspaceAccess: "read" }).join("\n");
+  assert.match(joined, /":workspace_roots"=\{"\."="read"/);
+  assert.doesNotMatch(joined, /"\."="write"/);
+  assert.throws(
+    () => codexProjectPermissionArgs({ workspaceAccess: "read", trustedReadRoots: ["relative"] }),
+    /must be absolute/,
+  );
+});
 
 test("SECURITY INTEGRITY SUITE: the install is dependency-free with no install hook", async () => {
   const pkg = JSON.parse(await readFile("package.json", "utf8")) as {
@@ -99,7 +152,8 @@ test("SECURITY INTEGRITY SUITE: owner receipt and ruling data never enter child-
 
 test("SECURITY INTEGRITY SUITE: fresh-model evidence runs strip ambient credentials and parent context identity", async () => {
   const runner = await readFile("scripts/run-guide-preflight-model-test.ts", "utf8");
-  assert.match(runner, /import \{ relayCodexEnvironment \} from "\.\.\/src\/relay-environment\.ts"/);
+  assert.match(runner, /import \{ relayCodexEnvironment, relayNodeToolchainReadRoots \} from "\.\.\/src\/relay-environment\.ts"/);
+  assert.match(runner, /codexProjectPermissionArgs/);
   assert.match(runner, /const codex = resolveExecutable\(process\.env\.KODA_CODEX_BIN/);
   assert.match(runner, /env: relayCodexEnvironment\(process\.env\)/);
   assert.doesNotMatch(runner, /spawnSync\(codex, args, \{ cwd, encoding:/);

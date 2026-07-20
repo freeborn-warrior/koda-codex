@@ -1,3 +1,7 @@
+import { spawnSync } from "node:child_process";
+import { realpathSync } from "node:fs";
+import path from "node:path";
+
 const SAFE_ROLE_KEYS = [
   "HOME",
   "USER",
@@ -12,6 +16,36 @@ const SAFE_ROLE_KEYS = [
 ] as const;
 
 const DEFAULT_PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+
+export function resolveRelayCodexExecutable(
+  configured = process.env.KODA_CODEX_BIN?.trim() || "codex",
+  source: NodeJS.ProcessEnv = process.env,
+): string {
+  if (path.isAbsolute(configured)) return realpathSync(configured);
+  if (configured.includes("/") || configured.includes("\\")) {
+    throw new Error("KODA_CODEX_BIN must be an absolute path or one executable name.");
+  }
+  const found = spawnSync("/usr/bin/which", [configured], {
+    encoding: "utf8",
+    env: { PATH: source.PATH || DEFAULT_PATH },
+  });
+  const candidate = (found.stdout ?? "").trim();
+  if (found.status !== 0 || !candidate) {
+    throw new Error(`Koda cannot find the Codex executable named ${configured}.`);
+  }
+  return realpathSync(candidate);
+}
+
+export function relayNodeToolchainReadRoots(nodeExecutable = process.execPath): string[] {
+  if (!path.isAbsolute(nodeExecutable)) throw new Error("The Node executable path must be absolute.");
+  const actual = path.resolve(nodeExecutable);
+  const segments = actual.split(path.sep);
+  const cellarIndex = segments.indexOf("Cellar");
+  if (cellarIndex > 0) {
+    return [segments.slice(0, cellarIndex).join(path.sep) || path.sep];
+  }
+  return [path.dirname(path.dirname(actual))];
+}
 
 function copySafe(source: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const clean: NodeJS.ProcessEnv = {};

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { pathExists, readProjectConfig } from "../src/config.ts";
 import { pendingDirectionsForActivePhase, readWaitingDirections } from "../src/direction.ts";
 import { currentPhase, loadSessionState, sessionRoot } from "../src/project.ts";
+import { relayOwnerName } from "../src/owner.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import { validateModelTurnInterruption, type ModelTurnInterruption } from "./relay-interruption.ts";
 import {
@@ -18,6 +19,7 @@ import {
 
 type RunRecord = {
   version: number;
+  owner?: string;
   mode?: "fixture-copy" | "guide-project";
   status: string;
   scenario: string;
@@ -67,12 +69,13 @@ async function readRun(candidate: string): Promise<RunRecord | null> {
       Number.isInteger(role.turns) && role.turns >= 0,
     );
     if (
-      run.version !== 1 || typeof run.status !== "string" || typeof run.scenario !== "string" ||
+      (run.version !== 1 && run.version !== 2) || typeof run.status !== "string" || typeof run.scenario !== "string" ||
       typeof run.project !== "string" || typeof run.runtime !== "string" || typeof run.cli !== "string" ||
       !validRole(run.producer) || !validRole(run.reviewer) ||
       !validInterruption(run) ||
       !(run.sessionId === undefined || /^\d{4}-\d{2}-\d{2}-\d{2}$/.test(run.sessionId))
     ) return null;
+    relayOwnerName(run);
     return run;
   } catch {
     return null;
@@ -102,6 +105,7 @@ const runRoot = requested
   : await discoverRun();
 const run = await readRun(runRoot);
 if (!run) refuse("RUN.json is missing, corrupt, or unsafe.");
+const ownerName = relayOwnerName(run);
 const resolved = await resolveRelayRunPaths({ packageRoot: root, configuredRunsRoot: runsRoot, runRoot, run })
   .catch((error) => refuse(error instanceof Error ? error.message : String(error)));
 const { project } = resolved;
@@ -147,6 +151,7 @@ if (run.sessionId) {
 console.log(`KODA-C RELAY — ${path.basename(runRoot)}`);
 console.log(`Run state: ${run.status}`);
 console.log(`Scenario: ${run.scenario}`);
+console.log(`Owner: ${ownerName}`);
 console.log(`Session: ${run.sessionId ?? "not opened"}`);
 console.log(`Phase: ${phase}`);
 console.log(`Owner acknowledgements: ${run.ownerAcknowledgements ?? 0}`);
@@ -211,7 +216,7 @@ if (run.status === "COMPLETE" || run.status === "HALTED") {
     console.log(`Window A is recorded as ${run.status}. Check that pane; do not start a second producer blindly.`);
   }
 } else if (job?.status === "AWAITING_OWNER") {
-  console.log("Return to Window B. The reviewer is waiting for Kristian.");
+  console.log(`Return to Window B. The reviewer is waiting for ${ownerName}.`);
 } else if (run.status === "FINALIZING_GUIDE_RETURN" && run.lastError) {
   console.log("Window B is preserving the closed session. Resume Window A to finish the Guide return:");
   console.log(`  ${producerCommand}`);

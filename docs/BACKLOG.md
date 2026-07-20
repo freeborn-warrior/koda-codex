@@ -6,6 +6,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
+- [ ] Decide the release UX for opening the long-running Guide with the same
+  project-scoped permission profile. Koda-managed Producer and Reviewer roles are
+  now contained, but an independently opened interactive Guide still uses whatever
+  Codex permissions the person selected. Do not hide this distinction or add a long
+  copy-paste command as the permanent human experience.
 - [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, and hardened Git locking now pass a pushed, integrity-bound 210/210 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same

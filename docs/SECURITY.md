@@ -39,7 +39,9 @@ parent, and ignored project-local runtime under `.koda/`:
   freeze that toolkit snapshot; `guide verify` refuses changed proof as stale;
 - `guide launch` writes only ignored `.koda/runs/<launch-id>/` rendezvous state
   after verifying pushed confirmation evidence, an empty shared Git index, and
-  one exact confirmed request. Unrelated unstaged claimed work may remain.
+  one exact confirmed request. The runtime binds the confirming owner's display
+  name for status and approval records; empty, overlong, or terminal-control-
+  character names refuse. Unrelated unstaged claimed work may remain.
 - explicit `guide launch ... --open ghostty` additionally invokes macOS
   `/usr/bin/open` twice to request labeled Reviewer then Producer windows. Each
   request gives Ghostty exactly one project-relative, mode-700 launcher token;
@@ -101,6 +103,42 @@ sandbox and approval controls, keep credentials out of project files, and treat
 model-written findings as untrusted until the mechanical gate and human decision
 loop complete.
 
+## Codex role containment
+
+Koda-launched Producer and Reviewer turns now use a named Codex permission
+profile instead of the legacy `workspace-write` preset. Model-generated commands
+may read and write the active project, but `.git`, `.agents`, and `.codex` remain
+read-only and project `.env` files are denied. Ordinary home files and sibling
+projects are not readable. Network and web search are disabled, login shells are
+disabled, user configuration is ignored, approval is `never`, and strict config
+makes an older Codex client refuse rather than silently discard the profile.
+
+The allowlist also contains the exact installed Codex executable, the compiled
+Koda runtime and its one package manifest, and the current Node toolchain root.
+On the tested Homebrew macOS installation that toolchain root is `/opt/homebrew`,
+read-only. Those are execution dependencies, not project workspaces; Koda grants
+no write access to them. The permission-profile mechanism is currently marked
+beta by OpenAI, so the release must keep a real boundary probe alongside the
+deterministic argument tests and must never fall back silently to broad-read
+`workspace-write`.
+
+A live ephemeral Sol/low probe proved project write, sibling/parent read denial,
+`.git` write denial, project `.env` read denial, and trusted Koda CLI execution.
+A no-model network mutation failed DNS resolution under the same profile. A
+planted required project-local MCP server did not load when the role used
+`--ignore-user-config`. The failed intermediate probes are preserved too: the
+first strict profile omitted Koda's package manifest and Codex executable; the
+second still omitted the Homebrew toolchain and could not execute Koda. See the
+[dated boundary result](security-runs/2026-07-19-project-boundary-probe-13/RESULT.md).
+
+This boundary applies to Koda-managed Producer and Reviewer subprocesses. The
+long-running Guide is currently a separately started interactive Codex task, so
+its effective access still depends on the permissions selected when that task is
+opened. Codex itself also uses its home directory for authentication and persistent
+thread state; those client-internal reads and writes are outside the model command
+sandbox. Koda mirrors durable workflow evidence into the project but does not claim
+that the Codex client stores nothing elsewhere.
+
 ## Relay and test-harness boundary
 
 The relay scripts are not quiet core commands. They can launch Codex models,
@@ -139,8 +177,9 @@ their bound session ID, and `HOME` so Codex can find its own authentication.
 Ambient API credentials, parent context IDs, arbitrary project variables, and
 Node startup options are excluded. Do not reintroduce blanket environment
 inheritance to support a custom provider; add and review the smallest explicit
-capability instead. Without the explicit Ghostty option, the core `koda` CLI
-does not launch a model.
+capability instead. Their command sandbox then applies the project-scoped profile
+above. Without the explicit Ghostty option, the core `koda` CLI does not launch a
+model.
 
 Git commit and push may execute hooks already configured in a repository. The
 core close and halt commands only print Git instructions; the explicitly started relay
@@ -257,4 +296,7 @@ are audited in
 [`security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md`](security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md).
 The current stable-handover and optional-adapter boundary is audited in
 [`security-runs/2026-07-19-stable-handover-recovery-audit-12/RESULT.md`](security-runs/2026-07-19-stable-handover-recovery-audit-12/RESULT.md).
+The stricter Codex filesystem, toolchain, network, and project-config boundary is
+proved in
+[`security-runs/2026-07-19-project-boundary-probe-13/RESULT.md`](security-runs/2026-07-19-project-boundary-probe-13/RESULT.md).
 The latest named full-suite transcript is linked from the README.
