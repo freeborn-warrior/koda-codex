@@ -108,6 +108,12 @@ Turn the proved two-context session relay into a project-level experience that c
     and adversarial proof that ambient Git settings cannot redirect writes. The
     unchanged pushed implementation passes **241/241** under
     `self-guided-full-session-v16`.
+34. [x] Repair the real first-use Codex configuration refusal without weakening
+    isolation. Replace the rejected whole-table override with documented dotted
+    permission entries, preflight Guide and role profiles against the installed
+    Codex CLI before project creation, and surface primary startup stderr before
+    secondary context symptoms. The complete local suite passes **242/242** under
+    `codex-permission-preflight-v17`.
 
 ## Submission cut
 

@@ -1909,3 +1909,44 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [post-push transcript](test-results/2026-07-20-self-guided-full-session-pushed.md).
   Toolkit capability `self-guided-full-session-v16` now binds that pushed commit,
   transcript, and every critical first-use or launch file.
+
+## 2026-07-20 — Installed Codex permission-profile refusal
+
+- **Owner-observed failure:** The new one-command session prepared and pushed its
+  isolated project, then Guide closed before receiving a persistent context. The
+  preserved stderr revealed the primary cause: Codex CLI 0.144.6 rejected Koda's
+  generated whole-table `permissions.<name>.filesystem={...}` override as a string
+  where `FilesystemPermissionsToml` was required.
+- **Why earlier tests missed it:** Security tests asserted the intended least-
+  privilege entries, while process tests used fake Codex children. Neither asked
+  the installed Codex configuration parser to accept the exact generated profile.
+- **Correction:** Every filesystem permission is now a separate dotted `-c`
+  override matching Codex's documented profile shape. Before creating a demo
+  project, the starter invokes the installed Codex CLI with `--version` under both
+  the exact Guide and role profiles. An incompatible client therefore refuses
+  before creating Git or launch evidence.
+- **Error-truth correction:** A nonzero Codex exit is now evaluated before the
+  secondary missing-context condition. The owner sees the first sanitized stderr
+  line and the durable evidence filename; a regression test proves the old
+  misleading message cannot replace the primary failure.
+- **Focused result:** Guide, security, Quick Start, and integrity tests pass
+  **35/35**. The Quick Start fixture's fake Codex actively rejects the superseded
+  whole-table shape and records both read-only Guide and write-capable role
+  preflights.
+- **Installed-client result:** Both corrected generated profiles were parsed
+  successfully by the installed **Codex CLI 0.144.6**. The starter then created a
+  clean, pushed, mechanically verified launch-ready project without starting a
+  model.
+- **Live-model boundary:** A real Guide model turn was not run from this build task
+  because its environment refused exporting project context to the external Codex
+  service without separate authorization. No workaround was attempted. Kristian's
+  Ghostty run remains the required live connection proof.
+- **Complete result:** Every one of the **242** named tests passed in the
+  [local transcript](test-results/2026-07-20-codex-permission-profile-local.md).
+- **Development and audits:** See the
+  [development record](test-results/2026-07-20-codex-permission-profile-development-failures.md),
+  [quality audit](quality-runs/2026-07-20-codex-permission-profile-14/RESULT.md),
+  and [security audit](security-runs/2026-07-20-codex-permission-profile-audit-20/RESULT.md).
+- **State:** LOCAL PASS. Capability `codex-permission-preflight-v17` binds repair
+  commit `35489f5` and the 242-check transcript. Push and an unchanged post-push
+  suite remain before another owner attempt.

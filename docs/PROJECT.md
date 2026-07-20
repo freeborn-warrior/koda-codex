@@ -182,6 +182,15 @@ owner contract
   `GIT_INDEX_FILE` cannot redirect it. Toolkit capability
   `self-guided-full-session-v16` binds the **241/241** post-push suite. A fresh
   owner-observed run remains separate human evidence before submission.
+- The first real use of that entry found a version-specific permission-profile
+  serialization defect before the Guide model started. Codex CLI 0.144.6 rejected
+  Koda's whole inline filesystem table, while the prior tests inspected only the
+  intended rules and fake process behavior. Koda now emits documented dotted
+  filesystem overrides, asks the installed CLI to parse both Guide and role
+  profiles before it creates any demo project, and reports primary Codex stderr
+  ahead of a missing-context symptom. Toolkit capability
+  `codex-permission-preflight-v17` binds the **242/242** local suite; unchanged
+  post-push proof and a fresh owner-visible model connection remain.
 - A real secure-Guide recovery then proved that the saved role launcher still
   depended on the terminal which created it. Guide refused safely twice with zero
   gate movement. Role launchers now use deterministic presentation/environment

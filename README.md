@@ -107,7 +107,7 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The current [241-check post-push full-session transcript](docs/test-results/2026-07-20-self-guided-full-session-pushed.md)
+- The current [242-check Codex-permission transcript](docs/test-results/2026-07-20-codex-permission-profile-local.md)
   is hash-bound by the toolkit integrity manifest.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
@@ -129,6 +129,10 @@ direct final answer instead of flooding the owner with procedural inspection.
   and [security audit](docs/security-runs/2026-07-20-self-guided-full-session-audit-19/RESULT.md)
   cover the single-command entry, human choices, hostile Git environment, package,
   and the remaining real-human boundary.
+- The [Codex permission-profile quality audit](docs/quality-runs/2026-07-20-codex-permission-profile-14/RESULT.md)
+  and [security audit](docs/security-runs/2026-07-20-codex-permission-profile-audit-20/RESULT.md)
+  preserve the real first-use startup refusal, installed-CLI parser proof, and
+  fail-before-creation preflight.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

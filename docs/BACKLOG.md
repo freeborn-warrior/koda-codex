@@ -44,6 +44,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
   numbered choice launches Reviewer and Producer. The unchanged post-push suite
   passes **241/241** under `self-guided-full-session-v16`; the final fresh human run is
   deliberately still listed as submission rehearsal, not automated proof.
+- [x] Repair the owner-observed Codex permission-profile startup refusal. Koda now
+  emits documented dotted profile overrides accepted by Codex CLI 0.144.6,
+  preflights both Guide and session-role profiles before creating a project, and
+  shows the primary Codex error before any missing-context symptom. The complete
+  local suite passes **242/242** under `codex-permission-preflight-v17`.
 
 ## Next
 

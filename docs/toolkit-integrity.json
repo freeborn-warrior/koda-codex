@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "self-guided-full-session-v16",
-  "verifiedAt": "2026-07-20T18:18:52.140Z",
-  "repairCommit": "410f6147b687975537c204f0bb001ff9fb139014",
-  "testedCommit": "75da47c3b2a422c8998ba54aec6b697d405914c9",
-  "testCount": 241,
+  "capability": "codex-permission-preflight-v17",
+  "verifiedAt": "2026-07-20T18:35:53.660Z",
+  "repairCommit": "35489f574dcf85e522f5f53f1ddc833d300a1755",
+  "testedCommit": "35489f574dcf85e522f5f53f1ddc833d300a1755",
+  "testCount": 242,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-self-guided-full-session-pushed.md",
-    "sha256": "4df3a921811d2b0330d23bc2e57b1fe1d8b845a5aded80d7b335754f68b3b63b"
+    "path": "docs/test-results/2026-07-20-codex-permission-profile-local.md",
+    "sha256": "2265c71f457798f1be242dddce520f46a92bd2e5b75184a9b7bf760da5abe8df"
   },
   "files": [
     {
@@ -80,11 +80,11 @@
     },
     {
       "path": "src/guide-console.ts",
-      "sha256": "c79a25e8c765b5105dec345768b8d06d0b7399a5245049c228eeaa3280495052"
+      "sha256": "9c1c34036ce12440475a0b603ea72629a9facd43af39ff50639819fda423c1b4"
     },
     {
       "path": "dist/guide-console.js",
-      "sha256": "81a60b81b07608e7c5ad90205b07cb8eb235773ea1b55d5e044d6637bfce2bc1"
+      "sha256": "d3b2ae6ab62a7743b756b66dc8d8f57d42fbe6e23e342f71bea9a0c4c885290a"
     },
     {
       "path": "src/terminal-ui.ts",
@@ -148,11 +148,11 @@
     },
     {
       "path": "src/codex-role-permissions.ts",
-      "sha256": "c1fe553805ab3831f63a61faa9c9c4b11c16fc394493420ce0053c0972a962d7"
+      "sha256": "e4de2ae00457318aebb3e0f18e62a3388a94672427428f5b94c81eb4cad80656"
     },
     {
       "path": "dist/codex-role-permissions.js",
-      "sha256": "f0a7e128fd57074a29b0311875277ef7e4a2c662a0ddc6d2265535f3c7c2756c"
+      "sha256": "1562df0e8b92ce110c2ad1965d6446340ede1ba26e23109edd1722f9d74c80e8"
     },
     {
       "path": "src/workset.ts",
@@ -164,7 +164,7 @@
     },
     {
       "path": "scripts/prepare-full-session-demo.ts",
-      "sha256": "3316daa6b404cfb066c82f4bd0477e7c9e71127b92a0db992a262a65535336ed"
+      "sha256": "4f218cff61056e15ce1a857e5a4a22754f1ba4e4c1a365ca6c95f44e72528c58"
     },
     {
       "path": "package.json",
