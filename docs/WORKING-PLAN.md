@@ -22,7 +22,12 @@ Turn the proved two-context session relay into a project-level experience that c
 10. [x] Make the session-prompter preflight every start request and refuse conceptually competing sessions before a draft exists.
 11. [x] Make Ctrl-C a named, fail-closed operational stop: kill the in-flight child, preserve partial evidence, distrust possible handbacks, resume the same context for reconciliation, and refuse context replacement when identity is missing.
 12. [x] Audit the whole product, package, and new interruption surface; consolidate recovery validation, preserve 157/157 deterministic checks with coverage, and publish the current security boundaries.
-13. [ ] Prove the complete three-context experience with Kristian. The first launch is pushed-halted security evidence. The dependent retry `6371ade2-3002-42aa-87ab-a613220b7eab` proved exactly one clean Reviewer and Producer beside Guide and reached an approved Brief, but both its initial acknowledgement and its recovered pager/clipboard replacement failed human use. The session remains at Brief with zero acknowledgements. Finish and push the inline-review, short-code, shared-terminal-panel replacement before another owner observation; then all six gate decisions and pushed close are still owed.
+13. [x] Prove the complete three-context experience with Kristian. After preserving
+    the first launch, acknowledgement, recovery, and pager/clipboard failures, the
+    dependent retry `6371ade2-3002-42aa-87ab-a613220b7eab` recovered its original
+    Sol Producer and Terra Reviewer, completed all six gates with six owner
+    acknowledgements, pushed immutable close `b5105da`, and returned to Guide at
+    `bde0807`.
 14. [x] Settle the top-level mutation ruling: an active Produce session may not lock the whole project; Guide and unrelated project work may continue changing files.
 15. [x] Implement exact per-workstream write sets, before/after hashes, same-path conflict refusal, exact-path staging, and a short recoverable Git-operation lock; mutation-test attribution, rename/delete, unrelated-dirt close, and dead-lock recovery.
 16. [x] Confirm the project/session model: Produce is one session kind; independent Explore, Research, Architecture, Triage, Produce, and later sibling sessions may be active concurrently.
@@ -75,7 +80,7 @@ Turn the proved two-context session relay into a project-level experience that c
     install, security audit, and clean-checkout proof. Preserve live recovery,
     video, `/feedback`, and Devpost submission as explicit owner work rather than
     inferred completion.
-30. [ ] Replace the failed pager/clipboard owner ceremony without weakening the
+30. [x] Replace the failed pager/clipboard owner ceremony without weakening the
     gate: inline human review, hidden machine metadata, a deterministic short code
     mapped to the current exact receipt, no clipboard or paste, retryable mistakes,
     and one bounded visual language across Guide, Reviewer, and Producer. Complete
@@ -83,11 +88,21 @@ Turn the proved two-context session relay into a project-level experience that c
     human verification. The local product now passes **232/232**, terminal-control
     mutation, coverage, package inspection, and zero-vulnerability audit. Pushed
     capability `owner-review-ceremony-v13` binds code commit `c1d55ea` and its
-    unchanged 232/232 transcript; human verification is the remaining step.
+    unchanged 232/232 transcript; the later owner-observed run completed all six
+    phases and immutable close.
+31. [x] Correct the successful run's presentation findings without changing the
+    workflow: phase-aware progress, aggregated successful checks, visible failures,
+    quiet Guide inspection, and direct Reviewer conversation with complete raw
+    events retained on disk. The local release suite passes **234/234**; push and
+    bind the unchanged transcript before submission freeze.
 
 ## Submission cut
 
-The submission demonstration still needs one strong Produce session moving from durable Guide state into its two-context relay while Guide, Producer, and Reviewer are visible. It will run in an isolated representative project, not by turning Koda-C into its own managed project before submission. The product model must no longer claim that this is the project's only possible active session. Full kind-specific skills and self-hosting may grow after the demonstration, but explicit session identity and dependency-scoped truth cannot remain globally hard-coded.
+The submission demonstration exists: one isolated representative Produce session
+moved from durable Guide state through the two-context relay, all six gates, pushed
+close, and Guide return with Guide, Producer, and Reviewer visible. The remaining
+submission work is rehearsal, recording, form completion, and freezing the exact
+pushed commit—not another product feature or a retrofitted self-hosting run.
 
 ## Current constraints
 
@@ -101,9 +116,8 @@ The submission demonstration still needs one strong Produce session moving from 
 - Tests are a living product contract and may grow, but must never be weakened to hide failure.
 - Koda-C is the workflow; the CLI and terminal panes are replaceable mechanical surfaces, not the product definition.
 
-## Proof still owed
+## Proof still owed after submission cut
 
-- One owner-observed Guide confirmation arranging the complete three-context experience while preserving two independent session contexts.
 - One owner-observed proof of Guide editing a claimed unrelated file while a visible session runs; deterministic attribution and close mutations are complete.
 - Cross-model continuation evidence before the org-chart staffing design becomes executable per-phase config.
 - Cross-provider staffing remains only a possible consequence of disk-separated seats, not required proof or a current commitment.

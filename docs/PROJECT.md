@@ -189,9 +189,13 @@ owner contract
   acknowledgements, pushed immutable close `b5105da`, returned the archived run to
   Guide at `bde0807`, and left the verification repository clean and synchronized
   with `origin/main`. The complete restorable evidence is preserved under
-  `docs/verification-runs/2026-07-19-markdown-headings-01/`. The run validates the
-  mechanics while exposing two remaining presentation issues: default event output
-  is too inspection-heavy, and owner conversation with Reviewer is too procedural.
+  `docs/verification-runs/2026-07-19-markdown-headings-01/`. The run validated the
+  mechanics and exposed two presentation issues: default event output was too
+  inspection-heavy, and owner conversation with Reviewer was too procedural. The
+  local correction keeps detailed events on disk, collapses successful checks into
+  one phase-aware total, keeps failures visible, and presents only the Reviewer's
+  direct final answer during ordinary owner conversation. It passes **234/234**
+  locally without changing gate semantics; pushed integrity binding follows.
 - Ctrl-C is now a fail-closed operational stop, distinct from workflow-level halt. The supervisor terminates the active model child, saves partial events, marks possible handbacks untrusted, and resumes the same persistent context for a skill-backed reconciliation before routing. Reviewer jobs return to `PENDING`; interrupted owner conversation preserves the exact owner message; missing context identity refuses automatic worker replacement.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
 - The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.

@@ -1757,4 +1757,22 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   See the [development record](test-results/2026-07-20-conversational-reviewer-development-failures.md).
 - **Corrected focused result:** Reviewer/relay **23/23**, Guide renderer **2/2**,
   skill validation PASS, dependency-free build PASS, and whitespace check PASS.
-  Full release verification remains pending and is not implied here.
+- **Complete local result:** The full suite passed **234/234** twice. The second
+  durable transcript is
+  [conversational-reviewer-final-local.md](test-results/2026-07-20-conversational-reviewer-final-local.md).
+  Coverage passed **234/234** at **87.75% lines, 71.44% branches, and 86.14%
+  functions** overall.
+- **Package and repository result:** An isolated package dry-run contains 814
+  entries, zero bundled dependencies, the compiled CLI, GPLv3, README, local
+  Reviewer skill, and the intentional demo fixture. It excludes `.git`, `.koda`,
+  `.env`, `.DS_Store`, and `node_modules`. The production-only audit reports zero
+  vulnerabilities. Repository symlink scan, `git diff --check`, and
+  `git fsck --full --no-dangling` passed.
+- **Audit setup refusal:** Direct `npm audit` refused with `ENOLOCK` because this
+  dependency-free source repository intentionally has no lockfile. The successful
+  audit generated a temporary production lockfile outside the repository; no
+  project file was changed to hide the refusal.
+- **Audits:** The [quality audit](quality-runs/2026-07-20-conversational-owner-surface-11/RESULT.md)
+  and [security audit](security-runs/2026-07-20-conversational-owner-surface-audit-17/RESULT.md)
+  preserve the exact claims and honest boundaries. Post-push integrity binding is
+  still pending and is not implied by these local results.

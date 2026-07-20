@@ -75,6 +75,11 @@ states `NO ACTION NEEDED — watch only`. All managed model and review text is
 sanitized for terminal control and bidirectional-override characters before it is
 displayed, while the evidence bytes on disk remain unchanged.
 
+Default progress is phase-aware and concise: successful low-level commands remain
+in the project-local event record and appear as one check total, while failures stay
+visible. Ordinary Reviewer conversation shows a thinking boundary and then its
+direct final answer instead of flooding the owner with procedural inspection.
+
 ## Evidence, not promises
 
 - The current [232-check post-push transcript](docs/test-results/2026-07-20-owner-review-ceremony-pushed.md)

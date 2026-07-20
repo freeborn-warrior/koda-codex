@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "owner-review-ceremony-v13",
-  "verifiedAt": "2026-07-20T13:40:00.999Z",
-  "repairCommit": "c1d55ea698f98ce525daa2c7c8ba6fe7effb093b",
-  "testedCommit": "c1d55ea698f98ce525daa2c7c8ba6fe7effb093b",
-  "testCount": 232,
+  "capability": "conversational-owner-surface-v14",
+  "verifiedAt": "2026-07-20T15:02:28.742Z",
+  "repairCommit": "1abdf68708d1419e75665b4ef107f6065d902ae8",
+  "testedCommit": "1abdf68708d1419e75665b4ef107f6065d902ae8",
+  "testCount": 234,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-owner-review-ceremony-pushed.md",
-    "sha256": "a1d7c7f17b4031727f527196a8926fbfb4e7e053f92969afb8a8e4cb7ab32c5b"
+    "path": "docs/test-results/2026-07-20-conversational-reviewer-provisional.md",
+    "sha256": "ec67eee628e00258289fe6bb5418236234f09148248c3028a96b6d5dae7986e4"
   },
   "files": [
     {
@@ -24,11 +24,11 @@
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "2a0316ae050fd8c51eb2932b3134c4217f6ac7cc7e2a6b2b9b3a22a83675c041"
+      "sha256": "f8ee21fc1c88c0f1cffd4c29c80880f98e3e7709a47165124de7fb6f5bb11bc0"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "9cf17380a7141ff7b9853034113e08be424ea254e4c0ba0a36b8aa506f46ce9e"
+      "sha256": "8957570b80087e53177d5227b337fd7eb312e75d22cc10b3d22a9d18b3b0097f"
     },
     {
       "path": "scripts/execute-reviewer-run.ts",
@@ -40,7 +40,7 @@
     },
     {
       "path": "scripts/relay-window-protocol.ts",
-      "sha256": "ae1b47c1f639b79ab4176ef1b3fae1a46ab2a25d5c86c7f41581a7dfe5c1c82a"
+      "sha256": "49a5d6c3abbc072bab458d1af4232ccab6da8365aae391789477a1c9e9c8f649"
     },
     {
       "path": "dist/ghostty.js",
@@ -80,11 +80,11 @@
     },
     {
       "path": "src/guide-console.ts",
-      "sha256": "b81325cb5c71772b002cffd96ccd4f05eef9a1540dad46eb78bbc24ee96efffa"
+      "sha256": "3a40c0df643b543a97949dec92cbf6683811555cdd270191d74910f1cd42b636"
     },
     {
       "path": "dist/guide-console.js",
-      "sha256": "8a014029d449d9974542ddf168f9dca7780442ae392e75b6774b2d756801b8bf"
+      "sha256": "aaf71f08d9d865028e6e0001aeccb143158804b095c6da12e4e0de450d245c35"
     },
     {
       "path": "src/terminal-ui.ts",
@@ -105,6 +105,10 @@
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",
       "sha256": "9fa96742f87c920699d7f96480dc80aaf486acff5a4170c1702d4c64f6996015"
+    },
+    {
+      "path": ".agents/skills/koda-c-review/SKILL.md",
+      "sha256": "22452bc6334008b1f819a27cb80c2ecf2e41e7bf035d10d6cf3ec4ce4c00ed58"
     },
     {
       "path": "src/commands.ts",

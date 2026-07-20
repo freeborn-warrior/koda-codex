@@ -24,7 +24,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The persistent Sol Producer and distinct Terra Reviewer completed all six phases and returned pushed close evidence to Guide.
 - [x] Owner-test the repaired one-action Ghostty adapter against a genuine Guide-confirmed session. It opened exactly one Reviewer and one Producer beside Guide, preserved role identity through recovery, and completed without the earlier environment, extra-tab, pager, clipboard, or paste-warning failures.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
-- [ ] Polish the successful three-window surface without changing gate semantics: keep detailed model commands in the durable event stream, show concise phase-aware progress by default, and make Reviewer conversation feel like an ongoing human partnership rather than a narrated procedure.
+- [x] Polish the successful three-window surface without changing gate semantics:
+  detailed model commands remain in durable events, default progress is concise and
+  phase-aware, Reviewer owner conversation leads with its direct answer, and empty
+  conversation output refuses. The full local suite passes **234/234**; pushed
+  integrity proof is the remaining release step for this correction.
 
 ## Next
 
