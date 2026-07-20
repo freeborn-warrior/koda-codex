@@ -165,7 +165,10 @@ identify the author. Manual Git commands and third-party tools also do not honor
 Koda's lock. Stronger hostile-writer isolation would require separate worktrees,
 OS identities, or a service boundary.
 
-The Ghostty adapter is deliberately opt-in. It records launch intent before the
+The Ghostty adapter is deliberately opt-in and is not required by the gate or
+relay. Without `--open ghostty`, Guide prepares the same bound runtime and prints
+the exact Reviewer-first and Producer-second terminal commands for manually opened
+windows. Automatic Ghostty opening records launch intent before the
 first GUI request and refuses automatic opening for an existing runtime, even if
 only one prior request appeared to succeed. The first live implementation proved
 that a mocked argument vector was insufficient: loose tokens created extra tabs
@@ -173,17 +176,20 @@ and an ambient credential was rendered. The repaired adapter passes one private
 launcher path after `-e`. That file uses fixed shell quoting and an explicit clean
 environment before starting the exact role command. Changed, linked, or replaced
 launchers refuse during request construction. A failed request leaves the runtime
-prepared and names `koda guide status` as manual recovery. Same-user replacement
+prepared and returns the owner to Guide, which derives the safe numbered recovery
+choice without asking the owner to reconstruct a role command. Same-user replacement
 between the final content check and external execution remains a local TOCTOU
 boundary, not hostile-writer isolation.
 
-The visible owner-receipt recovery is deliberately narrower than general process
-restart. It accepts only the exact legacy `PAUSED_REVIEWER_FAILURE` and failed job
-shape produced by the observed empty-receipt incident, requires the earlier visible
-launch and a stopped Reviewer, and writes one `RECOVERY.json` binding the current
-verified toolkit before opening anything. Reviewer opens first; Producer opens only
-after the same job reaches `AWAITING_OWNER` under a live Reviewer lock. Any different,
-linked, corrupt, live, or duplicate state refuses rather than guessing.
+Visible recovery remains narrower than general process restart. It accepts the exact
+legacy empty-receipt failure or any stable formal, repair, or fresh
+`AWAITING_OWNER` handover. The Reviewer job's full schema is checked; recovery binds
+its ID, kind, phase, and expected path beside the current verified toolkit. Changed,
+missing, linked, corrupt, unsafe, or unrelated job evidence refuses. Live role locks
+derive the missing set: Reviewer opens first when absent, and Producer opens only
+after Reviewer reaches the same owner decision. Exact Koda window/readiness failures
+remain retryable, successful attempts append to the recovery history, and a live role
+is never deliberately duplicated. Recovery cannot record a receipt or advance a gate.
 
 ## Concurrency and recovery
 
@@ -249,4 +255,6 @@ audited in
 The numbered owner ceremony, stdin-only receipt transport, and exact visible recovery
 are audited in
 [`security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md`](security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md).
+The current stable-handover and optional-adapter boundary is audited in
+[`security-runs/2026-07-19-stable-handover-recovery-audit-12/RESULT.md`](security-runs/2026-07-19-stable-handover-recovery-audit-12/RESULT.md).
 The latest named full-suite transcript is linked from the README.
