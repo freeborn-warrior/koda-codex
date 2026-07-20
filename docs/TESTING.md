@@ -2085,3 +2085,6 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   transcript, and every critical demo/launch file. The failed live attempt is
   discarded rather than recovered because the required owner proof is a fresh
   recording from the start. Fresh owner-visible proof remains.
+- **Release confirmation:** The promoted manifest, public evidence links, and
+  submission assertions passed another **246/246** at commit `239c8e6` in the
+  [release transcript](test-results/2026-07-20-full-session-prompt-contract-release.md).

@@ -30,5 +30,6 @@ journey the README promised and was too shallow to authorize another recording.
   **68/68 passed**.
 - Complete local suite: **246/246 passed**.
 - Unchanged post-push suite: **246/246 passed**.
+- Promoted release suite: **246/246 passed**.
 
 Fresh owner-visible proof remains open.
