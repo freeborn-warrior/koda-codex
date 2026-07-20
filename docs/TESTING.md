@@ -1393,3 +1393,13 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   suite passed **210/210** again.
 - **State:** PUSHED DETERMINISTIC AND MANIFEST PASS. Post-push focused slice and owner
   observation remain pending.
+- **Evidence push and post-push check:** Capability manifest, current project docs,
+  judge assertion, audits, and transcript reached `origin/main` at `83bc605`. The
+  post-push Guide, security, submission, and toolkit-integrity slice passed **53/53**.
+- **Real paused-project preflight:** The shipped CLI read the preserved verification
+  project without mutation. It reported capability
+  `ghostty-stable-handover-recovery-v8` at 210/210, session `2026-07-19-02` at Brief
+  1/6, the existing Reviewer decision still open, Producer missing, and only `1`
+  reopen Producer / `2` not now. No role or terminal was launched.
+- **Final state:** PUSHED MECHANICAL, SECURITY, PACKAGE, AND OWNER-SURFACE PASS.
+  Kristian's Ghostty observation and continuation through pushed close remain.

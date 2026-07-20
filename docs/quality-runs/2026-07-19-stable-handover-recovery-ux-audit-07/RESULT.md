@@ -1,7 +1,7 @@
 # First-use UX audit 07 — stable handover and optional terminal adapter
 
 **Date:** 2026-07-19  
-**Verdict:** PUSHED-CODE AND MANIFEST FLOW PASS; POST-PUSH CHECK AND OWNER OBSERVATION PENDING
+**Verdict:** PUSHED DETERMINISTIC FLOW PASS; OWNER OBSERVATION PENDING
 
 ## Product boundary
 
@@ -45,6 +45,11 @@ binding problem rather than guessing which decision the owner meant.
   [210-check transcript](../../test-results/2026-07-19-stable-handover-recovery-pushed.md)
   is bound by toolkit capability `ghostty-stable-handover-recovery-v8`.
 - The complete current-document and manifest regression passed 210/210.
+- Evidence commit `83bc605` reached `origin/main`; the post-push Guide, security,
+  submission, and toolkit-integrity slice passed 53/53.
+- The shipped Guide then reconstructed the preserved live project read-only and
+  displayed exactly `1` reopen only the missing Producer / `2` not now. It exposed
+  no role command and launched nothing.
 
 Mechanical tests prove state classification, minimal choices, job binding, opening
 order, readiness refusal, and retry. They cannot prove that Ghostty feels clear,

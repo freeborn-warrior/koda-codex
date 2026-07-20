@@ -1,7 +1,7 @@
 # Security audit 12 — stable owner-handover recovery
 
 **Date:** 2026-07-19  
-**Verdict:** PUSHED-CODE AND MANIFEST SECURITY PASS; POST-PUSH CHECK AND HUMAN OBSERVATION PENDING
+**Verdict:** PUSHED DETERMINISTIC SECURITY PASS; HUMAN OBSERVATION PENDING
 
 ## Scope
 
@@ -53,6 +53,12 @@ work.
   Toolkit capability `ghostty-stable-handover-recovery-v8` binds that evidence.
 - The complete manifest regression passed 210/210 after current README, submission,
   project, backlog, working-plan, UX, security, and Ghostty boundary updates.
+- Evidence commit `83bc605` reached `origin/main`; the post-push Guide, security,
+  submission, and toolkit-integrity slice passed 53/53.
+- A read-only status check against the preserved verification project reported the
+  v8 capability, same unacknowledged Brief decision, zero advancement, Reviewer
+  present, Producer missing, and only the safe Producer-only recovery choice. It
+  launched nothing and changed no runtime or project file.
 
 ## Residual boundaries
 
