@@ -47,9 +47,9 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Later, only after target (a) is secure
 
-- [ ] Consider whether the existing disk-separated seats are worth adapting across providers. Codex/Fable mixed staffing is an architectural possibility, not a committed requirement or current scope.
+- [ ] Consider whether the existing disk-separated seats are worth adapting across providers. Codex CLI/Claude Code mixed staffing is an architectural possibility, not a committed requirement or current scope.
 - [ ] Evaluate a read-only Guide-side Librarian/recall skill that answers where the project has been, is now, and is heading with citations, without becoming another authority or hidden truth store.
-- [ ] Consider a thin interface over the plain-file CLI contract.
+- [ ] Define a stable client boundary for separate local and remote interfaces over the permanently headless plain-file engine; no interface may own gate truth.
 - [ ] Consider an RLM-style evidence query layer only after a guide-context fixture proves ordinary file search, summaries, and compaction are insufficient.
 - [ ] Add machine-readable status for future interfaces after the human CLI contract is stable.
 - [ ] Revisit forward-only Koda-C self-hosting after submission at a clean, dated boundary; never retrofit the earlier construction history.

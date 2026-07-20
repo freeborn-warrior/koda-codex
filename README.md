@@ -63,6 +63,11 @@ The core does not require Ghostty or a model. Ghostty is an optional macOS adapt
 that makes the Guide, Producer, and Reviewer visible in separate windows. The
 same disk relay can be started from manually opened terminals.
 
+The engine remains headless by design. A future macOS, browser, editor, or remote
+interface would be a separate client of the same plain-file and command contract;
+an interface may present and request actions, but it never becomes gate truth or
+owns the workflow.
+
 In the managed Reviewer window, the complete human-facing review prints inline.
 Its final eight-character `REVIEW CODE` is the only acknowledgement text the owner
 types. Koda binds that code to the current review's complete receipt and still sends
