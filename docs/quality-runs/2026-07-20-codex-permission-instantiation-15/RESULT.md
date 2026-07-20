@@ -1,7 +1,7 @@
 # Quality audit 15 — Codex permission instantiation
 
 **Date:** 2026-07-20  
-**Result:** LOCAL STARTUP CONTRACT PASSES; LIVE OWNER GUIDE RUN OWED
+**Result:** POST-PUSH STARTUP CONTRACT PASSES; LIVE OWNER GUIDE RUN OWED
 
 ## Finding
 
@@ -30,13 +30,13 @@ automated check and then failed in the owner's real Guide window.
 - Installed Codex CLI 0.144.6 instantiated and applied both generated profiles:
   **Guide exit 0; role exit 0**.
 - Focused changed slice: **35/35 passed**.
-- Complete local suite: **244/244 passed**.
+- Complete unchanged post-push suite: **244/244 passed**.
 - Exact full-session preparation reached `READY — FULL SESSION` with an isolated
   locally pushed project and no model or Ghostty launch.
 - Named evidence:
   [development record](../../test-results/2026-07-20-codex-permission-instantiation-development-failures.md)
   [installed-client proof](../../test-results/2026-07-20-codex-permission-instantiation-installed-cli.md),
-  and [local transcript](../../test-results/2026-07-20-codex-permission-instantiation-bounded-local.md).
+  and [post-push transcript](../../test-results/2026-07-20-codex-permission-instantiation-bounded-pushed.md).
 
 ## Boundary
 

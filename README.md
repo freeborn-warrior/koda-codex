@@ -107,8 +107,8 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The current [244-check local Codex-permission-instantiation transcript](docs/test-results/2026-07-20-codex-permission-instantiation-bounded-local.md)
-  is hash-bound by the toolkit integrity manifest; pushed proof is being prepared.
+- The current [244-check post-push Codex-permission-instantiation transcript](docs/test-results/2026-07-20-codex-permission-instantiation-bounded-pushed.md)
+  is hash-bound by the toolkit integrity manifest.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
   encountered an unplanned Summary `REVISE`, recovered through a fresh review,

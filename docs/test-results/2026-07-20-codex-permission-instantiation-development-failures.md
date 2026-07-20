@@ -1,7 +1,7 @@
 # Codex permission instantiation — development record
 
 **Date:** 2026-07-20  
-**Current result:** LOCAL PASS; PUSHED PROOF PENDING
+**Current result:** POST-PUSH PASS; LIVE OWNER GUIDE RUN OWED
 
 ## The second owner-observed refusal
 
@@ -54,8 +54,8 @@ deserialize and apply the profile. Calling that fixed was incorrect.
   permission argument.
 - The newly added bounded-root and size-ceiling regressions pass in the focused
   Guide, security, Quick Start, and integrity suite.
-- Complete local suite: **244/244 passed** in the
-  [named transcript](2026-07-20-codex-permission-instantiation-bounded-local.md).
+- Complete unchanged post-push suite: **244/244 passed** in the
+  [named transcript](2026-07-20-codex-permission-instantiation-bounded-pushed.md).
 - The [installed-client transcript](2026-07-20-codex-permission-instantiation-installed-cli.md)
   preserves the Guide-only oversized failure and the final two-profile pass.
 - The exact no-model full-session starter repeated those checks and reached a

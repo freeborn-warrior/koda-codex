@@ -1,7 +1,7 @@
 # Security audit 21 — Codex permission instantiation
 
 **Date:** 2026-07-20  
-**Result:** LOCAL PASS; POLICY PRESERVED AND ACTUALLY INSTANTIATED
+**Result:** POST-PUSH PASS; POLICY PRESERVED AND ACTUALLY INSTANTIATED
 
 ## Security question
 
