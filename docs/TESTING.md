@@ -1447,8 +1447,12 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   955,624 compressed bytes, 4,587,696 unpacked bytes, 781 files, and zero bundled
   dependencies. The isolated production dependency audit found zero
   vulnerabilities. Credential-signature, whitespace, and reachable-object checks
-  passed. The repair commit, unchanged post-push transcript, and final integrity
-  binding remain pending and must not be reported as complete yet.
+  passed.
+- **Pushed-code result:** Repair commit `74f9067` reached `origin/main`, then the
+  unchanged complete suite passed **216/216** with every named result in the
+  [pushed transcript](test-results/2026-07-19-owner-bound-project-sandbox-pushed.md).
+  Toolkit capability `owner-bound-project-sandbox-v9` binds that commit,
+  transcript, owner/permission launch surface, and exact critical-file hashes.
 - **Evidence:** [owner identity design note](design-notes/2026-07-19-owner-identity-binding.md),
   [permission design note](design-notes/2026-07-19-project-scoped-codex-permissions.md),
   and [live boundary result](security-runs/2026-07-19-project-boundary-probe-13/RESULT.md).

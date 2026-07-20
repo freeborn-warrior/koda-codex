@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "ghostty-stable-handover-recovery-v8",
-  "verifiedAt": "2026-07-19T23:56:55.271Z",
-  "repairCommit": "93efd1a78dd98b8e17c7ee5b1926f04ebb395aad",
-  "testedCommit": "93efd1a78dd98b8e17c7ee5b1926f04ebb395aad",
-  "testCount": 210,
+  "capability": "owner-bound-project-sandbox-v9",
+  "verifiedAt": "2026-07-20T00:50:37.867Z",
+  "repairCommit": "74f9067fd6347b3827c634e599c863621af867af",
+  "testedCommit": "74f9067fd6347b3827c634e599c863621af867af",
+  "testCount": 216,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-stable-handover-recovery-pushed.md",
-    "sha256": "2feb4232fb0aaec672f2792752ec1863495249bd77e52078ce7ea1d6f619df06"
+    "path": "docs/test-results/2026-07-19-owner-bound-project-sandbox-pushed.md",
+    "sha256": "ff41fefe6c7cfc2592c85795747b7dc02238430ac8a58c42faa2a416b0bf4fbc"
   },
   "files": [
     {

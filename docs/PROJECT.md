@@ -134,6 +134,13 @@ owner contract
   passes an unchanged pushed 210/210 transcript under toolkit capability
   `ghostty-stable-handover-recovery-v8`. Ghostty remains an optional macOS adapter;
   manually opened terminals use the same core relay and gate.
+- Managed Producer and Reviewer roles now bind the confirmed owner's validated
+  display name instead of substituting the toolkit author, and run under a strict
+  project-data permission profile with no ordinary sibling/home reads, external
+  writes, network, web search, login shell, user config, or approval escape. Repair
+  commit `74f9067` passes the unchanged pushed 216/216 transcript under toolkit
+  capability `owner-bound-project-sandbox-v9`. The separately opened Guide still
+  uses its own Codex launch permissions and remains an explicit UX decision.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.
@@ -177,6 +184,7 @@ owner contract
 - [Stable-handover first-use UX audit](quality-runs/2026-07-19-stable-handover-recovery-ux-audit-07/RESULT.md)
 - [Stable-handover security audit](security-runs/2026-07-19-stable-handover-recovery-audit-12/RESULT.md)
 - [Pushed 210-check stable-handover proof](test-results/2026-07-19-stable-handover-recovery-pushed.md)
+- [Pushed 216-check owner-bound project-sandbox proof](test-results/2026-07-19-owner-bound-project-sandbox-pushed.md)
 - [Pushed 204-check owner-surface proof](test-results/2026-07-19-owner-surface-pushed.md)
 - [Ghostty launcher development failures](test-results/2026-07-18-ghostty-launcher-development-failures.md)
 - [Ghostty launcher 132-check result](test-results/2026-07-18-ghostty-launcher-final.md)

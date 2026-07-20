@@ -11,7 +11,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
   now contained, but an independently opened interactive Guide still uses whatever
   Codex permissions the person selected. Do not hide this distinction or add a long
   copy-paste command as the permanent human experience.
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, and hardened Git locking now pass a pushed, integrity-bound 210/210 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, hardened Git locking, dynamic owner binding, and strict role containment now pass a pushed 216/216 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
@@ -43,6 +43,15 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Bind the confirmed project owner's validated name into new Guide runtimes and
+  managed relay output, and replace broad-read role sandboxes with strict project-
+  data permission profiles. Producer and Reviewer can access named read-only
+  runtimes but not ordinary sibling/home files, external writes, network, web
+  search, login shells, user config, or approval escalation. Repair commit
+  `74f9067` passes the unchanged pushed **216/216** transcript under toolkit
+  capability `owner-bound-project-sandbox-v9`. Secure Guide opening remains the
+  separate in-progress UX item above.
 
 - [x] Generalize visible recovery from the historical Brief receipt incident to any
   stable formal, repair, or fresh owner handover. Recovery validates and binds the
