@@ -35,9 +35,10 @@ test("GUIDE CONSOLE SECURITY: every turn ignores ambient config and rules under 
   assert.match(rendered, /--ignore-rules/);
   assert.match(rendered, /default_permissions="koda_guide"/);
   assert.match(rendered, /permissions\.koda_guide\.network\.enabled=false/);
-  assert.match(rendered, /filesystem\.":workspace_roots"\."\."="read"/);
-  assert.match(rendered, /filesystem\.":workspace_roots"\."\.git"="read"/);
-  assert.doesNotMatch(rendered, /filesystem=\{/);
+  assert.match(rendered, /filesystem=\{ ":minimal" = "read",/);
+  assert.match(rendered, /":workspace_roots" = \{ "\." = "read"/);
+  assert.match(rendered, /"\.git" = "read"/);
+  assert.doesNotMatch(rendered, /filesystem\.":workspace_roots"/);
   assert.doesNotMatch(rendered, /workspace-write|danger-full-access|on-request/);
 
   const resumed = guideTurnArguments({
@@ -60,16 +61,16 @@ test("GUIDE CONSOLE SECURITY: the Guide profile retains only named read-only run
     ["docs/guide", "docs/PROJECT.md"],
     ["/trusted/koda/docs/toolkit-integrity.json", "/trusted/koda/docs/test-results/proof.md"],
   ).join("\n");
-  assert.match(rendered, /"\/trusted\/koda\/dist"="read"/);
-  assert.match(rendered, /"\/trusted\/koda\/package\.json"="read"/);
-  assert.match(rendered, /"\/trusted\/codex\/bin\/codex"="read"/);
-  assert.match(rendered, /"\/trusted\/toolchain"="read"/);
-  assert.match(rendered, /"\/trusted\/koda\/docs\/toolkit-integrity\.json"="read"/);
-  assert.match(rendered, /"\/trusted\/koda\/docs\/test-results\/proof\.md"="read"/);
-  assert.match(rendered, /"\."="read"/);
-  assert.match(rendered, /"docs\/guide"="write"/);
-  assert.match(rendered, /"docs\/PROJECT\.md"="write"/);
-  assert.doesNotMatch(rendered, /"docs\/sessions"="write"/);
+  assert.match(rendered, /"\/trusted\/koda\/dist" = "read"/);
+  assert.match(rendered, /"\/trusted\/koda\/package\.json" = "read"/);
+  assert.match(rendered, /"\/trusted\/codex\/bin\/codex" = "read"/);
+  assert.match(rendered, /"\/trusted\/toolchain" = "read"/);
+  assert.match(rendered, /"\/trusted\/koda\/docs\/toolkit-integrity\.json" = "read"/);
+  assert.match(rendered, /"\/trusted\/koda\/docs\/test-results\/proof\.md" = "read"/);
+  assert.match(rendered, /"\." = "read"/);
+  assert.match(rendered, /"docs\/guide" = "write"/);
+  assert.match(rendered, /"docs\/PROJECT\.md" = "write"/);
+  assert.doesNotMatch(rendered, /"docs\/sessions" = "write"/);
   assert.throws(
     () => codexGuidePermissionArgs("relative/cli.js", "/trusted/codex", []),
     /must be absolute/,

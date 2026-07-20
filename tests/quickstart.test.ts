@@ -18,9 +18,8 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
   const fakeCodex = path.join(parent, "codex");
   await writeFile(fakeCodex, [
     "#!/bin/sh",
-    "case \" $* \" in",
-    "  *'filesystem={'*) echo 'legacy inline filesystem profile refused' >&2; exit 41 ;;",
-    "esac",
+    "case \" $* \" in *'filesystem.\":workspace_roots\"'*) echo 'quoted dotted profile refused' >&2; exit 41 ;; esac",
+    "case \" $* \" in *'filesystem={ \"'*' = \"read\"'*' sandbox -P '*' -- /usr/bin/true'*) ;; *) echo 'profile was not instantiated offline' >&2; exit 42 ;; esac",
     `printf '%s\\n' \"$*\" >> ${JSON.stringify(permissionLog)}`,
     "printf '%s\\n' 'codex-cli fixture'",
   ].join("\n"), "utf8");
@@ -46,9 +45,11 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
   const permissionCalls = await readFile(permissionLog, "utf8");
   assert.match(permissionCalls, /default_permissions="koda_guide"/);
   assert.match(permissionCalls, /default_permissions="koda_project"/);
-  assert.match(permissionCalls, /filesystem\.":workspace_roots"\."\."="read"/);
-  assert.match(permissionCalls, /filesystem\.":workspace_roots"\."\."="write"/);
-  assert.doesNotMatch(permissionCalls, /filesystem=\{/);
+  assert.match(permissionCalls, /default_permissions="koda_guide"[\s\S]*sandbox -P koda_guide -- \/usr\/bin\/true/);
+  assert.match(permissionCalls, /default_permissions="koda_project"[\s\S]*sandbox -P koda_project -- \/usr\/bin\/true/);
+  assert.match(permissionCalls, /":workspace_roots" = \{ "\." = "read"/);
+  assert.match(permissionCalls, /":workspace_roots" = \{ "\." = "write"/);
+  assert.doesNotMatch(permissionCalls, /filesystem\.":workspace_roots"/);
 
   assert.equal(execFileSync("git", ["status", "--porcelain"], { cwd: project, encoding: "utf8" }), "");
   assert.equal(execFileSync("git", ["rev-list", "--left-right", "--count", "main...origin/main"], {

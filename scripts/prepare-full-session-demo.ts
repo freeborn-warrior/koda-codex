@@ -144,17 +144,23 @@ async function preflightCodexPermissionProfiles(): Promise<void> {
   const environment = relayCodexEnvironment(process.env);
   const toolchain = relayNodeToolchainReadRoots();
   const profiles = [
-    codexGuidePermissionArgs(
+    { name: "koda_guide", args: codexGuidePermissionArgs(
       cli,
       codex,
       toolchain,
       ["docs/guide"],
       await verifiedToolkitReadPaths(),
-    ),
-    codexRolePermissionArgs(cli, codex, toolchain),
+    ) },
+    { name: "koda_project", args: codexRolePermissionArgs(cli, codex, toolchain) },
   ];
   for (const profile of profiles) {
-    run(codex, [...profile, "--version"], packageRoot, environment);
+    // `--version` accepts override syntax without constructing the filesystem
+    // permission enum. The sandbox command resolves and applies the named profile
+    // locally, without a model prompt or network request.
+    run(codex, [
+      ...profile.args.filter((argument) => argument !== "--strict-config"),
+      "sandbox", "-P", profile.name, "--", "/usr/bin/true",
+    ], packageRoot, environment);
   }
 }
 
