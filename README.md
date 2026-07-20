@@ -107,8 +107,8 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The current [242-check post-push Codex-permission transcript](docs/test-results/2026-07-20-codex-permission-profile-pushed.md)
-  is hash-bound by the toolkit integrity manifest.
+- The current [242-check local Codex-permission-instantiation transcript](docs/test-results/2026-07-20-codex-permission-instantiation-local.md)
+  is hash-bound by the toolkit integrity manifest; pushed proof is being prepared.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
   encountered an unplanned Summary `REVISE`, recovered through a fresh review,
@@ -129,10 +129,10 @@ direct final answer instead of flooding the owner with procedural inspection.
   and [security audit](docs/security-runs/2026-07-20-self-guided-full-session-audit-19/RESULT.md)
   cover the single-command entry, human choices, hostile Git environment, package,
   and the remaining real-human boundary.
-- The [Codex permission-profile quality audit](docs/quality-runs/2026-07-20-codex-permission-profile-14/RESULT.md)
-  and [security audit](docs/security-runs/2026-07-20-codex-permission-profile-audit-20/RESULT.md)
-  preserve the real first-use startup refusal, installed-CLI parser proof, and
-  fail-before-creation preflight.
+- The [Codex permission-instantiation quality audit](docs/quality-runs/2026-07-20-codex-permission-instantiation-15/RESULT.md)
+  and [security audit](docs/security-runs/2026-07-20-codex-permission-instantiation-audit-21/RESULT.md)
+  preserve both real first-use refusals, the false `--version` proof, and the
+  installed CLI's actual fail-before-creation sandbox/profile check.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

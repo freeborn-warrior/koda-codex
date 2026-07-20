@@ -1920,11 +1920,9 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Why earlier tests missed it:** Security tests asserted the intended least-
   privilege entries, while process tests used fake Codex children. Neither asked
   the installed Codex configuration parser to accept the exact generated profile.
-- **Correction:** Every filesystem permission is now a separate dotted `-c`
-  override matching Codex's documented profile shape. Before creating a demo
-  project, the starter invokes the installed Codex CLI with `--version` under both
-  the exact Guide and role profiles. An incompatible client therefore refuses
-  before creating Git or launch evidence.
+- **First attempted correction:** Every filesystem permission was emitted as a
+  separate quoted dotted `-c` override. Before creating a demo project, the starter
+  invoked `codex --version` under both sets of arguments.
 - **Error-truth correction:** A nonzero Codex exit is now evaluated before the
   secondary missing-context condition. The owner sees the first sanitized stderr
   line and the durable evidence filename; a regression test proves the old
@@ -1933,10 +1931,10 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   **35/35**. The Quick Start fixture's fake Codex actively rejects the superseded
   whole-table shape and records both read-only Guide and write-capable role
   preflights.
-- **Installed-client result:** Both corrected generated profiles were parsed
-  successfully by the installed **Codex CLI 0.144.6**. The starter then created a
-  clean, pushed, mechanically verified launch-ready project without starting a
-  model.
+- **What that installed-client check proved:** Codex CLI 0.144.6 accepted the
+  surrounding command-line arguments, but `--version` never instantiated either
+  named filesystem profile. The starter could therefore become launch-ready while
+  retaining a later startup refusal.
 - **Live-model boundary:** A real Guide model turn was not run from this build task
   because its environment refused exporting project context to the external Codex
   service without separate authorization. No workaround was attempted. Kristian's
@@ -1947,11 +1945,36 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [development record](test-results/2026-07-20-codex-permission-profile-development-failures.md),
   [quality audit](quality-runs/2026-07-20-codex-permission-profile-14/RESULT.md),
   and [security audit](security-runs/2026-07-20-codex-permission-profile-audit-20/RESULT.md).
-- **State:** LOCAL PASS. Capability `codex-permission-preflight-v17` binds repair
-  commit `35489f5` and the 242-check transcript. Push and an unchanged post-push
-  suite remain before another owner attempt.
-- **Post-push result:** Repair and local evidence reached `origin/main` at
-  `52319c3`. The unchanged complete suite passed **242/242** in the
-  [post-push transcript](test-results/2026-07-20-codex-permission-profile-pushed.md).
-  Capability `codex-permission-preflight-v17` now binds that pushed commit,
-  transcript, and the exact permission/startup files.
+- **State:** FAILED REPAIR. Capability `codex-permission-preflight-v17`, commits
+  `35489f5` and `52319c3`, and the green 242-check transcript preserve what was
+  believed at the time but are superseded as current startup evidence. Kristian's
+  next real Guide run refused while deserializing `FilesystemPermissionToml`.
+
+## 2026-07-20 — Exact Codex permission instantiation
+
+- **Owner-observed failure:** The first repair's real Guide run refused with
+  `data did not match any variant of untagged enum FilesystemPermissionToml`.
+  No Guide context or phase state was created. The owner did nothing wrong.
+- **Root cause:** `codex --version` was a shallow command-line check. It never
+  loaded the selected permission profile. Quoted dotted keys also became literal
+  filesystem paths instead of the intended special table entries.
+- **Correction:** Koda serializes one explicitly spaced TOML inline filesystem
+  table and preflights both exact profiles through installed Codex's offline
+  `sandbox -P <profile> -- /usr/bin/true` path. This starts no model and makes no
+  network request, but requires `FilesystemPermissionToml` deserialization and
+  sandbox application before any demo project is created.
+- **Installed-client result:** On Codex CLI **0.144.6**, both the read-only Guide
+  profile and write-capable session-role profile exited **0** through that exact
+  offline path.
+- **Regression result:** The fake installed client rejects both superseded
+  serialization shapes and requires the two real sandbox/profile calls. Focused
+  Guide, security, Quick Start, and integrity tests pass **35/35**.
+- **Complete result:** Every one of **242** named tests passed in the
+  [local transcript](test-results/2026-07-20-codex-permission-instantiation-local.md).
+- **Development and audits:** See the
+  [development record](test-results/2026-07-20-codex-permission-instantiation-development-failures.md),
+  [quality audit](quality-runs/2026-07-20-codex-permission-instantiation-15/RESULT.md),
+  and [security audit](security-runs/2026-07-20-codex-permission-instantiation-audit-21/RESULT.md).
+- **State:** LOCAL PASS. Capability `codex-permission-instantiation-v18` binds
+  repair commit `ec82847` and the local 242-check transcript. Pushed proof and a
+  fresh owner-visible networked Guide run remain before human handoff.

@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "codex-permission-preflight-v17",
-  "verifiedAt": "2026-07-20T18:38:56.921Z",
-  "repairCommit": "35489f574dcf85e522f5f53f1ddc833d300a1755",
-  "testedCommit": "52319c3a19a1da6dc884afcb051370426b220f89",
+  "capability": "codex-permission-instantiation-v18",
+  "verifiedAt": "2026-07-20T18:52:18.208Z",
+  "repairCommit": "2aef8cabd20b42c70fdf208b9b63cea1f1be73ed",
+  "testedCommit": "ec8284747f42bbc24bbcadd8b033fe3f654d3113",
   "testCount": 242,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-codex-permission-profile-pushed.md",
-    "sha256": "cd920238a9b61dfa1cd1439d76e9096c50abdc65589cc7ce7a01203ee8ac1e34"
+    "path": "docs/test-results/2026-07-20-codex-permission-instantiation-local.md",
+    "sha256": "aa2e2e543ccf8c063798c2a1cdba76f37bead9e11b4f64d574d547a4e583dc17"
   },
   "files": [
     {
@@ -56,11 +56,11 @@
     },
     {
       "path": "src/toolkit-integrity.ts",
-      "sha256": "5251c82653ff88333f88da020cc3aef92adb964d88322a24b40ab0623021a710"
+      "sha256": "f4521a7d37b8aa78bb827c2315a450025ac5e69d4829cfc1dcfdc327206321c4"
     },
     {
       "path": "dist/toolkit-integrity.js",
-      "sha256": "5ccff1201889aa1031b70b7a7df9e293d620ab3c0589a98835cc8fad939d86e8"
+      "sha256": "67b2542e5175a82b055264afd9e44e5dc2a79398393cb893fcf49d254d86706d"
     },
     {
       "path": "src/guide.ts",
@@ -80,11 +80,11 @@
     },
     {
       "path": "src/guide-console.ts",
-      "sha256": "9c1c34036ce12440475a0b603ea72629a9facd43af39ff50639819fda423c1b4"
+      "sha256": "1e5c691625c0de7b1a3648507d8388c63825278a92e74b1df68f912ee58422b4"
     },
     {
       "path": "dist/guide-console.js",
-      "sha256": "d3b2ae6ab62a7743b756b66dc8d8f57d42fbe6e23e342f71bea9a0c4c885290a"
+      "sha256": "c4ea21914b910950f228e0a8fefe6c66a81dc4e0cb22ee6a7f2edd3536301bd1"
     },
     {
       "path": "src/terminal-ui.ts",
@@ -148,11 +148,11 @@
     },
     {
       "path": "src/codex-role-permissions.ts",
-      "sha256": "e4de2ae00457318aebb3e0f18e62a3388a94672427428f5b94c81eb4cad80656"
+      "sha256": "f155c9d0658b34e3de105bbab46b60929a2856bf8a4dc24901bd44088a1836c7"
     },
     {
       "path": "dist/codex-role-permissions.js",
-      "sha256": "1562df0e8b92ce110c2ad1965d6446340ede1ba26e23109edd1722f9d74c80e8"
+      "sha256": "edf5ccdd45f7e3b748169bf94c745ab269f5a8f92517c397a0275c5f3318b115"
     },
     {
       "path": "src/workset.ts",
@@ -164,7 +164,7 @@
     },
     {
       "path": "scripts/prepare-full-session-demo.ts",
-      "sha256": "4f218cff61056e15ce1a857e5a4a22754f1ba4e4c1a365ca6c95f44e72528c58"
+      "sha256": "a1f86e47c7f70cc787e427b9507e9b10aed6e7d9532474024332a03f3a5b4d31"
     },
     {
       "path": "package.json",

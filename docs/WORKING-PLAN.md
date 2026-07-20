@@ -109,11 +109,11 @@ Turn the proved two-context session relay into a project-level experience that c
     unchanged pushed implementation passes **241/241** under
     `self-guided-full-session-v16`.
 34. [x] Repair the real first-use Codex configuration refusal without weakening
-    isolation. Replace the rejected whole-table override with documented dotted
-    permission entries, preflight Guide and role profiles against the installed
-    Codex CLI before project creation, and surface primary startup stderr before
-    secondary context symptoms. The unchanged post-push suite passes **242/242** under
-    `codex-permission-preflight-v17`.
+    isolation. The first `--version` preflight was insufficient and failed again
+    for the owner; replace it with the installed CLI's offline `sandbox -P` path so
+    both exact profiles are deserialized and applied before project creation. The
+    corrected local suite passes **242/242** under
+    `codex-permission-instantiation-v18`; pushed proof is pending.
 
 ## Submission cut
 

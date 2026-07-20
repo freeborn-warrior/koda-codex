@@ -183,14 +183,14 @@ owner contract
   `self-guided-full-session-v16` binds the **241/241** post-push suite. A fresh
   owner-observed run remains separate human evidence before submission.
 - The first real use of that entry found a version-specific permission-profile
-  serialization defect before the Guide model started. Codex CLI 0.144.6 rejected
-  Koda's whole inline filesystem table, while the prior tests inspected only the
-  intended rules and fake process behavior. Koda now emits documented dotted
-  filesystem overrides, asks the installed CLI to parse both Guide and role
-  profiles before it creates any demo project, and reports primary Codex stderr
-  ahead of a missing-context symptom. Toolkit capability
-  `codex-permission-preflight-v17` binds the **242/242** post-push suite; a fresh
-  owner-visible model connection remains.
+  serialization defect before the Guide model started. The first repair then made
+  a second, documented mistake: `codex --version` did not instantiate the profile,
+  so 242 green tests still missed quoted dotted keys that failed in Kristian's next
+  Guide run. Koda now submits the exact Guide and role profiles to installed Codex
+  CLI 0.144.6 through its offline `sandbox -P` execution path before creating a
+  demo project. Both profiles deserialize and apply with exit 0; toolkit capability
+  `codex-permission-instantiation-v18` binds the corrected **242/242** local suite.
+  Pushed proof and a fresh owner-visible model connection remain.
 - A real secure-Guide recovery then proved that the saved role launcher still
   depended on the terminal which created it. Guide refused safely twice with zero
   gate movement. Role launchers now use deterministic presentation/environment
