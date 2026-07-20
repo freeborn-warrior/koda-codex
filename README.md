@@ -149,11 +149,11 @@ direct final answer instead of flooding the owner with procedural inspection.
   preserve the next owner-visible refusal, the missing whole-journey test, its
   failed 232/248 regression, native Git/XDG correction, and promoted 250-check proof.
 - The [Reviewer session-binding incident](docs/verification-runs/2026-07-20-reviewer-session-binding-race-04/RESULT.md),
-  [sealed review contract](docs/quality-runs/2026-07-20-reviewer-session-binding-19/CONTRACT.md),
+  [fresh independent review](docs/quality-runs/2026-07-20-reviewer-session-binding-19/REVIEW.md),
   and [security audit](docs/security-runs/2026-07-20-reviewer-session-binding-audit-25/RESULT.md)
   preserve the later false-ready prompt, the exact owner question that exposed it,
-  and the 252-check local plus unchanged post-push repair. Independent and fresh
-  human proof remain distinct until each actually exists.
+  and the 252-check local plus unchanged post-push repair. Terra/medium returned
+  `APPROVE`; fresh human proof remains separate until it actually exists.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

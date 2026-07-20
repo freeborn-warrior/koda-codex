@@ -71,8 +71,9 @@ This is the on-disk working queue for the build. A checked item means its eviden
   Producer-created session, then opens conversation; Producer and Guide refuse
   until that same live identity is present. The complete local and unchanged
   post-push suites pass **252/252** under promoted capability
-  `reviewer-session-binding-v22`. Finish fresh independent review and only then ask
-  Kristian for another recording attempt.
+  `reviewer-session-binding-v22`. Fresh Terra/medium independently returned
+  `APPROVE`; Kristian's next clean owner-visible run is now the sole remaining
+  proof for this repair.
 
 ## Next
 

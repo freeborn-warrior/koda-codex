@@ -2197,5 +2197,24 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   commit `24ebd5b` pass a further
   [252/252 release suite](test-results/2026-07-20-reviewer-session-binding-release.md),
   SHA-256 `1e05d99bbd30cf3bfd8fb6efad665f10c06bbdb7e38a46d8f56157f4802d7b7a`.
-  Independent review and fresh owner-visible rehearsal remain separate pending
-  proofs.
+  Independent review and fresh owner-visible rehearsal remain separate proof
+  classes; the review result is recorded immediately below.
+
+### Independent review and package hygiene
+
+- **Fresh review:** A new read-only GPT-5.6 Terra/medium context independently
+  ran `npm test`, verified all 45 toolkit-manifest file hashes plus the bound
+  transcript hash, confirmed clean `HEAD == origin/main`, and returned
+  [APPROVE](quality-runs/2026-07-20-reviewer-session-binding-19/REVIEW.md).
+  The supplied abbreviated commit fragment was malformed; Reviewer refused it,
+  resolved the exact full pushed HEAD from disk, and preserved the discrepancy.
+- **Package probe failure:** A direct `npm pack --dry-run --json` reached prepack
+  successfully but then refused because the machine's ordinary npm cache contains
+  root-owned files. The user cache was not changed and the failure is not promoted.
+- **Isolated package result:** The same dry run with a disposable cache passed:
+  zero bundled dependencies, 889 entries, 1,416,866 compressed bytes, and
+  6,459,322 unpacked bytes. The package intentionally carries the local skills,
+  runnable core, tests, and evidence archive; the primary judge path still needs
+  neither npm nor this cache.
+- **State:** INDEPENDENT APPROVE. The only remaining proof for this repair is a
+  clean owner-visible Ghostty run.

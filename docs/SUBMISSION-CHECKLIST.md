@@ -49,7 +49,8 @@ truth for the exact submission requirements.
   [252/252](test-results/2026-07-20-reviewer-session-binding-pushed.md) under
   capability `reviewer-session-binding-v22`. The promoted evidence passes a third
   [252/252 release suite](test-results/2026-07-20-reviewer-session-binding-release.md).
-  Fresh independent proof remains pending.
+  Fresh Terra/medium independently ran the full suite, verified every manifest
+  hash, and returned [APPROVE](quality-runs/2026-07-20-reviewer-session-binding-19/REVIEW.md).
 - [x] A first-time user has one documented command for a complete session;
   confirmation, launch, owner choices, and safe recovery remain inside Koda.
 - [x] A fresh Terra/medium task independently reviewed the complete integrated

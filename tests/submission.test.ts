@@ -34,6 +34,10 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   );
   assert.match(
     readme,
+    /\[Reviewer\/session-binding APPROVE review\]\(quality-runs\/2026-07-20-reviewer-session-binding-19\/REVIEW\.md\)/,
+  );
+  assert.match(
+    readme,
     /\[project-boundary security probe\]\(security-runs\/2026-07-19-project-boundary-probe-13\/RESULT\.md\)/,
   );
   assert.match(
@@ -56,6 +60,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /https:\/\/openai\.devpost\.com\/rules/);
   assert.match(checklist, /passes 250\/250 unchanged after push/);
   assert.match(checklist, /unchanged pushed commit passes a second[\s\S]*252\/252/);
+  assert.match(checklist, /Fresh Terra\/medium independently ran the full suite[\s\S]*APPROVE/);
 });
 
 test("JUDGE JOURNEY SUITE: local links in the judge documents resolve", async () => {

@@ -133,8 +133,8 @@ Turn the proved two-context session relay into a project-level experience that c
     Reviewer had a session ID. The repaired transition is explicit `STARTING` →
     exact session binding → `SESSION READY`; Producer and Guide require the same
     live binding. Local and unchanged post-push regressions pass **252/252** under
-    promoted capability `reviewer-session-binding-v22`. Obtain fresh independent
-    review, then perform one clean six-phase run.
+    promoted capability `reviewer-session-binding-v22`. Fresh Terra/medium review
+    returned `APPROVE`; perform one clean owner-visible six-phase run.
 
 ## Submission cut
 
