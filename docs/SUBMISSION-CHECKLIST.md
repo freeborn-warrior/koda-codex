@@ -1,6 +1,6 @@
 # Koda-C submission checklist
 
-**Verified against the live rules:** 2026-07-19
+**Verified against the live rules:** 2026-07-20
 
 **Hard deadline:** 2026-07-21 at 5:00 pm Pacific
 
@@ -11,6 +11,29 @@ should show thoughtful Codex/GPT-5.6 use and clearly explain the problem,
 solution, and approach. The
 [official Devpost rules](https://openai.devpost.com/rules) remain the source of
 truth for the exact submission requirements.
+
+## Owner handoff order
+
+These are the remaining actions in the order that avoids rework:
+
+1. Record one fresh complete source run from the repository root with
+   `npm run demo:session`. Capture silently at full quality. If it fails, stop the
+   recording and preserve the failure; do not continue as if it passed.
+2. After a successful pushed close and Guide return, record the separate
+   one-minute mechanical refusal/open fixture from the root README.
+3. Build the final video from those real captures using
+   [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md): English voiceover, no music, under 3:00.
+4. Let Codex record the successful human rehearsal in this repository, rerun final
+   checks, and push the exact intended submission commit.
+5. Make GitHub public and verify the clone/README path while signed out. If the
+   repository instead stays private, share it with both required judge addresses.
+6. Upload the final video publicly to YouTube and verify it while signed out.
+7. Complete the Devpost fields, run `/feedback` in the primary build task, freeze
+   and tag the exact commit, save the dated submission receipt, and submit before
+   the buffer expires.
+
+Koda currently has no live Producer, Reviewer, or Guide role process. GitHub is
+still `PRIVATE`; neither visibility nor submission state has been changed by Codex.
 
 ## Repository and runnable product
 
