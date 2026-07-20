@@ -9,12 +9,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Owner-test the new one-command `koda guide open` experience. Its
   persistent context, narrow Guide-owned write surface, ignored ambient config and
   rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex
-  resume, and live boundary probe now pass pushed capability
-  `secure-persistent-guide-v10` at **229/229**. The preserved production session
-  exposed one launcher-context mismatch on recovery; the deterministic legacy
-  migration repair passes locally at **230/230** and must be pushed before retry.
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, hardened Git locking, dynamic owner binding, strict role containment, and the secure persistent Guide now pass a pushed 229/229 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
-- [ ] Resume the preserved `2026-07-19-02` session only after the deterministic
+  resume, live boundary probe, and deterministic legacy-launcher migration now
+  pass pushed capability `deterministic-role-launchers-v11` at **230/230**.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Later, the secure Guide correctly stayed open when terminal-specific launcher bytes mismatched. Every event left the gate shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, hardened Git locking, dynamic owner binding, strict role containment, the secure persistent Guide, and bounded legacy-launcher migration now pass a pushed 230/230 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
+- [ ] Resume the preserved `2026-07-19-02` session now that the deterministic
   launcher-migration repair and its full audit are pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
   either role.
@@ -45,6 +43,13 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Make saved role launchers deterministic across terminal contexts and migrate
+  the exact historical Koda shape without weakening tamper refusal. Both role files
+  are inspected before either changes; valid migration records old/new hashes, and
+  arbitrary text, changed commands, links, malformed quoting, or concurrent changes
+  still refuse. Repair commit `461824b` passes the unchanged pushed **230/230**
+  transcript under toolkit capability `deterministic-role-launchers-v11`.
 
 - [x] Promote the secure persistent Guide console to pushed toolkit evidence.
   Commit `01e8055` passes the unchanged **229/229** transcript under toolkit

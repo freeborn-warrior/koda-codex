@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "capability": "secure-persistent-guide-v10",
-  "verifiedAt": "2026-07-20T02:07:18.236Z",
-  "repairCommit": "01e80559065c202a631abd86538500cfcbb9f77b",
-  "testedCommit": "01e80559065c202a631abd86538500cfcbb9f77b",
-  "testCount": 229,
+  "capability": "deterministic-role-launchers-v11",
+  "verifiedAt": "2026-07-20T02:40:05.362Z",
+  "repairCommit": "461824b50d82469dcd53f3ccb38788f91fdbe134",
+  "testedCommit": "461824b50d82469dcd53f3ccb38788f91fdbe134",
+  "testCount": 230,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-secure-guide-console-pushed.md",
-    "sha256": "1da7686bffd933af7f3c4936c7e5f520896092c593eaf60438cdcf8a319f9f62"
+    "path": "docs/test-results/2026-07-19-deterministic-launcher-migration-pushed.md",
+    "sha256": "6fb429a3819f776539c1e9a613267896a5624bd6ce2f64faf4d91d7325c43650"
   },
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "ed7967202a8830c8a7623de8e67912392afef8214a245b1d51dcbadbac0c8e21"
+      "sha256": "5c156c81123fb11ea55da129bd3901df9bd92b6056bf9b43e48ce7803a8e46d3"
     },
     {
       "path": "src/relay-environment.ts",
@@ -24,7 +24,7 @@
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "15d98c732d1a69cfefaeb249e0cb2696498588ee89b90a7911542fab6a3d3341"
+      "sha256": "0a59ad8ef794d81127dbb72d57026c8657544ccbbe37be79c38e8a922331a68d"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
@@ -40,11 +40,11 @@
     },
     {
       "path": "scripts/relay-window-protocol.ts",
-      "sha256": "e7fe13f012339646f1f7a380ff284b2764a189e59ccc05208aa4c9e0c313b5a7"
+      "sha256": "ae1b47c1f639b79ab4176ef1b3fae1a46ab2a25d5c86c7f41581a7dfe5c1c82a"
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "f643159260cf0378d4f70a456784e2da1b23015c56399daca24cf6f25a83bfa6"
+      "sha256": "70d62b2afc19cb9262bab7128233ad9c3b7761cc3b92b1d26433e6db88ecabc1"
     },
     {
       "path": "dist/relay-environment.js",

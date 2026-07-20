@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
-import { chmod, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -212,6 +212,7 @@ test("TWO-WINDOW PROTOCOL: reviewer jobs are bounded and duplicate reviewer wind
   await assert.rejects(readReviewerJob(temporary), /must be a regular file/);
 
   const release = await acquireReviewerWindow(temporary);
+  assert.equal((await lstat(path.join(temporary, REVIEWER_LOCK_DIR))).isFile(), true);
   await assert.rejects(acquireReviewerWindow(temporary), /already owns this run/);
   await release();
 
@@ -227,6 +228,7 @@ test("TWO-WINDOW PROTOCOL: reviewer jobs are bounded and duplicate reviewer wind
   await releaseRecovered();
 
   const releaseProducer = await acquireProducerWindow(temporary);
+  assert.equal((await lstat(path.join(temporary, PRODUCER_LOCK_DIR))).isFile(), true);
   await assert.rejects(acquireProducerWindow(temporary), /producer window already owns this run/);
   assert.equal((await producerWindowLockStatus(temporary))?.pid, process.pid);
   await releaseProducer();
@@ -258,7 +260,7 @@ test("TWO-WINDOW PROTOCOL: reviewer jobs are bounded and duplicate reviewer wind
     startedAt: new Date(0).toISOString(),
   });
   await symlink(outsideReviewer, path.join(temporary, REVIEWER_LOCK_DIR));
-  await assert.rejects(acquireReviewerWindow(temporary, { recoverStale: true }), /Reviewer lock must be a real directory/);
+  await assert.rejects(acquireReviewerWindow(temporary, { recoverStale: true }), /Reviewer lock must be a real file or legacy directory/);
   assert.equal(await pathExists(path.join(outsideReviewer, "OWNER.json")), true);
   await rm(path.join(temporary, REVIEWER_LOCK_DIR));
 
@@ -270,7 +272,7 @@ test("TWO-WINDOW PROTOCOL: reviewer jobs are bounded and duplicate reviewer wind
     startedAt: new Date(0).toISOString(),
   });
   await symlink(outsideProducer, path.join(temporary, PRODUCER_LOCK_DIR));
-  await assert.rejects(acquireProducerWindow(temporary, { recoverStale: true }), /Producer lock must be a real directory/);
+  await assert.rejects(acquireProducerWindow(temporary, { recoverStale: true }), /Producer lock must be a real file or legacy directory/);
   assert.equal(await pathExists(path.join(outsideProducer, "OWNER.json")), true);
 });
 

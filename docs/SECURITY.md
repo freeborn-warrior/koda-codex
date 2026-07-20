@@ -258,6 +258,11 @@ derive the missing set: Reviewer opens first when absent, and Producer opens onl
 after Reviewer reaches the same owner decision. Exact Koda window/readiness failures
 remain retryable, successful attempts append to the recovery history, and a live role
 is never deliberately duplicated. Recovery cannot record a receipt or advance a gate.
+New role ownership is published as complete mode-600 JSON through a same-filesystem
+no-clobber hard link, so status cannot observe a public lock name before its owner
+bytes exist. Readers retain strict support for the earlier directory-plus-owner shape
+held by an already-running window; links, non-files, malformed owners, live duplicates,
+and changed stale locks refuse.
 
 ## Concurrency and recovery
 

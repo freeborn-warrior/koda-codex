@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { lstat, mkdir, readFile, rm } from "node:fs/promises";
+import { link, lstat, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { pathExists } from "../src/config.ts";
@@ -125,15 +125,133 @@ export async function removeReviewerJob(runRoot: string): Promise<void> {
 }
 
 type ReviewerLockOwner = { version: 1; pid: number; startedAt: string };
+type RoleLockSnapshot = ReviewerLockOwner & {
+  kind: "file" | "legacy-directory";
+  device: number;
+  inode: number;
+};
 
-async function reviewerLockOwner(lock: string): Promise<ReviewerLockOwner> {
-  const file = path.join(lock, "OWNER.json");
-  if (!(await lstat(file)).isFile()) throw new Error(`Reviewer lock owner must be a regular file: ${file}`);
-  const owner = JSON.parse(await readFile(file, "utf8")) as Partial<ReviewerLockOwner>;
+function validateRoleLockOwner(value: unknown, file: string, role: "Reviewer" | "Producer"): ReviewerLockOwner {
+  const owner = value as Partial<ReviewerLockOwner>;
   if (owner.version !== 1 || !Number.isInteger(owner.pid) || owner.pid! < 1 || typeof owner.startedAt !== "string") {
-    throw new Error(`Reviewer lock owner is invalid: ${file}`);
+    throw new Error(`${role} lock owner is invalid: ${file}`);
   }
   return owner as ReviewerLockOwner;
+}
+
+async function readRoleLock(lock: string, role: "Reviewer" | "Producer"): Promise<RoleLockSnapshot> {
+  const metadata = await lstat(lock);
+  if (metadata.isSymbolicLink() || (!metadata.isFile() && !metadata.isDirectory())) {
+    throw new Error(`${role} lock must be a real file or legacy directory: ${lock}`);
+  }
+  const kind = metadata.isFile() ? "file" : "legacy-directory";
+  const file = kind === "file" ? lock : path.join(lock, "OWNER.json");
+  const ownerMetadata = await lstat(file);
+  if (!ownerMetadata.isFile() || ownerMetadata.isSymbolicLink()) {
+    throw new Error(`${role} lock owner must be a regular file: ${file}`);
+  }
+  let value: unknown;
+  try {
+    value = JSON.parse(await readFile(file, "utf8"));
+  } catch (error) {
+    if (error instanceof SyntaxError) throw new Error(`${role} lock owner is not valid JSON: ${file}`);
+    throw error;
+  }
+  return {
+    ...validateRoleLockOwner(value, file, role),
+    kind,
+    device: metadata.dev,
+    inode: metadata.ino,
+  };
+}
+
+function sameRoleLock(left: RoleLockSnapshot, right: RoleLockSnapshot): boolean {
+  return left.kind === right.kind && left.device === right.device && left.inode === right.inode &&
+    left.pid === right.pid && left.startedAt === right.startedAt;
+}
+
+async function publishRoleLock(lock: string, owner: ReviewerLockOwner): Promise<void> {
+  const temporary = path.join(path.dirname(lock), `.${path.basename(lock)}.${randomUUID()}.tmp`);
+  await writeFile(temporary, `${JSON.stringify(owner, null, 2)}\n`, { encoding: "utf8", mode: 0o600, flag: "wx" });
+  try {
+    // A hard-link publish is no-clobber and makes the complete owner bytes visible
+    // in the same filesystem operation that makes the lock name visible.
+    await link(temporary, lock);
+  } finally {
+    await rm(temporary, { force: true });
+  }
+}
+
+async function roleLockStatus(
+  lock: string,
+  role: "Reviewer" | "Producer",
+): Promise<{ pid: number; startedAt: string; alive: boolean } | null> {
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    if (!(await pathExists(lock))) return null;
+    try {
+      const owner = await readRoleLock(lock, role);
+      return { pid: owner.pid, startedAt: owner.startedAt, alive: processIsAlive(owner.pid) };
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      if (!(await pathExists(lock))) return null;
+      if (attempt < 3) {
+        // Legacy directory removal deletes OWNER.json just before the directory.
+        await new Promise<void>((resolve) => setImmediate(resolve));
+        continue;
+      }
+      throw new Error(`${role} lock owner is missing from a persistent lock: ${lock}`);
+    }
+  }
+  return null;
+}
+
+async function acquireRoleLock(
+  lock: string,
+  role: "Reviewer" | "Producer",
+  options: { recoverStale?: boolean },
+): Promise<() => Promise<void>> {
+  const owner: ReviewerLockOwner = { version: 1, pid: process.pid, startedAt: now() };
+  try {
+    await publishRoleLock(lock, owner);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    const existing = await readRoleLock(lock, role);
+    const lower = role.toLowerCase();
+    if (processIsAlive(existing.pid)) {
+      throw new Error(`A ${lower} window already owns this run as process ${existing.pid}. Lock: ${lock}`);
+    }
+    if (!options.recoverStale) {
+      const recovery = role === "Reviewer"
+        ? "Recover explicitly with: npm run relay:reviewer -- --recover-stale-lock"
+        : "Explicit recovery is required.";
+      throw new Error(`The ${lower}-window lock belongs to stopped process ${existing.pid}. ${recovery}`);
+    }
+    const confirmed = await readRoleLock(lock, role);
+    if (!sameRoleLock(existing, confirmed)) {
+      throw new Error(`Another ${lower} window changed the lock during stale-lock recovery. Lock: ${lock}`);
+    }
+    await rm(lock, { recursive: confirmed.kind === "legacy-directory", force: true });
+    try {
+      await publishRoleLock(lock, owner);
+    } catch (recoveryError) {
+      if ((recoveryError as NodeJS.ErrnoException).code === "EEXIST") {
+        throw new Error(`Another ${lower} window claimed the run during stale-lock recovery. Lock: ${lock}`);
+      }
+      throw recoveryError;
+    }
+  }
+  return async () => {
+    let current: RoleLockSnapshot;
+    try {
+      current = await readRoleLock(lock, role);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+      throw error;
+    }
+    if (current.kind === "file" && current.pid === owner.pid && current.startedAt === owner.startedAt) {
+      await rm(lock, { force: true });
+    }
+  };
 }
 
 export function processIsAlive(pid: number): boolean {
@@ -148,121 +266,27 @@ export function processIsAlive(pid: number): boolean {
 export async function reviewerWindowLockStatus(
   runRoot: string,
 ): Promise<{ pid: number; startedAt: string; alive: boolean } | null> {
-  const lock = path.join(runRoot, REVIEWER_LOCK_DIR);
-  if (!(await pathExists(lock))) return null;
-  try {
-    if (!(await lstat(lock)).isDirectory()) throw new Error(`Reviewer lock must be a directory: ${lock}`);
-    const owner = await reviewerLockOwner(lock);
-    return { pid: owner.pid, startedAt: owner.startedAt, alive: processIsAlive(owner.pid) };
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT" && !(await pathExists(lock))) return null;
-    throw error;
-  }
+  return roleLockStatus(path.join(runRoot, REVIEWER_LOCK_DIR), "Reviewer");
 }
 
 export async function acquireReviewerWindow(
   runRoot: string,
   options: { recoverStale?: boolean } = {},
 ): Promise<() => Promise<void>> {
-  const lock = path.join(runRoot, REVIEWER_LOCK_DIR);
-  try {
-    await mkdir(lock, { recursive: false });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
-      const metadata = await lstat(lock);
-      if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
-        throw new Error(`Reviewer lock must be a real directory: ${lock}`);
-      }
-      const owner = await reviewerLockOwner(lock);
-      if (processIsAlive(owner.pid)) {
-        throw new Error(`A reviewer window already owns this run as process ${owner.pid}. Lock: ${lock}`);
-      }
-      if (!options.recoverStale) {
-        throw new Error(`The reviewer-window lock belongs to stopped process ${owner.pid}. Recover explicitly with: npm run relay:reviewer -- --recover-stale-lock`);
-      }
-      await rm(lock, { recursive: true, force: true });
-      try {
-        await mkdir(lock, { recursive: false });
-      } catch (recoveryError) {
-        if ((recoveryError as NodeJS.ErrnoException).code === "EEXIST") {
-          throw new Error(`Another reviewer window claimed the run during stale-lock recovery. Lock: ${lock}`);
-        }
-        throw recoveryError;
-      }
-    } else {
-      throw error;
-    }
-  }
-  await writeJsonAtomic(path.join(lock, "OWNER.json"), {
-    version: 1,
-    pid: process.pid,
-    startedAt: now(),
-  });
-  return async () => rm(lock, { recursive: true, force: true });
+  return acquireRoleLock(path.join(runRoot, REVIEWER_LOCK_DIR), "Reviewer", options);
 }
 
 export async function producerWindowLockStatus(
   runRoot: string,
 ): Promise<{ pid: number; startedAt: string; alive: boolean } | null> {
-  const lock = path.join(runRoot, PRODUCER_LOCK_DIR);
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    if (!(await pathExists(lock))) return null;
-    try {
-      if (!(await lstat(lock)).isDirectory()) throw new Error(`Producer lock must be a directory: ${lock}`);
-      const owner = await reviewerLockOwner(lock);
-      return { pid: owner.pid, startedAt: owner.startedAt, alive: processIsAlive(owner.pid) };
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-      if (!(await pathExists(lock))) return null;
-      if (attempt < 3) {
-        // Recursive lock release removes OWNER.json immediately before its
-        // directory. Yield and reread the whole state instead of exposing that
-        // normal two-step deletion as corrupt product status.
-        await new Promise<void>((resolve) => setImmediate(resolve));
-        continue;
-      }
-      throw new Error(`Producer lock owner is missing from a persistent lock: ${lock}`);
-    }
-  }
-  return null;
+  return roleLockStatus(path.join(runRoot, PRODUCER_LOCK_DIR), "Producer");
 }
 
 export async function acquireProducerWindow(
   runRoot: string,
   options: { recoverStale?: boolean } = {},
 ): Promise<() => Promise<void>> {
-  const lock = path.join(runRoot, PRODUCER_LOCK_DIR);
-  try {
-    await mkdir(lock, { recursive: false });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-    const metadata = await lstat(lock);
-    if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
-      throw new Error(`Producer lock must be a real directory: ${lock}`);
-    }
-    const owner = await reviewerLockOwner(lock);
-    if (processIsAlive(owner.pid)) {
-      throw new Error(`A producer window already owns this run as process ${owner.pid}. Lock: ${lock}`);
-    }
-    if (!options.recoverStale) {
-      throw new Error(`The producer-window lock belongs to stopped process ${owner.pid}. Explicit recovery is required.`);
-    }
-    await rm(lock, { recursive: true, force: true });
-    try {
-      await mkdir(lock, { recursive: false });
-    } catch (recoveryError) {
-      if ((recoveryError as NodeJS.ErrnoException).code === "EEXIST") {
-        throw new Error(`Another producer window claimed the run during stale-lock recovery. Lock: ${lock}`);
-      }
-      throw recoveryError;
-    }
-  }
-  await writeJsonAtomic(path.join(lock, "OWNER.json"), {
-    version: 1,
-    pid: process.pid,
-    startedAt: now(),
-  });
-  return async () => rm(lock, { recursive: true, force: true });
+  return acquireRoleLock(path.join(runRoot, PRODUCER_LOCK_DIR), "Producer", options);
 }
 
 export function reviewerWindowState(input: Omit<ReviewerWindowState, "version" | "updatedAt">): ReviewerWindowState {

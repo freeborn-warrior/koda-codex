@@ -347,8 +347,10 @@ async function roleLockAlive(runRoot        , role                         )    
   const lock = path.join(runRoot, `.${role.toLowerCase()}-window.lock`);
   const metadata = await lstat(lock).catch(() => null);
   if (!metadata) return false;
-  if (!metadata.isDirectory() || metadata.isSymbolicLink()) throw new Error(`${role} recovery lock is unsafe.`);
-  const ownerFile = path.join(lock, "OWNER.json");
+  if (metadata.isSymbolicLink() || (!metadata.isFile() && !metadata.isDirectory())) {
+    throw new Error(`${role} recovery lock is unsafe.`);
+  }
+  const ownerFile = metadata.isFile() ? lock : path.join(lock, "OWNER.json");
   let ownerMetadata;
   try {
     ownerMetadata = await lstat(ownerFile);
@@ -363,9 +365,9 @@ async function roleLockAlive(runRoot        , role                         )    
   if (!ownerMetadata || !ownerMetadata.isFile() || ownerMetadata.isSymbolicLink()) {
     throw new Error(`${role} recovery lock owner is unsafe.`);
   }
-  let owner                                    ;
+  let owner                                                        ;
   try {
-    owner = JSON.parse(await readFile(ownerFile, "utf8"))                                      ;
+    owner = JSON.parse(await readFile(ownerFile, "utf8"))                                                          ;
   } catch (error) {
     if ((error                         ).code === "ENOENT") {
       const lockStillExists = await lstat(lock).then(() => true).catch(() => false);
@@ -374,7 +376,7 @@ async function roleLockAlive(runRoot        , role                         )    
     }
     throw new Error(`${role} recovery lock owner is invalid.`, { cause: error });
   }
-  if (owner.version !== 1 || !Number.isInteger(owner.pid) || owner.pid  < 1) {
+  if (owner.version !== 1 || !Number.isInteger(owner.pid) || owner.pid  < 1 || typeof owner.startedAt !== "string") {
     throw new Error(`${role} recovery lock owner is invalid.`);
   }
   return processAlive(owner.pid );

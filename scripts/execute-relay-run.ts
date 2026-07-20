@@ -1002,7 +1002,7 @@ async function buildGuideReturnStage(session: NonNullable<Awaited<ReturnType<typ
   });
   for (const entry of await readdir(runRoot, { withFileTypes: true })) {
     if (entry.name === "RUN.json" || entry.name === "GUIDE-RETURN-STAGE") continue;
-    if ((entry.name === REVIEWER_LOCK_DIR || entry.name === PRODUCER_LOCK_DIR) && entry.isDirectory()) continue;
+    if (entry.name === REVIEWER_LOCK_DIR || entry.name === PRODUCER_LOCK_DIR) continue;
     if (entry.isDirectory()) throw new Error(`Guide runtime contains unexpected directory ${entry.name}; evidence archival refuses.`);
     if (!entry.isFile()) throw new Error(`Guide runtime contains symbolic link or special entry ${entry.name}; evidence archival refuses.`);
     await cp(path.join(runRoot, entry.name), path.join(stageArchive, entry.name), { errorOnExist: true });

@@ -894,14 +894,17 @@ test("GUIDE VISIBLE ROLE STATUS: disk liveness reports a missing Producer instea
   prepared.run.status = "RUNNING";
   prepared.run.terminalLaunch = { adapter: "ghostty-macos", requestedAt: new Date().toISOString() };
   await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
-  for (const lock of [".reviewer-window.lock", ".producer-window.lock"]) {
-    await mkdir(path.join(prepared.runRoot, lock));
-    await writeJsonAtomic(path.join(prepared.runRoot, lock, "OWNER.json"), {
-      version: 1,
-      pid: process.pid,
-      startedAt: new Date().toISOString(),
-    });
-  }
+  await mkdir(path.join(prepared.runRoot, ".reviewer-window.lock"));
+  await writeJsonAtomic(path.join(prepared.runRoot, ".reviewer-window.lock", "OWNER.json"), {
+    version: 1,
+    pid: process.pid,
+    startedAt: new Date().toISOString(),
+  });
+  await writeJsonAtomic(path.join(prepared.runRoot, ".producer-window.lock"), {
+    version: 1,
+    pid: process.pid,
+    startedAt: new Date().toISOString(),
+  });
 
   const healthy: string[] = [];
   await runGuideCli(["status"], h.root, { out(message) { healthy.push(message); } });

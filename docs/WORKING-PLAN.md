@@ -61,6 +61,11 @@ Turn the proved two-context session relay into a project-level experience that c
     outside the model's write set, ambient config/rules/network are disabled, and
     real Codex plus the complete suite pass after the repair is pushed. Commit
     `01e8055` passes 229/229 under `secure-persistent-guide-v10`.
+27. [x] Remove terminal-context bytes from role-launcher identity and add a bounded
+    migration for the exact earlier generated form. Both roles prevalidate before
+    either changes; hostile or command-divergent files still refuse. Commit
+    `461824b` passes the unchanged pushed 230/230 transcript under
+    `deterministic-role-launchers-v11`.
 
 ## Submission cut
 

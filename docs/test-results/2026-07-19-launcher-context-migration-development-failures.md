@@ -1,7 +1,7 @@
 # Test result — launcher context migration development failures
 
 - **Date:** 2026-07-19 (America/New_York)
-- **Status:** PRESERVED FAILURES — CORRECTED LOCALLY
+- **Status:** PRESERVED FAILURES — CORRECTED AND PUSHED
 - **Production session mutated:** no
 
 ## Human recovery refusal
@@ -33,3 +33,27 @@ functions** overall. The dependency-free package dry-run passed at 994,236
 compressed bytes, 4,750,526 unpacked bytes, 794 files, and zero bundled
 dependencies. An isolated production lockfile audit found zero vulnerabilities.
 Whitespace, tracked-symlink, and reachable-object checks passed.
+
+Repair commit `461824b` reached `origin/main`, then the unchanged complete suite
+passed **230/230** in the
+[pushed transcript](2026-07-19-deterministic-launcher-migration-pushed.md).
+
+During evidence assembly, the focused submission/security/integrity run passed
+**19/20**. The one refusal named an obsolete judge-path assertion still requiring
+the prior 229-check README link after the new 230-check proof was promoted. The
+assertion was advanced to require the stronger current proof; no product, gate, or
+security condition was relaxed.
+
+The next complete run passed **229/230** and exposed a genuine role-lock publication
+race: under load, status could observe the prior lock directory before its
+`OWNER.json` existed. Role ownership now publishes complete bytes atomically through
+a no-clobber same-filesystem link while continuing to read the legacy directory
+shape held by the live Reviewer. The first focused run of that repair passed
+**19/20** because its new regular-file assertion omitted the `lstat` import. Adding
+the missing import changed no product or refusal condition.
+
+The corrected role-protocol slice passed **20/20**, the combined
+Guide/role/security/integrity slice passed **81/81**, and the complete and coverage
+suites each passed **230/230**. Coverage is **87.60% lines, 70.93% branches, and
+86.04% functions** overall. The dependency-free package dry-run passed at 1,001,772
+compressed bytes, 4,782,431 unpacked bytes, 795 files, and zero bundled dependencies.

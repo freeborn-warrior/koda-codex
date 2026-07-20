@@ -1534,5 +1534,30 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   whitespace, tracked-symlink, and reachable-object checks passed.
   A read-only check proves both preserved production launchers match the bounded
   legacy form. Neither production launcher nor active session evidence was changed.
-- **State:** LOCAL PASS. Pushed-code transcript, final capability binding, and the
-  owner's next recovery observation remain.
+- **Post-push result:** Repair commit `461824b` reached `origin/main`, then the
+  unchanged complete suite passed **230/230** in the
+  [pushed transcript](test-results/2026-07-19-deterministic-launcher-migration-pushed.md).
+  Toolkit capability `deterministic-role-launchers-v11` binds that commit,
+  transcript, and exact launch surface.
+- **Evidence-assembly refusal:** After promoting the new proof in the README, the
+  focused submission/security/integrity run passed **19/20**. The one refusal named
+  an obsolete assertion still requiring the prior 229-check README link. That
+  assertion now requires the stronger 230-check pushed proof; no live-rule,
+  security, or gate assertion was removed.
+- **Lock-publication failure:** The next complete run passed **229/230**. Under
+  full-suite load, Producer status observed the old two-step lock directory after
+  directory creation but before `OWNER.json` publication and refused it as a
+  persistent ownerless lock. This is a genuine process-visibility race, not a test
+  timeout. Role locks now publish complete owner bytes through one no-clobber
+  filesystem link; the reader retains compatibility with the open legacy Reviewer
+  lock in the preserved live session.
+- **Test-authoring failure:** The first focused atomic-lock run passed **19/20**;
+  the new regular-file assertion lacked its `lstat` import. The import was added
+  without changing the ownership, duplicate, stale, link, or recovery assertions.
+- **Corrected atomic-lock results:** Focused role protocol **20/20**; combined
+  Guide/role/security/integrity **81/81**; complete suite **230/230**; coverage
+  **230/230** at **87.60% lines, 70.93% branches, and 86.04% functions** overall.
+  The dependency-free package dry-run passed at 1,001,772 compressed bytes,
+  4,782,431 unpacked bytes, 795 files, and zero bundled dependencies.
+- **State:** PUSHED LAUNCHER PASS; ATOMIC-LOCK LOCAL PASS. The lock repair still
+  needs pushed-code evidence before the owner's next recovery observation.

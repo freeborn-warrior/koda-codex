@@ -78,3 +78,18 @@ The [receipt UX incident](RECEIPT-UX-INCIDENT.md) records the failure without th
 receipt or any secret. Numbered, retryable decisions and one-action same-context Guide
 recovery now pass deterministically. This attempt remains paused—not a pass—until
 Kristian observes recovery and completes the session through pushed close.
+
+## Secure-Guide recovery — fail-closed launcher-context mismatch
+
+The persistent secure Guide found the same saved Brief decision and offered only
+`1` recover Producer / `2` remain paused. Kristian selected recovery twice. Both
+attempts refused before opening a role because terminal-specific locale and color
+bytes in the clean saved launchers differed from bytes reconstructed under managed
+Guide. Guide stayed open; the ledger and phase remained unchanged.
+
+The [launcher-context incident](LAUNCHER-CONTEXT-MISMATCH-INCIDENT.md) records the
+root cause and bounded migration contract. Repair commit `461824b` passes an
+unchanged pushed **230/230** transcript under capability
+`deterministic-role-launchers-v11`. The preserved launchers have been validated
+read-only but not yet migrated or executed. The same session and review remain the
+next human observation.
