@@ -2216,6 +2216,15 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   6,459,322 unpacked bytes. The package intentionally carries the local skills,
   runnable core, tests, and evidence archive; the primary judge path still needs
   neither npm nor this cache.
+- **Exact no-window starter:** Running the real full-session preparation inside
+  this Codex desktop task first failed before project preparation because macOS
+  refused a sandbox nested inside the task's existing outer sandbox. No product
+  success is credited to that attempt. The unchanged command was then run outside
+  the outer task sandbox, matching an ordinary Ghostty terminal: installed Codex
+  instantiated both permission profiles, the restricted Producer opened exactly
+  one disposable preflight session, and Koda reached `READY — FULL SESSION` in
+  7.4 seconds without opening a model conversation or window. All disposable test
+  folders were removed afterward.
 - **State:** INDEPENDENT APPROVE. The only remaining proof for this repair is a
   clean owner-visible Ghostty run. After the review record strengthened submission
   assertions, pushed commit `ca198d3` passed a final
