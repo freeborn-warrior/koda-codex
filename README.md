@@ -92,8 +92,11 @@ displayed, while the evidence bytes on disk remain unchanged.
   preserve the literal judge path, package contents, zero-vulnerability result,
   failure handling, and remaining human work.
 - Failed first-use attempts and their repairs remain in dated files and Git
-  history; the current optional three-window recovery still awaits its final
-  owner-observed completion and is not represented as finished proof.
+  history. The same optional three-window launch later recovered its persistent
+  contexts, completed all six phases with six owner acknowledgements, pushed
+  immutable close, and returned its archive to Guide. The complete restorable
+  [owner-observed result](docs/verification-runs/2026-07-19-markdown-headings-01/RESULT.md)
+  preserves the failures and final pass together.
 
 ## How Codex and GPT-5.6 built it
 

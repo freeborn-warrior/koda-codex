@@ -1708,3 +1708,31 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   and toolkit-integrity checks passed **51/51**.
 - **State:** PUSHED MECHANICAL PASS. The preserved live Brief remains unchanged;
   Kristian's fresh human recovery observation is the next proof.
+
+## 2026-07-20 — Owner-observed six-phase Guide relay completion
+
+- **Subject:** Preserved Guide launch
+  `6371ade2-3002-42aa-87ab-a613220b7eab`, session `2026-07-19-02`.
+- **Staffing:** Persistent `gpt-5.6-sol` / medium Producer and distinct persistent
+  `gpt-5.6-terra` / medium Reviewer, with Kristian in the owner-facing Reviewer
+  window and the persistent Guide remaining available.
+- **Result:** PASS. Brief, Orient, Plan, Produce, Live, and Summary each produced a
+  non-empty artifact, received an independent bound review, required owner reading
+  and acknowledgement, and advanced only after Koda revalidated disk evidence.
+  Six phases and six owner acknowledgements completed.
+- **Closure:** Immutable close commit
+  `b5105da7b9404d2d2e42421fe732d047380a599e` was pushed. Guide archive commit
+  `bde0807643718b94bc0e9ee31d478b7e8d5c7d3e` was pushed afterward. The project
+  ended clean with local `main` exactly matching `origin/main`.
+- **Continuity:** Producer context
+  `019f7c0d-dc76-7510-8636-db23d81bf002` completed 9 turns; Reviewer context
+  `019f7c10-aabf-75d2-bc9d-3f9804992246` completed 8. They remained distinct.
+- **Durable evidence:** The complete verification history is stored in
+  [COMPLETED-SESSION-HISTORY.bundle](verification-runs/2026-07-19-markdown-headings-01/COMPLETED-SESSION-HISTORY.bundle),
+  SHA-256
+  `a536da61e642ca57b019b72db15145804cbcf33443de60257ee19aebdf9b8cb3`.
+- **Human UX findings:** The owner ceremony itself was usable and no longer relied
+  on a pager, clipboard, long receipt paste, raw recovery command, or extra role
+  window. Default model-event output still overemphasized inspection commands, and
+  Reviewer conversation felt procedural. These findings are queued as presentation
+  corrections; they did not alter the completed gate or close result.

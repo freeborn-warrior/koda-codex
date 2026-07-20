@@ -6,24 +6,25 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Owner-test the new one-command `koda guide open` experience. Its
+- [x] Owner-test the new one-command `koda guide open` experience. Its
   persistent context, narrow Guide-owned write surface, ignored ambient config and
   rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex
   resume, live boundary probe, and deterministic legacy-launcher migration now
   pass pushed capability `owner-review-ceremony-v13` at **232/232**.
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Recovery later proved the replacement still unusable: terminal pager warnings, hidden controls, clipboard replacement, and a paste-safety dialog. Every event left the gate shut with zero acknowledgements. The replacement now prints the review inline, accepts a bound short code, never touches the clipboard, sanitizes terminal controls, and gives all three windows one visually bounded message system. Its complete recorded, security, package, and pushed-integrity program passes; Kristian's observation, the remaining five phase decisions, and pushed close are still required.
+- [x] **Release blocker completed:** owner-observed launch `6371ade2-3002-42aa-87ab-a613220b7eab` recovered the original persistent contexts, traversed all six phases with six owner acknowledgements, pushed immutable close `b5105da`, archived the Guide return at `bde0807`, and left the verification repository clean and equal to `origin/main`. The record preserves every earlier launcher, recovery, pager, clipboard, and receipt-ceremony failure before the successful run ([result](verification-runs/2026-07-19-markdown-headings-01/RESULT.md)).
 - [x] Bind and push the repaired owner ceremony before human recovery. The exact
   implementation passes **232/232**, coverage, package inspection,
   terminal-control mutation, and zero-vulnerability audit. Pushed capability
   `owner-review-ceremony-v13` binds code commit `c1d55ea` and the unchanged
   post-push transcript before the preserved session may reopen.
-- [ ] Resume the preserved `2026-07-19-02` session now that the new inline-review,
+- [x] Resume the preserved `2026-07-19-02` session now that the new inline-review,
   short-code, and three-window terminal design is tested, recorded, pushed, and
   integrity-bound. Reopen the same contexts and same unacknowledged review through
   Guide; do not create a third attempt or manually run either role.
-- [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
-- [ ] Owner-test the repaired one-action Ghostty adapter against a genuine Guide-confirmed session. The original callback-only adapter test was insufficient and encoded the unsafe multi-token launch; never reinstate that claim.
+- [x] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The persistent Sol Producer and distinct Terra Reviewer completed all six phases and returned pushed close evidence to Guide.
+- [x] Owner-test the repaired one-action Ghostty adapter against a genuine Guide-confirmed session. It opened exactly one Reviewer and one Producer beside Guide, preserved role identity through recovery, and completed without the earlier environment, extra-tab, pager, clipboard, or paste-warning failures.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.
+- [ ] Polish the successful three-window surface without changing gate semantics: keep detailed model commands in the durable event stream, show concise phase-aware progress by default, and make Reviewer conversation feel like an ongoing human partnership rather than a narrated procedure.
 
 ## Next
 

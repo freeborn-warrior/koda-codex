@@ -1,8 +1,9 @@
 # Three-window verification result
 
-- Status: HALTED — HUMAN EXPERIENCE AND SECURITY FAILURE
+- Status: COMPLETE — OWNER-OBSERVED PASS AFTER PRESERVED FAILURES
 - Live project: repository-local ignored verification area
-- Launch: `bf91c29d-a7a3-4cd5-8118-80b186d7a790`
+- Initial halted launch: `bf91c29d-a7a3-4cd5-8118-80b186d7a790`
+- Successful recovered launch: `6371ade2-3002-42aa-87ab-a613220b7eab`
 - Confirmed project commit: `ae2255c7d738644eb6a92e58ed3bae41f3c77bfa`
 - Producer: `gpt-5.6-sol` / medium; persistent context created
 - Reviewer: `gpt-5.6-terra` / medium; distinct persistent context created
@@ -111,3 +112,42 @@ and zero advancement.
 This is a second human failure, not completion evidence. Its sanitized record and
 replacement contract are in
 [OWNER-REVIEW-CEREMONY-INCIDENT-02.md](OWNER-REVIEW-CEREMONY-INCIDENT-02.md).
+
+## Successful recovery and full-session completion
+
+On 2026-07-20, Kristian recovered the same dependent retry launch
+`6371ade2-3002-42aa-87ab-a613220b7eab` through the persistent Guide. Koda reopened
+the preserved Sol/medium Producer context and Terra/medium Reviewer context rather
+than creating replacements. The inline review ceremony required no pager,
+clipboard mutation, receipt paste, raw recovery command, or extra Ghostty tab.
+
+The recovered Brief and every later phase completed the full configured chain:
+Brief, Orient, Plan, Produce, Live, and Summary. Kristian read and acknowledged six
+bound reviews in Window B. Koda revalidated the artifact, review hash, verdict,
+short-code-to-receipt binding, and prior gate history before each advancement. The
+Producer remained input-closed; the Reviewer remained the owner-facing session
+context; their persistent Codex context IDs stayed distinct for the entire run.
+
+- Session: `2026-07-19-02`
+- Completed phases: 6/6
+- Owner acknowledgements: 6
+- Producer: `gpt-5.6-sol` / medium, 9 turns, context
+  `019f7c0d-dc76-7510-8636-db23d81bf002`
+- Reviewer: `gpt-5.6-terra` / medium, 8 turns, context
+  `019f7c10-aabf-75d2-bc9d-3f9804992246`
+- Immutable close commit: `b5105da7b9404d2d2e42421fe732d047380a599e`
+- Guide archive commit: `bde0807643718b94bc0e9ee31d478b7e8d5c7d3e`
+- Final repository state: clean, with local `main` exactly matching `origin/main`
+- Guide return: `CLOSED_SESSION_RETURNED`
+
+The complete verification-project history, including its pushed session evidence,
+Guide return, role event streams, stderr records, and disk-derived transcript, is
+preserved in [COMPLETED-SESSION-HISTORY.bundle](COMPLETED-SESSION-HISTORY.bundle).
+It is a complete `main` history at archive commit `bde0807`; its SHA-256 is
+`a536da61e642ca57b019b72db15145804cbcf33443de60257ee19aebdf9b8cb3`.
+
+The human observation also found two non-gating presentation weaknesses to correct
+before submission: successful command checks are too prominent in the default
+stream, and Reviewer conversation sounds procedural because skill/runtime narration
+surrounds otherwise useful answers. Those are UX findings from a successful run,
+not gate or closure failures.
