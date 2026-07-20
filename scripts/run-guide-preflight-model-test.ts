@@ -32,6 +32,7 @@ function runCodex(cwd: string, effort: "low" | "medium", prompt: string, skipGit
     "exec",
     "--ephemeral",
     "--ignore-user-config",
+    "--ignore-rules",
     "--json",
     "--color", "never",
     "--model", model,

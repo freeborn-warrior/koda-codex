@@ -6,11 +6,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Decide the release UX for opening the long-running Guide with the same
-  project-scoped permission profile. Koda-managed Producer and Reviewer roles are
-  now contained, but an independently opened interactive Guide still uses whatever
-  Codex permissions the person selected. Do not hide this distinction or add a long
-  copy-paste command as the permanent human experience.
+- [ ] Push and owner-test the new one-command `koda guide open` experience. Its
+  persistent context, narrow Guide-owned write surface, ignored ambient config and
+  rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex
+  resume, and live boundary probe now pass locally. The preserved production
+  session remains untouched until the pushed audit is complete.
 - [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, hardened Git locking, dynamic owner binding, and strict role containment now pass a pushed 216/216 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same
@@ -43,6 +43,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [ ] Promote the secure persistent Guide console to pushed toolkit evidence. Local
+  deterministic, fake-context persistence, real-context resume, ambient-rule,
+  project/session/Git/environment/network boundary, and end-to-end console checks
+  are complete; pushed-code transcript and final manifest binding remain.
 
 - [x] Bind the confirmed project owner's validated name into new Guide runtimes and
   managed relay output, and replace broad-read role sandboxes with strict project-

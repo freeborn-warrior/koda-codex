@@ -1,4 +1,6 @@
+import { spawnSync } from "node:child_process";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { findProjectRoot, readProjectConfig } from "./config.js";
 import {
@@ -40,10 +42,20 @@ import { verifyToolkitIntegrity } from "./toolkit-integrity.js";
 
 
 
+
 const defaultIo             = { out: (message) => console.log(message) };
 const defaultDependencies                       = {
   openGhostty: requestGhosttyWindows,
   recoverGhostty: requestGhosttyRecoveryWindows,
+  async openGuide(project, options) {
+    const script = fileURLToPath(new URL("./guide-console-cli.js", import.meta.url));
+    const result = spawnSync(process.execPath, [
+      script,
+      ...(options.model ? ["--model", options.model] : []),
+      ...(options.effort ? ["--effort", options.effort] : []),
+    ], { cwd: project, stdio: "inherit", env: process.env });
+    return result.status ?? 1;
+  },
 };
 
 function option(args          , name        )                {
@@ -77,6 +89,7 @@ function help(io            )       {
   io.out("Koda Guide — disk-backed continuity between Koda sessions");
   io.out("");
   io.out("Commands:");
+  io.out("  koda guide open [--model <model>] [--effort <effort>]");
   io.out("  koda guide status");
   io.out("  koda guide claim <path> [path...]");
   io.out("  koda guide confirm <prompt-file> --owner <name> [--kind <kind>] [--depends-on <session-id>] [--independent]");
@@ -97,6 +110,19 @@ export async function runGuideCli(
   if (!verb || verb === "help" || verb === "--help" || verb === "-h") return help(io);
   const root = await findProjectRoot(cwd);
   const config = await readProjectConfig(root);
+
+  if (verb === "open") {
+    const model = option(rest, "--model");
+    const effort = option(rest, "--effort");
+    rejectUnknownOptions(rest);
+    if (rest.length) throw new Error("Usage: koda guide open [--model <model>] [--effort <effort>]");
+    io.out("OPENING SECURE GUIDE");
+    io.out("One persistent project conversation will reconstruct its state from disk.");
+    io.out("Producer and Reviewer remain separate; this command opens neither one.");
+    const status = await (dependencies.openGuide ?? defaultDependencies.openGuide )(root, { model, effort });
+    if (status !== 0) throw new Error("The secure Guide console exited with an error. Project and session evidence remain on disk.");
+    return;
+  }
 
   if (verb === "claim") {
     rejectUnknownOptions(rest);

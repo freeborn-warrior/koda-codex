@@ -79,6 +79,7 @@ After the exact receipt is recorded, the same command reports `GATE OPEN — BRI
 
 ```text
 koda init [directory] [--demo]
+koda guide open [--model <model>] [--effort <effort>]
 koda guide status
 koda guide confirm <prompt-file> --owner <name> [--kind <kind>] [--depends-on <session-id>] [--independent]
 koda guide cancel <launch-id> --owner <name> --reason <text>
@@ -112,6 +113,17 @@ A [fresh ephemeral Codex startup proof](discovery-runs/2026-07-18-fresh-codex-st
 
 Guide reconstructs the project from configured steering files and disk-backed session evidence. `$koda-c-session-prompt` is the only owner-facing start ceremony. `koda guide status` lists every active session with kind, phase, named terminal condition, external write claims, and exact runtime commands; it also verifies the installed toolkit contract from a repository-contained integrity manifest. The owner never carries commands, paths, hashes, commits, test counts, receipts, or evidence locations between contexts. A dependent successor creates no prompt until all named predecessors have pushed close or halt; an explicitly owner-classified independent sibling may be confirmed with `--independent`. Confirmation binds the owner's chosen display name along with kind, relationship, prompt, steering snapshot, dependency terminal hashes, and the verified toolkit snapshot. New runtimes carry that identity through status, owner-facing messages, and approval ledger entries; Koda does not substitute the toolkit author's name. Changed project or toolkit evidence makes the launch stale; cancellation is immutable pushed evidence. A project with a Guide manifest cannot open from an unconfirmed or mismatched prompt. `koda guide launch` binds one Producer/Reviewer pair to the confirmed launch under `.koda/runs/<launch-id>/`; several valid launch IDs may remain active together. The supervisor exports `KODA_SESSION_ID`, and every producer/reviewer skill and CLI mutation targets that ID. A four-process real-Git integration proves two independent session pairs can complete distinct receipts, pushed closes, and Guide returns without crossing artifacts or contexts. `koda work claim` reserves planned session outputs before mutation; `koda guide claim` reserves additional Guide paths. Before/post-work hashes, overlap and unclaimed-mutation refusal, exact staging, and the short Git lock let unrelated dirty work coexist without entering or blocking another session's commit. Immutable close rechecks every claimed output and stays shut if the recorded bytes are changed, uncommitted, or unpushed. The [Guide continuity protocol](GUIDE-CONTINUITY.md) documents the mechanics and limits.
 
+`koda guide open` is the managed human entry to one persistent Guide context. It
+reopens the same context ID from project-local state, ignores ambient user config
+and command rules, disables network and approval escape, and gives the model
+project read access plus writes only to `docs/guide`, configured continuity files,
+and explicit Guide claims. Active session folders and Git metadata remain
+read-only. Trusted numbered controller actions handle an eligible session recovery;
+`1` recovers and `2` changes nothing, while a bare number refuses if several
+sessions would make the target ambiguous. Normal text remains project-level Guide
+conversation. Raw `codex -C ...` remains possible for experts, but it is not the
+contained Koda entry and is not the recommended judge path.
+
 Produce is one session kind beneath Guide, alongside Explore, Research, Architecture, Triage, and later kinds. The shipped core records explicit IDs, kinds, relationships, dependency hashes, aggregate active status, plural end-to-end relay binding, exact Guide/session write claims, post-work hashes, conflict refusal, exact-path commits, and a recoverable Git-operation lock. See the [concurrent project/session ruling](design-notes/2026-07-19-concurrent-project-work-owner-ruling.md) and [plural runtime proof](design-notes/2026-07-19-plural-session-runtimes.md).
 
 Every producer skill has three hard sections: ENTRY CHECK, ITS OWN JOB, and HANDOVER OBLIGATION. It refuses when required disk evidence is absent, writes only its own artifact, then hands to the shared reviewer without self-reviewing or advancing.
@@ -128,7 +140,7 @@ The first owner-observed three-context launch did create distinct persistent Sol
 
 Kristian's historical two-window terminal proof remains in the [first-time Ghostty test guide](GHOSTTY-TEST-GUIDE.md). The current product target is a [three-context human experience](design-notes/2026-07-18-three-context-human-experience.md): ongoing project-level Guide, visible non-interactive Producer, and ongoing owner-facing session Reviewer. Guide and Reviewer both remain conversational at their distinct scopes; Producer does not.
 
-Context separation is a tested operating protocol; `SKILL.md` alone is not a permission boundary. Koda-managed Producer and Reviewer commands now also run under a strict Codex profile: project read/write, read-only `.git`/`.agents`/`.codex`, denied project `.env`, no ordinary sibling or home-file reads, no network or web search, no login shell, no user config, and no approval escape. Only the exact Codex/Koda executables and the local Node toolchain are added read-only. A [live boundary probe](security-runs/2026-07-19-project-boundary-probe-13/RESULT.md) preserves both failed designs and the final pass. The separately opened Guide still inherits the permissions chosen for that interactive Codex task; Koda does not mislabel it as managed containment.
+Context separation is a tested operating protocol; `SKILL.md` alone is not a permission boundary. Koda-managed Producer and Reviewer commands run under a strict Codex profile: project read/write, read-only `.git`/`.agents`/`.codex`, denied project `.env`, no ordinary sibling or home-file reads, no network or web search, no login shell, no user config or ambient command rules, and no approval escape. Only the exact Codex/Koda executables and local Node toolchain are added read-only. The managed Guide uses the narrower claimed-write profile described above and receives only the exact integrity-manifest files needed to revalidate Koda. A [role boundary probe](security-runs/2026-07-19-project-boundary-probe-13/RESULT.md) and [persistent Guide boundary probe](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md) preserve their failed designs and final live passes. A manually started raw interactive Codex task still has whatever permissions its launcher selected; Koda does not mislabel that separate route as contained.
 
 ## Tests and evidence
 

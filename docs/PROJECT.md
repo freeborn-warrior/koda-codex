@@ -139,8 +139,16 @@ owner contract
   project-data permission profile with no ordinary sibling/home reads, external
   writes, network, web search, login shell, user config, or approval escape. Repair
   commit `74f9067` passes the unchanged pushed 216/216 transcript under toolkit
-  capability `owner-bound-project-sandbox-v9`. The separately opened Guide still
-  uses its own Codex launch permissions and remains an explicit UX decision.
+  capability `owner-bound-project-sandbox-v9`.
+- The release Guide now has a managed `koda guide open` console instead of a raw
+  interactive launch recipe. It resumes one disk-bound Codex context, strips
+  ambient config/rules/credentials, disables network and approval escape, reads
+  the project, and writes only the Guide directory, manifest continuity files,
+  and explicit Guide claims. The trusted controller owns numeric recovery; the
+  model cannot mutate active session paths or Git. A real low-effort Sol probe
+  preserved a malformed patch, found and repaired real `exec resume` ordering,
+  global-Git-config, and toolkit-capability defects, then passed the seven-part
+  boundary and an end-to-end reopen of the same Guide context.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.
@@ -259,6 +267,8 @@ owner contract
 - [Fresh Codex startup discovery proof](discovery-runs/2026-07-18-fresh-codex-startup-01/RESULT.md)
 - [Fresh public-checkout local npx proof](package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md)
 - [Safety and threat boundaries](SECURITY.md)
+- [Secure persistent Guide design](design-notes/2026-07-19-secure-guide-console.md)
+- [Secure persistent Guide boundary result](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md)
 - [Dated local safety audit](security-runs/2026-07-18-local-audit-01/RESULT.md)
 - [Whole-product security audit](security-runs/2026-07-19-whole-product-audit-02/RESULT.md)
 - [Under-three-minute recording script](VIDEO-SCRIPT.md)

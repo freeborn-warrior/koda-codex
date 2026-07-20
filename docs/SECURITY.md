@@ -131,13 +131,37 @@ first strict profile omitted Koda's package manifest and Codex executable; the
 second still omitted the Homebrew toolchain and could not execute Koda. See the
 [dated boundary result](security-runs/2026-07-19-project-boundary-probe-13/RESULT.md).
 
-This boundary applies to Koda-managed Producer and Reviewer subprocesses. The
-long-running Guide is currently a separately started interactive Codex task, so
-its effective access still depends on the permissions selected when that task is
-opened. Codex itself also uses its home directory for authentication and persistent
-thread state; those client-internal reads and writes are outside the model command
-sandbox. Koda mirrors durable workflow evidence into the project but does not claim
-that the Codex client stores nothing elsewhere.
+`koda guide open` applies a separate named profile to the persistent Guide. The
+Guide reads the project but may write only the configured `docs/guide` directory,
+manifest continuity files, and explicit Guide claims. Active session folders,
+`.git`, `.agents`, and `.codex` remain read-only; `.env`, ordinary sibling/home
+files, network, web search, login shells, user config, ambient command rules, and
+approval escape are denied. Koda's controller—not the Guide model—writes ignored
+`.koda/guide` identity/event state and performs an exact eligible numeric recovery.
+The controller refuses a duplicate Guide and refuses to guess when several
+sessions are recoverable.
+
+The Guide's trusted Koda CLI must revalidate toolkit integrity. Its profile grants
+only the exact manifest, bound test transcript, and critical files returned by a
+successful controller-side verification—not the whole Koda-C development checkout.
+Model-child Git reads use repository-local `.git/config` while global/system config,
+terminal credential prompting, and optional locks are disabled. Trusted relay
+commit/push processes use a different environment and retain the repository's
+normal configured Git behavior.
+
+A persistent live Sol/low probe proved Guide-owned write, active-session write
+denial, parent read denial despite a planted `allow` command rule, project `.env`
+read denial, Git write denial, network denial, trusted Koda execution, and same-ID
+resume. An end-to-end console run used the local skill, revalidated toolkit status,
+reached `guide>`, and closed without opening either session role. See the
+[dated Guide boundary result](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md).
+
+A manually started raw interactive Codex task remains governed by its own launch
+permissions and is not the managed Koda Guide entry. Codex itself still uses its
+home directory for authentication and persistent thread storage; those client-
+internal reads and writes sit outside the model command sandbox. Koda binds the
+context ID and turn evidence inside the project but does not claim that Codex
+stores nothing elsewhere.
 
 ## Relay and test-harness boundary
 
@@ -299,4 +323,7 @@ The current stable-handover and optional-adapter boundary is audited in
 The stricter Codex filesystem, toolchain, network, and project-config boundary is
 proved in
 [`security-runs/2026-07-19-project-boundary-probe-13/RESULT.md`](security-runs/2026-07-19-project-boundary-probe-13/RESULT.md).
+The managed persistent Guide's narrower claimed-write boundary and real same-context
+resume are proved in
+[`security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md`](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md).
 The latest named full-suite transcript is linked from the README.

@@ -16,7 +16,7 @@
     },
     {
       "path": "src/relay-environment.ts",
-      "sha256": "4b74901296d8fdaec54c6b2f3992bede4334b22fecd304fb59044bb668764476"
+      "sha256": "3baee8031828a8b1d5b4ab693f9e9d85e815bedaecd75ee8d0917d8db9ccbae1"
     },
     {
       "path": "src/guide-runtime.ts",
@@ -24,15 +24,23 @@
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "6cecc2df1f82af61253cb2c5a55ade6db015c7425c99da94445e442d14a781a9"
+      "sha256": "15d98c732d1a69cfefaeb249e0cb2696498588ee89b90a7911542fab6a3d3341"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "2d47caf2685bff9f21ace61fabf4a98ba9eb76f6ae0b88db19fbf63235f5da22"
+      "sha256": "d66a174eeeb90458c7fea9bec3433e988618f9444e9252aa0eb9243770713f74"
+    },
+    {
+      "path": "scripts/execute-reviewer-run.ts",
+      "sha256": "4a0a29d9d2e7572c8449b020b3953babe945e1be06b12ac4ac4b5e70339b5eea"
+    },
+    {
+      "path": "scripts/run-guide-preflight-model-test.ts",
+      "sha256": "bca50194d1b119b6fdeade6e3daeb5a7398840caba72942affb586f322fe1b86"
     },
     {
       "path": "scripts/relay-window-protocol.ts",
-      "sha256": "e5d66a7fca7f2f49d787c6ac0db7e4da05e501772b85d97841053828efa2f78a"
+      "sha256": "e7fe13f012339646f1f7a380ff284b2764a189e59ccc05208aa4c9e0c313b5a7"
     },
     {
       "path": "dist/ghostty.js",
@@ -40,7 +48,7 @@
     },
     {
       "path": "dist/relay-environment.js",
-      "sha256": "5a7dca5044d32848f32374daae17557a65775dad01635a61939c7dba3228eb6c"
+      "sha256": "b513988b0c7eeafbc1b3a34eabb9abcd17aa5bf93fa32ecdf52c639687905801"
     },
     {
       "path": "dist/guide-runtime.js",
@@ -48,11 +56,11 @@
     },
     {
       "path": "src/toolkit-integrity.ts",
-      "sha256": "a896bd1a2e0565ec870ceb45e4b3911151f7043ac15cdce07b2df0cd04305b2e"
+      "sha256": "5251c82653ff88333f88da020cc3aef92adb964d88322a24b40ab0623021a710"
     },
     {
       "path": "dist/toolkit-integrity.js",
-      "sha256": "f6b7c8e5989b9c659aeed8a33501a6d72d630dd15eafc0fe4fc281f1f08395af"
+      "sha256": "5ccff1201889aa1031b70b7a7df9e293d620ab3c0589a98835cc8fad939d86e8"
     },
     {
       "path": "src/guide.ts",
@@ -64,11 +72,27 @@
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "a8fa65de29e50c654003f5d905f56e9ee557bf10293f452d17df6e63702d345c"
+      "sha256": "0cd6b5c207b33477f346b946e0ba75433a44b6cb880fe9b37490089879fb46aa"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "cabe7069ef9b503bd0ac1311abfc8047824ba8b57fbd53b4f1f3415398cf657c"
+      "sha256": "3f230c5786a64bef14a3c976bb971c0eaf12e483764c22219170d6bf7b2254ed"
+    },
+    {
+      "path": "src/guide-console.ts",
+      "sha256": "8d84466386b4e66296bc905a5542a9e38e6ae9fcb56ba379ec2572b9c4d651ac"
+    },
+    {
+      "path": "dist/guide-console.js",
+      "sha256": "07badafed96027f90178b4cbc14817edad8c52c228acca94f69c61a302cc1c10"
+    },
+    {
+      "path": "src/guide-console-cli.ts",
+      "sha256": "3af54b08eb43e0bb269c0deb02496dfad3e9aa98be96788402f97d7c5f4dd87f"
+    },
+    {
+      "path": "dist/guide-console-cli.js",
+      "sha256": "cd205c5922ffb7dc19ce2fad89be4988338c7715f0807a409d10426492d63ea3"
     },
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",
@@ -76,11 +100,11 @@
     },
     {
       "path": "src/commands.ts",
-      "sha256": "ad35bbda27eab254bcec9aa01a9e05bdf7191e6e2d1d823200d1949a82c17f85"
+      "sha256": "827b4a3ec7605714aa38bd5d56393ee7d69222ecda19233a756ad113d3a40fb5"
     },
     {
       "path": "dist/commands.js",
-      "sha256": "e50ea2b5f4d634d85b00d09395c61095c277a0fc9dc3a973f648e85dd5ee8108"
+      "sha256": "8c8d5bfbadeb388aeeb896ee2a62e008fe887916996e1ab7646ba16f70cb1904"
     },
     {
       "path": "scripts/show-relay-status.ts",
@@ -112,11 +136,19 @@
     },
     {
       "path": "src/codex-role-permissions.ts",
-      "sha256": "ae175b56c112797b100daff4a3a375ef164e3e68d88e5908144004400fd0461f"
+      "sha256": "c1fe553805ab3831f63a61faa9c9c4b11c16fc394493420ce0053c0972a962d7"
     },
     {
       "path": "dist/codex-role-permissions.js",
-      "sha256": "9dc1f964a3a3cc1ea60e51078398030beb86ed971174854bae7208795ac1adaa"
+      "sha256": "f0a7e128fd57074a29b0311875277ef7e4a2c662a0ddc6d2265535f3c7c2756c"
+    },
+    {
+      "path": "src/workset.ts",
+      "sha256": "4cc97a927fb444f1cf71a7273ee093cbd90f281552fd16d1d00eab29a7373bd0"
+    },
+    {
+      "path": "dist/workset.js",
+      "sha256": "1a63742c59f7214548043cbe3437e652fd1b3c5239343b288af8f0e3bf4f5b36"
     }
   ]
 }

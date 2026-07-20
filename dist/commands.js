@@ -759,7 +759,8 @@ function help(io       )       {
   io.out("Commands:");
   io.out("  koda init [directory] [--demo]");
   io.out("  koda session new <prompt-file> [--kind <kind>] [--depends-on <session-id>] [--independent]");
-  io.out("  koda guide <status|claim|confirm|cancel|bind|verify|launch>");
+  io.out("  koda guide <open|status|claim|confirm|cancel|bind|verify|launch>");
+  io.out("  koda guide open [--model <model>] [--effort <effort>]");
   io.out("  koda guide launch ... [--open ghostty]");
   io.out("  koda guide recover --open ghostty");
   io.out("  koda status [--session <session-id>]");

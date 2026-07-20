@@ -266,6 +266,7 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
   ];
   const common = [
     "--ignore-user-config",
+    "--ignore-rules",
     "--json",
     "-m", roleRecord.model,
     "-c", `model_reasoning_effort=\"${roleRecord.effort}\"`,

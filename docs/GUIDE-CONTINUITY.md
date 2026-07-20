@@ -2,6 +2,13 @@
 
 Koda-C's Guide is the project-level context above its bounded sessions. It can accompany a project through session 1, session 27, session 44, and beyond because its authoritative memory is a small set of steering files plus cited session evidence—not an indefinitely growing chat transcript.
 
+The recommended human entry is `koda guide open`. It starts one plain persistent
+Guide console, saves the bound Codex context ID and raw turn evidence under ignored
+`.koda/guide/`, and resumes that same context after the console closes. The Guide
+model can read the project but write only `docs/guide`, configured continuity
+files, and explicit Guide claims. Trusted controller choices recover eligible
+session windows without giving the model Git or active-session write access.
+
 ## Project shape
 
 For the default `sessionsDir` of `docs/sessions`, Guide evidence lives under `docs/guide/`:
@@ -75,5 +82,8 @@ The Guide path fails closed and names the condition when:
 - automatic Ghostty opening is requested for an existing runtime, the Codex executable is unavailable, the platform is unsupported, or either window request fails;
 - a real-project runtime path does not resolve to its containing `.koda/runs/` project, or the trusted CLI changes;
 - Guide return recovery encounters changed archive bytes, unexpected evidence, an occupied shared index, a missing bound close commit, or unsafe linked directories.
+- another Guide console is live, the saved Guide context identity is corrupt or
+  changes, an ambient rule/config escape is attempted, or a bare recovery number
+  would select between several eligible sessions.
 
 The test suite evolves with this contract. Every new deterministic refusal condition receives a one-condition mutation test and named reason. Existing tests stay unless an explicit owner ruling changes the product contract; a test is never weakened merely to make a new implementation pass.

@@ -1459,3 +1459,44 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Remaining boundary:** The separately started interactive Guide still uses the
   permissions selected at its own Codex launch. Koda must design a simple secure
   Guide opening experience before claiming whole-workflow containment.
+
+## 2026-07-19 — Secure persistent Guide and failure-safe recovery
+
+- **Why:** The first human run proved the role gates but also exposed that raw Guide
+  startup sat outside Koda's project boundary, and that a failed owner recovery
+  could close the process that was supposed to explain what happened.
+- **Implementation:** `koda guide open` now owns one persistent Guide context across
+  repeated Codex turns. Every managed turn ignores ambient user configuration and
+  command rules, uses a no-approval, no-network permission profile, reads the
+  project and exact verified toolkit files, and writes only Guide continuity. Any
+  requested Guide write inside configured session evidence refuses before Codex
+  starts. Exact context state and raw turn evidence remain project-local.
+- **Recovery UX:** The trusted controller handles displayed `1` recover / `2` not
+  now choices. It never guesses between multiple sessions. A role-launch or
+  readiness failure reports `RECOVERY PAUSED SAFELY`, confirms that no gate moved,
+  and leaves Guide open. Empty input, corrupt state, duplicate consoles, stale
+  locks, terminal controls, and linked runtime parents all have explicit outcomes.
+- **Real-runtime evidence:** Sol/low passed Guide-owned write, active-session write
+  denial, parent read denial, project `.env` denial, Git write denial, network
+  denial, and trusted-toolkit execution in one persistent context. A planted
+  project rule that explicitly allowed the read was ignored. A second end-to-end
+  run resumed one Guide context after finding the exact blocked Git/toolkit reads,
+  reached `guide>`, and closed without opening session roles. See
+  [security audit 14](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md).
+- **Preserved failures:** Fixture setup, local integrity refusals, a real Codex
+  option-order defect, a malformed model patch, one concurrent role-lock cleanup
+  race, and the no-lockfile audit refusal are all preserved in the
+  [development record](test-results/2026-07-19-secure-guide-console-development-failures.md).
+  No gate or mutation assertion was weakened.
+- **Corrected local results:** Complete suite **228/228**, then coverage after the
+  session-write refusal **229/229** at **87.62% lines, 70.76% branches, and 85.77%
+  functions** overall. Security/package/submission/integrity slice **22/22**.
+- **Package and repository checks:** Dependency-free package dry-run passed at
+  980,813 compressed bytes, 4,692,898 unpacked bytes, 790 files, and zero bundled
+  dependencies. An isolated production lockfile audit found zero vulnerabilities.
+  Whitespace and tracked-symlink checks passed; reachable Git history is intact.
+- **UX assessment:** [audit 08](quality-runs/2026-07-19-secure-guide-console-ux-audit-08/RESULT.md)
+  records the one-command Guide, one-number recovery, mistake behavior, optional
+  Ghostty boundary, and the remaining future-session publisher work.
+- **State:** LOCAL MECHANICS, SECURITY, PACKAGE, AND REAL-CODEX BOUNDARY PASS.
+  Pushed toolkit binding and Kristian's recovered Ghostty observation remain.

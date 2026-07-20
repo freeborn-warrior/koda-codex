@@ -205,15 +205,26 @@ export async function producerWindowLockStatus(
   runRoot: string,
 ): Promise<{ pid: number; startedAt: string; alive: boolean } | null> {
   const lock = path.join(runRoot, PRODUCER_LOCK_DIR);
-  if (!(await pathExists(lock))) return null;
-  try {
-    if (!(await lstat(lock)).isDirectory()) throw new Error(`Producer lock must be a directory: ${lock}`);
-    const owner = await reviewerLockOwner(lock);
-    return { pid: owner.pid, startedAt: owner.startedAt, alive: processIsAlive(owner.pid) };
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT" && !(await pathExists(lock))) return null;
-    throw error;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    if (!(await pathExists(lock))) return null;
+    try {
+      if (!(await lstat(lock)).isDirectory()) throw new Error(`Producer lock must be a directory: ${lock}`);
+      const owner = await reviewerLockOwner(lock);
+      return { pid: owner.pid, startedAt: owner.startedAt, alive: processIsAlive(owner.pid) };
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      if (!(await pathExists(lock))) return null;
+      if (attempt < 3) {
+        // Recursive lock release removes OWNER.json immediately before its
+        // directory. Yield and reread the whole state instead of exposing that
+        // normal two-step deletion as corrupt product status.
+        await new Promise<void>((resolve) => setImmediate(resolve));
+        continue;
+      }
+      throw new Error(`Producer lock owner is missing from a persistent lock: ${lock}`);
+    }
   }
+  return null;
 }
 
 export async function acquireProducerWindow(

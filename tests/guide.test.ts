@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdir, readFile, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
@@ -8,6 +8,7 @@ import { runCli } from "../src/commands.ts";
 import { DEFAULT_CONFIG, pathExists } from "../src/config.ts";
 import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
 import { runGuideCli } from "../src/guide-commands.ts";
+import { performGuideRecoveryChoice } from "../src/guide-console.ts";
 import {
   cancelGuideLaunch,
   confirmGuideLaunch,
@@ -1385,6 +1386,76 @@ test("GUIDE GHOSTTY BOTH-WINDOW RECOVERY: a saved owner decision restores Review
   assert.match(reopened[0]!, /Producer/);
   const repeatedRecovery = JSON.parse(await readFile(path.join(prepared.runRoot, "RECOVERY.json"), "utf8"));
   assert.equal(repeatedRecovery.attempts.length, 2);
+});
+
+test("GUIDE CONSOLE RECOVERY: displayed choices are handled outside the model without weakening the gate", async (t) => {
+  const { h } = await bothWindowsMissingAfterPartialRecovery(t);
+  let calls = 0;
+  const notNow = await performGuideRecoveryChoice(h.root, "2", {
+    async recoverGhostty() {
+      calls += 1;
+      throw new Error("Choice 2 must never launch a role.");
+    },
+  });
+  assert.equal(notNow.handled, true);
+  assert.match(notNow.message ?? "", /Nothing changed/);
+  assert.equal(calls, 0);
+
+  const recover = await performGuideRecoveryChoice(h.root, "1", {
+    async recoverGhostty() {
+      calls += 1;
+      return [
+        { role: "reviewer", title: "Koda-C Reviewer", args: ["reviewer"] },
+        { role: "producer", title: "Koda-C Producer", args: ["producer"] },
+      ];
+    },
+  });
+  assert.equal(recover.handled, true);
+  assert.equal(calls, 1);
+  assert.deepEqual(recover.requests?.map((item) => item.role), ["reviewer", "producer"]);
+  assert.match(recover.message ?? "", /Reviewer-first order/);
+
+  const failedRecovery = await performGuideRecoveryChoice(h.root, "1", {
+    async recoverGhostty() {
+      calls += 1;
+      throw new Error("injected role readiness failure\u001b[31m");
+    },
+  });
+  assert.equal(failedRecovery.handled, true);
+  assert.match(failedRecovery.message ?? "", /RECOVERY PAUSED SAFELY/);
+  assert.match(failedRecovery.message ?? "", /Nothing was acknowledged or advanced/);
+  assert.match(failedRecovery.message ?? "", /This Guide remains open/);
+  assert.doesNotMatch(failedRecovery.message ?? "", /\u001b/);
+
+  const discussion = await performGuideRecoveryChoice(h.root, "Can we discuss the project first?", {
+    async recoverGhostty() { throw new Error("Conversation must go to the Guide model."); },
+  });
+  assert.equal(discussion.handled, false);
+});
+
+test("GUIDE CONSOLE RECOVERY MUTATION: a bare number never guesses between two recoverable sessions", async (t) => {
+  const { h, prepared } = await bothWindowsMissingAfterPartialRecovery(t);
+  const secondId = "44444444-4444-4444-8444-444444444444";
+  const secondRoot = path.join(path.dirname(prepared.runRoot), secondId);
+  await cp(prepared.runRoot, secondRoot, { recursive: true });
+  const secondRun = JSON.parse(await readFile(path.join(secondRoot, "RUN.json"), "utf8"));
+  secondRun.launchId = secondId;
+  secondRun.preparedAt = new Date(Date.now() + 1_000).toISOString();
+  await writeJsonAtomic(path.join(secondRoot, "RUN.json"), secondRun);
+
+  let recoveries = 0;
+  const result = await performGuideRecoveryChoice(h.root, "1", {
+    async recoverGhostty() {
+      recoveries += 1;
+      return [];
+    },
+  });
+  assert.equal(result.handled, true);
+  assert.equal(recoveries, 0);
+  assert.match(result.message ?? "", /2 recoverable sessions/);
+  assert.match(result.message ?? "", new RegExp(prepared.run.launchId));
+  assert.match(result.message ?? "", new RegExp(secondId));
+  assert.match(result.message ?? "", /nothing changed/i);
 });
 
 test("GUIDE GHOSTTY BOTH-WINDOW RECOVERY MUTATION: Producer stays closed when restored Reviewer is not ready", async (t) => {

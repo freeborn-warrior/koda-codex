@@ -64,6 +64,7 @@ const args = [
   "exec",
   "--ephemeral",
   "--ignore-user-config",
+  "--ignore-rules",
   "--json",
   "--color", "never",
   "-C", project,

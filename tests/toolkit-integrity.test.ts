@@ -4,7 +4,7 @@ import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
-import { verifyToolkitIntegrityAt } from "../src/toolkit-integrity.ts";
+import { verifiedToolkitReadPathsAt, verifyToolkitIntegrityAt } from "../src/toolkit-integrity.ts";
 import { writeJsonAtomic } from "../src/project.ts";
 import { temporaryRoot } from "./helpers.ts";
 
@@ -53,6 +53,15 @@ test("TOOLKIT INTEGRITY: a complete manifest proves the installed launch surface
   assert.equal(result.capability, "clean-launch-v1");
   assert.equal(result.testCount, 181);
   assert.match(result.manifestSha256, /^[a-f0-9]{64}$/);
+});
+
+test("TOOLKIT INTEGRITY CAPABILITY: a sandbox receives only exact verified read paths", async (t) => {
+  const h = await integrityHarness(t);
+  assert.deepEqual(await verifiedToolkitReadPathsAt(h.root), [
+    path.join(h.root, "docs", "post-push.md"),
+    path.join(h.root, "docs", "toolkit-integrity.json"),
+    path.join(h.root, "src", "critical.ts"),
+  ]);
 });
 
 test("TOOLKIT INTEGRITY MUTATION: changed launch code refuses and names the file", async (t) => {

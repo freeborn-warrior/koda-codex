@@ -231,6 +231,14 @@ test("TWO-WINDOW PROTOCOL: reviewer jobs are bounded and duplicate reviewer wind
   assert.equal((await producerWindowLockStatus(temporary))?.pid, process.pid);
   await releaseProducer();
 
+  const incompleteProducerLock = path.join(temporary, PRODUCER_LOCK_DIR);
+  await mkdir(incompleteProducerLock);
+  await assert.rejects(
+    producerWindowLockStatus(temporary),
+    /Producer lock owner is missing from a persistent lock/,
+  );
+  await rm(incompleteProducerLock, { recursive: true });
+
   const staleProducerLock = path.join(temporary, PRODUCER_LOCK_DIR);
   await mkdir(staleProducerLock);
   await writeJsonAtomic(path.join(staleProducerLock, "OWNER.json"), {

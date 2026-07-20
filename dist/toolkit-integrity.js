@@ -151,5 +151,34 @@ export async function verifyToolkitIntegrity()                                  
   return verifyToolkitIntegrityAt(packageRoot());
 }
 
+/**
+ * Exact installed files a sandboxed Guide must be able to read so the trusted
+ * CLI can re-run toolkit verification from inside the model boundary.
+ *
+ * The whole source checkout is deliberately not granted: a development tree
+ * may contain unrelated ignored projects or local evidence beside the package.
+ */
+export async function verifiedToolkitReadPathsAt(root        )                    {
+  const manifestFile = path.resolve(root, MANIFEST_RELATIVE);
+  const manifestBytes = await readFile(manifestFile);
+  let parsed         ;
+  try {
+    parsed = JSON.parse(manifestBytes.toString("utf8"));
+  } catch {
+    throw new Error("Toolkit readiness is unverified: the integrity manifest is not valid JSON.");
+  }
+  const manifest = parseManifest(parsed);
+  await verifyToolkitIntegrityAt(root);
+  return [...new Set([
+    manifestFile,
+    path.resolve(root, manifest.evidence.path),
+    ...manifest.files.map((file) => path.resolve(root, file.path)),
+  ])].sort();
+}
+
+export async function verifiedToolkitReadPaths()                    {
+  return verifiedToolkitReadPathsAt(packageRoot());
+}
+
 
 //# sourceURL=/Users/freeborn/Dev/koda-codex/src/toolkit-integrity.ts

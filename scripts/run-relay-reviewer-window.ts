@@ -224,6 +224,7 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
   const codexExecutable = resolveRelayCodexExecutable();
   const common = [
     "--ignore-user-config",
+    "--ignore-rules",
     "--json",
     "-m", state.model,
     "-c", `model_reasoning_effort=\"${state.effort}\"`,

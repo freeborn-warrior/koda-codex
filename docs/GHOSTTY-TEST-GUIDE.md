@@ -62,15 +62,19 @@ names the missing evidence first.
 
 ### The one launch or recovery action
 
-Window G is a real interactive Codex Guide, not a shell window pretending to be
-Guide. Start Codex in the target project, let it reconstruct status from disk,
-then speak to it in ordinary language. Kristian should not paste a shell command
-into the Codex conversation.
+Window G is a real persistent Codex Guide behind Koda's plain secure console, not
+a shell window pretending to be Guide. Open it from the target project with:
 
-For each fresh sealed verification run, the one terminal command that starts
-Window G is recorded in that run's `OWNER-STEPS.md`. It starts Guide only; it does
-not launch the session. The current halted run's owner steps intentionally contain
-no launch command.
+```bash
+node /Users/freeborn/Dev/koda-codex/dist/cli.js guide open --model gpt-5.6-sol --effort medium
+```
+
+It opens or resumes Guide only; it does not launch Producer or Reviewer. For an
+installed package, the equivalent command is `koda guide open ...`. Do not replace
+it with raw `codex -C`: that route does not establish Koda's Guide permission
+boundary or trusted numeric recovery controller. Once `guide>` appears, speak in
+ordinary language or type a displayed number. Kristian should never paste a shell
+command into the Guide conversation.
 
 Once Guide verifies a fresh launch, it shows `1` launch / `2` not now. When Guide
 detects a recoverable session, it shows `1` reopen / `2` not now and explains which

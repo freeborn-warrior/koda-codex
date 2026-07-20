@@ -17,19 +17,40 @@ function tomlString(value: string): string {
 export function codexProjectPermissionArgs(options: {
   workspaceAccess: "read" | "write";
   trustedReadRoots?: string[];
+  profileName?: string;
+  gitAccess?: "read" | "write";
+  workspaceOverrides?: Record<string, "read" | "write" | "deny">;
 }): string[] {
   const trustedReadRoots = options.trustedReadRoots ?? [];
+  const profileName = options.profileName ?? "koda_project";
+  if (!/^[a-z][a-z0-9_]*$/.test(profileName)) {
+    throw new Error("The Codex permission profile name must contain only lowercase letters, digits, and underscores.");
+  }
   for (const trustedRoot of trustedReadRoots) {
     if (!path.isAbsolute(trustedRoot)) {
       throw new Error("Every trusted Codex read root must be absolute.");
     }
   }
+  const workspaceOverrides = Object.entries(options.workspaceOverrides ?? {}).map(([entry, access]) => {
+    const normalized = entry.split(path.sep).join("/").replace(/^\.\//, "");
+    if (
+      !normalized || path.posix.isAbsolute(normalized) || normalized.split("/").includes("..") ||
+      normalized === ".git" || normalized.startsWith(".git/") ||
+      normalized === ".agents" || normalized.startsWith(".agents/") ||
+      normalized === ".codex" || normalized.startsWith(".codex/") ||
+      normalized === ".koda" || normalized.startsWith(".koda/")
+    ) {
+      throw new Error(`Codex workspace permission override is unsafe: ${entry}.`);
+    }
+    return [normalized, access] as const;
+  });
   const filesystem = [
     `${tomlString(":minimal")}="read",`,
     ...trustedReadRoots.map((trustedRoot) => `${tomlString(path.resolve(trustedRoot))}="read",`),
     `${tomlString(":workspace_roots")}={`,
     `${tomlString(".")}=${tomlString(options.workspaceAccess)},`,
-    `${tomlString(".git")}="read",`,
+    ...workspaceOverrides.map(([entry, access]) => `${tomlString(entry)}=${tomlString(access)},`),
+    `${tomlString(".git")}=${tomlString(options.gitAccess ?? "read")},`,
     `${tomlString(".agents")}="read",`,
     `${tomlString(".codex")}="read",`,
     `${tomlString("**/*.env")}="deny"`,
@@ -40,10 +61,42 @@ export function codexProjectPermissionArgs(options: {
     "--strict-config",
     "-c", 'web_search="disabled"',
     "-c", "allow_login_shell=false",
-    "-c", 'default_permissions="koda_project"',
-    "-c", `permissions.koda_project.filesystem={${filesystem}}`,
-    "-c", "permissions.koda_project.network.enabled=false",
+    "-c", `default_permissions=${tomlString(profileName)}`,
+    "-c", `permissions.${profileName}.filesystem={${filesystem}}`,
+    "-c", `permissions.${profileName}.network.enabled=false`,
   ];
+}
+
+/**
+ * The persistent Guide gets the same project-data boundary as session roles.
+ * It remains unable to mutate Git metadata itself: trusted numbered controller
+ * actions perform the narrow runtime operations the owner explicitly selects.
+ */
+export function codexGuidePermissionArgs(
+  trustedCli: string,
+  codexExecutable: string,
+  toolchainReadRoots: string[],
+  guideWritePaths: string[] = [],
+  toolkitVerificationPaths: string[] = [],
+): string[] {
+  if (!path.isAbsolute(trustedCli) || !path.isAbsolute(codexExecutable)) {
+    throw new Error("The trusted Koda CLI and Codex executable paths must be absolute before Guide permissions are built.");
+  }
+  const toolkitRuntime = path.dirname(path.resolve(trustedCli));
+  const toolkitPackage = path.join(path.dirname(toolkitRuntime), "package.json");
+  return codexProjectPermissionArgs({
+    workspaceAccess: "read",
+    profileName: "koda_guide",
+    gitAccess: "read",
+    workspaceOverrides: Object.fromEntries(guideWritePaths.map((entry) => [entry, "write"])),
+    trustedReadRoots: [
+      toolkitRuntime,
+      toolkitPackage,
+      path.resolve(codexExecutable),
+      ...toolkitVerificationPaths,
+      ...toolchainReadRoots,
+    ],
+  });
 }
 
 export function codexRolePermissionArgs(

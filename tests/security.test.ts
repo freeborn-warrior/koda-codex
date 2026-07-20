@@ -137,6 +137,10 @@ test("SECURITY INTEGRITY SUITE: relay roles and model children never inherit amb
     TMPDIR: "/safe/tmp",
     LANG: "C.UTF-8",
     PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    GIT_CONFIG_GLOBAL: "/dev/null",
+    GIT_CONFIG_SYSTEM: "/dev/null",
+    GIT_OPTIONAL_LOCKS: "0",
+    GIT_TERMINAL_PROMPT: "0",
     KODA_SESSION_ID: "2026-07-19-01",
   });
 });
@@ -154,9 +158,24 @@ test("SECURITY INTEGRITY SUITE: fresh-model evidence runs strip ambient credenti
   const runner = await readFile("scripts/run-guide-preflight-model-test.ts", "utf8");
   assert.match(runner, /import \{ relayCodexEnvironment, relayNodeToolchainReadRoots \} from "\.\.\/src\/relay-environment\.ts"/);
   assert.match(runner, /codexProjectPermissionArgs/);
+  assert.match(runner, /"--ignore-rules"/);
   assert.match(runner, /const codex = resolveExecutable\(process\.env\.KODA_CODEX_BIN/);
   assert.match(runner, /env: relayCodexEnvironment\(process\.env\)/);
   assert.doesNotMatch(runner, /spawnSync\(codex, args, \{ cwd, encoding:/);
+});
+
+test("SECURITY INTEGRITY SUITE: every managed Codex exec ignores ambient command rules", async () => {
+  const files = [
+    "scripts/execute-relay-run.ts",
+    "scripts/run-relay-reviewer-window.ts",
+    "scripts/execute-reviewer-run.ts",
+    "scripts/run-guide-preflight-model-test.ts",
+    "src/guide-console.ts",
+  ];
+  for (const file of files) {
+    const source = await readFile(file, "utf8");
+    assert.match(source, /"--ignore-user-config"[\s\S]{0,80}"--ignore-rules"/, `${file} must ignore config and rules together`);
+  }
 });
 
 test("SECURITY INTEGRITY SUITE: the executable Ghostty role launcher starts one child with a clean environment", async () => {

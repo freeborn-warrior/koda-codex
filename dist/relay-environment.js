@@ -81,6 +81,14 @@ export function relayCodexEnvironment(
 )                    {
   const clean                    = {
     ...copySafe(source),
+    // Model-generated Git reads must use only the active repository's local
+    // config. Otherwise Git probes the blocked home directory before it can
+    // report project truth. Trusted relay commit/push processes do not use this
+    // child environment.
+    GIT_CONFIG_GLOBAL: "/dev/null",
+    GIT_CONFIG_SYSTEM: "/dev/null",
+    GIT_OPTIONAL_LOCKS: "0",
+    GIT_TERMINAL_PROMPT: "0",
     ...(sessionId ? { KODA_SESSION_ID: sessionId } : {}),
   };
   // Deterministic relay fixtures use explicit KODA_TEST_* channels for fake
