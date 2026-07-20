@@ -47,6 +47,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Later, only after target (a) is secure
 
+- [ ] After submission, migrate the current TypeScript/Node.js engine to a compiled headless Rust core while preserving the proven plain-file evidence contract, deterministic gate semantics, mutation suite, and separate-interface boundary.
 - [ ] Consider whether the existing disk-separated seats are worth adapting across providers. Codex CLI/Claude Code mixed staffing is an architectural possibility, not a committed requirement or current scope.
 - [ ] Evaluate a read-only Guide-side Librarian/recall skill that answers where the project has been, is now, and is heading with citations, without becoming another authority or hidden truth store.
 - [ ] Define a stable client boundary for separate local and remote interfaces over the permanently headless plain-file engine; no interface may own gate truth.

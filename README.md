@@ -63,10 +63,12 @@ The core does not require Ghostty or a model. Ghostty is an optional macOS adapt
 that makes the Guide, Producer, and Reviewer visible in separate windows. The
 same disk relay can be started from manually opened terminals.
 
-The engine remains headless by design. A future macOS, browser, editor, or remote
-interface would be a separate client of the same plain-file and command contract;
-an interface may present and request actions, but it never becomes gate truth or
-owns the workflow.
+The engine remains headless by design. This competition entry implements it in
+TypeScript and dependency-free JavaScript; the intended long-term core is a
+headless Rust engine, not a permanent TypeScript runtime. A future macOS, browser,
+editor, or remote interface would be a separate client of the same plain-file and
+command contract. An interface may present and request actions, but it never
+becomes gate truth or owns the workflow.
 
 In the managed Reviewer window, the complete human-facing review prints inline.
 Its final eight-character `REVIEW CODE` is the only acknowledgement text the owner
@@ -128,6 +130,19 @@ The receipt does **not** prove comprehension. It raises the floor: ignoring a
 review is no longer a passive omission; bypassing it requires deliberately opening
 the review and taking its unique phrase. Koda-C is evidence discipline, not
 mind-reading or a cryptographic identity system.
+
+## Future direction
+
+The production direction is a compiled, headless Rust core with its human
+interfaces kept separate. A native macOS client may be the first richer interface,
+but terminal, browser, editor, mobile, and remote clients should all connect through
+the same bounded workflow contract rather than absorbing the engine.
+
+The disk-separated seats also leave room for future runtime adapters: Codex CLI
+could occupy Producer while Claude Code occupies Reviewer, or the reverse. That is
+architectural direction, not a claim about the current release. Today's managed
+runner is Codex-only, and any additional provider must prove isolation, permissions,
+recovery, and review quality before Koda-C trusts it.
 
 ## Judge and contributor map
 
