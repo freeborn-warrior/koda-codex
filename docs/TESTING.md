@@ -2225,6 +2225,13 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   one disposable preflight session, and Koda reached `READY — FULL SESSION` in
   7.4 seconds without opening a model conversation or window. All disposable test
   folders were removed afterward.
+- **Literal one-minute judge path:** From the committed binary, a new disposable
+  demo initialized session `2026-07-20-01`; the printed `advance` command refused
+  exactly because the current receipt was absent; the complete final review
+  receipt entered through the printed `approve` command; and the next printed
+  `advance` reported `GATE OPEN — BRIEF` and activated `orient`. No npm, rebuild,
+  model, network request, or unprinted command was needed. The disposable fixture
+  was removed afterward.
 - **State:** INDEPENDENT APPROVE. The only remaining proof for this repair is a
   clean owner-visible Ghostty run. After the review record strengthened submission
   assertions, pushed commit `ca198d3` passed a final
