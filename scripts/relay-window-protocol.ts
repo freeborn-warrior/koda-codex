@@ -44,7 +44,8 @@ export type ReviewerJob = {
 
 export type ReviewerWindowState = {
   version: 1;
-  status: "READY" | "WORKING" | "AWAITING_OWNER" | "FAILED";
+  status: "STARTING" | "READY" | "WORKING" | "AWAITING_OWNER" | "FAILED";
+  sessionId?: string | null;
   model: string;
   effort: string;
   threadId: string | null;
@@ -311,7 +312,8 @@ export function validateReviewerWindowState(value: unknown): ReviewerWindowState
   );
   if (
     state.version !== 1 ||
-    !["READY", "WORKING", "AWAITING_OWNER", "FAILED"].includes(String(state.status)) ||
+    !["STARTING", "READY", "WORKING", "AWAITING_OWNER", "FAILED"].includes(String(state.status)) ||
+    !(state.sessionId === undefined || state.sessionId === null || /^\d{4}-\d{2}-\d{2}-\d{2}$/.test(state.sessionId)) ||
     typeof state.model !== "string" || state.model.trim() === "" ||
     typeof state.effort !== "string" || state.effort.trim() === "" ||
     !(state.threadId === null || typeof state.threadId === "string") ||

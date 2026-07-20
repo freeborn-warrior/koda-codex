@@ -375,6 +375,110 @@ test("REVIEWER OPEN CONVERSATION TTY: a real terminal line reaches the idle Revi
   assert.equal(result.projectStatusAfter, result.projectStatusBefore);
 });
 
+test("REVIEWER STARTUP RACE: input typed before session binding waits and is answered after the same session binds", {
+  skip: process.platform !== "darwin",
+}, async (t) => {
+  const temporary = await mkdtemp(path.join(tmpdir(), "koda-reviewer-startup-race-"));
+  t.after(() => rm(temporary, { recursive: true, force: true }));
+  const prepared = spawnSync(process.execPath, [
+    "scripts/prepare-relay-run.ts",
+    "software-clean",
+    "gpt-5.6-sol",
+    "medium",
+    "gpt-5.6-terra",
+    "medium",
+  ], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    env: { ...process.env, KODA_RELAY_RUNS_ROOT: temporary },
+  });
+  assert.equal(prepared.status, 0, prepared.stderr);
+  const runRoot = path.join(temporary, (await readdir(temporary))[0]!);
+  const project = path.join(runRoot, "project");
+  const runPath = path.join(runRoot, "RUN.json");
+  const fakeCodex = path.join(temporary, "fake-startup-reviewer.mjs");
+  await writeFile(fakeCodex, [
+    "#!/usr/bin/env node",
+    "const prompt = process.argv.at(-1) ?? '';",
+    "if (!prompt.includes('owner-conversation mode')) { process.stderr.write('missing owner-conversation mode'); process.exit(1); }",
+    "console.log(JSON.stringify({ type: 'thread.started', thread_id: '019f0000-0000-7000-8000-000000000123' }));",
+    "console.log(JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text: 'The session is bound and the early question survived startup.' } }));",
+    "console.log(JSON.stringify({ type: 'turn.completed' }));",
+  ].join("\n"), "utf8");
+  await chmod(fakeCodex, 0o755);
+
+  const binder = path.join(temporary, "bind-session-after-start.mjs");
+  await writeFile(binder, [
+    "import { spawnSync } from 'node:child_process';",
+    "import { readFile, readdir, rename, writeFile } from 'node:fs/promises';",
+    "import path from 'node:path';",
+    "await new Promise((resolve) => setTimeout(resolve, 800));",
+    "const opened = spawnSync(process.execPath, [process.env.KODA_TEST_CLI, 'session', 'new', path.join(process.env.KODA_TEST_PROJECT, 'owner-prompt.md')], { cwd: process.env.KODA_TEST_PROJECT, encoding: 'utf8' });",
+    "if (opened.status !== 0) { process.stderr.write(opened.stderr || opened.stdout || 'session new failed'); process.exit(1); }",
+    "const ids = (await readdir(path.join(process.env.KODA_TEST_PROJECT, 'docs', 'sessions'))).filter((name) => /^\\d{4}-\\d{2}-\\d{2}-\\d{2}$/.test(name)).sort();",
+    "if (ids.length !== 1) { process.stderr.write(`expected one session, found ${ids.length}`); process.exit(1); }",
+    "const run = JSON.parse(await readFile(process.env.KODA_TEST_RUN, 'utf8'));",
+    "run.status = 'RUNNING';",
+    "run.sessionId = ids[0];",
+    "const temporaryRun = `${process.env.KODA_TEST_RUN}.startup-test`;",
+    "await writeFile(temporaryRun, `${JSON.stringify(run, null, 2)}\\n`, 'utf8');",
+    "await rename(temporaryRun, process.env.KODA_TEST_RUN);",
+  ].join("\n"), "utf8");
+
+  let binderStderr = "";
+  const binderChild = spawn(process.execPath, [binder], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      KODA_TEST_CLI: path.join(process.cwd(), "dist", "cli.js"),
+      KODA_TEST_PROJECT: project,
+      KODA_TEST_RUN: runPath,
+    },
+    stdio: ["ignore", "ignore", "pipe"],
+  });
+  binderChild.stderr.on("data", (chunk) => { binderStderr += String(chunk); });
+  const binderCompleted = new Promise<number>((resolve, reject) => {
+    binderChild.once("error", reject);
+    binderChild.once("close", (code) => resolve(code ?? -1));
+  });
+
+  const question = "What's happening now?";
+  const expectProgram = [
+    "set timeout 15",
+    "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT)",
+    "expect \"KODA-C REVIEWER — STARTING SESSION\"",
+    "send -- \"$env(KODA_TEST_QUESTION)\\r\"",
+    "expect \"KODA-C REVIEWER — SESSION READY\"",
+    "expect \"reviewer> \"",
+    "expect \"REVIEWER BRIEF RESPONSE\"",
+    "expect \"early question survived startup\"",
+    "expect eof",
+    "set result [wait]",
+    "exit [lindex $result 3]",
+  ].join("\n");
+  const executed = spawnSync("/usr/bin/expect", ["-c", expectProgram], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 20_000,
+    env: {
+      ...process.env,
+      KODA_RELAY_RUNS_ROOT: temporary,
+      KODA_RELAY_REVIEWER_ONCE: "1",
+      KODA_CODEX_BIN: fakeCodex,
+      KODA_TEST_NODE: process.execPath,
+      KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
+      KODA_TEST_QUESTION: question,
+    },
+  });
+  assert.equal(await binderCompleted, 0, binderStderr);
+  assert.equal(executed.status, 0, `${executed.stdout}\n${executed.stderr}`);
+  assert.doesNotMatch(`${executed.stdout}\n${executed.stderr}`, /REVIEWER PAUSED SAFELY|has not bound a session ID/);
+  const run = JSON.parse(await readFile(runPath, "utf8"));
+  const state = await readReviewerWindowState(runRoot);
+  assert.equal(state?.sessionId, run.sessionId);
+  assert.equal(state?.status, "READY");
+});
+
 test("TWO-WINDOW RECEIPT: short owner code maps to the exact disk receipt", async (t) => {
   const result = await preparedAcknowledgementRun("correct", { ownerName: "Ada Owner" });
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
@@ -1056,7 +1160,8 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   assert.match(producerResult.stdout, /GATE PASSED — BRIEF[\s\S]*1 of 1 phases complete/);
   assert.match(producerResult.stdout, /Next: immutable session close ceremony/);
   assert.match(producerResult.stdout, /RELAY COMPLETE/);
-  assert.match(reviewerResult.stdout, /KODA-C REVIEWER WINDOW/);
+  assert.match(reviewerResult.stdout, /KODA-C REVIEWER — STARTING SESSION/);
+  assert.match(reviewerResult.stdout, /KODA-C REVIEWER — SESSION READY/);
   assert.match(reviewerResult.stdout, /Owner input: OPEN — active-session conversation belongs here/);
   assert.match(reviewerResult.stdout, /REVIEWER 1 — formal review of brief/);
   assert.match(reviewerResult.stdout, /REVIEWER BRIEF — THINKING/);

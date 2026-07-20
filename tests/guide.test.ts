@@ -16,7 +16,7 @@ import {
   verifyGuideLaunch,
 } from "../src/guide.ts";
 import { currentGuideRuntime, listGuideRuntimes, prepareGuideRuntime } from "../src/guide-runtime.ts";
-import { ghosttyWindowRequests, requestGhosttyRecoveryWindows, requestGhosttyWindows } from "../src/ghostty.ts";
+import { ghosttyWindowRequests, requestGhosttyRecoveryWindows, requestGhosttyWindows, visibleSessionStartupReady } from "../src/ghostty.ts";
 import { prepareHaltArtifact } from "../src/halt.ts";
 import { createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
 import { temporaryRoot } from "./helpers.ts";
@@ -807,6 +807,20 @@ test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Review
     ghosttyWindowRequests(h.root, reused, { platform: "darwin", codexExecutable: process.execPath }),
     /Existing Ghostty role launcher is unsafe or changed/,
   );
+});
+
+test("GUIDE VISIBLE STARTUP MUTATION: launch is ready only after both roles bind the same session", () => {
+  const run = { status: "RUNNING", sessionId: "2026-07-20-01" };
+  const reviewer = { status: "READY", sessionId: "2026-07-20-01", lastError: null };
+  assert.equal(visibleSessionStartupReady(run, reviewer), true);
+  assert.equal(visibleSessionStartupReady({ ...run, sessionId: undefined }, reviewer), false);
+  assert.equal(visibleSessionStartupReady(run, { ...reviewer, status: "STARTING" }), false);
+  assert.equal(visibleSessionStartupReady(run, { ...reviewer, sessionId: null }), false);
+  assert.equal(visibleSessionStartupReady(run, { ...reviewer, sessionId: "2026-07-20-02" }), false);
+  assert.equal(visibleSessionStartupReady({ ...run, status: "UNKNOWN" }, reviewer), false);
+  assert.equal(visibleSessionStartupReady(run, { ...reviewer, status: undefined }), false);
+  assert.equal(visibleSessionStartupReady({ ...run, lastError: "Producer failed" }, reviewer), false);
+  assert.equal(visibleSessionStartupReady(run, { ...reviewer, status: "FAILED", lastError: "Reviewer failed" }), false);
 });
 
 test("GUIDE GHOSTTY MUTATION: a failed Producer request refuses duplicate automatic recovery", async (t) => {

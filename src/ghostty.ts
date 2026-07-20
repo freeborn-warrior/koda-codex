@@ -25,6 +25,32 @@ export interface VisibleRoleHealth {
   producerRunning: boolean;
 }
 
+export type VisibleStartupRun = {
+  status?: string;
+  sessionId?: string;
+  lastError?: string;
+};
+
+export type VisibleStartupReviewer = {
+  status?: string;
+  sessionId?: string | null;
+  lastError?: string | null;
+};
+
+export function visibleSessionStartupReady(
+  run: VisibleStartupRun | null,
+  reviewer: VisibleStartupReviewer | null,
+): boolean {
+  return Boolean(
+    run?.sessionId &&
+    run.status === "RUNNING" &&
+    !run.lastError &&
+    reviewer?.sessionId === run.sessionId &&
+    ["READY", "WORKING", "AWAITING_OWNER"].includes(String(reviewer.status)) &&
+    !reviewer.lastError
+  );
+}
+
 export interface GhosttyLaunchDependencies {
   platform?: string;
   codexExecutable?: string;
@@ -454,10 +480,22 @@ async function waitForStartedReviewer(runRoot: string): Promise<boolean> {
 async function waitForStartedProducer(runRoot: string): Promise<boolean> {
   for (let attempt = 0; attempt < ROLE_START_ATTEMPTS; attempt += 1) {
     const state = await recoveredRunState(runRoot);
+    const reviewerFile = path.join(runRoot, "REVIEWER-STATE.json");
+    const reviewerMetadata = await lstat(reviewerFile).catch(() => null);
+    let reviewer: VisibleStartupReviewer | null = null;
+    if (reviewerMetadata) {
+      if (!reviewerMetadata.isFile() || reviewerMetadata.isSymbolicLink()) {
+        throw new Error("Visible startup requires a real REVIEWER-STATE.json file.");
+      }
+      try {
+        reviewer = JSON.parse(await readFile(reviewerFile, "utf8")) as VisibleStartupReviewer;
+      } catch {
+        throw new Error("Visible startup requires valid Reviewer state JSON.");
+      }
+    }
     if (
       await producerLockAlive(runRoot) &&
-      !["PREPARED", "PAUSED_ERROR", "PAUSED_REVIEWER_FAILURE"].includes(String(state?.status)) &&
-      !state?.lastError
+      visibleSessionStartupReady(state, reviewer)
     ) return true;
     if (["PAUSED_ERROR", "PAUSED_REVIEWER_FAILURE"].includes(String(state?.status))) return false;
     await new Promise((resolve) => setTimeout(resolve, 50));

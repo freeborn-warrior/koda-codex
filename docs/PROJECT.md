@@ -124,9 +124,20 @@ owner contract
   toolkit proof, native Git, and private project-run configuration. The first full
   regression honestly failed 16 checks and exposed two downstream consequences;
   the corrected local and unchanged post-push suites pass **250/250** under
-  toolkit capability `integrated-role-preflight-v21`. A fresh independent review
-  was blocked before start by the private-repository export boundary and is not
-  represented as complete; fresh owner-visible proof also remains pending.
+  toolkit capability `integrated-role-preflight-v21`. After owner authorization,
+  a fresh Terra/medium review approved the sealed change. The next owner-visible
+  attempt then exposed a separate startup-order defect rather than completing the
+  rehearsal.
+- Owner-observed launch `115c716e-1c9c-43c5-8e5d-edead043b29a` displayed an open
+  Reviewer prompt about one second before Producer created the session identity.
+  Kristian's valid early question therefore reached a context that had no session
+  to inspect and the Reviewer exited safely. No phase artifact, review, receipt,
+  approval, or advancement occurred. Reviewer now has an explicit `STARTING`
+  state, opens owner input only after recording the exact session ID, preserves
+  early terminal input until then, and Producer plus Guide both require that
+  matching live binding before Brief work or launch success. The complete local
+  regression passes **252/252**; unchanged post-push proof, independent review,
+  and the fresh owner-visible rehearsal remain pending.
 - The first owner-observed three-context launch created distinct persistent Sol Producer and Terra Reviewer contexts and reached formal Brief review, but it is pushed-halted failure evidence rather than a pass. The unsafe launch rendered an ambient credential, and a second race repeated a voided review after halt. Zero acknowledgements and zero phases advanced; the deterministic repair passes 181/181, while a fresh owner-observed Ghostty run remains owed.
 - The first retry draft exposed a second human-experience defect before launch: Guide required Kristian to carry repository paths, commit IDs, test counts, and evidence references from the builder context. The toolkit now validates its release manifest itself, `guide status` reports one verified capability, the session-prompter forbids owner technical relays, and every new confirmation freezes that toolkit proof alongside project truth.
 - The second owner-observed launch passed the repaired window/security boundary: one Reviewer and one Producer opened beside the existing Guide with no extra tabs or environment dump, and the distinct contexts reached an approved Brief. Its acknowledgement UX then failed when an ambiguous Return produced an empty receipt, correctly leaving zero ledger entries but exiting both role processes. The preserved run remains at Brief. Numbered, retryable owner decisions, stdin-only receipt/ruling transport, exact legacy recovery, and a two-choice Guide recovery surface pass a pushed 194-check transcript bound as toolkit capability `ghostty-owner-ceremony-v2`; real recovery and the remaining phases are still owed.

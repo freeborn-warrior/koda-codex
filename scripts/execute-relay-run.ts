@@ -58,6 +58,7 @@ import {
   newReviewerJob,
   readReviewerJob,
   readReviewerWindowState,
+  reviewerWindowLockStatus,
   renderCodexEvent,
   removeReviewerJob,
   writeReviewerJob,
@@ -728,9 +729,32 @@ async function openSession(): Promise<void> {
   const session = await latest();
   if (!session) throw new Error(`The producer turn did not create the one session bound to Guide launch ${run.launchId ?? "unknown"}.`);
   run.sessionId = session.id;
+  run.lastAction = `wait for Reviewer to bind session ${session.id}`;
   await claimSessionPaths(project, config, session.id, [path.relative(project, session.directory)]);
   await reconcileSessionWorkSet(project, config, session.id);
   await saveRun();
+  if (twoWindow) {
+    for (let attempt = 0; attempt < 900; attempt += 1) {
+      const [reviewerState, reviewerLock] = await Promise.all([
+        readReviewerWindowState(runRoot),
+        reviewerWindowLockStatus(runRoot),
+      ]);
+      if (reviewerState?.status === "FAILED") {
+        throw new Error(`Reviewer failed before binding session ${session.id}: ${reviewerState.lastError ?? "unknown Reviewer failure"}`);
+      }
+      if (
+        reviewerState?.sessionId === session.id &&
+        reviewerState.status !== "STARTING" &&
+        reviewerLock?.alive
+      ) {
+        run.lastAction = `session ${session.id} bound to Producer and Reviewer`;
+        await saveRun();
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    throw new Error(`Reviewer did not bind session ${session.id}; Brief work was not started.`);
+  }
 }
 
 async function producePhase(phaseName: string, revision: boolean): Promise<void> {

@@ -201,7 +201,8 @@ const releaseLock = await acquireReviewerWindow(runRoot, { recoverStale: recover
     refuse(message);
   });
 let state = await readReviewerWindowState(runRoot) ?? reviewerWindowState({
-  status: "READY",
+  status: initialRun.sessionId ? "READY" : "STARTING",
+  sessionId: initialRun.sessionId ?? null,
   model: initialRun.reviewer.model,
   effort: initialRun.reviewer.effort,
   threadId: initialRun.reviewer.threadId,
@@ -213,6 +214,19 @@ if (state.model !== initialRun.reviewer.model || state.effort !== initialRun.rev
   await releaseLock();
   refuse("Reviewer model or effort changed after this session was prepared.");
 }
+if (state.sessionId && initialRun.sessionId && state.sessionId !== initialRun.sessionId) {
+  await releaseLock();
+  refuse("Reviewer state is bound to a different session than RUN.json.");
+}
+if (state.sessionId && !initialRun.sessionId) {
+  await releaseLock();
+  refuse("Reviewer state claims a session before RUN.json binds one.");
+}
+state = reviewerWindowState({
+  ...state,
+  status: !initialRun.sessionId && state.status === "READY" ? "STARTING" : state.status,
+  sessionId: state.sessionId ?? initialRun.sessionId ?? null,
+});
 await writeReviewerWindowState(runRoot, state);
 
 const ownerConversationQueue: string[] = [];
@@ -886,22 +900,21 @@ async function recoverInterruptedOwnerConversation(): Promise<void> {
   await recordOwnerConversationResponse(interrupted.ownerMessage, response);
 }
 
-console.log(terminalPanel("KODA-C REVIEWER WINDOW", [
+console.log(terminalPanel("KODA-C REVIEWER — STARTING SESSION", [
   `Reviewer: ${state.model} / ${state.effort}`,
   `Relay: ${path.basename(runRoot)}`,
   "",
-  "Owner input: OPEN — active-session conversation belongs here.",
-  "This context remains the Reviewer for the complete session. Leave it open.",
-  "",
-  "You may type while Producer works. New direction is recorded now and waits for the next gate.",
-  "Waiting for the Producer…",
+  "Owner input: NOT OPEN YET",
+  "Producer is creating and binding the session identity.",
+  "Any line typed early is held safely until that binding exists.",
+  "NO ACTION NEEDED — this window will announce when conversation is ready.",
 ]));
-if (ownerConsole) process.stdout.write("reviewer> ");
 
 try {
   const recoveredConfiguredConversation = state.interruption?.jobId === null;
-  await recoverInterruptedOwnerConversation();
-  let announcedWaiting = true;
+  let recoveredOwnerConversation = false;
+  let boundSessionId: string | null = null;
+  let announcedWaiting = false;
   let testIdleConversationConsumed = recoveredConfiguredConversation;
   while (!stopping) {
     const run = await readRun();
@@ -910,6 +923,37 @@ try {
         ? terminalPanel("SESSION CLOSED", ["Reviewer window complete."])
         : terminalPanel("SESSION HALTED", ["Reviewer window complete. Return to Guide for a fresh Brief."]));
       break;
+    }
+    if (!run.sessionId) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      continue;
+    }
+    if (boundSessionId !== run.sessionId) {
+      await activeSession();
+      if (state.sessionId && state.sessionId !== run.sessionId) {
+        throw new Error("Reviewer state changed to a different session during startup.");
+      }
+      state = reviewerWindowState({
+        ...state,
+        status: state.status === "STARTING" ? "READY" : state.status,
+        sessionId: run.sessionId,
+        lastError: state.status === "STARTING" ? null : state.lastError,
+      });
+      await writeReviewerWindowState(runRoot, state);
+      boundSessionId = run.sessionId;
+      console.log(terminalPanel("KODA-C REVIEWER — SESSION READY", [
+        `Session: ${run.sessionId}`,
+        "Owner input: OPEN — active-session conversation belongs here.",
+        "This context remains the Reviewer for the complete session. Leave it open.",
+        "",
+        "You may type while Producer works. New direction is recorded now and waits for the next gate.",
+      ]));
+      if (ownerConsole) process.stdout.write("reviewer> ");
+      announcedWaiting = true;
+    }
+    if (!recoveredOwnerConversation) {
+      await recoverInterruptedOwnerConversation();
+      recoveredOwnerConversation = true;
     }
     const job = await readReviewerJob(runRoot);
     if (!job || job.status === "COMPLETE") {

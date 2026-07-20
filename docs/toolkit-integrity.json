@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "capability": "integrated-role-preflight-v21",
-  "verifiedAt": "2026-07-20T21:20:49.458Z",
-  "repairCommit": "5380f5114fbb917d217cb7b75e8a434879737078",
-  "testedCommit": "5380f5114fbb917d217cb7b75e8a434879737078",
-  "testCount": 250,
+  "capability": "reviewer-session-binding-local-v22",
+  "verifiedAt": "2026-07-20T22:03:41.431Z",
+  "repairCommit": "1799f4bfa10a97501ad0ffdbe8620326f140b698",
+  "testedCommit": "1799f4bfa10a97501ad0ffdbe8620326f140b698",
+  "testCount": 252,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-integrated-role-preflight-pushed.md",
-    "sha256": "fdb2dcd37a8cfc9578b75967a6453b3ddf0d6138023002e56c29e33ea31865bd"
+    "path": "docs/test-results/2026-07-20-reviewer-session-binding-local.md",
+    "sha256": "278a7c543be0f0c82d759fb15b909e13c36ea017d7b5a3fa36afc09ca95c2ad2"
   },
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "1f6ca78d660bc704725d6107d449f1777bcd0ce96dbd381cbd2d6aec58e0b0e8"
+      "sha256": "007e7e61018a264dd63510fa814cd51add77afc34f4875440955f45e8c5ff3b8"
     },
     {
       "path": "src/relay-environment.ts",
@@ -24,11 +24,11 @@
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "94bd00194a02e6b4db2d0d599417fb19e80f71e451bf0b811e5eae334fffdb67"
+      "sha256": "06e9b878eb33dc8290c5c474c3450ad2d5337b55e6433bddc71bbf994f9b0d3e"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "015099e5d3f89c54cd576347e7bad2624fb3a3b9ea50383cbe56a0114cf05b54"
+      "sha256": "d2977e39bcdafb7bad243b4f30b6d842e29599b198e81330d974de2bbb38f1dc"
     },
     {
       "path": "scripts/execute-reviewer-run.ts",
@@ -40,11 +40,11 @@
     },
     {
       "path": "scripts/relay-window-protocol.ts",
-      "sha256": "49a5d6c3abbc072bab458d1af4232ccab6da8365aae391789477a1c9e9c8f649"
+      "sha256": "15024b609dd553ad7ccb2a35e77de5a9f2da06ebf396830afbb22e37fc52162d"
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "fee4185342138fc6dce1620ade79929f2a446beea956337c69091cb2dcc587c1"
+      "sha256": "1f998613923b87b26a99c5fa49245c6838ec7ee4fdc673e2b5d864246f38fc2e"
     },
     {
       "path": "dist/relay-environment.js",
@@ -172,7 +172,7 @@
     },
     {
       "path": "docs/QUICKSTART.md",
-      "sha256": "aa5d622db38814cce70ff79d47d5c6e743988df8ed0ede0a953a98478b28f832"
+      "sha256": "57966b13b1d070fdf5792caccdfd8418fa4eaf261310f3d5597959f4a71696e6"
     },
     {
       "path": "docs/COMMAND-MANUAL.md",

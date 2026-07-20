@@ -127,14 +127,13 @@ Turn the proved two-context session relay into a project-level experience that c
     bundled prompt instead of stopping at requested windows. The expanded Guide,
     Quick Start, plural-runtime, security, and integrity slice passes **68/68**;
     the complete local and unchanged post-push suites pass **246/246**.
-37. [ ] Complete the owner-visible rehearsal of the promoted integrated
-    Producer-role acceptance boundary. The bundled project, installed Codex
-    profile, verified toolkit proof, exact `session new`, native Git, private XDG,
-    and immutable archive now pass local, unchanged post-push, and promoted
-    **250/250** suites under `integrated-role-preflight-v21`. Preserve the
-    232/248 regression failure and private-repository review refusal. The later
-    owner-authorized fresh Terra/medium review returned **APPROVE**; only a fresh
-    owner-visible six-phase session remains.
+37. [ ] Complete the owner-visible rehearsal only after the Reviewer/session
+    startup boundary is promoted. Integrated role preflight passed **250/250** and
+    fresh Terra/medium review, but the next launch exposed owner input before the
+    Reviewer had a session ID. The repaired transition is explicit `STARTING` →
+    exact session binding → `SESSION READY`; Producer and Guide require the same
+    live binding. Local regression passes **252/252**. Record unchanged post-push
+    proof, obtain fresh independent review, then perform one clean six-phase run.
 
 ## Submission cut
 

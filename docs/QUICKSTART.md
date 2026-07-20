@@ -64,6 +64,12 @@ Koda then owns the instructions:
 6. Koda opens Guide. Guide reconstructs the project from disk. When it displays `READY TO LAUNCH`,
    choose `1`. The trusted controller opens exactly one Reviewer and one Producer.
 
+Reviewer may appear first with `STARTING SESSION — NO ACTION NEEDED`. It does not
+accept active-session conversation yet. Producer then creates the disk-backed
+session. Only when Reviewer displays `SESSION READY` and `reviewer>` is the owner
+conversation open. If a line is typed during the short startup interval, the same
+Reviewer window waits and processes it after the session binds instead of exiting.
+
 After launch:
 
 - **Guide:** type normally for project-level conversation. It may remain open

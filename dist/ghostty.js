@@ -35,6 +35,32 @@ import { relayRoleEnvironment } from "./relay-environment.js";
 
 
 
+
+
+export function visibleSessionStartupReady(
+  run                          ,
+  reviewer                               ,
+)          {
+  return Boolean(
+    run?.sessionId &&
+    run.status === "RUNNING" &&
+    !run.lastError &&
+    reviewer?.sessionId === run.sessionId &&
+    ["READY", "WORKING", "AWAITING_OWNER"].includes(String(reviewer.status)) &&
+    !reviewer.lastError
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
 const ROLE_START_ATTEMPTS = 900;
 
 function packageRoot()         {
@@ -454,10 +480,22 @@ async function waitForStartedReviewer(runRoot        )                   {
 async function waitForStartedProducer(runRoot        )                   {
   for (let attempt = 0; attempt < ROLE_START_ATTEMPTS; attempt += 1) {
     const state = await recoveredRunState(runRoot);
+    const reviewerFile = path.join(runRoot, "REVIEWER-STATE.json");
+    const reviewerMetadata = await lstat(reviewerFile).catch(() => null);
+    let reviewer                                = null;
+    if (reviewerMetadata) {
+      if (!reviewerMetadata.isFile() || reviewerMetadata.isSymbolicLink()) {
+        throw new Error("Visible startup requires a real REVIEWER-STATE.json file.");
+      }
+      try {
+        reviewer = JSON.parse(await readFile(reviewerFile, "utf8"))                          ;
+      } catch {
+        throw new Error("Visible startup requires valid Reviewer state JSON.");
+      }
+    }
     if (
       await producerLockAlive(runRoot) &&
-      !["PREPARED", "PAUSED_ERROR", "PAUSED_REVIEWER_FAILURE"].includes(String(state?.status)) &&
-      !state?.lastError
+      visibleSessionStartupReady(state, reviewer)
     ) return true;
     if (["PAUSED_ERROR", "PAUSED_REVIEWER_FAILURE"].includes(String(state?.status))) return false;
     await new Promise((resolve) => setTimeout(resolve, 50));

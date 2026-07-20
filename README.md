@@ -148,6 +148,12 @@ direct final answer instead of flooding the owner with procedural inspection.
   and [security audit](docs/security-runs/2026-07-20-integrated-role-preflight-audit-24/RESULT.md)
   preserve the next owner-visible refusal, the missing whole-journey test, its
   failed 232/248 regression, native Git/XDG correction, and promoted 250-check proof.
+- The [Reviewer session-binding incident](docs/verification-runs/2026-07-20-reviewer-session-binding-race-04/RESULT.md),
+  [sealed review contract](docs/quality-runs/2026-07-20-reviewer-session-binding-19/CONTRACT.md),
+  and [security audit](docs/security-runs/2026-07-20-reviewer-session-binding-audit-25/RESULT.md)
+  preserve the later false-ready prompt, the exact owner question that exposed it,
+  and the 252-check local repair. Post-push, independent, and fresh human proof are
+  kept distinct until each actually exists.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

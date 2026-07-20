@@ -2149,3 +2149,36 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   critical role/startup file. The promoted release and final documentation-bound
   working tree each pass 250/250. Independent review is APPROVE; a fresh
   owner-visible six-phase session remains.
+
+## 2026-07-20 — Reviewer/session startup binding
+
+- **Owner-observed failure:** Launch
+  `115c716e-1c9c-43c5-8e5d-edead043b29a` printed `Owner input: OPEN` and
+  `reviewer>` before its run had a `sessionId`. Kristian typed the ordinary
+  question `What's happening now?`; Reviewer correctly found no active session
+  and exited, but the interface—not the owner—had created the invalid state.
+- **Disk timing:** Reviewer recorded failure at `2026-07-20T21:47:13.523Z`;
+  Producer created and bound session `2026-07-20-01` at
+  `2026-07-20T21:47:14.671Z`. No phase artifact, review, receipt, approval, or
+  advancement was created.
+- **Correction:** Reviewer is `STARTING` and input-closed until it validates and
+  records Producer's exact session ID. Early terminal lines remain in the same
+  process queue and are consumed after `SESSION READY`. Producer does not begin
+  Brief work, and Guide cannot report launch success, until the live Reviewer has
+  that matching identity.
+- **Executable race:** A real Expect-driven Reviewer process receives Kristian's
+  exact question before binding, waits through an 800 ms delayed session open,
+  then answers it in the same process. Separate mutations break missing, starting,
+  malformed, failed, and cross-session readiness.
+- **Honest test history:** The first focused run passed 33/87 because toolkit
+  integrity correctly refused changed protected startup files. With development
+  hashes rebound, 87/88 passed; the remaining old banner assertion was strengthened
+  to require both `STARTING SESSION` and `SESSION READY`. Focused checks then passed
+  88/88, the exact race plus readiness mutation passed 2/2, the security/toolkit
+  slice passed 23/23, and the complete recorded local suite passed
+  [252/252](test-results/2026-07-20-reviewer-session-binding-local.md).
+- **Evidence:** [incident](verification-runs/2026-07-20-reviewer-session-binding-race-04/RESULT.md),
+  [sealed review contract](quality-runs/2026-07-20-reviewer-session-binding-19/CONTRACT.md),
+  and [security audit](security-runs/2026-07-20-reviewer-session-binding-audit-25/RESULT.md).
+- **State:** LOCAL PASS. Post-push regression, manifest promotion, independent
+  review, and fresh owner-visible rehearsal remain separate pending proofs.

@@ -38,11 +38,14 @@ truth for the exact submission requirements.
 - [x] The one-minute refusal fixture is documented in [DEMO.md](DEMO.md).
 - [x] Package safety, install hooks, dependencies, and model-harness boundaries
   are documented in [SECURITY.md](SECURITY.md).
-- [x] The current full suite passes 250/250 unchanged after push against the
-  integrated Producer-role preflight repair and preserves its
+- [x] The integrated Producer-role preflight passes 250/250 unchanged after push
+  and preserves its
   [bound post-push transcript](test-results/2026-07-20-integrated-role-preflight-pushed.md).
   The final promoted manifest and public evidence pass a further
   [250/250 release suite](test-results/2026-07-20-integrated-role-preflight-release-final.md).
+- [ ] Promote the later Reviewer/session startup repair. Its complete
+  [local suite passes 252/252](test-results/2026-07-20-reviewer-session-binding-local.md),
+  while unchanged post-push and fresh independent proof remain pending.
 - [x] A first-time user has one documented command for a complete session;
   confirmation, launch, owner choices, and safe recovery remain inside Koda.
 - [x] A fresh Terra/medium task independently reviewed the complete integrated

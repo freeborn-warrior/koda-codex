@@ -63,19 +63,15 @@ This is the on-disk working queue for the build. A checked item means its eviden
   consumes the bundled prompt through real session creation and Guide binding;
   the expanded Guide, plural-runtime, security, and integrity slice passes
   **68/68** and the complete local and unchanged post-push suites pass **246/246**.
-- [ ] Complete the fresh owner-visible rehearsal for the
-  integrated Producer-role preflight. The owner-observed launch failed because the real
-  restricted Producer could not read toolkit integrity evidence even though the
-  command and profile had passed separately. Quick Start now composes them before
-  `READY`; native Git and private XDG remove blocked ambient probes; the first full
-  regression preserved 16 failures before the corrected local and unchanged
-  post-push **250/250** passes. The promoted manifest then passed a further
-  **250/250** release suite at commit `701d17a`. Capability
-  `integrated-role-preflight-v21` is promoted. The sealed Terra/medium review did
-  not initially run because private-repository export required fresh explicit
-  owner approval. After approval, a new read-only Terra/medium task returned
-  **APPROVE** against the sealed contract and pushed commit `2fdbd9e`. Fresh
-  owner-visible proof remains deliberately separate.
+- [ ] Complete the fresh owner-visible full-session rehearsal. Integrated role
+  preflight is promoted and independently approved, but launch
+  `115c716e-1c9c-43c5-8e5d-edead043b29a` exposed the Reviewer prompt before a
+  session ID existed. The owner did nothing wrong; the interface announced a false
+  readiness state. Reviewer now starts visibly but input-closed, binds the exact
+  Producer-created session, then opens conversation; Producer and Guide refuse
+  until that same live identity is present. The complete local suite passes
+  **252/252**. Finish unchanged post-push proof, fresh independent review, and only
+  then ask Kristian for another recording attempt.
 
 ## Next
 
