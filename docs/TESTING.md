@@ -1774,5 +1774,21 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   project file was changed to hide the refusal.
 - **Audits:** The [quality audit](quality-runs/2026-07-20-conversational-owner-surface-11/RESULT.md)
   and [security audit](security-runs/2026-07-20-conversational-owner-surface-audit-17/RESULT.md)
-  preserve the exact claims and honest boundaries. Post-push integrity binding is
-  still pending and is not implied by these local results.
+  preserve the exact claims and honest boundaries.
+- **Post-push result:** Code and local-evidence commits `1abdf68` and `975678e`
+  reached `origin/main`. The unchanged complete suite then passed **234/234** in
+  the [post-push transcript](test-results/2026-07-20-conversational-reviewer-pushed.md).
+  Toolkit capability `conversational-owner-surface-v14` binds tested commit
+  `975678e`, that transcript, the shared Reviewer skill, and every critical changed
+  terminal/relay file.
+- **Final assembly refusal:** The first package/security/skill/submission/integrity
+  slice after promoting the new proof passed **33/34**. The judge-journey test still
+  required the superseded `232-check` README wording and prior transcript link. The
+  assertion now requires the current `234-check` post-push proof; no product,
+  security, receipt, or gate condition was removed.
+- **Second assembly refusal:** The corrected slice again passed **33/34** and
+  exposed a second sequential stale assertion for `passes 232/232` in the
+  submission checklist. It now requires `passes 234/234`. This was the same
+  evidence-version migration, not a hidden product failure.
+- **Corrected assembly result:** Package, security, skills, judge journey, and
+  toolkit integrity passed **34/34** with the current 234-check claims and links.

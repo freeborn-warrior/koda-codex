@@ -27,8 +27,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Polish the successful three-window surface without changing gate semantics:
   detailed model commands remain in durable events, default progress is concise and
   phase-aware, Reviewer owner conversation leads with its direct answer, and empty
-  conversation output refuses. The full local suite passes **234/234**; pushed
-  integrity proof is the remaining release step for this correction.
+  conversation output refuses. The unchanged pushed suite passes **234/234** under
+  toolkit capability `conversational-owner-surface-v14`.
 
 ## Next
 

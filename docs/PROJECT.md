@@ -192,10 +192,12 @@ owner contract
   `docs/verification-runs/2026-07-19-markdown-headings-01/`. The run validated the
   mechanics and exposed two presentation issues: default event output was too
   inspection-heavy, and owner conversation with Reviewer was too procedural. The
-  local correction keeps detailed events on disk, collapses successful checks into
+  correction keeps detailed events on disk, collapses successful checks into
   one phase-aware total, keeps failures visible, and presents only the Reviewer's
-  direct final answer during ordinary owner conversation. It passes **234/234**
-  locally without changing gate semantics; pushed integrity binding follows.
+  direct final answer during ordinary owner conversation. The unchanged pushed
+  suite passes **234/234** without changing gate semantics; toolkit capability
+  `conversational-owner-surface-v14` binds the transcript, shared Reviewer skill,
+  and changed renderers.
 - Ctrl-C is now a fail-closed operational stop, distinct from workflow-level halt. The supervisor terminates the active model child, saves partial events, marks possible handbacks untrusted, and resumes the same persistent context for a skill-backed reconciliation before routing. Reviewer jobs return to `PENDING`; interrupted owner conversation preserves the exact owner message; missing context identity refuses automatic worker replacement.
 - A disk-backed in-phase consultation protocol lets producer skills suggest reviewer versus owner authority while sending every request to the reviewer. Reviewer advice may escalate to Kristian in the reviewer window but cannot impersonate a product ruling or become a formal phase verdict.
 - The competition repository contains the domain-general gate and a reference Koda-C skill set. It does not yet generate or adapt project-local guidance for a new writing or coding project.
@@ -242,6 +244,9 @@ owner contract
 - [Pushed 230-check deterministic launcher proof](test-results/2026-07-19-deterministic-launcher-migration-pushed.md)
 - [Pushed 230-check atomic role-ownership proof](test-results/2026-07-19-atomic-role-locks-pushed.md)
 - [Pushed 232-check owner review ceremony proof](test-results/2026-07-20-owner-review-ceremony-pushed.md)
+- [Pushed 234-check conversational owner-surface proof](test-results/2026-07-20-conversational-reviewer-pushed.md)
+- [Conversational owner-surface quality audit](quality-runs/2026-07-20-conversational-owner-surface-11/RESULT.md)
+- [Conversational owner-surface security audit](security-runs/2026-07-20-conversational-owner-surface-audit-17/RESULT.md)
 - [Secure persistent Guide security audit](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md)
 - [Secure persistent Guide UX audit](quality-runs/2026-07-19-secure-guide-console-ux-audit-08/RESULT.md)
 - [Pushed 204-check owner-surface proof](test-results/2026-07-19-owner-surface-pushed.md)

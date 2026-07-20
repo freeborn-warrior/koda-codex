@@ -93,8 +93,8 @@ Turn the proved two-context session relay into a project-level experience that c
 31. [x] Correct the successful run's presentation findings without changing the
     workflow: phase-aware progress, aggregated successful checks, visible failures,
     quiet Guide inspection, and direct Reviewer conversation with complete raw
-    events retained on disk. The local release suite passes **234/234**; push and
-    bind the unchanged transcript before submission freeze.
+    events retained on disk. The unchanged pushed release suite passes **234/234**
+    under toolkit capability `conversational-owner-surface-v14`.
 
 ## Submission cut
 

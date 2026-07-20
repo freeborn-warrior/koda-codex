@@ -5,7 +5,7 @@
 **Scope:** Default Guide, Producer, and Reviewer model-event presentation after the
 successful owner-observed six-phase run.
 
-**Result:** LOCAL MECHANICAL PASS — HUMAN TONE REMAINS SUBJECTIVE
+**Result:** PUSHED MECHANICAL PASS — HUMAN TONE REMAINS SUBJECTIVE
 
 ## Owner finding
 
@@ -42,6 +42,9 @@ promises.
 - Coverage run: **234/234 passed**, with **87.75% lines, 71.44% branches, and
   86.14% functions** overall.
 - Dependency-free build and whitespace checks passed.
+- The unchanged pushed candidate passed **234/234** again from commit `975678e`;
+  toolkit capability `conversational-owner-surface-v14` binds that commit, the
+  complete transcript, the shared Reviewer skill, and every changed renderer.
 - The preserved development record includes the initial missing-import failure,
   corrected assertion failure, and skill-validator invocation mistake instead of
   erasing them.
@@ -53,4 +56,3 @@ prove that a particular model response will feel warm, insightful, or natural to
 particular owner. The skill and controller remove the avoidable procedural framing;
 the next real Reviewer conversation remains the honest human test of tone. That
 subjective check does not reopen the already proved gate, recovery, or close result.
-

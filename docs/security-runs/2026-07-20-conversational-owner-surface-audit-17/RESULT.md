@@ -6,7 +6,7 @@
 Reviewer skill integrity, package contents, repository hygiene, and unchanged gate
 enforcement.
 
-**Result:** LOCAL PASS WITH STATED BOUNDARIES
+**Result:** PUSHED PASS WITH STATED BOUNDARIES
 
 ## Security properties preserved
 
@@ -43,6 +43,9 @@ enforcement.
 - Package contains GPLv3, root README, compiled CLI, local Reviewer skill, and the
   intentional one-minute demo fixture. It excludes `.git`, `.koda`, `.env`,
   `.DS_Store`, `node_modules`, and nested package artifacts.
+- The unchanged pushed candidate passed **234/234** from commit `975678e`. Toolkit
+  capability `conversational-owner-surface-v14` binds its transcript and critical
+  Guide, Producer, Reviewer, renderer, permission, and skill bytes.
 
 The first direct `npm audit` invocation refused with `ENOLOCK` because the source
 repository intentionally has no lockfile. An isolated temporary copy then generated
@@ -61,4 +64,3 @@ failed setup changed no repository file and is part of the audit record.
   replacement of the repository or controller remains outside Koda's guarantee.
 - The short review code and receipt show explicit engagement with the ceremony;
   neither proves cognition or comprehension.
-

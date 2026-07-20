@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "conversational-owner-surface-v14",
-  "verifiedAt": "2026-07-20T15:02:28.742Z",
+  "verifiedAt": "2026-07-20T15:12:09.161Z",
   "repairCommit": "1abdf68708d1419e75665b4ef107f6065d902ae8",
-  "testedCommit": "1abdf68708d1419e75665b4ef107f6065d902ae8",
+  "testedCommit": "975678e8aaa2bd8f93e325d9be065f292ba6ae86",
   "testCount": 234,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-conversational-reviewer-provisional.md",
-    "sha256": "ec67eee628e00258289fe6bb5418236234f09148248c3028a96b6d5dae7986e4"
+    "path": "docs/test-results/2026-07-20-conversational-reviewer-pushed.md",
+    "sha256": "2013fe6df2863559b2fa9adef3f8ebc8012675a750a58dd8db5bdf73ba083bc8"
   },
   "files": [
     {
