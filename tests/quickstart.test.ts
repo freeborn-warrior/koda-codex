@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { lstat, readdir } from "node:fs/promises";
+import { chmod, lstat, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
@@ -14,6 +14,17 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
   const project = path.join(parent, "project");
   const hostileGitDirectory = path.join(parent, "ambient-git-dir");
   const hostileGitIndex = path.join(parent, "ambient-git-index");
+  const permissionLog = path.join(parent, "permission-preflight.log");
+  const fakeCodex = path.join(parent, "codex");
+  await writeFile(fakeCodex, [
+    "#!/bin/sh",
+    "case \" $* \" in",
+    "  *'filesystem={'*) echo 'legacy inline filesystem profile refused' >&2; exit 41 ;;",
+    "esac",
+    `printf '%s\\n' \"$*\" >> ${JSON.stringify(permissionLog)}`,
+    "printf '%s\\n' 'codex-cli fixture'",
+  ].join("\n"), "utf8");
+  await chmod(fakeCodex, 0o700);
   const result = spawnSync(process.execPath, [
     path.resolve("scripts/prepare-full-session-demo.ts"),
     "--confirm",
@@ -26,11 +37,18 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
       ...process.env,
       GIT_DIR: hostileGitDirectory,
       GIT_INDEX_FILE: hostileGitIndex,
+      KODA_CODEX_BIN: fakeCodex,
     },
   });
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   assert.match(result.stdout, /READY — FULL SESSION/);
   assert.match(result.stdout, /confirmed, committed, pushed, and mechanically verified/);
+  const permissionCalls = await readFile(permissionLog, "utf8");
+  assert.match(permissionCalls, /default_permissions="koda_guide"/);
+  assert.match(permissionCalls, /default_permissions="koda_project"/);
+  assert.match(permissionCalls, /filesystem\.":workspace_roots"\."\."="read"/);
+  assert.match(permissionCalls, /filesystem\.":workspace_roots"\."\."="write"/);
+  assert.doesNotMatch(permissionCalls, /filesystem=\{/);
 
   assert.equal(execFileSync("git", ["status", "--porcelain"], { cwd: project, encoding: "utf8" }), "");
   assert.equal(execFileSync("git", ["rev-list", "--left-right", "--count", "main...origin/main"], {

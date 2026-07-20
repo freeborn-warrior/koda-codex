@@ -44,25 +44,28 @@ export function codexProjectPermissionArgs(options: {
     }
     return [normalized, access] as const;
   });
-  const filesystem = [
-    `${tomlString(":minimal")}="read",`,
-    ...trustedReadRoots.map((trustedRoot) => `${tomlString(path.resolve(trustedRoot))}="read",`),
-    `${tomlString(":workspace_roots")}={`,
-    `${tomlString(".")}=${tomlString(options.workspaceAccess)},`,
-    ...workspaceOverrides.map(([entry, access]) => `${tomlString(entry)}=${tomlString(access)},`),
-    `${tomlString(".git")}=${tomlString(options.gitAccess ?? "read")},`,
-    `${tomlString(".agents")}="read",`,
-    `${tomlString(".codex")}="read",`,
-    `${tomlString("**/*.env")}="deny"`,
-    "}",
-  ].join("");
+  const filesystemPrefix = `permissions.${profileName}.filesystem`;
+  const filesystemArgs = [
+    "-c", `${filesystemPrefix}.${tomlString(":minimal")}="read"`,
+    ...trustedReadRoots.flatMap((trustedRoot) => [
+      "-c", `${filesystemPrefix}.${tomlString(path.resolve(trustedRoot))}="read"`,
+    ]),
+    "-c", `${filesystemPrefix}.${tomlString(":workspace_roots")}.${tomlString(".")}=${tomlString(options.workspaceAccess)}`,
+    ...workspaceOverrides.flatMap(([entry, access]) => [
+      "-c", `${filesystemPrefix}.${tomlString(":workspace_roots")}.${tomlString(entry)}=${tomlString(access)}`,
+    ]),
+    "-c", `${filesystemPrefix}.${tomlString(":workspace_roots")}.${tomlString(".git")}=${tomlString(options.gitAccess ?? "read")}`,
+    "-c", `${filesystemPrefix}.${tomlString(":workspace_roots")}.${tomlString(".agents")}="read"`,
+    "-c", `${filesystemPrefix}.${tomlString(":workspace_roots")}.${tomlString(".codex")}="read"`,
+    "-c", `${filesystemPrefix}.${tomlString(":workspace_roots")}.${tomlString("**/*.env")}="deny"`,
+  ];
 
   return [
     "--strict-config",
     "-c", 'web_search="disabled"',
     "-c", "allow_login_shell=false",
     "-c", `default_permissions=${tomlString(profileName)}`,
-    "-c", `permissions.${profileName}.filesystem={${filesystem}}`,
+    ...filesystemArgs,
     "-c", `permissions.${profileName}.network.enabled=false`,
   ];
 }

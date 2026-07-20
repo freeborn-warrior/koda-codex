@@ -421,15 +421,22 @@ async function guideTurn(root        , state                   , prompt        )
     await saveGuideConsoleState(root, failed);
     throw new Error(failed.lastError );
   }
+  if (exit !== 0) {
+    const detail = sanitizeGuideTerminalText(stderr.trim().split(/\r?\n/).find((line) => line.trim()) ?? "Codex returned no error detail.");
+    const failed = validateGuideConsoleState({
+      ...working,
+      threadId,
+      status: "FAILED",
+      lastError: `Guide could not start or continue: ${detail}`,
+      updatedAt: now(),
+    });
+    await saveGuideConsoleState(root, failed);
+    throw new Error(`${failed.lastError} Full evidence: ${prefix}-STDERR.txt.`);
+  }
   if (!threadId) {
     const failed = validateGuideConsoleState({ ...working, status: "FAILED", lastError: "The Guide turn emitted no persistent context identifier.", updatedAt: now() });
     await saveGuideConsoleState(root, failed);
     throw new Error(failed.lastError );
-  }
-  if (exit !== 0) {
-    const failed = validateGuideConsoleState({ ...working, threadId, status: "FAILED", lastError: `Guide turn ${turn} exited ${exit}.`, updatedAt: now() });
-    await saveGuideConsoleState(root, failed);
-    throw new Error(`${failed.lastError} See ${prefix}-STDERR.txt.`);
   }
   const ready = validateGuideConsoleState({ ...working, threadId, status: "READY", lastError: null, updatedAt: now() });
   await saveGuideConsoleState(root, ready);

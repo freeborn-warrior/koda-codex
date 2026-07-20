@@ -4,6 +4,14 @@ import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 
+import { codexGuidePermissionArgs, codexRolePermissionArgs } from "../src/codex-role-permissions.ts";
+import {
+  relayCodexEnvironment,
+  relayNodeToolchainReadRoots,
+  resolveRelayCodexExecutable,
+} from "../src/relay-environment.ts";
+import { verifiedToolkitReadPaths } from "../src/toolkit-integrity.ts";
+
 const packageRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const templateRoot = path.join(packageRoot, "demo", "full-session-project");
 const cli = path.join(packageRoot, "dist", "cli.js");
@@ -131,6 +139,25 @@ async function prepare(target: string, owner: string): Promise<void> {
   run(process.execPath, [cli, "guide", "verify"], target, isolatedEnvironment);
 }
 
+async function preflightCodexPermissionProfiles(): Promise<void> {
+  const codex = resolveRelayCodexExecutable();
+  const environment = relayCodexEnvironment(process.env);
+  const toolchain = relayNodeToolchainReadRoots();
+  const profiles = [
+    codexGuidePermissionArgs(
+      cli,
+      codex,
+      toolchain,
+      ["docs/guide"],
+      await verifiedToolkitReadPaths(),
+    ),
+    codexRolePermissionArgs(cli, codex, toolchain),
+  ];
+  for (const profile of profiles) {
+    run(codex, [...profile, "--version"], packageRoot, environment);
+  }
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const shouldOpen = flag(args, "--open");
@@ -176,6 +203,7 @@ async function main(): Promise<void> {
     }
     if (choice !== "1") throw new Error("Choose exactly 1 or 2. Nothing was created.");
 
+    await preflightCodexPermissionProfiles();
     await prepare(target, owner);
     console.log("────────────────────────────────────────────────────────");
     console.log("READY — FULL SESSION");

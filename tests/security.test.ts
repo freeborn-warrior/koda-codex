@@ -29,11 +29,12 @@ test("PROJECT SANDBOX SUITE: role turns fail closed with project-scoped read and
   assert.match(joined, /"\/trusted\/koda\/package\.json"="read"/);
   assert.match(joined, /"\/trusted\/codex\/bin\/codex"="read"/);
   assert.match(joined, /"\/trusted\/toolchain"="read"/);
-  assert.match(joined, /":workspace_roots"=\{"\."="write"/);
-  assert.match(joined, /"\.git"="read"/);
-  assert.match(joined, /"\.agents"="read"/);
-  assert.match(joined, /"\.codex"="read"/);
-  assert.match(joined, /"\*\*\/\*\.env"="deny"/);
+  assert.match(joined, /filesystem\.":workspace_roots"\."\."="write"/);
+  assert.match(joined, /filesystem\.":workspace_roots"\."\.git"="read"/);
+  assert.match(joined, /filesystem\.":workspace_roots"\."\.agents"="read"/);
+  assert.match(joined, /filesystem\.":workspace_roots"\."\.codex"="read"/);
+  assert.match(joined, /filesystem\.":workspace_roots"\."\*\*\/\*\.env"="deny"/);
+  assert.doesNotMatch(joined, /filesystem=\{/);
   assert.match(joined, /permissions\.koda_project\.network\.enabled=false/);
   assert.doesNotMatch(joined, /workspace-write/);
   assert.throws(() => codexRolePermissionArgs("relative/dist/cli.js", "/trusted/codex", []), /must be absolute/);
@@ -53,8 +54,8 @@ test("PROJECT SANDBOX SUITE: the Node toolchain root is a narrow explicit read c
 
 test("PROJECT SANDBOX SUITE: read-only probes cannot mutate their workspace", () => {
   const joined = codexProjectPermissionArgs({ workspaceAccess: "read" }).join("\n");
-  assert.match(joined, /":workspace_roots"=\{"\."="read"/);
-  assert.doesNotMatch(joined, /"\."="write"/);
+  assert.match(joined, /filesystem\.":workspace_roots"\."\."="read"/);
+  assert.doesNotMatch(joined, /filesystem\.":workspace_roots"\."\."="write"/);
   assert.throws(
     () => codexProjectPermissionArgs({ workspaceAccess: "read", trustedReadRoots: ["relative"] }),
     /must be absolute/,

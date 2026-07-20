@@ -35,7 +35,9 @@ test("GUIDE CONSOLE SECURITY: every turn ignores ambient config and rules under 
   assert.match(rendered, /--ignore-rules/);
   assert.match(rendered, /default_permissions="koda_guide"/);
   assert.match(rendered, /permissions\.koda_guide\.network\.enabled=false/);
-  assert.match(rendered, /":workspace_roots"=\{"\."="read","\.git"="read","\.agents"="read","\.codex"="read","\*\*\/\*\.env"="deny"\}/);
+  assert.match(rendered, /filesystem\.":workspace_roots"\."\."="read"/);
+  assert.match(rendered, /filesystem\.":workspace_roots"\."\.git"="read"/);
+  assert.doesNotMatch(rendered, /filesystem=\{/);
   assert.doesNotMatch(rendered, /workspace-write|danger-full-access|on-request/);
 
   const resumed = guideTurnArguments({
@@ -354,6 +356,33 @@ test("GUIDE CONSOLE PERSISTENCE: a closed console resumes the same independent G
   assert.equal(secondState.threadId, firstState.threadId);
   assert.equal(secondState.turns, 2);
   assert.equal(secondState.status, "READY");
+});
+
+test("GUIDE CONSOLE STARTUP REFUSAL: the primary Codex error is shown before a missing context symptom", async (t) => {
+  const root = await temporaryRoot(t, "koda-guide-primary-error-");
+  await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
+  await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
+  await mkdir(path.join(root, "docs", "guide"), { recursive: true });
+  await writeFile(path.join(root, "docs", "PROJECT.md"), "# Fixture project\n", "utf8");
+  await writeJsonAtomic(path.join(root, "docs", "guide", "project.json"), {
+    version: 1,
+    project: "Primary startup error fixture",
+    continuityFiles: ["docs/PROJECT.md"],
+  });
+  const fakeCodex = path.join(root, "fake-codex");
+  await writeFile(fakeCodex, [
+    "#!/bin/sh",
+    "printf '%s\\n' 'Error loading config.toml: invalid permission profile' >&2",
+    "exit 1",
+  ].join("\n"), "utf8");
+  await chmod(fakeCodex, 0o700);
+
+  const result = await runConsoleProcess(root, fakeCodex);
+  assert.equal(result.status, 1);
+  assert.match(result.output, /Guide could not start or continue: Error loading config\.toml: invalid permission profile/);
+  assert.doesNotMatch(result.output, /emitted no persistent context identifier/);
+  const state = JSON.parse(await readFile(path.join(root, ".koda", "guide", "STATE.json"), "utf8"));
+  assert.match(state.lastError, /invalid permission profile/);
 });
 
 test("GUIDE CONSOLE INPUT RECOVERY: input closing during a long startup exits cleanly after preserving the turn", async (t) => {
