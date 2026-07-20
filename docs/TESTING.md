@@ -2193,5 +2193,9 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   26/26; no assertion was removed or generalized.
 - **State:** POST-PUSH PASS. Capability `reviewer-session-binding-v22` binds
   repair/tested commit `ec1df13`, the unchanged transcript, and the critical
-  startup surface. Independent review and fresh owner-visible rehearsal remain
-  separate pending proofs.
+  startup surface. The promoted manifest and judge-facing evidence at pushed
+  commit `24ebd5b` pass a further
+  [252/252 release suite](test-results/2026-07-20-reviewer-session-binding-release.md),
+  SHA-256 `1e05d99bbd30cf3bfd8fb6efad665f10c06bbdb7e38a46d8f56157f4802d7b7a`.
+  Independent review and fresh owner-visible rehearsal remain separate pending
+  proofs.

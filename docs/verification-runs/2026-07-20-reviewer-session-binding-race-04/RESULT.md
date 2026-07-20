@@ -5,6 +5,7 @@
 - Result: **FAIL — REVIEWER EXPOSED INPUT BEFORE SESSION BINDING**
 - Local corrected suite: [252/252](../../test-results/2026-07-20-reviewer-session-binding-local.md)
 - Unchanged post-push suite: [252/252](../../test-results/2026-07-20-reviewer-session-binding-pushed.md)
+- Promoted release suite: [252/252](../../test-results/2026-07-20-reviewer-session-binding-release.md)
 - Promoted capability: `reviewer-session-binding-v22`, repair/tested commit `ec1df13`
 - Fresh owner-visible retry: required only after independent proof
 
@@ -68,3 +69,5 @@ strengthened to require both `STARTING SESSION` and `SESSION READY`; the focused
 slice then passed 88/88, the race/security subset passed, and the complete recorded
 local suite passed 252/252. The unchanged pushed repair at `ec1df13` then passed a
 second recorded 252/252 and was promoted into toolkit integrity.
+The promoted manifest and judge-facing evidence at `24ebd5b` then passed a third
+complete 252/252 release suite.

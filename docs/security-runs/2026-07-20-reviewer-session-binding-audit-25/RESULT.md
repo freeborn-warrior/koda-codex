@@ -6,6 +6,7 @@
 - Status: **POST-PUSH PASS — INDEPENDENT REVIEW PENDING**
 - Local complete regression: [252/252](../../test-results/2026-07-20-reviewer-session-binding-local.md)
 - Unchanged post-push regression: [252/252](../../test-results/2026-07-20-reviewer-session-binding-pushed.md)
+- Promoted release regression: [252/252](../../test-results/2026-07-20-reviewer-session-binding-release.md)
 
 ## Findings
 

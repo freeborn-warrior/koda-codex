@@ -47,7 +47,9 @@ truth for the exact submission requirements.
   [local suite passes 252/252](test-results/2026-07-20-reviewer-session-binding-local.md),
   and the unchanged pushed commit passes a second
   [252/252](test-results/2026-07-20-reviewer-session-binding-pushed.md) under
-  capability `reviewer-session-binding-v22`. Fresh independent proof remains pending.
+  capability `reviewer-session-binding-v22`. The promoted evidence passes a third
+  [252/252 release suite](test-results/2026-07-20-reviewer-session-binding-release.md).
+  Fresh independent proof remains pending.
 - [x] A first-time user has one documented command for a complete session;
   confirmation, launch, owner choices, and safe recovery remain inside Koda.
 - [x] A fresh Terra/medium task independently reviewed the complete integrated
