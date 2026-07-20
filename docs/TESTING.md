@@ -1904,3 +1904,8 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   `self-guided-full-session-v16` binds implementation commit `410f614` and the
   241-check transcript. Documentation, audits, manifest promotion, push, and an
   unchanged post-push suite remain before human handoff.
+- **Post-push result:** Implementation and local evidence reached `origin/main` at
+  `75da47c`. The unchanged complete suite passed **241/241** in the
+  [post-push transcript](test-results/2026-07-20-self-guided-full-session-pushed.md).
+  Toolkit capability `self-guided-full-session-v16` now binds that pushed commit,
+  transcript, and every critical first-use or launch file.

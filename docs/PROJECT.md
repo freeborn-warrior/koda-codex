@@ -180,7 +180,7 @@ owner contract
   the trusted launcher; choice `2` leaves the launch untouched. Preparation uses an
   isolated Git environment, and an adversarial test proves ambient `GIT_DIR` and
   `GIT_INDEX_FILE` cannot redirect it. Toolkit capability
-  `self-guided-full-session-v16` binds the **241/241** hardened suite. A fresh
+  `self-guided-full-session-v16` binds the **241/241** post-push suite. A fresh
   owner-observed run remains separate human evidence before submission.
 - A real secure-Guide recovery then proved that the saved role launcher still
   depended on the terminal which created it. Guide refused safely twice with zero

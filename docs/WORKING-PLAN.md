@@ -106,7 +106,7 @@ Turn the proved two-context session relay into a project-level experience that c
     complete-session entry command, a nontechnical Quick Start and consequence-led
     command manual, controller-owned numbered launch, isolated Git preparation,
     and adversarial proof that ambient Git settings cannot redirect writes. The
-    hardened implementation passes **241/241** under
+    unchanged pushed implementation passes **241/241** under
     `self-guided-full-session-v16`.
 
 ## Submission cut

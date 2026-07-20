@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "self-guided-full-session-v16",
-  "verifiedAt": "2026-07-20T18:10:08.782Z",
+  "verifiedAt": "2026-07-20T18:18:52.140Z",
   "repairCommit": "410f6147b687975537c204f0bb001ff9fb139014",
-  "testedCommit": "410f6147b687975537c204f0bb001ff9fb139014",
+  "testedCommit": "75da47c3b2a422c8998ba54aec6b697d405914c9",
   "testCount": 241,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-self-guided-full-session-security-final.md",
-    "sha256": "ecd5cc443df9a694ec512d54f07b97fc40a97aecf9df14162ae64121216bfc16"
+    "path": "docs/test-results/2026-07-20-self-guided-full-session-pushed.md",
+    "sha256": "4df3a921811d2b0330d23bc2e57b1fe1d8b845a5aded80d7b335754f68b3b63b"
   },
   "files": [
     {
