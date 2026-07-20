@@ -1,7 +1,7 @@
 # First-use UX audit 07 — stable handover and optional terminal adapter
 
 **Date:** 2026-07-19  
-**Verdict:** LOCAL DETERMINISTIC FLOW PASS; PUSHED PROOF AND OWNER OBSERVATION PENDING
+**Verdict:** PUSHED-CODE AND MANIFEST FLOW PASS; POST-PUSH CHECK AND OWNER OBSERVATION PENDING
 
 ## Product boundary
 
@@ -41,6 +41,10 @@ binding problem rather than guessing which decision the owner meant.
 - The live verification project remained untouched at its existing Brief decision.
 - Development failures are preserved in the
   [development record](../../test-results/2026-07-19-stable-handover-recovery-development-failures.md).
+- Repair commit `93efd1a` reached `origin/main`; its unchanged
+  [210-check transcript](../../test-results/2026-07-19-stable-handover-recovery-pushed.md)
+  is bound by toolkit capability `ghostty-stable-handover-recovery-v8`.
+- The complete current-document and manifest regression passed 210/210.
 
 Mechanical tests prove state classification, minimal choices, job binding, opening
 order, readiness refusal, and retry. They cannot prove that Ghostty feels clear,

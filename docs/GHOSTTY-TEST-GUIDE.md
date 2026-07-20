@@ -20,16 +20,20 @@ gate stayed shut: zero ledger entries and zero advanced phases.
 
 Session `2026-07-19-02` remains safely recoverable with the same review and context
 identities. Do not create another session or manually start either role. The pushed
-206-check capability `ghostty-repeatable-recovery-v7` covers the exact recovery
+210-check capability `ghostty-stable-handover-recovery-v8` covers the exact recovery
 shapes that the live attempt exposed:
 
 - if Reviewer is still running, Koda opens only the missing Producer;
 - if Reviewer also disappeared, Koda restores Reviewer first and opens Producer only
   after Reviewer reaches the saved owner decision;
 - if either readiness check fails, the later role stays closed and Guide names the
-  unchanged pause; and
+  unchanged pause, and the same Guide recovery choice remains available; and
 - if a restored role later disappears from the same owner handover, the same
   disk-bound recovery remains available instead of becoming a one-shot dead end.
+
+The same mechanism applies at every stable formal, repair, or fresh owner decision,
+not only the Brief incident that first exposed the recovery need. Its recovery
+record binds the exact Reviewer job; changed or missing job evidence refuses.
 
 The gate remains unchanged throughout recovery. See the
 [sanitized receipt UX incident](verification-runs/2026-07-19-markdown-headings-01/RECEIPT-UX-INCIDENT.md).

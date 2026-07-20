@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "capability": "ghostty-repeatable-recovery-v7",
-  "verifiedAt": "2026-07-19T23:39:08.022Z",
-  "repairCommit": "b9b63ebd2070dbc4e5e06ebc39d62e7d32800f85",
-  "testedCommit": "b9b63ebd2070dbc4e5e06ebc39d62e7d32800f85",
-  "testCount": 206,
+  "capability": "ghostty-stable-handover-recovery-v8",
+  "verifiedAt": "2026-07-19T23:56:55.271Z",
+  "repairCommit": "93efd1a78dd98b8e17c7ee5b1926f04ebb395aad",
+  "testedCommit": "93efd1a78dd98b8e17c7ee5b1926f04ebb395aad",
+  "testCount": 210,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-repeatable-recovery-manifest-corrected.md",
-    "sha256": "59d5fd8a73766a9ba5fe7ad696de4a71e09ae13447056c38694f4a10b6fcc626"
+    "path": "docs/test-results/2026-07-19-stable-handover-recovery-pushed.md",
+    "sha256": "2feb4232fb0aaec672f2792752ec1863495249bd77e52078ce7ea1d6f619df06"
   },
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "cb99a4af5ab95fcaba0ac1e27ed534e72941196fb4ab74a2ef4b95b1997a8187"
+      "sha256": "d219021e12448776454fde689043ebd2e25237e95f6ec3e9e5dd5351d7b693d6"
     },
     {
       "path": "src/relay-environment.ts",
@@ -36,7 +36,7 @@
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "72c852b0f0c85b7e8232bfee9b7992dbf24ad30960bab530cb01dfcd71e44459"
+      "sha256": "d685b7d6fa7adadd8ddfa5928c4ec925b6871090c81b5e1c6d37bcb0ed4b35ae"
     },
     {
       "path": "dist/relay-environment.js",

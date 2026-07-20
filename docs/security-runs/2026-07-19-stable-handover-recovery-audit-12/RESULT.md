@@ -1,7 +1,7 @@
 # Security audit 12 — stable owner-handover recovery
 
 **Date:** 2026-07-19  
-**Verdict:** LOCAL DETERMINISTIC SECURITY PASS; PUSHED PROOF AND HUMAN OBSERVATION PENDING
+**Verdict:** PUSHED-CODE AND MANIFEST SECURITY PASS; POST-PUSH CHECK AND HUMAN OBSERVATION PENDING
 
 ## Scope
 
@@ -48,6 +48,11 @@ work.
 - Diff whitespace, tracked-symlink scan, and reachable Git connectivity: pass.
 - Development failures remain in the
   [development record](../../test-results/2026-07-19-stable-handover-recovery-development-failures.md).
+- Repair commit `93efd1a` reached `origin/main`; the unchanged complete suite passed
+  210/210 in the [pushed transcript](../../test-results/2026-07-19-stable-handover-recovery-pushed.md).
+  Toolkit capability `ghostty-stable-handover-recovery-v8` binds that evidence.
+- The complete manifest regression passed 210/210 after current README, submission,
+  project, backlog, working-plan, UX, security, and Ghostty boundary updates.
 
 ## Residual boundaries
 

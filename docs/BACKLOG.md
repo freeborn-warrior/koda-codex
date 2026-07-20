@@ -6,7 +6,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery, numbered retry, hidden technical commands, fresh-model isolation, and hardened Git locking now pass a pushed, integrity-bound 206/206 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, and hardened Git locking now pass a pushed, integrity-bound 210/210 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
@@ -38,6 +38,13 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Generalize visible recovery from the historical Brief receipt incident to any
+  stable formal, repair, or fresh owner handover. Recovery validates and binds the
+  exact Reviewer job, restores only missing roles in Reviewer-first order, and stays
+  recoverable after a named window-readiness failure. Repair commit `93efd1a` passes
+  an unchanged pushed **210/210** transcript under toolkit capability
+  `ghostty-stable-handover-recovery-v8`; human observation remains required.
 
 - [x] Make a saved owner decision recoverable even if both visible windows disappear,
   and keep recovery available if a role later disappears again. Reviewer always

@@ -1383,5 +1383,13 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   checks pass.
 - **Audits:** [Security audit 12](security-runs/2026-07-19-stable-handover-recovery-audit-12/RESULT.md)
   and [first-use UX audit 07](quality-runs/2026-07-19-stable-handover-recovery-ux-audit-07/RESULT.md).
-- **State:** LOCAL DETERMINISTIC PASS. Pushed-code transcript, release-manifest
-  binding, and owner observation remain pending.
+- **Pushed-code result:** Repair commit `93efd1a` reached `origin/main`, then the
+  unchanged complete suite passed **210/210** with every named result in the
+  [pushed transcript](test-results/2026-07-19-stable-handover-recovery-pushed.md).
+  Toolkit capability `ghostty-stable-handover-recovery-v8` binds that commit,
+  transcript, and changed launch surface.
+- **Manifest regression:** After binding the exact pushed transcript, repair commit,
+  current source/distribution hashes, and current judge links, the unchanged complete
+  suite passed **210/210** again.
+- **State:** PUSHED DETERMINISTIC AND MANIFEST PASS. Post-push focused slice and owner
+  observation remain pending.
