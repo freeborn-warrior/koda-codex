@@ -11,6 +11,7 @@ import {
   guideConsoleWritePaths,
   guideStartupPrompt,
   guideTurnArguments,
+  performGuideLaunchChoice,
   renderGuideEvent,
   sanitizeGuideTerminalText,
   validateGuideConsoleState,
@@ -174,8 +175,24 @@ test("GUIDE OPEN UX: one command enters the persistent console without opening s
   await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
   await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
   const output: string[] = [];
-  let opened: { project: string; model: string | null; effort: string | null } | null = null;
-  await runGuideCli(["open", "--model", "gpt-5.6-sol", "--effort", "medium"], root, {
+  let opened: {
+    project: string;
+    model: string | null;
+    effort: string | null;
+    producerModel: string | null;
+    producerEffort: string | null;
+    reviewerModel: string | null;
+    reviewerEffort: string | null;
+  } | null = null;
+  await runGuideCli([
+    "open",
+    "--model", "gpt-5.6-sol",
+    "--effort", "medium",
+    "--producer-model", "gpt-5.6-sol",
+    "--producer-effort", "medium",
+    "--reviewer-model", "gpt-5.6-terra",
+    "--reviewer-effort", "medium",
+  ], root, {
     out(message) { output.push(message); },
   }, {
     async openGhostty() { throw new Error("Guide open must not open Producer or Reviewer."); },
@@ -184,10 +201,88 @@ test("GUIDE OPEN UX: one command enters the persistent console without opening s
       return 0;
     },
   });
-  assert.deepEqual(opened, { project: root, model: "gpt-5.6-sol", effort: "medium" });
+  assert.deepEqual(opened, {
+    project: root,
+    model: "gpt-5.6-sol",
+    effort: "medium",
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
   assert.match(output.join("\n"), /OPENING SECURE GUIDE/);
-  assert.match(output.join("\n"), /opens neither one/);
+  assert.match(output.join("\n"), /numbered Guide choice may open them later/);
   assert.doesNotMatch(output.join("\n"), /Guide console closed/);
+});
+
+test("GUIDE OPEN UX: partial launch staffing refuses before the Guide opens", async (t) => {
+  const root = await temporaryRoot(t, "koda-guide-open-partial-staffing-");
+  await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
+  await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
+  let opened = false;
+  await assert.rejects(runGuideCli([
+    "open",
+    "--producer-model", "gpt-5.6-sol",
+  ], root, { out() {} }, {
+    async openGhostty() { throw new Error("not used"); },
+    async openGuide() { opened = true; return 0; },
+  }), /needs Producer and Reviewer model plus effort together/);
+  assert.equal(opened, false);
+});
+
+test("GUIDE NUMBERED LAUNCH: 2 preserves a pushed launch and 1 opens the two staffed roles", async (t) => {
+  const root = await temporaryRoot(t, "koda-guide-numbered-launch-");
+  await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
+  await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
+  await mkdir(path.join(root, "docs", "guide", "launches"), { recursive: true });
+  await writeJsonAtomic(path.join(root, "docs", "guide", "launches", "11111111-1111-4111-8111-111111111111.json"), {
+    version: 1,
+    id: "11111111-1111-4111-8111-111111111111",
+    status: "READY_TO_LAUNCH",
+    prompt: "docs/guide/prompts/session.md",
+    promptSha256: "a".repeat(64),
+    manifest: { path: "docs/guide/project.json", sha256: "b".repeat(64) },
+    continuity: [],
+    previousSessionId: null,
+    previousCloseSha256: null,
+    previousCarryForward: null,
+    sessionKind: "produce",
+    launchMode: "independent",
+    dependencies: [],
+    confirmedBy: "Fixture Owner",
+    confirmedAt: new Date(0).toISOString(),
+  });
+
+  const staffing = {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  };
+  let opened = 0;
+  const later = await performGuideLaunchChoice(root, "2", staffing, {
+    async launch() { opened += 1; return { message: "should not run", requests: [] }; },
+  });
+  assert.equal(later.handled, true);
+  assert.match(later.message!, /remains ready for later/);
+  assert.equal(opened, 0);
+
+  const launched = await performGuideLaunchChoice(root, "1", staffing, {
+    async launch() {
+      opened += 1;
+      return {
+        message: "THREE-CONTEXT START REQUESTED",
+        requests: [
+          { role: "reviewer", title: "Reviewer", args: ["reviewer"] },
+          { role: "producer", title: "Producer", args: ["producer"] },
+        ],
+      };
+    },
+  });
+  assert.equal(launched.handled, true);
+  assert.equal(opened, 1);
+  assert.equal(launched.requests?.map((item) => item.role).join(","), "reviewer,producer");
+  assert.match(launched.message!, /THREE-CONTEXT START REQUESTED/);
 });
 
 async function runConsoleProcess(root: string, fakeCodex: string): Promise<{ status: number; output: string }> {

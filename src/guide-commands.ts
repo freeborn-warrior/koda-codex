@@ -40,7 +40,14 @@ export interface GuideCliDependencies {
     runtime: NonNullable<Awaited<ReturnType<typeof currentGuideRuntime>>>,
     toolkit: Awaited<ReturnType<typeof verifyToolkitIntegrity>>,
   ): Promise<GhosttyWindowRequest[]>;
-  openGuide?(project: string, options: { model: string | null; effort: string | null }): Promise<number>;
+  openGuide?(project: string, options: {
+    model: string | null;
+    effort: string | null;
+    producerModel: string | null;
+    producerEffort: string | null;
+    reviewerModel: string | null;
+    reviewerEffort: string | null;
+  }): Promise<number>;
 }
 
 const defaultIo: GuideCliIo = { out: (message) => console.log(message) };
@@ -53,6 +60,10 @@ const defaultDependencies: GuideCliDependencies = {
       script,
       ...(options.model ? ["--model", options.model] : []),
       ...(options.effort ? ["--effort", options.effort] : []),
+      ...(options.producerModel ? ["--producer-model", options.producerModel] : []),
+      ...(options.producerEffort ? ["--producer-effort", options.producerEffort] : []),
+      ...(options.reviewerModel ? ["--reviewer-model", options.reviewerModel] : []),
+      ...(options.reviewerEffort ? ["--reviewer-effort", options.reviewerEffort] : []),
     ], { cwd: project, stdio: "inherit", env: process.env });
     return result.status ?? 1;
   },
@@ -89,7 +100,7 @@ function help(io: GuideCliIo): void {
   io.out("Koda Guide — disk-backed continuity between Koda sessions");
   io.out("");
   io.out("Commands:");
-  io.out("  koda guide open [--model <model>] [--effort <effort>]");
+  io.out("  koda guide open [--model <model>] [--effort <effort>] [--producer-model <model>] [--producer-effort <effort>] [--reviewer-model <model>] [--reviewer-effort <effort>]");
   io.out("  koda guide status");
   io.out("  koda guide claim <path> [path...]");
   io.out("  koda guide confirm <prompt-file> --owner <name> [--kind <kind>] [--depends-on <session-id>] [--independent]");
@@ -114,12 +125,27 @@ export async function runGuideCli(
   if (verb === "open") {
     const model = option(rest, "--model");
     const effort = option(rest, "--effort");
+    const producerModel = option(rest, "--producer-model");
+    const producerEffort = option(rest, "--producer-effort");
+    const reviewerModel = option(rest, "--reviewer-model");
+    const reviewerEffort = option(rest, "--reviewer-effort");
     rejectUnknownOptions(rest);
-    if (rest.length) throw new Error("Usage: koda guide open [--model <model>] [--effort <effort>]");
+    if (rest.length) throw new Error("Usage: koda guide open [--model <model>] [--effort <effort>] [--producer-model <model>] [--producer-effort <effort>] [--reviewer-model <model>] [--reviewer-effort <effort>]");
+    const roleAssignments = [producerModel, producerEffort, reviewerModel, reviewerEffort];
+    if (roleAssignments.some(Boolean) && !roleAssignments.every(Boolean)) {
+      throw new Error("Guide launch staffing needs Producer and Reviewer model plus effort together.");
+    }
     io.out("OPENING SECURE GUIDE");
     io.out("One persistent project conversation will reconstruct its state from disk.");
-    io.out("Producer and Reviewer remain separate; this command opens neither one.");
-    const status = await (dependencies.openGuide ?? defaultDependencies.openGuide!)(root, { model, effort });
+    io.out("Producer and Reviewer remain separate; a verified numbered Guide choice may open them later.");
+    const status = await (dependencies.openGuide ?? defaultDependencies.openGuide!)(root, {
+      model,
+      effort,
+      producerModel,
+      producerEffort,
+      reviewerModel,
+      reviewerEffort,
+    });
     if (status !== 0) throw new Error("The secure Guide console exited with an error. Project and session evidence remain on disk.");
     return;
   }

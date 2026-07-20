@@ -10,8 +10,8 @@ import { codexGuidePermissionArgs } from "./codex-role-permissions.js";
 import { findProjectRoot, pathExists, readProjectConfig } from "./config.js";
 import { runGuideCli } from "./guide-commands.js";
 import { currentGuideRuntime, listGuideRuntimes } from "./guide-runtime.js";
-import { guideRoot, hasGuideManifest, loadGuideManifest } from "./guide.js";
-import { partialRecoveryRoles, requestGhosttyRecoveryWindows,                           } from "./ghostty.js";
+import { guideRoot, hasGuideManifest, loadGuideManifest, pendingGuideLaunches } from "./guide.js";
+import { partialRecoveryRoles, requestGhosttyRecoveryWindows, requestGhosttyWindows,                           } from "./ghostty.js";
 import { relayNodeToolchainReadRoots, relayCodexEnvironment, resolveRelayCodexExecutable } from "./relay-environment.js";
 import { sanitizeTerminalText, terminalBlock, terminalPanel } from "./terminal-ui.js";
 import { writeJsonAtomic } from "./project.js";
@@ -43,8 +43,49 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 const defaultRecoveryDependencies                            = {
   recoverGhostty: requestGhosttyRecoveryWindows,
+};
+
+
+
+
+
+
+
+
+
+
+const defaultLaunchDependencies                          = {
+  async launch(root, staffing) {
+    const lines           = [];
+    let requests                         = [];
+    await runGuideCli([
+      "launch",
+      "--producer-model", staffing.producerModel,
+      "--producer-effort", staffing.producerEffort,
+      "--reviewer-model", staffing.reviewerModel,
+      "--reviewer-effort", staffing.reviewerEffort,
+      "--open", "ghostty",
+    ], root, { out(message) { lines.push(message); } }, {
+      async openGhostty(project, prepared) {
+        requests = await requestGhosttyWindows(project, prepared);
+        return requests;
+      },
+    });
+    return { message: lines.join("\n"), requests };
+  },
 };
 
 function now()         {
@@ -435,6 +476,55 @@ export async function performGuideRecoveryChoice(
   };
 }
 
+export async function performGuideLaunchChoice(
+  root        ,
+  choice        ,
+  staffing                     ,
+  dependencies                          = defaultLaunchDependencies,
+)                                                                                     {
+  const config = await readProjectConfig(root);
+  const pending = await pendingGuideLaunches(root, config);
+  if (pending.length === 0) return { handled: false };
+  if (pending.length > 1 && (choice === "1" || choice === "2")) {
+    return {
+      handled: true,
+      message: `Koda found ${pending.length} ready launches. A bare number is ambiguous, so nothing changed.`,
+    };
+  }
+  if (choice === "2") {
+    return { handled: true, message: "Nothing changed. The verified launch remains ready for later." };
+  }
+  if (choice !== "1") return { handled: false };
+
+  const assignments = [
+    validateAssignment(staffing.producerModel, "Producer model"),
+    validateAssignment(staffing.producerEffort, "Producer effort"),
+    validateAssignment(staffing.reviewerModel, "Reviewer model"),
+    validateAssignment(staffing.reviewerEffort, "Reviewer effort"),
+  ];
+  if (assignments.some((value) => value === null)) {
+    return {
+      handled: true,
+      message: "LAUNCH PAUSED SAFELY — this Guide was opened without complete Producer and Reviewer staffing. Nothing opened or advanced. Reopen Guide using the documented full-session command.",
+    };
+  }
+
+  try {
+    const launched = await dependencies.launch(root, {
+      producerModel: assignments[0] ,
+      producerEffort: assignments[1] ,
+      reviewerModel: assignments[2] ,
+      reviewerEffort: assignments[3] ,
+    });
+    return { handled: true, message: launched.message, requests: launched.requests };
+  } catch (error) {
+    return {
+      handled: true,
+      message: `LAUNCH PAUSED SAFELY — ${sanitizeGuideTerminalText(error instanceof Error ? error.message : String(error))}\nNothing opened blindly, acknowledged, or advanced. This Guide remains open.`,
+    };
+  }
+}
+
 function guideStatusData(status        )         {
   return [
     "The trusted Koda controller ran `koda guide status` immediately before this turn.",
@@ -489,6 +579,12 @@ export async function runGuideConsole(options                      = {})        
   try {
     const requestedModel = validateAssignment(options.model, "Guide model");
     const requestedEffort = validateAssignment(options.effort, "Guide effort");
+    const launchStaffing                      = {
+      producerModel: validateAssignment(options.producerModel, "Producer model"),
+      producerEffort: validateAssignment(options.producerEffort, "Producer effort"),
+      reviewerModel: validateAssignment(options.reviewerModel, "Reviewer model"),
+      reviewerEffort: validateAssignment(options.reviewerEffort, "Reviewer effort"),
+    };
     const existing = await readGuideConsoleState(root);
     if (existing?.model && requestedModel && existing.model !== requestedModel) {
       throw new Error(`The persistent Guide is already bound to model ${existing.model}; refusing ${requestedModel}.`);
@@ -562,6 +658,25 @@ export async function runGuideConsole(options                      = {})        
         if (action.requests) {
           const status = await currentGuideStatus(root);
           state = await guideTurn(root, state, `The owner selected the displayed recovery choice and Koda's trusted controller performed it. Explain the exact observed result from the supplied status and wait. Do not infer success from a window request alone.\n\n${guideStatusData(status)}`);
+        }
+        continue;
+      }
+      let launchAction                                                      ;
+      try {
+        launchAction = await performGuideLaunchChoice(root, input, launchStaffing);
+      } catch (error) {
+        console.log(terminalPanel("GUIDE LAUNCH CHECK REFUSED", [
+          sanitizeGuideTerminalText(error instanceof Error ? error.message : String(error)),
+          "",
+          "Nothing opened or advanced. This Guide remains open.",
+        ]));
+        continue;
+      }
+      if (launchAction.handled) {
+        console.log(terminalBlock(launchAction.message ?? "Guide launch choice completed."));
+        if (launchAction.requests) {
+          const status = await currentGuideStatus(root);
+          state = await guideTurn(root, state, `The owner selected the displayed launch choice and Koda's trusted controller performed it. Explain the exact observed result from the supplied status and wait. Do not infer success from a window request alone.\n\n${guideStatusData(status)}`);
         }
         continue;
       }

@@ -46,6 +46,24 @@ the [one-minute demo](docs/DEMO.md#one-minute-mechanical-proof).
 required for this primary demo, so a damaged or cold npm cache cannot obscure the
 gate itself.
 
+## Run the complete session
+
+The one-minute path proves the mechanical gate. The complete human workflow uses
+one persistent Guide, one visible watch-only Producer, and one separate
+owner-facing Reviewer across all six phases and pushed close.
+
+On macOS with Ghostty and a signed-in Codex CLI, one repository command prepares
+an isolated project, shows the exact prompt for confirmation, creates its own
+local Git upstream, and opens Guide:
+
+```bash
+npm run demo:session
+```
+
+From that point Koda presents the choices. This chat or a separate command sheet
+is not part of the operating loop. See the [nontechnical Quick Start](docs/QUICKSTART.md)
+and the consequence-oriented [Command Manual](docs/COMMAND-MANUAL.md).
+
 ## What ships
 
 - A small CLI whose gate and status truth are re-derived from ordinary files.
@@ -157,6 +175,8 @@ recovery, and review quality before Koda-C trusts it.
 
 ## Judge and contributor map
 
+- [Quick Start: one-minute gate or complete session](docs/QUICKSTART.md)
+- [Command Manual](docs/COMMAND-MANUAL.md)
 - [Full product README](docs/README.md)
 - [Demo and camera path](docs/DEMO.md)
 - [Submission checklist](docs/SUBMISSION-CHECKLIST.md)

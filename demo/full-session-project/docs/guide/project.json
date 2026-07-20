@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "project": "Markdown heading reporter",
+  "continuityFiles": [
+    "docs/PROJECT.md",
+    "docs/BACKLOG.md",
+    "docs/WORKING-PLAN.md"
+  ]
+}

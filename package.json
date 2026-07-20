@@ -31,6 +31,7 @@
   "scripts": {
     "build": "node scripts/build.ts",
     "dogfood": "node scripts/run-dogfood.ts",
+    "demo:session": "node scripts/prepare-full-session-demo.ts --open",
     "prepack": "npm run build",
     "relay:prepare": "node scripts/prepare-relay-run.ts",
     "relay:execute": "node scripts/execute-relay-run.ts",
