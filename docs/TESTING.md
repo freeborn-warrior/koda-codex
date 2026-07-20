@@ -2030,3 +2030,6 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   repair commit `59d6267`, pushed tested commit `ff0a7b8`, the 245-check post-push
   transcript, and every critical launch file. Fresh owner-visible window proof
   remains and is not represented as passed.
+- **Release confirmation:** The promoted manifest, public evidence links, and
+  submission assertions passed another **245/245** at commit `140cebd` in the
+  [release transcript](test-results/2026-07-20-ghostty-absolute-role-command-release.md).

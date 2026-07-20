@@ -31,6 +31,7 @@ proved Koda's intended argument shape while missing Ghostty's real execution sha
 - Focused changed slice: **82/82 passed**.
 - Complete local suite: **245/245 passed**.
 - Unchanged post-push suite: **245/245 passed**.
+- Promoted release suite: **245/245 passed**.
 - Real macOS login wrapper accepted a harmless absolute executable with exit 0.
 
 Fresh owner-window proof remains open.
