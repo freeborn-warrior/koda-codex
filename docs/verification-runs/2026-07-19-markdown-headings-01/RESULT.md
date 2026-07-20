@@ -97,3 +97,17 @@ next human observation.
 The subsequent atomic role-ownership repair is bound by pushed capability
 `atomic-role-ownership-v12` at **230/230**. It retains read compatibility with the
 Reviewer's already-open legacy lock; the live session remains untouched.
+
+## Second recovery observation — pager and clipboard UX failure
+
+On 2026-07-20, the same Reviewer context and approved Brief were recovered. The
+gate again stayed shut, but the owner ceremony was still unusable: the terminal
+pager warned that the terminal was not fully functional, returning required `q`,
+acknowledgement depended on an automatically copied long receipt, and Ghostty
+showed a paste-safety dialog after the clipboard had been replaced by copied
+terminal output. All three visible consoles were closed with zero acknowledgements
+and zero advancement.
+
+This is a second human failure, not completion evidence. Its sanitized record and
+replacement contract are in
+[OWNER-REVIEW-CEREMONY-INCIDENT-02.md](OWNER-REVIEW-CEREMONY-INCIDENT-02.md).

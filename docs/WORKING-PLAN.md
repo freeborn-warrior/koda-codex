@@ -1,6 +1,6 @@
 # Koda-C working plan
 
-**Last updated:** 2026-07-19
+**Last updated:** 2026-07-20
 
 This file records the current engineering direction above individual implementation steps. `PROJECT.md` explains what Koda-C is, `BACKLOG.md` tracks the visible work/evidence queue, and this plan states the sequence currently being pursued. Conversation may change the plan, but the change is not durable until this file moves with it.
 
@@ -22,7 +22,7 @@ Turn the proved two-context session relay into a project-level experience that c
 10. [x] Make the session-prompter preflight every start request and refuse conceptually competing sessions before a draft exists.
 11. [x] Make Ctrl-C a named, fail-closed operational stop: kill the in-flight child, preserve partial evidence, distrust possible handbacks, resume the same context for reconciliation, and refuse context replacement when identity is missing.
 12. [x] Audit the whole product, package, and new interruption surface; consolidate recovery validation, preserve 157/157 deterministic checks with coverage, and publish the current security boundaries.
-13. [ ] Prove the complete three-context experience with Kristian. The first launch is pushed-halted security evidence. The dependent retry `6371ade2-3002-42aa-87ab-a613220b7eab` then proved exactly one clean Reviewer and Producer beside Guide and reached an approved Brief, but its hidden second acknowledgement step caused a recoverable empty-receipt failure. The first recovery restored Reviewer but Producer failed to rejoin its existing formal-review job. The session remains at Brief with zero acknowledgements; ordered and repeatable recovery at every stable owner handover now passes a pushed, integrity-bound 210/210 proof, then owner observation, all remaining gates, and pushed close are still owed.
+13. [ ] Prove the complete three-context experience with Kristian. The first launch is pushed-halted security evidence. The dependent retry `6371ade2-3002-42aa-87ab-a613220b7eab` proved exactly one clean Reviewer and Producer beside Guide and reached an approved Brief, but both its initial acknowledgement and its recovered pager/clipboard replacement failed human use. The session remains at Brief with zero acknowledgements. Finish and push the inline-review, short-code, shared-terminal-panel replacement before another owner observation; then all six gate decisions and pushed close are still owed.
 14. [x] Settle the top-level mutation ruling: an active Produce session may not lock the whole project; Guide and unrelated project work may continue changing files.
 15. [x] Implement exact per-workstream write sets, before/after hashes, same-path conflict refusal, exact-path staging, and a short recoverable Git-operation lock; mutation-test attribution, rename/delete, unrelated-dirt close, and dead-lock recovery.
 16. [x] Confirm the project/session model: Produce is one session kind; independent Explore, Research, Architecture, Triage, Produce, and later sibling sessions may be active concurrently.
@@ -75,6 +75,14 @@ Turn the proved two-context session relay into a project-level experience that c
     install, security audit, and clean-checkout proof. Preserve live recovery,
     video, `/feedback`, and Devpost submission as explicit owner work rather than
     inferred completion.
+30. [ ] Replace the failed pager/clipboard owner ceremony without weakening the
+    gate: inline human review, hidden machine metadata, a deterministic short code
+    mapped to the current exact receipt, no clipboard or paste, retryable mistakes,
+    and one bounded visual language across Guide, Reviewer, and Producer. Complete
+    deterministic, security, coverage, package, pushed-integrity, and only then
+    human verification. The local product now passes **232/232**, terminal-control
+    mutation, coverage, package inspection, and zero-vulnerability audit; code push
+    and unchanged pushed-integrity proof are the remaining mechanical steps.
 
 ## Submission cut
 

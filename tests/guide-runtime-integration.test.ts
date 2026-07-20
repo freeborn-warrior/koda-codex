@@ -117,7 +117,6 @@ test("GUIDE REAL-PROJECT RELAY: an independent sibling uses two bound contexts a
   });
 
   const generatedReceipt = path.join(temporary, "receipt.txt");
-  const clipboard = path.join(temporary, "clipboard.txt");
   const fakeCodex = path.join(temporary, "fake-guide-codex.mjs");
   await writeFile(fakeCodex, [
     "#!/usr/bin/env node",
@@ -165,8 +164,6 @@ test("GUIDE REAL-PROJECT RELAY: an independent sibling uses two bound contexts a
   const environment = {
     ...process.env,
     KODA_RELAY_RUNS_ROOT: path.join(project, ".koda", "runs"),
-    KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-    KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
     KODA_RELAY_TEST_CONFIRM_READ: "1",
     KODA_RELAY_TEST_RECEIPT_INPUT_FILE: generatedReceipt,
     KODA_CODEX_BIN: fakeCodex,
@@ -240,7 +237,7 @@ test("GUIDE REAL-PROJECT RELAY: an independent sibling uses two bound contexts a
   assert.equal(reviewerResult.status, 0, reviewerResult.stderr);
   assert.match(producerResult.stdout, /RELAY COMPLETE/);
   assert.match(producerResult.stdout, /Guide return:/);
-  assert.match(reviewerResult.stdout, /SESSION CLOSED — reviewer window complete/);
+  assert.match(reviewerResult.stdout, /SESSION CLOSED[\s\S]*Reviewer window complete/);
 
   const run = JSON.parse(await readFile(path.join(prepared.runRoot, "RUN.json"), "utf8"));
   assert.equal(run.status, "COMPLETE");

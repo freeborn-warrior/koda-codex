@@ -1,10 +1,10 @@
 # Koda-C project working document
 
-**Last updated:** 2026-07-19
+**Last updated:** 2026-07-20
 
 ## Product
 
-Koda-C is a small, headless CLI over plain files. It prevents a project phase from advancing until a non-empty artifact, independent review, allowed verdict, unique review receipt, and the owner's exact receipt quote all agree on disk.
+Koda-C is a small, headless CLI over plain files. It prevents a project phase from advancing until a non-empty artifact, independent review, allowed verdict, unique review receipt, and an explicit owner acknowledgement bound to that exact receipt all agree on disk.
 
 Koda-C is the workflow; the CLI is its current mechanical surface. The product is the movement of separate contexts, frozen inputs, artifacts, review, owner engagement, gates, session closure, and project continuity—not a wrapper around a model command.
 
@@ -43,7 +43,7 @@ owner contract
   → session opens
   → current producer skill writes its artifact
   → koda-c-review independently verifies it
-  → owner reads and quotes the unique receipt
+  → owner reads and acknowledges the unique receipt
   → gate routes:
       APPROVE / APPROVE WITH COMMENTS → next configured phase
       REVISE / REJECT                 → same producer phase
@@ -87,6 +87,14 @@ owner contract
 - A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its first genuine run completed all six phases with distinct persistent contexts, an unplanned Summary REVISE recovery, seven owner acknowledgements, and a pushed immutable close.
 - In supervised close, the persistent producer prepares and later verifies immutable `close.md`, while the trusted relay supervisor performs the exact intervening session commit and push. This keeps `.git` protected from model sandboxes without moving closure authority out of Koda's disk checks.
 - The historical owner reader reduced Window B to `npm run relay:review`. The first real two-window slice now uses `npm run relay:producer` and `npm run relay:reviewer`: Window A posts an atomic disk job and waits; Window B owns a single persistent reviewer context, automatically receives formal reviews and consultations, streams readable activity with receipts redacted, opens the complete review, and keeps exact owner receipt acknowledgement in that same window.
+- The current owner ceremony no longer uses a pager or clipboard. Reviewer prints the
+  human-facing review inline, omits machine-only metadata, and displays a
+  deterministic eight-character code. A matching code resolves to the current
+  complete receipt before the core gate runs; wrong or old codes change nothing.
+  Guide, Reviewer, and Producer share one bounded terminal-panel language, and
+  Producer explicitly marks every owner-free state as watch-only. The shared
+  renderer strips terminal control and bidirectional-override characters from
+  visible text while preserving the exact evidence bytes and hashes on disk.
 - The reviewer-window lock prevents two Window B processes from claiming the same run. Unsafe job paths, ambiguous unfinished runs, wrong receipts, changed reviews, and missing persistent context identity all refuse with named disk state.
 - Managed Producer and Reviewer model commands now use a strict Codex permission profile rather than broad-read `workspace-write`: active-project read/write, read-only Git/instructions/config, denied project `.env`, no sibling or ordinary home reads, no network/web search/login shell/user config/approval escape, and only the exact Koda/Codex executables plus Node toolchain added read-only. A live probe records two incomplete policies before the final five-condition pass. The separately started Guide remains governed by its own interactive Codex permissions and is not falsely claimed as contained by Koda.
 - `npm run relay:status` is a read-only owner view derived from current run, session, job, reviewer state, and process lock files. It names Guide, Producer, Reviewer, and their owner-input scopes, then prints exactly one safe start/recovery action: Reviewer first, Producer only after Reviewer is alive. It refuses corrupt/ambiguous runs and offers stale-lock recovery only after the recorded reviewer process is no longer alive.
@@ -196,6 +204,7 @@ owner contract
 - [Guide-launched real-project runtime](design-notes/2026-07-18-guide-real-project-runtime.md)
 - [Guide real-project runtime development failures](test-results/2026-07-18-guide-runtime-development-failures.md)
 - [Receipt acknowledgement UX incident](verification-runs/2026-07-19-markdown-headings-01/RECEIPT-UX-INCIDENT.md)
+- [Pager and clipboard owner-ceremony incident](verification-runs/2026-07-19-markdown-headings-01/OWNER-REVIEW-CEREMONY-INCIDENT-02.md)
 - [First-use UX audit](quality-runs/2026-07-19-first-use-ux-audit-02/RESULT.md)
 - [Final pre-handoff first-use UX audit](quality-runs/2026-07-19-first-use-ux-audit-03/RESULT.md)
 - [Partial recovery first-use UX audit](quality-runs/2026-07-19-partial-recovery-ux-audit-04/RESULT.md)

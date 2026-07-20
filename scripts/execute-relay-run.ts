@@ -39,6 +39,7 @@ import {
   verifyStagedSessionClaims,
   verifySessionWorkSetObservations,
 } from "../src/workset.ts";
+import { terminalBlock, terminalPanel } from "../src/terminal-ui.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
   baseTurnPurpose,
@@ -150,7 +151,10 @@ async function discoverExecutableRun(): Promise<string> {
 }
 
 const runRoot = await (requested ? realpath(path.resolve(root, requested)) : discoverExecutableRun()).catch((error) => {
-  console.error(`RELAY REFUSED — ${error instanceof Error ? error.message : String(error)}`);
+  console.error(terminalPanel("PRODUCER REFUSED", [
+    error instanceof Error ? error.message : String(error),
+    "Nothing changed on disk.",
+  ]));
   process.exit(1);
 });
 const runPath = path.join(runRoot, "RUN.json");
@@ -196,7 +200,10 @@ const producerResumeCommand = resolved.mode === "guide-project"
   : `npm run ${twoWindow ? "relay:producer" : "relay:execute"} -- ${path.relative(root, runRoot)}`;
 const releaseProducerLock = twoWindow
   ? await acquireProducerWindow(runRoot, { recoverStale: true }).catch((error) => {
-      console.error(`RELAY REFUSED — ${error instanceof Error ? error.message : String(error)}`);
+      console.error(terminalPanel("PRODUCER REFUSED", [
+        error instanceof Error ? error.message : String(error),
+        "Nothing changed on disk.",
+      ]));
       process.exit(1);
     })
   : async () => {};
@@ -278,7 +285,7 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
 
   run.lastAction = `${role} turn ${turn}: ${purpose}`;
   await saveRun();
-  console.log(`\n${role.toUpperCase()} ${turn}: ${purpose}`);
+  console.log(terminalPanel(`${role.toUpperCase()} ${turn} — ${purpose}`));
 
   const child = spawn(codexExecutable, args, {
     cwd: project,
@@ -292,7 +299,7 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
   lines.on("line", (line) => {
     stdout += `${line}\n`;
     const rendered = renderCodexEvent(line, role === "producer" ? "PRODUCER" : "REVIEWER");
-    if (rendered) console.log(rendered);
+    if (rendered) console.log(terminalBlock(rendered));
   });
   child.stderr.on("data", (chunk) => { stderr += String(chunk); });
   const exit = await new Promise<number>((resolve, reject) => {
@@ -608,13 +615,18 @@ async function waitForReviewerWindowJob(job: ReviewerJob, expectedFile: string):
   run.lastAction = `${purpose} in Window B`;
   run.lastError = undefined;
   await saveRun();
-  console.log(`\nHANDOVER TO WINDOW B — ${purpose}`);
-  console.log("The persistent reviewer window receives this automatically. Window A will wait here.");
-  if (!(await readReviewerWindowState(runRoot))) {
-    console.log(resolved.mode === "guide-project"
-      ? "Window B is not ready. Return to Guide for recovery; do not start a role command yourself."
-      : `If Window B is not open yet, run: ${reviewerResumeCommand}`);
-  }
+  const reviewerState = await readReviewerWindowState(runRoot);
+  console.log(terminalPanel(`HANDOVER TO REVIEWER — ${purpose}`, [
+    "The Reviewer receives this automatically. Producer will wait here.",
+    ...(reviewerState ? [] : [
+      "",
+      resolved.mode === "guide-project"
+        ? "Reviewer is not ready. Return to Guide for recovery; do not start a role command yourself."
+        : `Reviewer is not ready. Start it with: ${reviewerResumeCommand}`,
+    ]),
+    "",
+    "NO ACTION NEEDED — watch only.",
+  ]));
 
   for (;;) {
     if (stopRequested) {
@@ -649,7 +661,10 @@ async function waitForReviewerWindowJob(job: ReviewerJob, expectedFile: string):
             : `- Owner acknowledgement was recorded through Koda in Window B; ${ownerName}'s quote entered neither model chat.`,
       ]);
       await removeReviewerJob(runRoot);
-      console.log("WINDOW B HANDOVER COMPLETE — deriving the next route from disk.");
+      console.log(terminalPanel("REVIEWER HANDOVER RECEIVED", [
+        "Koda is deriving the next route from disk.",
+        "NO ACTION NEEDED — watch only.",
+      ]));
       return;
     }
     await new Promise((resolve) => setTimeout(resolve, 350));
@@ -693,10 +708,13 @@ async function producePhase(phaseName: string, revision: boolean): Promise<void>
 }
 
 function printProducerHandover(phaseName: string, artifactFile: string, content: string, next: string): void {
-  console.log(`\nPRODUCER HANDOVER — ${phaseName.toUpperCase()}`);
-  console.log(`Artifact: ${path.relative(project, artifactFile)}`);
-  console.log(`Observed: non-empty regular artifact, ${Buffer.byteLength(content, "utf8")} bytes, SHA-256 ${sha256(content).slice(0, 12)}…`);
-  console.log(`Control: ${next}`);
+  console.log(terminalPanel(`PRODUCER HANDOVER — ${phaseName.toUpperCase()}`, [
+    `Artifact: ${path.relative(project, artifactFile)}`,
+    `Observed: non-empty regular artifact, ${Buffer.byteLength(content, "utf8")} bytes, SHA-256 ${sha256(content).slice(0, 12)}…`,
+    "",
+    `Control: ${next}`,
+    "NO ACTION NEEDED — watch only.",
+  ]));
 }
 
 async function reviewPhase(phaseName: string, mode: "formal" | "repair" | "fresh"): Promise<void> {
@@ -752,8 +770,12 @@ async function ownerAcknowledge(phaseName: string, reviewFile: string): Promise<
       existing.phase === phaseName &&
       existing.expectedPath === expectedPath
     ) {
-      console.log(`\nRESTORING WINDOW B HANDOVER — ${existing.purpose}`);
-      console.log("Reviewer already owns this exact review and owner decision. Window A will wait without creating a second job.");
+      console.log(terminalPanel(`RESTORING REVIEWER HANDOVER — ${existing.purpose}`, [
+        "Reviewer already owns this exact review and owner decision.",
+        "Producer will wait without creating a second job.",
+        "",
+        "NO ACTION NEEDED — watch only.",
+      ]));
       await waitForReviewerWindowJob(existing, reviewFile);
       return;
     }
@@ -769,9 +791,10 @@ async function ownerAcknowledge(phaseName: string, reviewFile: string): Promise<
   run.status = "AWAITING_OWNER_RECEIPT";
   run.lastAction = `owner acknowledgement for ${phaseName}`;
   await saveRun();
-  console.log("\nOWNER ACKNOWLEDGEMENT REQUIRED");
-  console.log(`Read the complete review through its final receipt: ${reviewFile}`);
-  console.log("Koda will ask you to paste that exact final line. The relay does not read or print it for you.");
+  console.log(terminalPanel("OWNER ACKNOWLEDGEMENT REQUIRED", [
+    `Read the complete review through its final receipt: ${reviewFile}`,
+    "Koda will ask you to paste that exact final line.",
+  ]));
   const result = koda(["approve", phaseName, "--approver", ownerName], true);
   if (result.status !== 0) {
     run.status = "PAUSED_OWNER_ACKNOWLEDGEMENT";
@@ -805,12 +828,16 @@ async function advance(phaseName: string, previousIndex: number): Promise<void> 
   ]);
   const released = session.state.advances.at(-1)?.directions ?? [];
   const next = currentPhase(session.state);
-  console.log(`\nGATE PASSED — ${phaseName.toUpperCase()} — ${session.state.currentPhaseIndex}/${session.state.phases.length} phases complete`);
-  console.log("Evidence: artifact, independent review, verdict, owner receipt, and prior gates revalidated from disk");
-  console.log(`Waiting direction release: ${released.length === 0 ? "none" : released.join(", ")}`);
-  console.log(next
-    ? `Next: ${next.phase.name.toUpperCase()} — Producer receives only its frozen entry evidence`
-    : "Next: immutable session close ceremony");
+  console.log(terminalPanel(`GATE PASSED — ${phaseName.toUpperCase()}`, [
+    `${session.state.currentPhaseIndex} of ${session.state.phases.length} phases complete.`,
+    "Evidence rechecked: artifact, independent review, verdict, owner receipt, and prior gates.",
+    `Waiting direction release: ${released.length === 0 ? "none" : released.join(", ")}`,
+    "",
+    next
+      ? `Next: ${next.phase.name.toUpperCase()} — Producer receives only its frozen entry evidence.`
+      : "Next: immutable session close ceremony.",
+    "NO ACTION NEEDED — watch only.",
+  ]));
 }
 
 async function commitProducedOutput(): Promise<void> {
@@ -1097,9 +1124,11 @@ async function finishGuideReturn(stage: string): Promise<void> {
   run.lastAction = "closed session evidence returned to Guide and pushed";
   run.lastError = undefined;
   await saveRun();
-  console.log(`\nRELAY COMPLETE — ${run.sessionId}`);
-  console.log(`Guide return: ${path.join(project, guideReturnRelative)}`);
-  console.log(`Durable evidence: ${path.join(project, archiveRelative)}`);
+  console.log(terminalPanel(`RELAY COMPLETE — ${run.sessionId}`, [
+    `Guide return: ${path.join(project, guideReturnRelative)}`,
+    `Durable evidence: ${path.join(project, archiveRelative)}`,
+    "The session is closed and pushed.",
+  ]));
 }
 
 async function finalize(): Promise<void> {
@@ -1227,8 +1256,10 @@ async function finalize(): Promise<void> {
 
   await rm(path.join(project, ".git"), { recursive: true, force: true });
   await rm(runtime, { recursive: true, force: true });
-  console.log(`\nRELAY COMPLETE — ${session.id}`);
-  console.log(`Durable evidence: ${runRoot}`);
+  console.log(terminalPanel(`RELAY COMPLETE — ${session.id}`, [
+    `Durable evidence: ${runRoot}`,
+    "The session is closed and pushed.",
+  ]));
 }
 
 async function main(): Promise<void> {
@@ -1238,11 +1269,14 @@ async function main(): Promise<void> {
   if (!run.interruption) run.lastError = undefined;
   await saveRun();
 
-  console.log("KODA-C PRODUCER WINDOW");
-  console.log(`Producer: ${run.producer.model} / ${run.producer.effort}`);
-  console.log(`Session: ${run.sessionId ?? "not opened yet"}`);
-  console.log("Owner input: CLOSED — watch here; speak only in the Reviewer window");
-  console.log("This context remains the Producer for the complete configured session.");
+  console.log(terminalPanel("KODA-C PRODUCER WINDOW", [
+    `Producer: ${run.producer.model} / ${run.producer.effort}`,
+    `Session: ${run.sessionId ?? "not opened yet"}`,
+    "",
+    "Owner input: CLOSED — watch here; speak only in the Reviewer window.",
+    "This context remains the Producer for the complete configured session.",
+    "NO ACTION NEEDED — watch only.",
+  ]));
 
   await recoverInterruptedModelTurn();
 
@@ -1272,8 +1306,10 @@ async function main(): Promise<void> {
         "- Continuation requires a fresh Brief through a new session.",
       ]);
       await removeReviewerJob(runRoot);
-      console.log(`\nRELAY HALTED — ${session.id}`);
-      console.log(`Halt evidence: ${path.relative(project, session.directory)}/halt.md`);
+      console.log(terminalPanel(`RELAY HALTED — ${session.id}`, [
+        `Halt evidence: ${path.relative(project, session.directory)}/halt.md`,
+        "Return to Guide when you are ready to prepare a fresh Brief.",
+      ]));
       return;
     }
 
@@ -1288,9 +1324,12 @@ async function main(): Promise<void> {
     const phaseKey = `${session.id}:${active.index}:${active.phase.name}`;
     if (announcedPhase !== phaseKey) {
       announcedPhase = phaseKey;
-      console.log(`\nPHASE ${active.index + 1}/${session.state.phases.length} — ${active.phase.name.toUpperCase()}`);
-      console.log("State: ACTIVE — inputs frozen at phase entry");
-      console.log("Handover: Producer artifact → independent Reviewer → owner receipt → mechanical gate");
+      console.log(terminalPanel(`PHASE ${active.index + 1}/${session.state.phases.length} — ${active.phase.name.toUpperCase()}`, [
+        "State: ACTIVE — inputs frozen at phase entry.",
+        "Handover: Producer artifact → independent Reviewer → owner receipt → mechanical gate.",
+        "",
+        "NO ACTION NEEDED — watch only.",
+      ]));
     }
 
     const consultation = await outstandingConsultation(session.directory, active.phase.name, active.index);
@@ -1326,9 +1365,12 @@ async function main(): Promise<void> {
           "passed to Window B for independent formal review; the phase remains unadvanced.",
         );
       } else if (pending) {
-        console.log(`\nPRODUCER PAUSED — ${active.phase.name.toUpperCase()}`);
-        console.log(`Consultation request: ${path.relative(project, pending.request)}`);
-        console.log("Control: passed to Window B; producer work remains blocked until a disk response exists.");
+        console.log(terminalPanel(`PRODUCER PAUSED — ${active.phase.name.toUpperCase()}`, [
+          `Consultation request: ${path.relative(project, pending.request)}`,
+          "Control: passed to Reviewer; Producer remains blocked until a disk response exists.",
+          "",
+          "NO ACTION NEEDED HERE — use the Reviewer window.",
+        ]));
       }
       continue;
     }
@@ -1375,8 +1417,10 @@ async function main(): Promise<void> {
           "- No artifact, review, or approval from the in-flight phase counts as gated work.",
           "- Continuation requires a fresh Brief through a new session.",
         ]);
-        console.log(`\nRELAY HALTED — ${session.id}`);
-        console.log(`Halt evidence: ${path.relative(project, session.directory)}/halt.md`);
+        console.log(terminalPanel(`RELAY HALTED — ${session.id}`, [
+          `Halt evidence: ${path.relative(project, session.directory)}/halt.md`,
+          "Return to Guide when you are ready to prepare a fresh Brief.",
+        ]));
         return;
       }
       gate = await evaluateGate(session.directory, active.phase, active.index);
@@ -1420,12 +1464,13 @@ try {
     run.lastError = error instanceof Error ? error.message : String(error);
     await saveRun();
   }
-  console.error(`\nRELAY PAUSED — ${run.lastError ?? String(error)}`);
-  if (resolved.mode === "guide-project") {
-    console.error("Return to Guide and say: Recover this session. This Producer window may be closed.");
-  } else {
-    console.error(`Resume with: ${producerResumeCommand}`);
-  }
+  console.error(terminalPanel("RELAY PAUSED SAFELY", [
+    run.lastError ?? String(error),
+    "",
+    resolved.mode === "guide-project"
+      ? "Return to Guide and say: Recover this session. This Producer window may be closed."
+      : `Resume with: ${producerResumeCommand}`,
+  ]));
   process.exitCode = error instanceof PausedRun ? 2 : 1;
 } finally {
   await releaseProducerLock();

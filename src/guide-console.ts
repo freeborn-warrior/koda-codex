@@ -10,6 +10,7 @@ import { currentGuideRuntime, listGuideRuntimes } from "./guide-runtime.ts";
 import { guideRoot, hasGuideManifest, loadGuideManifest } from "./guide.ts";
 import { partialRecoveryRoles, requestGhosttyRecoveryWindows, type GhosttyWindowRequest } from "./ghostty.ts";
 import { relayNodeToolchainReadRoots, relayCodexEnvironment, resolveRelayCodexExecutable } from "./relay-environment.ts";
+import { sanitizeTerminalText, terminalBlock, terminalPanel } from "./terminal-ui.ts";
 import { writeJsonAtomic, writeTextAtomic } from "./project.ts";
 import { verifiedToolkitReadPaths, verifyToolkitIntegrity } from "./toolkit-integrity.ts";
 import { loadGuideWorkSet } from "./workset.ts";
@@ -201,9 +202,7 @@ function threadIdFromEvents(output: string): string | null {
 }
 
 export function sanitizeGuideTerminalText(value: string): string {
-  return value
-    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/gu, "")
-    .replace(/[\u202a-\u202e\u2066-\u2069]/gu, "");
+  return sanitizeTerminalText(value);
 }
 
 function renderGuideEvent(line: string): string | null {
@@ -277,7 +276,7 @@ async function guideTurn(root: string, state: GuideConsoleState, prompt: string)
   lines.on("line", (line) => {
     stdout += `${line}\n`;
     const rendered = renderGuideEvent(line);
-    if (rendered) console.log(rendered);
+    if (rendered) console.log(terminalBlock(rendered));
   });
   child.stderr.on("data", (chunk) => { stderr += String(chunk); });
   let exit: number;
@@ -407,10 +406,12 @@ export async function runGuideConsole(options: GuideConsoleOptions = {}): Promis
         lastError: null,
       });
     await saveGuideConsoleState(root, state);
-    console.log("KODA-C SECURE GUIDE");
-    console.log("Owner input: OPEN — project conversation belongs here.");
-    console.log("Boundary: project data only; no network, ambient rules, user config, or approval escape.");
-    console.log("Type normally to talk. Type q to close only this Guide console.");
+    console.log(terminalPanel("KODA-C SECURE GUIDE", [
+      "Owner input: OPEN — project conversation belongs here.",
+      "Boundary: project data only; no network, ambient rules, user config, or approval escape.",
+      "",
+      "Type normally to talk. Type q to close only this Guide console.",
+    ]));
     const cli = fileURLToPath(new URL("./cli.ts", import.meta.url));
     state = await guideTurn(root, state, state.threadId
       ? `${initialPrompt(cli)} This is a resumed Guide context; reconcile any saved interruption before giving advice.`
@@ -418,23 +419,26 @@ export async function runGuideConsole(options: GuideConsoleOptions = {}): Promis
     while (true) {
       const input = (await ownerInput.question("guide> ")).trim();
       if (input.toLowerCase() === "q") {
-        console.log("Guide console closed. Project and session evidence remain on disk.");
+        console.log(terminalPanel("GUIDE CLOSED SAFELY", ["Project and session evidence remain on disk."]));
         break;
       }
       if (!input) {
-        console.log("Nothing changed. Type a message, a displayed number, or q to close the Guide console.");
+        console.log(terminalPanel("NOTHING CHANGED", ["Type a message, a displayed number, or q to close the Guide console."]));
         continue;
       }
       let action: Awaited<ReturnType<typeof performGuideRecoveryChoice>>;
       try {
         action = await performGuideRecoveryChoice(root, input);
       } catch (error) {
-        console.log(`GUIDE STATE CHECK REFUSED — ${sanitizeGuideTerminalText(error instanceof Error ? error.message : String(error))}`);
-        console.log("Nothing changed. Correct the named disk evidence or type q to close only this Guide console.");
+        console.log(terminalPanel("GUIDE STATE CHECK REFUSED", [
+          sanitizeGuideTerminalText(error instanceof Error ? error.message : String(error)),
+          "",
+          "Nothing changed. Correct the named disk evidence or type q to close only this Guide console.",
+        ]));
         continue;
       }
       if (action.handled) {
-        console.log(action.message);
+        console.log(terminalBlock(action.message ?? "Guide action completed."));
         if (action.requests) {
           state = await guideTurn(root, state, "The owner selected the displayed recovery choice and Koda's trusted controller performed it. Run Koda Guide status, explain the exact observed result, and wait. Do not infer success from a window request alone.");
         }

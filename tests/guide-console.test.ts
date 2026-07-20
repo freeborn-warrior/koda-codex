@@ -215,6 +215,7 @@ test("GUIDE CONSOLE PERSISTENCE: a closed console resumes the same independent G
   const first = await runConsoleProcess(root, fakeCodex);
   assert.equal(first.status, 0, first.output);
   assert.match(first.output, /KODA-C SECURE GUIDE/);
+  assert.match(first.output, /─{20}/);
   assert.match(first.output, /Fixture Guide reconstructed disk state/);
   assert.doesNotMatch(first.output, /command_execution|--ignore-user-config/);
   const firstState = JSON.parse(await readFile(path.join(root, ".koda", "guide", "STATE.json"), "utf8"));

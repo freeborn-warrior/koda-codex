@@ -14,9 +14,11 @@ process locks.
 
 The first live attempt is pushed-halted security evidence. A dependent retry then
 opened exactly one Reviewer and one Producer beside the persistent Guide and reached
-an approved Brief without extra tabs or environment output. Its ambiguous
-acknowledgement prompt caused an empty receipt and exited both role processes. The
-gate stayed shut: zero ledger entries and zero advanced phases.
+an approved Brief without extra tabs or environment output. Its first ambiguous
+acknowledgement caused an empty receipt. Recovery later proved that the replacement
+pager-and-clipboard ceremony was also unusable: terminal warnings, hidden `q`
+controls, an overwritten clipboard, and a paste-safety dialog. Every attempt left
+the gate shut: zero ledger entries and zero advanced phases.
 
 Session `2026-07-19-02` remains safely recoverable with the same review and context
 identities. Do not create another session or manually start either role. The pushed
@@ -173,24 +175,36 @@ Leave this running too. It begins with the permanent `KODA-C REVIEWER WINDOW` la
 
 While Window A is working, Window B shows `reviewer> `. Type an active-session question there and press Return. The same Reviewer context answers from current disk evidence, then returns to the prompt. Ordinary explanation changes no project file. A project-level thought is marked for Guide. Direction is marked `OWNER DIRECTION — WAIT FOR GATE` and written immediately under the session's `directions/` folder, bound to the frozen phase entry and the artifact/review state observed when it arrived. Producer does not receive it until the next successful gate.
 
-For a formal review, Window B shows the reviewer progress and then says `REVIEW READY`. It asks you to press Return, opens the complete review, and waits while you read it:
+For a formal review, Window B shows the reviewer progress and then prints the
+complete human-facing review directly in the same terminal. There is no special
+reader to enter or leave.
 
 1. Read the verdict and every finding.
-2. Press Space to move down when needed.
-3. Read through the final receipt line.
-4. Press `q` when finished.
-5. Back in Window B, choose the displayed number:
-   - `1` acknowledges after one disclosed receipt-paste step;
+2. Scroll normally if the review is taller than the window.
+3. At the bottom, note the eight-character `REVIEW CODE`.
+4. Choose the displayed number:
+   - `1` acknowledges after you type that short review code;
    - `2` asks the same Reviewer a question;
    - `3` rereads the complete review;
    - `4` stops for now while preserving the decision point;
-   - `5` begins permanent halt, which still requires direction and `HALT` confirmation.
-6. Explanation questions resume the same reviewer context, alter no files, and return to this menu. Ask as many as needed.
-7. If discussion introduces new product direction, Window B records it immediately and says `DIRECTION RECORDED — WAITING FOR GATE`. Acknowledging the review still judges the unchanged artifact against its frozen entry contract. There is no send-now or same-phase revision choice.
-8. When you choose `1`, Koda says the exact receipt is on the macOS clipboard before it asks for input. Press Command–V and Return in this same window. A wrong or empty paste changes nothing and offers numbered retry choices; it does not end the process.
-9. If Koda asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
+   - `5` begins permanent halt, which still requires direction and a second
+     confirmation.
+5. Explanation questions resume the same Reviewer context, alter no files, and
+   return to this menu. Ask as many as needed.
+6. If discussion introduces new product direction, Window B records it immediately
+   and says `DIRECTION RECORDED — WAITING FOR GATE`. Acknowledging the review still
+   judges the unchanged artifact against its frozen entry contract. There is no
+   send-now or same-phase revision choice.
+7. If Koda asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
 
-The reviewer console never prints the receipt into its readable progress stream, and Kristian's acknowledgement input is never sent as a model message or child-process argument. The raw reviewer event evidence may contain the generated receipt because the reviewer creates and validates the review that contains it; the receipt is not treated as a secret. A changed review or wrong quote refuses and writes no approval. After a valid acknowledgement, Window A re-reads the gate and automatically advances, revises, or requests a fresh review according to the verdict.
+The machine-only protected review metadata remains on disk but is omitted from the
+human display. The complete receipt is visible as part of the review and is not a
+secret, but the owner never copies or pastes it. Koda derives the displayed short
+code from that exact receipt, rejects a wrong or old code, rechecks that the review
+did not change, and passes the current complete receipt to the deterministic CLI over
+stdin. Neither acknowledgement nor code is sent as a model message or child-process
+argument. After a valid acknowledgement, Window A re-reads the gate and automatically
+advances, revises, or requests a fresh review according to the verdict.
 
 Window B prints a disk-derived `REVIEWER HANDOVER` after a consultation answer or acknowledgement. It names the response, review, or waiting-direction path and says that Window A regains control; the gate still decides the route.
 

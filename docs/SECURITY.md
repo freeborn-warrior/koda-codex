@@ -91,11 +91,28 @@ tested-commit field is checked against the hashed transcript rather than resolve
 through a local Git object database.
 
 The receipt proves that the unique review phrase entered the decision record. It
-does not prove comprehension. The receipt is evidence, not a secret; the macOS
-reader copies it to the system clipboard, where other local applications may be
-able to observe it. The Reviewer passes the owner's pasted receipt and any comments
-or ruling to the deterministic CLI over stdin. They do not enter model chat, child
-process arguments, production environment variables, or durable event logs.
+does not prove comprehension. The receipt is evidence, not a secret. The managed
+Reviewer prints the human-facing review inline, omits protected machine metadata,
+and displays a deterministic eight-character code beneath it. The owner types that
+code; the trusted controller compares it with the current review, rechecks that the
+review did not change, and passes the current complete receipt plus any comments or
+ruling to the deterministic CLI over stdin. The system clipboard and external pager
+are not used. The acknowledgement does not enter model chat, child-process
+arguments, production environment variables, or durable event logs. Anyone able to
+rewrite the same-user controller could bypass this ceremony, just as they could
+rewrite the core verifier; the code is a usability token, not authentication or a
+cryptographic signature.
+
+Inline terminal display creates a separate untrusted-output boundary. Before any
+managed Guide, Reviewer, or Producer panel reaches the terminal, Koda removes C0
+and C1 controls other than line breaks and tabs, plus Unicode bidirectional
+override/isolate characters. A review containing escape, bell, or bidirectional
+control bytes therefore cannot rename a window, conceal or reorder visible text,
+or execute terminal control sequences through the managed renderer. Sanitization
+is display-only: the original review remains byte-for-byte intact on disk, its hash
+and receipt binding do not change, and the core gate continues to validate those
+original bytes. This does not make arbitrary terminal emulators or model output
+outside Koda's managed renderer safe.
 
 `SKILL.md` narrows role behavior but is not a permission boundary. Markdown,
 source files, and prompts can contain prompt-injection instructions. Use Codex's
@@ -342,4 +359,7 @@ are preserved in
 The final public-clone, package-lifecycle, no-build demo, current role-boundary,
 and zero-vulnerability delta is recorded in
 [`security-runs/2026-07-19-submission-readiness-audit-15/RESULT.md`](security-runs/2026-07-19-submission-readiness-audit-15/RESULT.md).
+The inline review-code ceremony, shared three-window renderer, terminal-control
+mutation, package contents, and zero-vulnerability delta are recorded in
+[`security-runs/2026-07-20-owner-review-ceremony-audit-16/RESULT.md`](security-runs/2026-07-20-owner-review-ceremony-audit-16/RESULT.md).
 The latest named full-suite transcript is linked from the README.

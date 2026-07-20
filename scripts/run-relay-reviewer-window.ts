@@ -2,7 +2,7 @@
 
 import { createHash } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
-import { lstat, readFile, readdir, realpath, writeFile } from "node:fs/promises";
+import { lstat, readFile, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { createInterface as createPrompt } from "node:readline/promises";
@@ -23,6 +23,7 @@ import {
   resolveRelayCodexExecutable,
 } from "../src/relay-environment.ts";
 import { stagedProjectPaths } from "../src/workset.ts";
+import { sanitizeTerminalText, TERMINAL_DIVIDER, terminalBlock, terminalPanel } from "../src/terminal-ui.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
 import {
   acquireReviewerWindow,
@@ -65,6 +66,28 @@ let activeModelChild: ReturnType<typeof spawn> | null = null;
 let testDiscussionConsumed = false;
 let boundOwnerName: string | null = null;
 
+function reviewCode(receipt: string): string {
+  return createHash("sha256").update(receipt).digest("hex").slice(0, 8).toUpperCase();
+}
+
+function ownerVisibleReview(content: string): string {
+  return sanitizeTerminalText(content
+    .split(/\r?\n/)
+    .filter((line) => !line.startsWith("<!-- KODA_REVIEW "))
+    .join("\n")
+    .trim());
+}
+
+function beginScreen(title: string): void {
+  console.log(`\n${TERMINAL_DIVIDER}`);
+  console.log(title);
+  console.log(TERMINAL_DIVIDER);
+}
+
+function endScreen(): void {
+  console.log(TERMINAL_DIVIDER);
+}
+
 function requestStop(signal: RelaySignal): void {
   const repeated = stopping;
   stopping = true;
@@ -85,7 +108,10 @@ process.on("SIGINT", () => { requestStop("SIGINT"); });
 process.on("SIGTERM", () => { requestStop("SIGTERM"); });
 
 function refuse(message: string): never {
-  console.error(`REVIEWER WINDOW REFUSED — ${message}`);
+  console.error(terminalPanel("REVIEWER WINDOW REFUSED", [
+    message,
+    "Nothing changed on disk.",
+  ]));
   process.exit(1);
 }
 
@@ -234,7 +260,7 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
     ? [...base, "resume", ...common, state.threadId, prompt]
     : [...base, ...common, "--color", "never", prompt];
 
-  console.log(`\nREVIEWER ${turn} — ${purpose}`);
+  console.log(terminalPanel(`REVIEWER ${turn} — ${purpose}`));
   const child = spawn(codexExecutable, args, {
     cwd: project,
     env: relayCodexEnvironment(process.env, activeRun.sessionId),
@@ -256,7 +282,7 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
       // The raw event remains saved; malformed diagnostics never become conversation state.
     }
     const rendered = renderCodexEvent(line, "REVIEWER");
-    if (rendered) console.log(rendered);
+    if (rendered) console.log(terminalBlock(rendered));
   });
   child.stderr.on("data", (chunk) => { stderr += String(chunk); });
   const exit = await new Promise<number>((resolve, reject) => {
@@ -356,30 +382,21 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   const testMode = Boolean(process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CONFIRM_READ === "1");
   let waitingDirectionPath: string | null = null;
   const beforeHash = createHash("sha256").update(before).digest("hex");
+  const acknowledgementCode = reviewCode(parsed.receipt);
   const requireUnchangedReview = async () => {
     const current = await readFile(review, "utf8");
     if (createHash("sha256").update(current).digest("hex") !== beforeHash) {
       throw new Error("The review changed during owner reading or discussion. Nothing was acknowledged.");
     }
   };
-  const openReview = async (): Promise<boolean> => {
-    if (!testMode) {
-      console.log("\nREAD THE COMPLETE REVIEW");
-      console.log("Press Return to open it. Scroll as needed; when you reach (END), press q to return here.");
-      console.log("Nothing advances while the review is open.");
-      await promptOwner("Press Return to read the review: ");
-    }
-    const pager = withOwnerConsolePaused(() => spawnSync(
-      process.env.KODA_RELAY_REVIEW_PAGER ?? "less",
-      [review],
-      { stdio: "inherit" },
-    ));
-    if (pager.status !== 0) {
-      console.log(`REVIEW DID NOT OPEN — the reader exited ${pager.status ?? -1}. Nothing was acknowledged.`);
-      return false;
-    }
+  const openReview = async (): Promise<void> => {
+    beginScreen(`COMPLETE REVIEW — ${job.phase.toUpperCase()} — ${parsed.verdict}`);
+    process.stdout.write(`${ownerVisibleReview(before)}\n`);
+    console.log("");
+    console.log(`REVIEW CODE: ${acknowledgementCode}`);
+    console.log("You will type this short code only if you choose to acknowledge the review.");
+    endScreen();
     await requireUnchangedReview();
-    return true;
   };
   const haltSession = async (ownerDirectionInput: string) => {
     const ownerDirection = ownerDirectionInput.trim();
@@ -416,10 +433,11 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     const halt = await evaluateSessionHalt(project, session.directory, session.state);
     if (!halt.halted) throw new Error(`Halt verification failed: ${halt.reasons.join("; ")}`);
     job.completion = "HALTED";
-    console.log(`\nSESSION HALTED — ${session.id}`);
-    console.log(`Disk evidence: ${displayPath(project, prepared)}`);
-    console.log(`Halt ID: ${halt.metadata?.id}`);
-    console.log("The in-flight phase is void. Window A will stop; later work must begin through a fresh Brief.");
+    console.log(terminalPanel(`SESSION HALTED — ${session.id}`, [
+      `Disk evidence: ${displayPath(project, prepared)}`,
+      `Halt ID: ${halt.metadata?.id}`,
+      "The in-flight phase is void. Producer will stop; later work must begin through a fresh Brief.",
+    ]));
   };
   const discuss = async (question: string) => {
     const response = await modelTurn(`explain ${job.phase} review`, [
@@ -442,30 +460,25 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
         classification: response,
       });
       waitingDirectionPath = displayPath(project, created.path);
-      console.log("\nDIRECTION RECORDED — WAITING FOR GATE");
-      console.log(`Disk evidence: ${waitingDirectionPath}`);
-      console.log("The reviewed artifact keeps its frozen contract. Producer receives this direction only after advancement.");
+      console.log(terminalPanel("DIRECTION RECORDED — WAITING FOR GATE", [
+        `Disk evidence: ${waitingDirectionPath}`,
+        "The reviewed artifact keeps its frozen contract.",
+        "Producer receives this direction only after advancement.",
+      ]));
     } else if (response.trimStart().startsWith("OWNER DIRECTION — DISK HANDOFF REQUIRED")) {
       throw new Error("Reviewer used the superseded DISK HANDOFF REQUIRED marker. Re-run the explanation under the wait-or-halt contract.");
     }
   };
 
-  console.log(`\nREVIEW READY — ${job.phase.toUpperCase()} — ${parsed.verdict}`);
+  beginScreen(`REVIEW READY — ${job.phase.toUpperCase()} — ${parsed.verdict}`);
   if (active?.phase.name === job.phase) {
-    console.log(`Phase: ${active.index + 1}/${progressSession.state.phases.length}`);
+    console.log(`Phase ${active.index + 1} of ${progressSession.state.phases.length}`);
   }
-  console.log("This is your decision point in Window B. The producer is waiting in Window A.");
-  console.log(`Review: ${path.relative(project, review)}`);
-  console.log(`Binding: artifact SHA-256 ${parsed.metadata.artifactSha256.slice(0, 12)}…; review ID ${parsed.metadata.id}`);
-  console.log("Nothing has advanced. The numbered choices and their consequences appear after you read.");
-  while (!(await openReview())) {
-    console.log("1. Try opening the review again.");
-    console.log("2. Stop for now — preserve this decision point.");
-    const readerChoice = (await promptOwner("Choose 1 or 2: ")).trim();
-    if (readerChoice === "1") continue;
-    if (readerChoice === "2") throw new OwnerPaused(`${ownerName} stopped after the review reader failed; the review remains ready and unacknowledged.`);
-    console.log("Nothing changed. Choose 1 to retry or 2 to stop safely.");
-  }
+  console.log("The Producer is waiting. Nothing has advanced.");
+  console.log("The complete review appears next in this same window.");
+  console.log(`Disk record: ${path.relative(project, review)}`);
+  endScreen();
+  await openReview();
 
   const configuredTestQuestion = testMode ? process.env.KODA_RELAY_TEST_DISCUSSION_QUESTION?.trim() : undefined;
   const testQuestion = configuredTestQuestion && (
@@ -480,132 +493,147 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     await haltSession(testHaltDirection);
     return;
   }
-  const testClipboard = process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CLIPBOARD_FILE;
-  let receiptCopied = false;
   let acknowledgementSelected = testMode;
   for (;;) {
     if (!testMode && !acknowledgementSelected) {
       const permitted = parsed.verdict === "APPROVE" || parsed.verdict === "APPROVE WITH COMMENTS";
-      console.log("\nWHAT WOULD YOU LIKE TO DO?");
-      console.log(`1. Acknowledge this review — ${permitted ? "Koda will recheck the gate and continue if every condition passes." : `${parsed.verdict} keeps the gate closed and returns the work through its required route.`}`);
-      console.log("2. Ask the Reviewer a question — nothing advances.");
-      console.log("3. Read the complete review again — nothing advances.");
-      console.log("4. Stop for now — preserve everything so this session can resume later.");
-      console.log("5. Halt this session — permanently end this attempt and require a fresh Brief.");
+      const followUp = parsed.verdict === "APPROVE WITH COMMENTS"
+        ? " You will then preserve your comments."
+        : parsed.verdict === "DISCUSS"
+          ? " You will then record your product ruling."
+          : "";
+      beginScreen("WHAT WOULD YOU LIKE TO DO?");
+      console.log("1. ACKNOWLEDGE");
+      console.log(`   Type the 8-character REVIEW CODE.${followUp} ${permitted ? "Koda then rechecks every gate condition." : `${parsed.verdict} keeps the gate closed and returns the work.`}`);
+      console.log("");
+      console.log("2. DISCUSS");
+      console.log("   Ask the Reviewer a question. Nothing advances.");
+      console.log("");
+      console.log("3. READ AGAIN");
+      console.log("   Show the complete review again. Nothing advances.");
+      console.log("");
+      console.log("4. STOP SAFELY");
+      console.log("   Close the windows and resume later.");
+      console.log("");
+      console.log("5. HALT PERMANENTLY");
+      console.log("   End this attempt and require a fresh Brief.");
+      console.log("");
       const choice = (await promptOwner("Choose 1, 2, 3, 4, or 5: ")).trim();
+      endScreen();
       if (choice === "2") {
         const question = (await promptOwner("Type your question for the Reviewer, then press Return: ")).trim();
         if (!question) {
-          console.log("No question was entered. Nothing changed.");
+          console.log(terminalPanel("NOTHING CHANGED", ["No question was entered."]));
           continue;
         }
         await discuss(question);
         continue;
       }
       if (choice === "3") {
-        if (!(await openReview())) {
-          console.log("The review remains unchanged. Returning to the numbered choices.");
-        }
+        await openReview();
         continue;
       }
       if (choice === "4") throw new OwnerPaused(`${ownerName} chose to stop for now; the review remains ready and unacknowledged.`);
       if (choice === "5") {
-        console.log("HALT ENDS THIS SESSION ATTEMPT. No phase from it will count; later work must start from a fresh Brief.");
+        beginScreen("PERMANENT HALT — FIRST CONFIRMATION");
+        console.log("Halt ends this session attempt. No phase from it will count.");
+        console.log("Later work must start from a fresh Brief.");
+        console.log("");
         console.log("1. Continue toward a permanent halt.");
+        console.log("");
         console.log("2. Go back — nothing changes.");
+        console.log("");
         const haltChoice = (await promptOwner("Choose 1 or 2: ")).trim();
+        endScreen();
         if (haltChoice !== "1") {
-          console.log("Halt was not prepared. Nothing changed.");
+          console.log(terminalPanel("NOTHING CHANGED", ["Halt was not prepared."]));
           continue;
         }
         const ownerDirection = await promptOwner("Type the direction the fresh Brief must carry, or press Return to go back: ");
         if (!ownerDirection.trim()) {
-          console.log("Halt was not prepared. Nothing changed.");
+          console.log(terminalPanel("NOTHING CHANGED", ["Halt was not prepared because no direction was entered."]));
           continue;
         }
-        console.log("FINAL HALT CONFIRMATION");
+        beginScreen("PERMANENT HALT — FINAL CONFIRMATION");
         console.log("1. Permanently halt this session attempt.");
+        console.log("");
         console.log("2. Go back — nothing changes.");
+        console.log("");
         const confirmation = (await promptOwner("Choose 1 or 2: ")).trim();
+        endScreen();
         if (confirmation !== "1") {
-          console.log("Halt was not confirmed. Nothing changed.");
+          console.log(terminalPanel("NOTHING CHANGED", ["Halt was not confirmed."]));
           continue;
         }
         await haltSession(ownerDirection);
         return;
       }
       if (choice !== "1") {
-        console.log("Nothing changed. Choose one of the numbered options.");
+        console.log(terminalPanel("NOTHING CHANGED", ["Choose one of the numbered options."]));
         continue;
       }
       acknowledgementSelected = true;
     }
 
-    if (!receiptCopied) {
-      if (testClipboard) {
-        await writeFile(testClipboard, parsed.receipt, "utf8");
-      } else {
-        const copied = spawnSync("pbcopy", [], { input: parsed.receipt, encoding: "utf8" });
-        if (copied.status !== 0) {
-          console.log("COPY FAILED — macOS did not copy the receipt. Nothing was acknowledged and the gate is still closed.");
-          console.log("1. Try copying again.");
-          console.log("2. Return to the full review choices.");
-          console.log("3. Stop for now and preserve this decision point.");
-          const copyChoice = (await promptOwner("Choose 1, 2, or 3: ")).trim();
-          if (copyChoice === "1") continue;
-          if (copyChoice === "2") {
-            acknowledgementSelected = false;
-            continue;
-          }
-          if (copyChoice === "3") throw new OwnerPaused(`${ownerName} stopped after the receipt copy failed; the review remains ready and unacknowledged.`);
-          console.log("Nothing changed. Returning to the full review choices.");
-          acknowledgementSelected = false;
-          continue;
-        }
-      }
-      receiptCopied = true;
-    }
     if (!testMode) {
-      console.log("\nFINAL ACKNOWLEDGEMENT — ONE KEYBOARD ACTION");
-      console.log("The exact receipt is already copied. Press Command-V, then press Return.");
-      console.log("This does not bypass the gate: Koda will re-read the artifact, review, verdict, and receipt from disk.");
-      console.log("Type 0 instead to return to the numbered choices. A wrong or empty paste changes nothing and stays here.");
+      beginScreen("FINAL ACKNOWLEDGEMENT");
+      console.log("Type the 8-character REVIEW CODE shown beneath the complete review.");
+      console.log("Koda will translate that code to this review's exact receipt, then recheck the gate from disk.");
+      console.log("Type 0 to go back. A wrong code changes nothing.");
+      console.log("");
     }
-    const receiptInput = testMode
+    const testReceiptInput = testMode
       ? (process.env.KODA_RELAY_TEST_RECEIPT_INPUT_FILE
           ? await readFile(process.env.KODA_RELAY_TEST_RECEIPT_INPUT_FILE, "utf8")
           : process.env.KODA_RELAY_TEST_RECEIPT_INPUT ?? "")
-      : await promptOwner("Press Command-V, then Return: ");
-    if (!testMode && receiptInput.trim() === "0") {
+      : "";
+    const codeInput = testMode
+      ? (testReceiptInput.trim() === parsed.receipt.trim() ? acknowledgementCode : testReceiptInput)
+      : await promptOwner("Review code: ");
+    if (!testMode) endScreen();
+    if (!testMode && codeInput.trim() === "0") {
       acknowledgementSelected = false;
       continue;
     }
-    if (receiptInput.trim() !== parsed.receipt.trim()) {
-      console.log("NOT ACKNOWLEDGED — that paste does not match this review's receipt. Nothing changed and the gate is still closed.");
-      if (testMode) throw new OwnerPaused("The receipt did not match; the review remains ready for another owner attempt.");
-      console.log("1. Try pasting the copied receipt again.");
+    if (codeInput.trim().toUpperCase() !== acknowledgementCode) {
+      beginScreen("NOT ACKNOWLEDGED");
+      console.log("That code does not match this review.");
+      console.log("Nothing changed and the gate is still closed.");
+      if (testMode) {
+        endScreen();
+        throw new OwnerPaused("The review code did not match; the review remains ready for another owner attempt.");
+      }
+      console.log("");
+      console.log("1. Try entering the review code again.");
+      console.log("");
       console.log("2. Return to the full review choices.");
+      console.log("");
       console.log("3. Stop for now and preserve this decision point.");
+      console.log("");
       const retryChoice = (await promptOwner("Choose 1, 2, or 3: ")).trim();
+      endScreen();
       if (retryChoice === "1") continue;
       if (retryChoice === "2") {
         acknowledgementSelected = false;
         continue;
       }
-      if (retryChoice === "3") throw new OwnerPaused(`${ownerName} chose to stop after an unmatched receipt; the review remains ready and unacknowledged.`);
-      console.log("Nothing changed. Returning to the full review choices.");
+      if (retryChoice === "3") throw new OwnerPaused(`${ownerName} chose to stop after an unmatched review code; the review remains ready and unacknowledged.`);
+      console.log(terminalPanel("NOTHING CHANGED", ["Returning to the full review choices."]));
       acknowledgementSelected = false;
       continue;
     }
 
     const approvalArgs = [cli, "approve", job.phase, "--approver", ownerName, "--session", progressSession.id];
-    const approvalInput = [receiptInput.trim()];
+    const approvalInput = [parsed.receipt.trim()];
     if (parsed.verdict === "APPROVE WITH COMMENTS") {
       const comments = testMode
         ? process.env.KODA_RELAY_TEST_APPROVAL_COMMENTS ?? "Owner acknowledged the review comments."
         : (await promptOwner("Type the comments to preserve in the ledger, then press Return: ")).trim();
       if (!comments) {
-        console.log("NOT ACKNOWLEDGED — comments are required for APPROVE WITH COMMENTS. Nothing changed.");
+        console.log(terminalPanel("NOT ACKNOWLEDGED", [
+          "Comments are required for APPROVE WITH COMMENTS.",
+          "Nothing changed.",
+        ]));
         if (testMode) throw new OwnerPaused("Approval comments were empty; the review remains ready for another owner attempt.");
         continue;
       }
@@ -616,7 +644,10 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
         ? process.env.KODA_RELAY_TEST_OWNER_RULING ?? "Owner requests a fresh review after this discussion."
         : (await promptOwner("Type your product ruling for the ledger, then press Return: ")).trim();
       if (!ruling) {
-        console.log("NOT ACKNOWLEDGED — DISCUSS requires your ruling. Nothing changed.");
+        console.log(terminalPanel("NOT ACKNOWLEDGED", [
+          "DISCUSS requires your product ruling.",
+          "Nothing changed.",
+        ]));
         if (testMode) throw new OwnerPaused("The owner ruling was empty; the review remains ready for another owner attempt.");
         continue;
       }
@@ -638,10 +669,12 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     break;
   }
   job.completion = "ACKNOWLEDGED";
-  console.log("ACKNOWLEDGED — Window A will now derive the route from disk.");
-  console.log(`REVIEWER HANDOVER — ${job.phase.toUpperCase()} — ${job.completion}`);
-  console.log(`Disk evidence: ${waitingDirectionPath ?? path.relative(project, review)}`);
-  console.log("Control: returned to Window A; the gate, not this message, determines the next action.");
+  console.log(terminalPanel(`REVIEWER HANDOVER — ${job.phase.toUpperCase()} — ${job.completion}`, [
+    "ACKNOWLEDGED — Window A will now derive the route from disk.",
+    `Disk evidence: ${waitingDirectionPath ?? path.relative(project, review)}`,
+    "",
+    "Control: returned to Window A; the gate, not this message, determines the next action.",
+  ]));
 }
 
 async function completeConsultation(job: ReviewerJob, response: string): Promise<void> {
@@ -652,8 +685,7 @@ async function completeConsultation(job: ReviewerJob, response: string): Promise
     await writeReviewerJob(runRoot, job);
     state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: null });
     await writeReviewerWindowState(runRoot, state);
-    console.log(`\nOWNER DECISION REQUIRED — ${job.phase.toUpperCase()}`);
-    console.log(content);
+    console.log(terminalPanel(`OWNER DECISION REQUIRED — ${job.phase.toUpperCase()}`, [content]));
     const ruling = (await promptOwner("Your answer to the reviewer: ")).trim();
     if (!ruling) throw new Error("An empty owner ruling cannot unblock the producer.");
     await modelTurn(`record owner ruling for ${job.phase}`, [
@@ -670,7 +702,10 @@ async function processJob(job: ReviewerJob): Promise<void> {
   if (job.status === "RUNNING") throw new Error("A prior reviewer process stopped mid-turn. The job is preserved; explicit recovery is required.");
   if (job.status === "FAILED") {
     if (job.error === "Owner acknowledgement exited 1." && job.completion === null) {
-      console.log(`\nREVIEWER RECOVERY — the earlier receipt attempt changed nothing. Reopening the same bound review for ${ownerName}.`);
+      console.log(terminalPanel("REVIEWER RECOVERY", [
+        "The earlier acknowledgement attempt changed nothing.",
+        `Reopening the same bound review for ${ownerName}.`,
+      ]));
       job.status = "AWAITING_OWNER";
       job.error = null;
       await writeReviewerJob(runRoot, job);
@@ -709,9 +744,10 @@ async function processJob(job: ReviewerJob): Promise<void> {
   if (job.kind === "consultation") {
     await completeConsultation(job, output);
     job.completion = "CONSULTATION_ANSWERED";
-    console.log(`\nREVIEWER HANDOVER — ${job.phase.toUpperCase()} — CONSULTATION ANSWERED`);
-    console.log(`Disk response: ${path.relative(project, output)}`);
-    console.log("Control: returned to Window A; producer may use only the recorded response.");
+    console.log(terminalPanel(`REVIEWER HANDOVER — ${job.phase.toUpperCase()} — CONSULTATION ANSWERED`, [
+      `Disk response: ${path.relative(project, output)}`,
+      "Control: returned to Producer; Producer may use only the recorded response.",
+    ]));
   } else {
     await ownerAcknowledge(job, output);
   }
@@ -733,17 +769,23 @@ async function recordOwnerConversationResponse(question: string, response: strin
       ownerStatement: question,
       classification: response,
     });
-    console.log("\nDIRECTION RECORDED — WAITING FOR GATE");
-    console.log(`Disk evidence: ${displayPath(project, created.path)}`);
-    console.log(`Direction ID: ${created.metadata.id}`);
-    console.log("The active phase inputs remain frozen. Producer receives this only after the next successful gate.");
+    console.log(terminalPanel("DIRECTION RECORDED — WAITING FOR GATE", [
+      `Disk evidence: ${displayPath(project, created.path)}`,
+      `Direction ID: ${created.metadata.id}`,
+      "The active phase inputs remain frozen.",
+      "Producer receives this only after the next successful gate.",
+    ]));
   } else if (response.trimStart().startsWith("OWNER DIRECTION — ACTIVE SESSION TRANSFER REQUIRED")) {
     throw new Error("Reviewer used the superseded ACTIVE SESSION TRANSFER REQUIRED marker. Re-run the conversation under the wait-or-halt contract.");
   } else if (response.trimStart().startsWith("GUIDE CONVERSATION — PROJECT SCOPE")) {
-    console.log("\nGUIDE SCOPE — continue this project-level thought in the Guide conversation.");
-    console.log("Nothing from this Reviewer conversation changed the active session.");
+    console.log(terminalPanel("GUIDE SCOPE", [
+      "Continue this project-level thought in the Guide conversation.",
+      "Nothing from this Reviewer conversation changed the active session.",
+    ]));
   } else {
-    console.log("\nREVIEWER CONVERSATION COMPLETE — no producer handback was created.");
+    console.log(terminalPanel("REVIEWER CONVERSATION COMPLETE", [
+      "No Producer handback was created.",
+    ]));
   }
 }
 
@@ -771,7 +813,9 @@ async function recoverInterruptedOwnerConversation(): Promise<void> {
   if (!interrupted.ownerMessage) {
     throw new Error("The interrupted reviewer conversation has no bound owner message; Koda cannot reconstruct it safely.");
   }
-  console.log(`\nREVIEWER RECOVERY — resuming interrupted conversation turn ${interrupted.turn} in the same context.`);
+  console.log(terminalPanel("REVIEWER RECOVERY", [
+    `Resuming interrupted conversation turn ${interrupted.turn} in the same context.`,
+  ]));
   const response = await modelTurn(
     `reconcile interrupted turn ${interrupted.turn}: ${interrupted.purpose}`,
     [
@@ -786,13 +830,16 @@ async function recoverInterruptedOwnerConversation(): Promise<void> {
   await recordOwnerConversationResponse(interrupted.ownerMessage, response);
 }
 
-console.log("KODA-C REVIEWER WINDOW");
-console.log(`Reviewer: ${state.model} / ${state.effort}`);
-console.log(`Relay: ${path.basename(runRoot)}`);
-console.log("Owner input: OPEN — active-session conversation belongs here");
-console.log("This context remains the Reviewer for the complete session. Leave it open.");
-console.log("You may type an active-session question while Producer works; direction is recorded now and waits for the next gate.");
-console.log("Waiting for the producer in Window A…");
+console.log(terminalPanel("KODA-C REVIEWER WINDOW", [
+  `Reviewer: ${state.model} / ${state.effort}`,
+  `Relay: ${path.basename(runRoot)}`,
+  "",
+  "Owner input: OPEN — active-session conversation belongs here.",
+  "This context remains the Reviewer for the complete session. Leave it open.",
+  "",
+  "You may type while Producer works. New direction is recorded now and waits for the next gate.",
+  "Waiting for the Producer…",
+]));
 if (ownerConsole) process.stdout.write("reviewer> ");
 
 try {
@@ -804,8 +851,8 @@ try {
     const run = await readRun();
     if (run.status === "COMPLETE" || run.status === "HALTED") {
       console.log(run.status === "COMPLETE"
-        ? "\nSESSION CLOSED — reviewer window complete."
-        : "\nSESSION HALTED — reviewer window complete; return to Guide for a fresh Brief.");
+        ? terminalPanel("SESSION CLOSED", ["Reviewer window complete."])
+        : terminalPanel("SESSION HALTED", ["Reviewer window complete. Return to Guide for a fresh Brief."]));
       break;
     }
     const job = await readReviewerJob(runRoot);
@@ -819,13 +866,13 @@ try {
         announcedWaiting = false;
         await holdOwnerConversation(ownerQuestion);
         if (process.env.KODA_RELAY_REVIEWER_ONCE === "1") break;
-        console.log("\nWaiting for the next producer handover…");
+        console.log(terminalPanel("REVIEWER READY", ["Waiting for the next Producer handover."]));
         if (ownerConsole) process.stdout.write("reviewer> ");
         announcedWaiting = true;
         continue;
       }
       if (!announcedWaiting) {
-        console.log("\nWaiting for the next producer handover…");
+        console.log(terminalPanel("REVIEWER READY", ["Waiting for the next Producer handover."]));
         if (ownerConsole) process.stdout.write("reviewer> ");
         announcedWaiting = true;
       }
@@ -846,11 +893,14 @@ try {
         await writeReviewerJob(runRoot, job);
         state = reviewerWindowState({ ...state, status: "READY", currentJobId: job.id, lastError: message });
         await writeReviewerWindowState(runRoot, state);
-        console.error(`\nREVIEWER INTERRUPTED SAFELY — ${message}`);
-        console.error("The job returned to PENDING; its partial handback is untrusted.");
-        console.error(resolved.mode === "guide-project"
-          ? "Return to Guide and say: Recover this session. This Reviewer window may be closed."
-          : `Resume the same reviewer context with: ${reviewerResumeCommand}`);
+        console.error(terminalPanel("REVIEWER INTERRUPTED SAFELY", [
+          message,
+          "The job returned to PENDING; its partial handback is untrusted.",
+          "",
+          resolved.mode === "guide-project"
+            ? "Return to Guide and say: Recover this session. This Reviewer window may be closed."
+            : `Resume the same reviewer context with: ${reviewerResumeCommand}`,
+        ]));
         process.exitCode = 2;
         break;
       }
@@ -859,10 +909,13 @@ try {
         await writeReviewerJob(runRoot, job);
         state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: message });
         await writeReviewerWindowState(runRoot, state);
-        console.error(`\nREVIEWER PAUSED SAFELY — ${message}`);
-        console.error(resolved.mode === "guide-project"
-          ? "Return to Guide when you are ready and say: Recover this session. This Reviewer window may be closed."
-          : `Resume with: ${reviewerResumeCommand}`);
+        console.error(terminalPanel("REVIEWER PAUSED SAFELY", [
+          message,
+          "",
+          resolved.mode === "guide-project"
+            ? "Return to Guide when you are ready and say: Recover this session. This Reviewer window may be closed."
+            : `Resume with: ${reviewerResumeCommand}`,
+        ]));
         process.exitCode = 2;
         break;
       }
@@ -871,8 +924,11 @@ try {
       await writeReviewerJob(runRoot, job);
       state = reviewerWindowState({ ...state, status: "FAILED", currentJobId: job.id, lastError: message });
       await writeReviewerWindowState(runRoot, state);
-      console.error(`\nREVIEWER PAUSED — ${message}`);
-      console.error(`Evidence remains in ${path.join(runRoot, "REVIEWER-JOB.json")}`);
+      console.error(terminalPanel("REVIEWER PAUSED SAFELY", [
+        message,
+        `Evidence remains in ${path.join(runRoot, "REVIEWER-JOB.json")}`,
+        "Nothing was acknowledged or advanced.",
+      ]));
       process.exitCode = 1;
       break;
     }
@@ -886,16 +942,20 @@ try {
     lastError: message,
   });
   await writeReviewerWindowState(runRoot, state);
-  console.error(error instanceof ReviewerTurnInterrupted
-    ? `\nREVIEWER INTERRUPTED SAFELY — ${message}`
-    : `\nREVIEWER PAUSED — ${message}`);
-  console.error(resolved.mode === "guide-project"
-    ? "Return to Guide and say: Recover this session. This Reviewer window may be closed."
-    : `Resume with: ${reviewerResumeCommand}`);
+  console.error(terminalPanel(
+    error instanceof ReviewerTurnInterrupted ? "REVIEWER INTERRUPTED SAFELY" : "REVIEWER PAUSED SAFELY",
+    [
+      message,
+      "",
+      resolved.mode === "guide-project"
+        ? "Return to Guide and say: Recover this session. This Reviewer window may be closed."
+        : `Resume with: ${reviewerResumeCommand}`,
+    ],
+  ));
   process.exitCode = error instanceof ReviewerTurnInterrupted ? 2 : 1;
 } finally {
   ownerConsole?.close();
   await releaseLock();
 }
 
-if (stopping) console.log("\nREVIEWER WINDOW STOPPED — disk state was preserved.");
+if (stopping) console.log(terminalPanel("REVIEWER WINDOW STOPPED", ["Disk state was preserved."]));

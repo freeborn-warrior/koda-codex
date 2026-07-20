@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
 import { chmod, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -26,9 +27,19 @@ import {
   writeReviewerJob,
 } from "../scripts/relay-window-protocol.ts";
 
+function acknowledgementCode(receipt: string): string {
+  return createHash("sha256").update(receipt).digest("hex").slice(0, 8).toUpperCase();
+}
+
 async function preparedAcknowledgementRun(
   receiptInput: "correct" | "wrong",
-  options: { discussionResponse?: string; haltDirection?: string; ownerName?: string } = {},
+  options: {
+    discussionResponse?: string;
+    haltDirection?: string;
+    ownerName?: string;
+    reviewCodeInput?: string;
+    reviewFinding?: string;
+  } = {},
 ) {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-reviewer-window-"));
   const prepared = spawnSync(process.execPath, [
@@ -53,7 +64,7 @@ async function preparedAcknowledgementRun(
   await writeFile(artifactPath(session.directory, phase, 0), "# Brief\n\nOne bounded, cited outcome.\n", "utf8");
   const review = await createFreshReview(session.directory, phase, 0, {
     verdict: "APPROVE",
-    body: "# Peer review — brief\n\n## Findings\n\n- The artifact is bounded and supported.",
+    body: `# Peer review — brief\n\n## Findings\n\n- ${options.reviewFinding ?? "The artifact is bounded and supported."}`,
   });
   const runPath = path.join(runRoot, "RUN.json");
   const run = JSON.parse(await readFile(runPath, "utf8"));
@@ -90,10 +101,9 @@ async function preparedAcknowledgementRun(
       ...process.env,
       KODA_RELAY_RUNS_ROOT: temporary,
       KODA_RELAY_REVIEWER_ONCE: "1",
-      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-      KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
       KODA_RELAY_TEST_CONFIRM_READ: "1",
-      KODA_RELAY_TEST_RECEIPT_INPUT: receiptInput === "correct" ? review.metadata.receipt : "RECEIPT: Review read — wrong",
+      KODA_RELAY_TEST_RECEIPT_INPUT: options.reviewCodeInput
+        ?? (receiptInput === "correct" ? review.metadata.receipt : "RECEIPT: Review read — wrong"),
       ...(options.haltDirection ? { KODA_RELAY_TEST_HALT_DIRECTION: options.haltDirection } : {}),
       ...(fakeCodex
         ? {
@@ -293,7 +303,7 @@ test("REVIEWER OPEN CONVERSATION: an idle owner question resumes the Reviewer bu
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
   assert.equal(result.executed.status, 0, result.executed.stderr);
   assert.match(result.executed.stdout, /owner conversation while Producer works/);
-  assert.match(result.executed.stdout, /REVIEWER CONVERSATION COMPLETE — no producer handback was created/);
+  assert.match(result.executed.stdout, /REVIEWER CONVERSATION COMPLETE[\s\S]*No Producer handback was created/);
   assert.equal(result.projectStatusAfter, result.projectStatusBefore);
   const state = await readReviewerWindowState(result.runRoot);
   assert.equal(state?.threadId, "019f0000-0000-7000-8000-000000000099");
@@ -305,7 +315,7 @@ test("REVIEWER OPEN CONVERSATION SCOPE: project-level thought returns to Guide w
   const result = await preparedIdleConversationRun("GUIDE CONVERSATION — PROJECT SCOPE\nThis belongs in the project path, not the active session.");
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
   assert.equal(result.executed.status, 0, result.executed.stderr);
-  assert.match(result.executed.stdout, /GUIDE SCOPE — continue this project-level thought in the Guide conversation/);
+  assert.match(result.executed.stdout, /GUIDE SCOPE[\s\S]*Continue this project-level thought in the Guide conversation/);
   assert.match(result.executed.stdout, /Nothing from this Reviewer conversation changed the active session/);
   assert.equal(result.projectStatusAfter, result.projectStatusBefore);
   assert.equal(await pathExists(path.join(result.session.directory, "owner-handbacks")), false);
@@ -336,31 +346,43 @@ test("REVIEWER OPEN CONVERSATION TTY: a real terminal line reaches the idle Revi
   assert.equal(result.executed.status, 0, result.executed.stderr);
   assert.match(result.executed.stdout, /reviewer> /);
   assert.match(result.executed.stdout, /owner conversation while Producer works/);
-  assert.match(result.executed.stdout, /REVIEWER CONVERSATION COMPLETE — no producer handback was created/);
+  assert.match(result.executed.stdout, /REVIEWER CONVERSATION COMPLETE[\s\S]*No Producer handback was created/);
   assert.equal(result.projectStatusAfter, result.projectStatusBefore);
 });
 
-test("TWO-WINDOW RECEIPT: exact owner quote is recorded from Window B", async (t) => {
+test("TWO-WINDOW RECEIPT: short owner code maps to the exact disk receipt", async (t) => {
   const result = await preparedAcknowledgementRun("correct", { ownerName: "Ada Owner" });
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
   assert.equal(result.executed.status, 0, result.executed.stderr);
   assert.match(result.executed.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
-  assert.doesNotMatch(result.executed.stdout, /RECEIPT: Review read/);
+  assert.match(result.executed.stdout, new RegExp(`REVIEW CODE: ${acknowledgementCode(result.review.metadata.receipt)}`));
   assert.equal((await readReviewerJob(result.runRoot))?.status, "COMPLETE");
   assert.equal((await readReviewerWindowState(result.runRoot))?.threadId, "019f0000-0000-7000-8000-000000000001");
-  assert.equal(await readFile(result.clipboard, "utf8"), result.review.metadata.receipt);
+  assert.equal(await pathExists(result.clipboard), false);
   const approvals = await readApprovalEntries(result.session.directory);
   assert.equal(approvals.length, 1);
   assert.equal(approvals[0].receipt, result.review.metadata.receipt);
   assert.equal(approvals[0].approver, "Ada Owner");
 });
 
-test("TWO-WINDOW RECEIPT MUTATION: a wrong quote refuses, names the condition, and remains retryable", async (t) => {
+test("TWO-WINDOW TERMINAL SAFETY: inline review controls are sanitized without changing disk evidence", async (t) => {
+  const plantedFinding = "Visible\u001b[2J\u0007 text \u202ereversed";
+  const result = await preparedAcknowledgementRun("correct", { reviewFinding: plantedFinding });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  assert.doesNotMatch(result.executed.stdout, /[\u001b\u0007\u202e]/u);
+  assert.match(result.executed.stdout, /Visible\[2J text reversed/);
+  assert.match(await readFile(reviewPath(result.session.directory, result.phase, 0), "utf8"), /[\u001b\u0007\u202e]/u);
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
+});
+
+test("TWO-WINDOW RECEIPT MUTATION: a wrong review code refuses, names the condition, and remains retryable", async (t) => {
   const result = await preparedAcknowledgementRun("wrong");
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
   assert.equal(result.executed.status, 2, result.executed.stderr);
-  assert.match(result.executed.stdout, /NOT ACKNOWLEDGED — that paste does not match this review's receipt/);
-  assert.match(result.executed.stderr, /REVIEWER PAUSED SAFELY — The receipt did not match/);
+  assert.match(result.executed.stdout, /NOT ACKNOWLEDGED[\s\S]*That code does not match this review/);
+  assert.match(result.executed.stderr, /REVIEWER PAUSED SAFELY[\s\S]*The review code did not match/);
   const job = await readReviewerJob(result.runRoot);
   assert.equal(job?.status, "AWAITING_OWNER");
   assert.equal(job?.error, null);
@@ -373,8 +395,6 @@ test("TWO-WINDOW RECEIPT MUTATION: a wrong quote refuses, names the condition, a
       ...process.env,
       KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
       KODA_RELAY_REVIEWER_ONCE: "1",
-      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-      KODA_RELAY_TEST_CLIPBOARD_FILE: result.clipboard,
       KODA_RELAY_TEST_CONFIRM_READ: "1",
       KODA_RELAY_TEST_RECEIPT_INPUT: result.review.metadata.receipt,
     },
@@ -383,6 +403,19 @@ test("TWO-WINDOW RECEIPT MUTATION: a wrong quote refuses, names the condition, a
   assert.match(retried.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
   assert.equal((await readReviewerJob(result.runRoot))?.status, "COMPLETE");
   assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
+});
+
+test("TWO-WINDOW RECEIPT ADVERSARIAL: a valid code from another review refuses", async (t) => {
+  const oldReceipt = "RECEIPT: Review read — 11111111-2222-4333-8444-555555555555";
+  const result = await preparedAcknowledgementRun("wrong", {
+    reviewCodeInput: acknowledgementCode(oldReceipt),
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+
+  assert.equal(result.executed.status, 2, result.executed.stderr);
+  assert.match(result.executed.stdout, /NOT ACKNOWLEDGED[\s\S]*That code does not match this review/);
+  assert.equal((await readReviewerJob(result.runRoot))?.status, "AWAITING_OWNER");
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
 });
 
 test("WAIT AT FORMAL REVIEW: new direction is recorded immediately but does not revise the reviewed artifact", async (t) => {
@@ -445,14 +478,12 @@ test("TWO-WINDOW RECEIPT RECOVERY: the live legacy acknowledgement failure reope
       ...process.env,
       KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
       KODA_RELAY_REVIEWER_ONCE: "1",
-      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-      KODA_RELAY_TEST_CLIPBOARD_FILE: result.clipboard,
       KODA_RELAY_TEST_CONFIRM_READ: "1",
       KODA_RELAY_TEST_RECEIPT_INPUT: result.review.metadata.receipt,
     },
   });
   assert.equal(recovered.status, 0, recovered.stderr);
-  assert.match(recovered.stdout, /REVIEWER RECOVERY — the earlier receipt attempt changed nothing/);
+  assert.match(recovered.stdout, /REVIEWER RECOVERY[\s\S]*The earlier acknowledgement attempt changed nothing/);
   assert.match(recovered.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
   const state = await readReviewerWindowState(result.runRoot);
   assert.equal(state?.threadId, "019f0000-0000-7000-8000-000000000001");
@@ -507,10 +538,10 @@ test("TWO-WINDOW PRODUCER RECOVERY: an awaiting formal review is rejoined instea
   assert.equal(producerLock?.pid, producer.pid);
   assert.equal((await readReviewerJob(result.runRoot))?.id, job.id);
   assert.equal((await readReviewerJob(result.runRoot))?.kind, "formal");
-  for (let attempt = 0; attempt < 40 && !stdout.includes("RESTORING WINDOW B HANDOVER"); attempt += 1) {
+  for (let attempt = 0; attempt < 40 && !stdout.includes("RESTORING REVIEWER HANDOVER"); attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
-  assert.match(stdout, /RESTORING WINDOW B HANDOVER — formal review of brief/);
+  assert.match(stdout, /RESTORING REVIEWER HANDOVER — formal review of brief/);
   assert.doesNotMatch(stderr, /different reviewer job is already active/);
 
   const duplicate = spawnSync(process.execPath, [
@@ -536,7 +567,7 @@ test("TWO-WINDOW PRODUCER RECOVERY: an awaiting formal review is rejoined instea
   assert.equal(await producerWindowLockStatus(result.runRoot), null);
 });
 
-test("TWO-WINDOW OWNER CEREMONY TTY: numbered choices disclose the receipt step before acknowledgement", {
+test("TWO-WINDOW OWNER CEREMONY TTY: inline review and numbered choices disclose the code step", {
   skip: process.platform !== "darwin",
 }, async (t) => {
   const result = await preparedAcknowledgementRun("wrong");
@@ -544,27 +575,25 @@ test("TWO-WINDOW OWNER CEREMONY TTY: numbered choices disclose the receipt step 
   const expectProgram = [
     "set timeout 10",
     "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT) $env(KODA_TEST_RUN_ROOT)",
-    "expect \"Press Return to read the review: \"",
-    "send -- \"\\r\"",
+    "expect \"REVIEW CODE: $env(KODA_TEST_CODE)\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"9\\r\"",
-    "expect \"Nothing changed. Choose one of the numbered options.\"",
+    "expect \"Choose one of the numbered options.\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"2\\r\"",
     "expect \"Type your question for the Reviewer, then press Return: \"",
     "send -- \"\\r\"",
-    "expect \"No question was entered. Nothing changed.\"",
+    "expect \"No question was entered.\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"3\\r\"",
-    "expect \"Press Return to read the review: \"",
-    "send -- \"\\r\"",
+    "expect \"REVIEW CODE: $env(KODA_TEST_CODE)\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"5\\r\"",
     "expect \"Choose 1 or 2: \"",
     "send -- \"1\\r\"",
     "expect \"Type the direction the fresh Brief must carry, or press Return to go back: \"",
     "send -- \"\\r\"",
-    "expect \"Halt was not prepared. Nothing changed.\"",
+    "expect \"Halt was not prepared because no direction was entered.\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"5\\r\"",
     "expect \"Choose 1 or 2: \"",
@@ -574,16 +603,16 @@ test("TWO-WINDOW OWNER CEREMONY TTY: numbered choices disclose the receipt step 
     "expect \"FINAL HALT CONFIRMATION\"",
     "expect \"Choose 1 or 2: \"",
     "send -- \"2\\r\"",
-    "expect \"Halt was not confirmed. Nothing changed.\"",
+    "expect \"Halt was not confirmed.\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"1\\r\"",
-    "expect \"Press Command-V, then Return: \"",
+    "expect \"Review code: \"",
     "send -- \"\\r\"",
-    "expect \"NOT ACKNOWLEDGED — that paste does not match this review's receipt\"",
+    "expect \"That code does not match this review.\"",
     "expect \"Choose 1, 2, or 3: \"",
     "send -- \"1\\r\"",
-    "expect \"Press Command-V, then Return: \"",
-    "send -- \"$env(KODA_TEST_RECEIPT)\\r\"",
+    "expect \"Review code: \"",
+    "send -- \"$env(KODA_TEST_CODE)\\r\"",
     "expect eof",
     "set result [wait]",
     "exit [lindex $result 3]",
@@ -596,24 +625,26 @@ test("TWO-WINDOW OWNER CEREMONY TTY: numbered choices disclose the receipt step 
       ...process.env,
       KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
       KODA_RELAY_REVIEWER_ONCE: "1",
-      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-      KODA_RELAY_TEST_CLIPBOARD_FILE: result.clipboard,
       KODA_TEST_NODE: process.execPath,
       KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
       KODA_TEST_RUN_ROOT: result.runRoot,
-      KODA_TEST_RECEIPT: result.review.metadata.receipt,
+      KODA_TEST_CODE: acknowledgementCode(result.review.metadata.receipt),
     },
   });
   assert.equal(executed.status, 0, `${executed.stdout}\n${executed.stderr}`);
   assert.match(executed.stdout, /WHAT WOULD YOU LIKE TO DO\?/);
-  assert.match(executed.stdout, /1\. Acknowledge this review/);
-  assert.match(executed.stdout, /5\. Halt this session — permanently end this attempt/);
-  assert.match(executed.stdout, /Nothing changed\. Choose one of the numbered options/);
-  assert.match(executed.stdout, /No question was entered\. Nothing changed/);
-  assert.match(executed.stdout, /Halt was not prepared\. Nothing changed/);
-  assert.match(executed.stdout, /Halt was not confirmed\. Nothing changed/);
-  assert.match(executed.stdout, /FINAL ACKNOWLEDGEMENT — ONE KEYBOARD ACTION/);
-  assert.match(executed.stdout, /NOT ACKNOWLEDGED — that paste does not match this review's receipt/);
+  assert.match(executed.stdout, /1\. ACKNOWLEDGE/);
+  assert.match(executed.stdout, /Type the 8-character REVIEW CODE/);
+  assert.match(executed.stdout, /5\. HALT PERMANENTLY/);
+  assert.match(executed.stdout, /NOTHING CHANGED[\s\S]*Choose one of the numbered options/);
+  assert.match(executed.stdout, /NOTHING CHANGED[\s\S]*No question was entered/);
+  assert.match(executed.stdout, /NOTHING CHANGED[\s\S]*Halt was not prepared because no direction was entered/);
+  assert.match(executed.stdout, /NOTHING CHANGED[\s\S]*Halt was not confirmed/);
+  assert.match(executed.stdout, /FINAL ACKNOWLEDGEMENT/);
+  assert.match(executed.stdout, /NOT ACKNOWLEDGED[\s\S]*That code does not match this review/);
+  assert.match(executed.stdout, /─{20}/);
+  assert.doesNotMatch(executed.stdout, /<!-- KODA_REVIEW/);
+  assert.doesNotMatch(executed.stdout, /Command-V|terminal is not fully functional|Press q/);
   assert.match(executed.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
   assert.equal((await readReviewerJob(result.runRoot))?.status, "COMPLETE");
   assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
@@ -627,8 +658,7 @@ test("TWO-WINDOW OWNER CEREMONY TTY: stop for now preserves an explicit resumabl
   const expectProgram = [
     "set timeout 10",
     "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT) $env(KODA_TEST_RUN_ROOT)",
-    "expect \"Press Return to read the review: \"",
-    "send -- \"\\r\"",
+    "expect \"REVIEW CODE: $env(KODA_TEST_CODE)\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"4\\r\"",
     "expect \"REVIEWER PAUSED SAFELY\"",
@@ -644,11 +674,10 @@ test("TWO-WINDOW OWNER CEREMONY TTY: stop for now preserves an explicit resumabl
       ...process.env,
       KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
       KODA_RELAY_REVIEWER_ONCE: "1",
-      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-      KODA_RELAY_TEST_CLIPBOARD_FILE: result.clipboard,
       KODA_TEST_NODE: process.execPath,
       KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
       KODA_TEST_RUN_ROOT: result.runRoot,
+      KODA_TEST_CODE: acknowledgementCode(result.review.metadata.receipt),
     },
   });
   assert.equal(executed.status, 0, `${executed.stdout}\n${executed.stderr}`);
@@ -659,7 +688,7 @@ test("TWO-WINDOW OWNER CEREMONY TTY: stop for now preserves an explicit resumabl
   assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
 });
 
-test("TWO-WINDOW OWNER ERROR: a failed review reader offers numbered retry or safe stop", {
+test("TWO-WINDOW OWNER CEREMONY TTY: inline review does not invoke a configured pager", {
   skip: process.platform !== "darwin",
 }, async (t) => {
   const result = await preparedAcknowledgementRun("wrong");
@@ -667,11 +696,10 @@ test("TWO-WINDOW OWNER ERROR: a failed review reader offers numbered retry or sa
   const expectProgram = [
     "set timeout 10",
     "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT) $env(KODA_TEST_RUN_ROOT)",
-    "expect \"Press Return to read the review: \"",
-    "send -- \"\\r\"",
-    "expect \"REVIEW DID NOT OPEN\"",
-    "expect \"Choose 1 or 2: \"",
-    "send -- \"2\\r\"",
+    "expect \"REVIEW CODE: $env(KODA_TEST_CODE)\"",
+    "expect \"Choose 1, 2, 3, 4, or 5: \"",
+    "send -- \"4\\r\"",
+    "expect \"REVIEWER PAUSED SAFELY\"",
     "expect eof",
     "set result [wait]",
     "exit [lindex $result 3]",
@@ -688,35 +716,35 @@ test("TWO-WINDOW OWNER ERROR: a failed review reader offers numbered retry or sa
       KODA_TEST_NODE: process.execPath,
       KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
       KODA_TEST_RUN_ROOT: result.runRoot,
+      KODA_TEST_CODE: acknowledgementCode(result.review.metadata.receipt),
     },
   });
   assert.equal(executed.status, 2, `${executed.stdout}\n${executed.stderr}`);
-  assert.match(executed.stdout, /1\. Try opening the review again/);
-  assert.match(executed.stdout, /2\. Stop for now — preserve this decision point/);
+  assert.match(executed.stdout, /COMPLETE REVIEW — BRIEF — APPROVE/);
+  assert.doesNotMatch(executed.stdout, /REVIEW DID NOT OPEN|Press q|terminal is not fully functional/);
   assert.match(`${executed.stdout}\n${executed.stderr}`, /REVIEWER PAUSED SAFELY/);
   assert.equal((await readReviewerJob(result.runRoot))?.status, "AWAITING_OWNER");
   assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
 });
 
-test("TWO-WINDOW OWNER ERROR: a failed receipt copy offers only numbered recovery choices", {
+test("TWO-WINDOW OWNER CEREMONY TTY: acknowledgement never invokes pbcopy", {
   skip: process.platform !== "darwin",
 }, async (t) => {
   const result = await preparedAcknowledgementRun("wrong");
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
   const fakeBin = path.join(result.temporary, "fake-bin");
+  const marker = path.join(result.temporary, "pbcopy-invoked.txt");
   await mkdir(fakeBin);
-  await writeFile(path.join(fakeBin, "pbcopy"), "#!/bin/sh\nexit 1\n", "utf8");
+  await writeFile(path.join(fakeBin, "pbcopy"), "#!/bin/sh\nprintf invoked > \"$KODA_TEST_MARKER\"\nexit 1\n", "utf8");
   await chmod(path.join(fakeBin, "pbcopy"), 0o755);
   const expectProgram = [
     "set timeout 10",
     "spawn $env(KODA_TEST_NODE) $env(KODA_TEST_REVIEWER_SCRIPT) $env(KODA_TEST_RUN_ROOT)",
-    "expect \"Press Return to read the review: \"",
-    "send -- \"\\r\"",
+    "expect \"REVIEW CODE: $env(KODA_TEST_CODE)\"",
     "expect \"Choose 1, 2, 3, 4, or 5: \"",
     "send -- \"1\\r\"",
-    "expect \"COPY FAILED\"",
-    "expect \"Choose 1, 2, or 3: \"",
-    "send -- \"3\\r\"",
+    "expect \"Review code: \"",
+    "send -- \"$env(KODA_TEST_CODE)\\r\"",
     "expect eof",
     "set result [wait]",
     "exit [lindex $result 3]",
@@ -728,21 +756,20 @@ test("TWO-WINDOW OWNER ERROR: a failed receipt copy offers only numbered recover
     env: {
       ...process.env,
       PATH: `${fakeBin}:/usr/bin:/bin`,
+      KODA_TEST_MARKER: marker,
       KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
       KODA_RELAY_REVIEWER_ONCE: "1",
-      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
       KODA_TEST_NODE: process.execPath,
       KODA_TEST_REVIEWER_SCRIPT: path.join(process.cwd(), "scripts", "run-relay-reviewer-window.ts"),
       KODA_TEST_RUN_ROOT: result.runRoot,
+      KODA_TEST_CODE: acknowledgementCode(result.review.metadata.receipt),
     },
   });
-  assert.equal(executed.status, 2, `${executed.stdout}\n${executed.stderr}`);
-  assert.match(executed.stdout, /1\. Try copying again/);
-  assert.match(executed.stdout, /2\. Return to the full review choices/);
-  assert.match(executed.stdout, /3\. Stop for now and preserve this decision point/);
-  assert.match(`${executed.stdout}\n${executed.stderr}`, /REVIEWER PAUSED SAFELY/);
-  assert.equal((await readReviewerJob(result.runRoot))?.status, "AWAITING_OWNER");
-  assert.equal((await readApprovalEntries(result.session.directory)).length, 0);
+  assert.equal(executed.status, 0, `${executed.stdout}\n${executed.stderr}`);
+  assert.doesNotMatch(executed.stdout, /COPY FAILED|Command-V/);
+  assert.equal(await pathExists(marker), false);
+  assert.equal((await readReviewerJob(result.runRoot))?.status, "COMPLETE");
+  assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
 });
 
 test("WAIT CONTRACT MIGRATION: the superseded same-phase handback marker refuses by name", async (t) => {
@@ -831,7 +858,6 @@ test("TWO-WINDOW RELAY: a pending formal-review job wakes one persistent reviewe
   await writeReviewerJob(runRoot, job);
 
   const generatedReceipt = path.join(temporary, "generated-receipt.txt");
-  const clipboard = path.join(temporary, "clipboard.txt");
   const fakeCodex = path.join(temporary, "fake-codex.mjs");
   await writeFile(fakeCodex, [
     "#!/usr/bin/env node",
@@ -861,8 +887,6 @@ test("TWO-WINDOW RELAY: a pending formal-review job wakes one persistent reviewe
       ...process.env,
       KODA_RELAY_RUNS_ROOT: temporary,
       KODA_RELAY_REVIEWER_ONCE: "1",
-      KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-      KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
       KODA_RELAY_TEST_CONFIRM_READ: "1",
       KODA_RELAY_TEST_RECEIPT_INPUT_FILE: generatedReceipt,
       KODA_CODEX_BIN: fakeCodex,
@@ -873,7 +897,7 @@ test("TWO-WINDOW RELAY: a pending formal-review job wakes one persistent reviewe
   assert.equal(executed.status, 0, executed.stderr);
   assert.match(executed.stdout, /REVIEWER 1 — formal review of brief/);
   assert.match(executed.stdout, /REVIEWER UPDATE\nReview written/);
-  assert.doesNotMatch(executed.stdout, /RECEIPT: Review read/);
+  assert.match(executed.stdout, /REVIEW CODE: [0-9A-F]{8}/);
   assert.equal((await readReviewerJob(runRoot))?.status, "COMPLETE");
   const state = await readReviewerWindowState(runRoot);
   assert.equal(state?.threadId, "019f0000-0000-7000-8000-000000000002");
@@ -881,7 +905,6 @@ test("TWO-WINDOW RELAY: a pending formal-review job wakes one persistent reviewe
   const approvals = await readApprovalEntries(session.directory);
   assert.equal(approvals.length, 1);
   assert.equal(approvals[0].receipt, await readFile(generatedReceipt, "utf8"));
-  assert.equal(await readFile(clipboard, "utf8"), approvals[0].receipt);
 });
 
 test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous through pushed close", async (t) => {
@@ -917,7 +940,6 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   await writeJsonAtomic(runPath, run);
 
   const generatedReceipt = path.join(temporary, "session-receipt.txt");
-  const clipboard = path.join(temporary, "session-clipboard.txt");
   const fakeCodex = path.join(temporary, "fake-session-codex.mjs");
   await writeFile(fakeCodex, [
     "#!/usr/bin/env node",
@@ -961,8 +983,6 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   const environment = {
     ...process.env,
     KODA_RELAY_RUNS_ROOT: temporary,
-    KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-    KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
     KODA_RELAY_TEST_CONFIRM_READ: "1",
     KODA_RELAY_TEST_RECEIPT_INPUT_FILE: generatedReceipt,
     KODA_RELAY_TEST_DISCUSSION_QUESTION: "Please add JSON output to this session's brief.",
@@ -1000,13 +1020,15 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   const reviewerResult = await reviewer;
   assert.equal(reviewerResult.status, 0, reviewerResult.stderr);
   assert.match(producerResult.stdout, /KODA-C PRODUCER WINDOW/);
+  assert.match(producerResult.stdout, /NO ACTION NEEDED — watch only/);
+  assert.match(producerResult.stdout, /─{20}/);
   assert.match(producerResult.stdout, /Owner input: CLOSED — watch here; speak only in the Reviewer window/);
   assert.match(producerResult.stdout, /PHASE 1\/1 — BRIEF/);
-  assert.match(producerResult.stdout, /HANDOVER TO WINDOW B — formal review of brief/);
+  assert.match(producerResult.stdout, /HANDOVER TO REVIEWER — formal review of brief/);
   assert.match(producerResult.stdout, /PRODUCER HANDOVER — BRIEF/);
   assert.match(producerResult.stdout, /Observed: non-empty regular artifact/);
-  assert.match(producerResult.stdout, /WINDOW B HANDOVER COMPLETE/);
-  assert.match(producerResult.stdout, /GATE PASSED — BRIEF — 1\/1 phases complete/);
+  assert.match(producerResult.stdout, /REVIEWER HANDOVER RECEIVED/);
+  assert.match(producerResult.stdout, /GATE PASSED — BRIEF[\s\S]*1 of 1 phases complete/);
   assert.match(producerResult.stdout, /Next: immutable session close ceremony/);
   assert.match(producerResult.stdout, /RELAY COMPLETE/);
   assert.match(reviewerResult.stdout, /KODA-C REVIEWER WINDOW/);
@@ -1014,10 +1036,10 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   assert.match(reviewerResult.stdout, /REVIEWER 1 — formal review of brief/);
   assert.match(reviewerResult.stdout, /REVIEWER 2 — explain brief review/);
   assert.match(reviewerResult.stdout, /DIRECTION RECORDED — WAITING FOR GATE/);
-  assert.match(reviewerResult.stdout, /Phase: 1\/1/);
+  assert.match(reviewerResult.stdout, /Phase 1 of 1/);
   assert.match(reviewerResult.stdout, /REVIEWER HANDOVER — BRIEF — ACKNOWLEDGED/);
   assert.match(reviewerResult.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
-  assert.match(reviewerResult.stdout, /SESSION CLOSED — reviewer window complete/);
+  assert.match(reviewerResult.stdout, /SESSION CLOSED[\s\S]*Reviewer window complete/);
 
   const completed = JSON.parse(await readFile(runPath, "utf8"));
   assert.equal(completed.status, "COMPLETE");

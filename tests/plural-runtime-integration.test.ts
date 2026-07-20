@@ -189,8 +189,6 @@ test("PLURAL LIVE RUNTIME: two independent Producer/Reviewer pairs complete with
   const envFor = (slot: "A" | "B", promptFile: string, receiptFile: string): NodeJS.ProcessEnv => ({
     ...process.env,
     KODA_RELAY_RUNS_ROOT: path.join(project, ".koda", "runs"),
-    KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-    KODA_RELAY_TEST_CLIPBOARD_FILE: `${receiptFile}.clipboard`,
     KODA_RELAY_TEST_CONFIRM_READ: "1",
     KODA_RELAY_TEST_RECEIPT_INPUT_FILE: receiptFile,
     KODA_CODEX_BIN: fakeCodex,

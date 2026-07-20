@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "capability": "atomic-role-ownership-v12",
+  "capability": "owner-terminal-ceremony-v13-development",
   "verifiedAt": "2026-07-20T02:55:06.171Z",
   "repairCommit": "e6890f4c7e59719c89d25cd111f6f457a0610494",
   "testedCommit": "e6890f4c7e59719c89d25cd111f6f457a0610494",
@@ -24,11 +24,11 @@
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "0a59ad8ef794d81127dbb72d57026c8657544ccbbe37be79c38e8a922331a68d"
+      "sha256": "2a0316ae050fd8c51eb2932b3134c4217f6ac7cc7e2a6b2b9b3a22a83675c041"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "d66a174eeeb90458c7fea9bec3433e988618f9444e9252aa0eb9243770713f74"
+      "sha256": "9cf17380a7141ff7b9853034113e08be424ea254e4c0ba0a36b8aa506f46ce9e"
     },
     {
       "path": "scripts/execute-reviewer-run.ts",
@@ -80,11 +80,19 @@
     },
     {
       "path": "src/guide-console.ts",
-      "sha256": "8d84466386b4e66296bc905a5542a9e38e6ae9fcb56ba379ec2572b9c4d651ac"
+      "sha256": "b81325cb5c71772b002cffd96ccd4f05eef9a1540dad46eb78bbc24ee96efffa"
     },
     {
       "path": "dist/guide-console.js",
-      "sha256": "07badafed96027f90178b4cbc14817edad8c52c228acca94f69c61a302cc1c10"
+      "sha256": "8a014029d449d9974542ddf168f9dca7780442ae392e75b6774b2d756801b8bf"
+    },
+    {
+      "path": "src/terminal-ui.ts",
+      "sha256": "f2e71f99b7e460526e12be1f838ec18c049c757b87ad4f3f6a130c0f712d9eaf"
+    },
+    {
+      "path": "dist/terminal-ui.js",
+      "sha256": "036f188525a0619578461fd1f81d2f6f74a2e785686699a284473dcecbb6b959"
     },
     {
       "path": "src/guide-console-cli.ts",

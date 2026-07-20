@@ -47,3 +47,13 @@ a fatal process error.
 Deterministic proof is recorded separately. This live run remains paused and is not a
 human pass until the repaired recovery and the remainder of all six phases are
 observed by Kristian.
+
+## 2026-07-20 observation
+
+The numbered retry repaired process exit but did not make the ceremony usable. The
+recovered flow still depended on a terminal pager, hidden terminal controls, the
+macOS clipboard, and a second paste. That design produced a terminal-mode warning,
+an overwritten receipt, and a Ghostty paste-safety dialog. The gate again refused
+correctly, but the human experience failed. The superseding incident and replacement
+contract are preserved in
+[OWNER-REVIEW-CEREMONY-INCIDENT-02.md](OWNER-REVIEW-CEREMONY-INCIDENT-02.md).

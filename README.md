@@ -63,6 +63,18 @@ The core does not require Ghostty or a model. Ghostty is an optional macOS adapt
 that makes the Guide, Producer, and Reviewer visible in separate windows. The
 same disk relay can be started from manually opened terminals.
 
+In the managed Reviewer window, the complete human-facing review prints inline.
+Its final eight-character `REVIEW CODE` is the only acknowledgement text the owner
+types. Koda binds that code to the current review's complete receipt and still sends
+the exact receipt—not the short code—to the unchanged mechanical gate. No pager,
+clipboard, or terminal paste is involved.
+
+Guide, Reviewer, and Producer use the same visibly bounded terminal panels and
+spacing. Numbered choices appear only where owner input is accepted; Producer
+states `NO ACTION NEEDED — watch only`. All managed model and review text is
+sanitized for terminal control and bidirectional-override characters before it is
+displayed, while the evidence bytes on disk remain unchanged.
+
 ## Evidence, not promises
 
 - The current [230-check post-push transcript](docs/test-results/2026-07-19-atomic-role-locks-pushed.md)

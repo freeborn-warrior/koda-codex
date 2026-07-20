@@ -180,9 +180,9 @@ test("SECURITY INTEGRITY SUITE: role launcher bytes ignore ambient terminal loca
 
 test("SECURITY INTEGRITY SUITE: owner receipt and ruling data never enter child-process arguments or environment", async () => {
   const reviewerWindow = await readFile("scripts/run-relay-reviewer-window.ts", "utf8");
-  assert.match(reviewerWindow, /const approvalInput = \[receiptInput\.trim\(\)\]/);
+  assert.match(reviewerWindow, /const approvalInput = \[parsed\.receipt\.trim\(\)\]/);
   assert.match(reviewerWindow, /input: `\$\{approvalInput\.join\("\\n"\)\}\\n`/);
-  assert.doesNotMatch(reviewerWindow, /approvalArgs[^\n]*receiptInput/);
+  assert.doesNotMatch(reviewerWindow, /approvalArgs[^\n]*parsed\.receipt/);
   assert.doesNotMatch(reviewerWindow, /approvalArgs\.push\("--(?:comments|ruling)"/);
   assert.doesNotMatch(reviewerWindow, /KODA_(?!RELAY_TEST_)[A-Z_]*(?:RECEIPT|RULING|COMMENTS)[A-Z_]*/);
 });

@@ -1,6 +1,6 @@
 # Koda-C visible backlog
 
-**Last updated:** 2026-07-19
+**Last updated:** 2026-07-20
 
 This is the on-disk working queue for the build. A checked item means its evidence exists in committed project files; conversation-only completion does not count.
 
@@ -11,11 +11,16 @@ This is the on-disk working queue for the build. A checked item means its eviden
   rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex
   resume, live boundary probe, and deterministic legacy-launcher migration now
   pass pushed capability `atomic-role-ownership-v12` at **230/230**.
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Later, the secure Guide correctly stayed open when terminal-specific launcher bytes mismatched. Every event left the gate shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, hardened Git locking, dynamic owner binding, strict role containment, the secure persistent Guide, and bounded legacy-launcher migration now pass a pushed 230/230 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
-- [ ] Resume the preserved `2026-07-19-02` session now that the deterministic
-  launcher-migration repair and its full audit are pushed. Reopen the same contexts and same
-  unacknowledged review through Guide; do not create a third attempt or manually run
-  either role.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Recovery later proved the replacement still unusable: terminal pager warnings, hidden controls, clipboard replacement, and a paste-safety dialog. Every event left the gate shut with zero acknowledgements. The in-progress replacement prints the review inline, accepts a bound short code, never touches the clipboard, and gives all three windows one visually bounded message system. It must pass the complete recorded, security, package, and pushed-integrity program before Kristian sees it again; then the remaining five phase decisions and pushed close are still required.
+- [ ] Bind and push the repaired owner ceremony before human recovery. The exact
+  local implementation now passes **232/232**, coverage, package inspection,
+  terminal-control mutation, and zero-vulnerability audit. The code commit,
+  unchanged post-push transcript, and final integrity manifest remain before the
+  preserved session may reopen.
+- [ ] Resume the preserved `2026-07-19-02` session only after the new inline-review,
+  short-code, and three-window terminal design is fully tested, recorded, pushed,
+  and integrity-bound. Reopen the same contexts and same unacknowledged review
+  through Guide; do not create a third attempt or manually run either role.
 - [ ] Run one genuine full-session live-model test of the Guide-launched runtime with all three contexts visible: ongoing project-level Guide, non-interactive Producer, and owner-facing session Reviewer. The two-context session relay has already been owner-observed; deterministic Guide launch/return simulation is complete.
 - [ ] Owner-test the repaired one-action Ghostty adapter against a genuine Guide-confirmed session. The original callback-only adapter test was insufficient and encoded the unsafe multi-token launch; never reinstate that claim.
 - [ ] Complete the Guide-side human UX for active-session direction. The shared waiting evidence and fresh-Brief mechanics now work; the live three-window test must prove the owner understands that Guide and Reviewer record now but never inject the active phase.

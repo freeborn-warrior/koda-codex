@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
-import { spawnSync } from "node:child_process";
-import { lstat, readFile, readdir, realpath, writeFile } from "node:fs/promises";
+import { lstat, readFile, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { terminalPanel } from "../src/terminal-ui.ts";
 
 type RunRecord = {
   status: string;
@@ -24,7 +25,10 @@ const runsRoot = await realpath(process.env.KODA_RELAY_RUNS_ROOT
   : path.join(root, "docs", "relay-runs"));
 
 function refuse(message: string): never {
-  console.error(`REVIEW NOT READY — ${message}`);
+  console.error(terminalPanel("REVIEW NOT READY", [
+    message,
+    "Nothing changed on disk.",
+  ]));
   process.exit(1);
 }
 
@@ -92,20 +96,19 @@ async function reviewSnapshot(): Promise<{ content: string; receipt: string; has
 }
 
 const before = await reviewSnapshot();
-console.log(`Opening the complete ${phase.name} review. Read every finding, then press q.`);
-const reader = spawnSync(process.env.KODA_RELAY_REVIEW_PAGER ?? "less", [review], { stdio: "inherit" });
-if (reader.status !== 0) refuse(`The review reader exited ${reader.status ?? -1}; nothing was copied.`);
+const visible = before.content
+  .split(/\r?\n/)
+  .filter((line) => !line.startsWith("<!-- KODA_REVIEW "))
+  .join("\n")
+  .trim();
+const code = createHash("sha256").update(before.receipt).digest("hex").slice(0, 8).toUpperCase();
+console.log(terminalPanel(`COMPLETE REVIEW — ${phase.name.toUpperCase()}`, [
+  visible,
+  "",
+  `REVIEW CODE: ${code}`,
+  "",
+  "This historical helper is read-only. Current sessions acknowledge inside the persistent Reviewer window.",
+]));
 
 const after = await reviewSnapshot();
 if (after.hash !== before.hash) refuse("The review changed while it was open. Run the same command again and read the current review.");
-
-const testClipboard = process.env.KODA_RELAY_RUNS_ROOT && process.env.KODA_RELAY_TEST_CLIPBOARD_FILE;
-if (testClipboard) {
-  await writeFile(testClipboard, after.receipt, "utf8");
-} else {
-  const copied = spawnSync("pbcopy", [], { input: after.receipt, encoding: "utf8" });
-  if (copied.status !== 0) refuse("macOS could not copy the receipt; nothing was sent to Window A.");
-}
-
-console.log("Receipt copied. Return to Window A, press Command-V, then press Return.");
-console.log("The receipt was not printed here or sent to either model context.");

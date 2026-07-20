@@ -98,27 +98,24 @@ test("FULL RELAY RUNNER: preparation creates a clean pushed project with local s
       status: "AWAITING_OWNER_RECEIPT",
       sessionId,
     }, null, 2)}\n`, "utf8");
-    const clipboard = path.join(temporary, "clipboard.txt");
     const reviewed = spawnSync(process.execPath, ["scripts/read-relay-review.ts"], {
       cwd: process.cwd(),
       encoding: "utf8",
       env: {
         ...process.env,
         KODA_RELAY_RUNS_ROOT: temporary,
-        KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
-        KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
       },
     });
     assert.equal(reviewed.status, 0, reviewed.stderr);
-    assert.doesNotMatch(reviewed.stdout, /RECEIPT:/);
-    assert.match(reviewed.stdout, /Receipt copied/);
-    assert.equal(await readFile(clipboard, "utf8"), receipt);
+    assert.match(reviewed.stdout, /RECEIPT: Review read/);
+    assert.match(reviewed.stdout, /REVIEW CODE: [0-9A-F]{8}/);
+    assert.match(reviewed.stdout, /historical helper is read-only/);
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }
 });
 
-test("FULL RELAY RUNNER: execution preserves two contexts and never automates owner receipt proof", async () => {
+test("FULL RELAY RUNNER: execution preserves two contexts and binds owner acknowledgement to the full receipt", async () => {
   const [prepare, execute, location, reviewerWindow, reviewHelper, reviewerExecute, protocol, ghostty, packageJson] = await Promise.all([
     readFile("scripts/prepare-relay-run.ts", "utf8"),
     readFile("scripts/execute-relay-run.ts", "utf8"),
@@ -142,7 +139,8 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(execute, /run\.producer\.threadId === run\.reviewer\.threadId/);
   assert.match(execute, /stdio: "inherit"/);
   assert.match(execute, /\["approve", phaseName, "--approver", ownerName\]/);
-  assert.match(execute, /The relay does not read or print it for you/);
+  assert.match(execute, /NO ACTION NEEDED — watch only/);
+  assert.match(execute, /terminalPanel/);
   assert.match(execute, /evaluateGate/);
   assert.match(execute, /evaluateSessionClosure/);
   assert.match(execute, /dispatchReviewerWindowJob/);
@@ -173,8 +171,8 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(reviewHelper, /run\.status !== "AWAITING_OWNER_RECEIPT"/);
   assert.match(reviewHelper, /candidates\.length > 1/);
   assert.match(reviewHelper, /after\.hash !== before\.hash/);
-  assert.match(reviewHelper, /spawnSync\("pbcopy"/);
-  assert.doesNotMatch(reviewHelper, /console\.log\(after\.receipt/);
+  assert.doesNotMatch(reviewHelper, /pbcopy|KODA_RELAY_REVIEW_PAGER|Command-V/);
+  assert.match(reviewHelper, /REVIEW CODE/);
   assert.match(reviewHelper, /project path resolves outside the relay run/);
   assert.match(reviewHelper, /must be a regular file inside the active session/);
   assert.match(reviewerExecute, /Reviewer project resolves outside its prepared run folder/);
@@ -183,12 +181,16 @@ test("FULL RELAY RUNNER: execution preserves two contexts and never automates ow
   assert.match(reviewerWindow, /This context remains the Reviewer for the complete session/);
   assert.match(reviewerWindow, /stdio: \["ignore", "pipe", "pipe"\]/);
   assert.match(reviewerWindow, /parseReview\(before\)/);
-  assert.match(reviewerWindow, /receiptInput\.trim\(\) !== parsed\.receipt\.trim\(\)/);
+  assert.match(reviewerWindow, /codeInput\.trim\(\)\.toUpperCase\(\) !== acknowledgementCode/);
+  assert.match(reviewerWindow, /const approvalInput = \[parsed\.receipt\.trim\(\)\]/);
   assert.match(reviewerWindow, /approvalArgs = \[cli, "approve", job\.phase, "--approver", ownerName/);
   assert.match(reviewerWindow, /input: `\$\{approvalInput\.join\("\\n"\)\}\\n`/);
   assert.match(reviewerWindow, /WHAT WOULD YOU LIKE TO DO\?/);
-  assert.match(reviewerWindow, /NOT ACKNOWLEDGED.*gate is still closed/);
-  assert.match(reviewerWindow, /The exact receipt is already copied/);
+  assert.match(reviewerWindow, /beginScreen\("NOT ACKNOWLEDGED"\)/);
+  assert.match(reviewerWindow, /Nothing changed and the gate is still closed/);
+  assert.match(reviewerWindow, /REVIEW CODE shown beneath the complete review/);
+  assert.match(reviewerWindow, /ownerVisibleReview\(before\)/);
+  assert.doesNotMatch(reviewerWindow, /pbcopy|KODA_RELAY_REVIEW_PAGER|Command-V/);
   assert.match(reviewerWindow, /owner-explanation mode/);
   assert.match(reviewerWindow, /WAITING_DIRECTION_PREFIX/);
   assert.match(reviewerWindow, /createWaitingDirection/);

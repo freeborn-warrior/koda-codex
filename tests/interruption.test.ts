@@ -167,7 +167,7 @@ test("INTERRUPTION RECOVERY: Ctrl-C kills Producer, distrusts partial artifact, 
   second.child.kill("SIGINT");
   const resumed = await second.result;
   assert.equal(resumed.status, 2, resumed.stderr);
-  assert.match(resumed.stdout, /HANDOVER TO WINDOW B — formal review of brief/);
+  assert.match(resumed.stdout, /HANDOVER TO REVIEWER — formal review of brief/);
   const finalRun = JSON.parse(await readFile(prepared.runPath, "utf8"));
   assert.equal(finalRun.status, "PAUSED_BY_OWNER");
   assert.equal(finalRun.producer.threadId, threadId);
@@ -205,7 +205,6 @@ test("INTERRUPTION RECOVERY: Ctrl-C returns a formal Reviewer job to PENDING and
   const count = path.join(prepared.temporary, "reviewer-count");
   const calls = path.join(prepared.temporary, "reviewer-calls.jsonl");
   const generatedReceipt = path.join(prepared.temporary, "receipt.txt");
-  const clipboard = path.join(prepared.temporary, "clipboard.txt");
   const fakeCodex = path.join(prepared.temporary, "fake-reviewer.mjs");
   const threadId = "019f0000-0000-7000-8000-000000000702";
   await writeFile(fakeCodex, [
@@ -248,9 +247,7 @@ test("INTERRUPTION RECOVERY: Ctrl-C returns a formal Reviewer job to PENDING and
     ...process.env,
     KODA_RELAY_RUNS_ROOT: prepared.temporary,
     KODA_RELAY_REVIEWER_ONCE: "1",
-    KODA_RELAY_REVIEW_PAGER: "/usr/bin/true",
     KODA_RELAY_TEST_CONFIRM_READ: "1",
-    KODA_RELAY_TEST_CLIPBOARD_FILE: clipboard,
     KODA_RELAY_TEST_RECEIPT_INPUT_FILE: generatedReceipt,
     KODA_CODEX_BIN: fakeCodex,
     KODA_TEST_CLI: path.join(process.cwd(), "src", "cli.ts"),
@@ -287,7 +284,9 @@ test("INTERRUPTION RECOVERY: Ctrl-C returns a formal Reviewer job to PENDING and
   });
   assert.equal(resumed.status, 0, resumed.stderr);
   assert.match(resumed.stdout, /reconcile interrupted turn 1/);
-  assert.doesNotMatch(resumed.stdout, /RECEIPT: Review read/);
+  assert.equal((resumed.stdout.match(/RECEIPT: Review read/g) ?? []).length, 1, "receipt appears only inside the complete owner-visible review");
+  assert.match(resumed.stdout, /REVIEW CODE: [0-9A-F]{8}/);
+  assert.doesNotMatch(resumed.stdout, /<!-- KODA_REVIEW/);
   assert.equal((await readReviewerJob(prepared.runRoot))?.status, "COMPLETE");
   const finalState = await readReviewerWindowState(prepared.runRoot);
   assert.equal(finalState?.threadId, threadId);
@@ -360,7 +359,7 @@ test("INTERRUPTION RECOVERY: an interrupted owner conversation resumes without l
   resumed.child.kill("SIGINT");
   const completed = await resumed.result;
   assert.equal(completed.status, 0, completed.stderr);
-  assert.match(completed.stdout, /REVIEWER RECOVERY — resuming interrupted conversation turn 1/);
+  assert.match(completed.stdout, /REVIEWER RECOVERY[\s\S]*Resuming interrupted conversation turn 1/);
   assert.match(completed.stdout, /DIRECTION RECORDED — WAITING FOR GATE/);
   const directions = await pendingDirectionsForActivePhase(prepared.session.directory, prepared.session.state);
   assert.equal(directions.length, 1);

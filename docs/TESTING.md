@@ -1617,3 +1617,75 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   READMEs now give the exact public `git clone`, `cd`, and no-build `node` path and
   say no `npm install` is required. A new submission assertion plus the complete
   package/security slice passed **18/18**; no product mechanic changed.
+
+## 2026-07-20 — Inline owner review ceremony and shared three-window language
+
+- **Owner-observed failure:** The preserved retry reached an APPROVE Brief review,
+  but the owner ceremony still opened an external pager, required a hidden `q`,
+  overwrote the clipboard, and then triggered Ghostty's multi-line paste warning.
+  An attempted paste contained terminal history instead of the receipt. The exact
+  receipt gate refused it; zero approval entries and zero advancements were
+  written. Guide, Reviewer, and Producer were then closed safely.
+- **Replacement:** The persistent Reviewer now prints the complete human-facing
+  review inline, omits protected machine metadata from terminal display, and shows
+  a deterministic eight-character review code. The code resolves to the current
+  review's full receipt only inside the controller; the full receipt still enters
+  the unchanged core approval command over stdin. Pager and clipboard mutation
+  were removed from the managed ceremony.
+- **Three-window language:** Guide, Reviewer, and Producer now share bounded
+  divider panels. Only an owner-interactive window presents numbered choices.
+  Producer panels explicitly say `NO ACTION NEEDED — watch only`. Refusal,
+  recovery, interruption, handover, halt, and completion branches use the same
+  visual language instead of falling back to raw terminal prose.
+- **New adversarial check:** A correctly formed review code derived from another
+  receipt refuses, leaves the Reviewer job `AWAITING_OWNER`, and writes no ledger
+  entry. Existing full-receipt adversarial and gate mutation suites remain intact.
+- **Development failures:** The first post-panel focused run passed **22/32**.
+  The integrity manifest correctly rejected changed launch files; the remaining
+  failures were exact assertions for superseded sentence layout, including one
+  Expect script that timed out while waiting for old wording. After the local
+  development hashes and first assertions were corrected, the slice passed
+  **25/32**; seven further assertions still joined titles and bodies that are now
+  deliberately separated by panel dividers. No gate, receipt, mutation, security,
+  or recovery condition failed.
+- **Corrected focused results:** The complete Guide/Reviewer/Producer window slice
+  passed **33/33**, including real TTY choices, wrong and cross-review codes,
+  recovery, interruption, halt, conversation, and pushed close. The focused
+  real-project/interruption/security slice passed **18/18**.
+- **First complete-suite run:** **226/231** passed. The five failures were stale
+  presentation or source-structure assertions: one Reviewer close sentence, three
+  interruption output layouts, and one security assertion that still named the
+  removed raw receipt variable. Each was updated to require the stronger inline,
+  metadata-hidden, stdin-only contract.
+- **Corrected complete-suite result:** `npm test` passed **231/231**. No assertion
+  was removed to create a pass; every changed assertion now checks the replacement
+  behavior or a stronger confidentiality/binding property.
+- **Security defect found before handoff:** Printing reviews inline introduced a
+  terminal-output trust boundary. A review could contain escape, bell, C1, or
+  Unicode bidirectional controls. The shared Guide/Reviewer/Producer renderer now
+  strips those bytes from terminal display only; the review on disk, artifact hash,
+  receipt, and gate evidence remain unchanged. The new mutation plants controls,
+  proves none reach the terminal, proves they remain on disk, and still records the
+  exact bound receipt through the gate.
+- **Final focused and complete results:** Guide/Reviewer/security/integrity passed
+  **48/48**. The complete suite passed **232/232** and the durable local transcript
+  is [recorded here](test-results/2026-07-20-owner-review-ceremony-final-local.md).
+  Coverage passed **232/232** at **87.70% lines, 71.45% branches, and 86.24%
+  functions** overall; the new shared terminal renderer has 100% line, branch, and
+  function coverage.
+- **Package and dependency result:** An isolated `npm pack --dry-run --json` and
+  real tarball completed with 1,036,827 compressed bytes, 4,977,358 unpacked bytes,
+  809 entries, and zero bundled dependencies. The tarball contains the full GPLv3
+  license, root README, compiled CLI, and repository-local review skill while
+  excluding `.git`, `.koda`, `.env`, `.DS_Store`, `node_modules`, and nested
+  tarballs. An isolated production lockfile audit reports zero vulnerabilities at
+  every severity. `git diff --check` and `git fsck --full --no-dangling` passed.
+- **Audit setup failure preserved:** The first isolated audit-copy command used a
+  relative `package.json` after changing to the temporary directory and failed by
+  name. Re-running with the explicit repository path succeeded. The failure changed
+  no project file, test, or assertion.
+- **State:** LOCAL DETERMINISTIC, COVERAGE, PACKAGE, UX, AND SECURITY PASS. The
+  [UX audit](quality-runs/2026-07-20-owner-review-ceremony-ux-audit-10/RESULT.md)
+  and [security audit](security-runs/2026-07-20-owner-review-ceremony-audit-16/RESULT.md)
+  are durable. Code push, unchanged post-push test proof, and final integrity
+  binding remain before owner recovery.
