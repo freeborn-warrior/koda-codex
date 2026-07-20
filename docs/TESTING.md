@@ -1984,3 +1984,8 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [244-check post-push transcript](test-results/2026-07-20-codex-permission-instantiation-bounded-pushed.md),
   and every critical startup file. A fresh owner-visible networked Guide run remains
   before human handoff.
+- **Release confirmation:** The promoted documentation state passed another
+  **244/244** at commit `0cb633d` in the
+  [release transcript](test-results/2026-07-20-codex-permission-instantiation-bounded-release.md).
+  Against the final pushed manifest, installed Codex again applied Guide and role
+  profiles with exit 0; the durable installed-client record includes both results.

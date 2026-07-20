@@ -56,3 +56,17 @@ The prompt is confirmed, committed, pushed, and mechanically verified.
 ```
 
 No Guide model, Producer, Reviewer, network request, or Ghostty window was started.
+
+## Final pushed-manifest rerun
+
+After the post-push transcript was promoted into the integrity manifest and the
+244-test release suite was pushed, both exact profiles were instantiated once more
+against that final disk state:
+
+```json
+{"profile":"koda_guide","permissionArgumentBytes":1087,"status":0,"signal":null,"stdout":"","stderr":""}
+{"profile":"koda_project","permissionArgumentBytes":409,"status":0,"signal":null,"stdout":"","stderr":""}
+```
+
+The Guide increase from 1,078 to 1,087 bytes reflects the promoted evidence
+filename and remains below the 2,000-byte regression ceiling.
