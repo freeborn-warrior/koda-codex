@@ -45,6 +45,9 @@ truth for the exact submission requirements.
   [250/250 release suite](test-results/2026-07-20-integrated-role-preflight-release-final.md).
 - [x] A first-time user has one documented command for a complete session;
   confirmation, launch, owner choices, and safe recovery remain inside Koda.
+- [x] A fresh Terra/medium task independently reviewed the complete integrated
+  Producer-role preflight under its precommitted contract and returned
+  [APPROVE](quality-runs/2026-07-20-integrated-role-preflight-18/REVIEW.md).
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.
 
 ## Submission form

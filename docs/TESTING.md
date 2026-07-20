@@ -2134,10 +2134,12 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   mistake was corrected with a fresh recorded **250/250**
   [final release transcript](test-results/2026-07-20-integrated-role-preflight-release-final.md)
   against the complete final working tree.
-- **Independent review:** Its contract was pushed before execution. A fresh
+- **Independent review:** Its contract was pushed before execution. A first fresh
   Terra/medium attempt was refused before start by the private-repository export
-  boundary. No repository bytes were sent by that attempt, no workaround was
-  used, and no verdict is claimed.
+  boundary; no bytes were sent and no workaround was used. After explicit owner
+  approval, a new read-only Terra/medium task reviewed pushed commit `2fdbd9e`,
+  independently observed 250/250, and returned **APPROVE**. The exact task ID and
+  final answer are preserved in the [review record](quality-runs/2026-07-20-integrated-role-preflight-18/REVIEW.md).
 - **Evidence:** [incident and verification result](verification-runs/2026-07-20-integrated-role-preflight-03/RESULT.md),
   [sealed review contract](quality-runs/2026-07-20-integrated-role-preflight-18/CONTRACT.md),
   [quality result](quality-runs/2026-07-20-integrated-role-preflight-18/RESULT.md),
@@ -2145,5 +2147,5 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **State:** POST-PUSH PASS. Capability `integrated-role-preflight-v21` binds
   repair/tested commit `5380f51`, the unchanged 250-check transcript, and every
   critical role/startup file. The promoted release and final documentation-bound
-  working tree each pass 250/250. Independent review and a fresh owner-visible
-  six-phase session remain.
+  working tree each pass 250/250. Independent review is APPROVE; a fresh
+  owner-visible six-phase session remains.

@@ -63,7 +63,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
   consumes the bundled prompt through real session creation and Guide binding;
   the expanded Guide, plural-runtime, security, and integrity slice passes
   **68/68** and the complete local and unchanged post-push suites pass **246/246**.
-- [ ] Complete the fresh independent review and owner-visible rehearsal for the
+- [ ] Complete the fresh owner-visible rehearsal for the
   integrated Producer-role preflight. The owner-observed launch failed because the real
   restricted Producer could not read toolkit integrity evidence even though the
   command and profile had passed separately. Quick Start now composes them before
@@ -72,9 +72,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
   post-push **250/250** passes. The promoted manifest then passed a further
   **250/250** release suite at commit `701d17a`. Capability
   `integrated-role-preflight-v21` is promoted. The sealed Terra/medium review did
-  not run because private-repository export required fresh explicit owner
-  approval; no verdict is claimed. Fresh owner-visible proof remains deliberately
-  separate.
+  not initially run because private-repository export required fresh explicit
+  owner approval. After approval, a new read-only Terra/medium task returned
+  **APPROVE** against the sealed contract and pushed commit `2fdbd9e`. Fresh
+  owner-visible proof remains deliberately separate.
 
 ## Next
 
