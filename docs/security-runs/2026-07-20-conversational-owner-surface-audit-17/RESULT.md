@@ -37,6 +37,11 @@ enforcement.
 - Repository symlink scan: none found.
 - `git diff --check`: passed.
 - `git fsck --full --no-dangling`: passed.
+- A pre-publication scan of every reachable Git commit found no Fireworks-shaped,
+  GitHub, AWS, Google, Slack, npm, private-key, or actual OpenAI-shaped credential.
+  Its sole textual match was the harmless substring `sk-role-handovers-final`
+  inside the evidence filename `disk-role-handovers-final`; no matched secret value
+  was printed during diagnosis.
 - Isolated production package audit: zero vulnerabilities at every severity.
 - Package dry-run: 1,234,384 compressed bytes, 5,244,660 unpacked bytes, 814
   entries, and zero bundled dependencies.
@@ -62,5 +67,7 @@ failed setup changed no repository file and is part of the audit record.
   commands or unrelated terminal applications safe.
 - Hashes detect changed bytes but are not signatures. A malicious same-user
   replacement of the repository or controller remains outside Koda's guarantee.
+- Credential-pattern scanning is heuristic. Public release does not replace
+  provider-side key rotation or GitHub secret scanning.
 - The short review code and receipt show explicit engagement with the ceremony;
   neither proves cognition or comprehension.

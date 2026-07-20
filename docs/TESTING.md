@@ -1810,3 +1810,8 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Owner decision required:** Make the repository public, or keep it private and
   grant/verify both judging invitations. Koda must not represent the public clone
   path as judge-ready until one route is observed working.
+- **Pre-publication history scan:** Every reachable commit was checked for common
+  Fireworks, OpenAI, GitHub, AWS, Google, Slack, npm, and private-key signatures.
+  No credential was found. The only match was a substring crossing the filename
+  `disk-role-handovers-final`; redacted context confirmed it was not token data.
+  This is a strong heuristic check, not a guarantee against every credential form.
