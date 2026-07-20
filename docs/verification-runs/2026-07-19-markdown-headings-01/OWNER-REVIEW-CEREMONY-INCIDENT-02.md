@@ -1,8 +1,11 @@
 # Owner review ceremony incident — pager and clipboard path
 
-**Observed:** 2026-07-20  
-**Launch:** `6371ade2-3002-42aa-87ab-a613220b7eab`  
-**Session:** `2026-07-19-02`  
+**Observed:** 2026-07-20
+
+**Launch:** `6371ade2-3002-42aa-87ab-a613220b7eab`
+
+**Session:** `2026-07-19-02`
+
 **Result:** HUMAN UX FAILURE — GATE REMAINED CLOSED
 
 The recovered Reviewer returned to the same approved Brief review and persistent

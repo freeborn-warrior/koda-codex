@@ -1,8 +1,10 @@
 # Owner review ceremony UX audit 10
 
-**Date:** 2026-07-20  
+**Date:** 2026-07-20
+
 **Scope:** First-time human comprehension across the visible Guide, Reviewer, and
-Producer terminal windows.  
+Producer terminal windows.
+
 **Result:** LOCAL MECHANICS PASS — OWNER OBSERVATION PENDING
 
 ## Failure being repaired

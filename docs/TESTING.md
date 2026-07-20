@@ -1683,7 +1683,11 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Audit setup failure preserved:** The first isolated audit-copy command used a
   relative `package.json` after changing to the temporary directory and failed by
   name. Re-running with the explicit repository path succeeded. The failure changed
-  no project file, test, or assertion.
+  no project file, test, or assertion. The first staged whitespace check then named
+  seven trailing-space lines in new audit Markdown. Because the check and commit
+  were mistakenly sequential rather than conditional, the milestone commit still
+  completed locally. A separate cleanup removes the spaces; the corrected staged
+  check must pass before either commit is pushed.
 - **State:** LOCAL DETERMINISTIC, COVERAGE, PACKAGE, UX, AND SECURITY PASS. The
   [UX audit](quality-runs/2026-07-20-owner-review-ceremony-ux-audit-10/RESULT.md)
   and [security audit](security-runs/2026-07-20-owner-review-ceremony-audit-16/RESULT.md)
