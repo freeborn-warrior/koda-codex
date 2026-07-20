@@ -32,6 +32,8 @@
 - The fully assembled local submission surface then passed the complete
   **230/230** suite in the
   [named transcript](../../test-results/2026-07-19-submission-readiness-final.md).
+- The same assembled surface passed **230/230** again after push at `91729b0` in
+  the [post-push transcript](../../test-results/2026-07-19-submission-readiness-pushed.md).
 
 ## Failures handled safely
 

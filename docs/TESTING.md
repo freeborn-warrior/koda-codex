@@ -1609,3 +1609,6 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Assembled-suite result:** The completed judge landing, refreshed submission
   documents, project records, and audit links passed the full **230/230** suite in
   the [named local transcript](test-results/2026-07-19-submission-readiness-final.md).
+- **Post-push result:** After the assembled audit commit `91729b0` reached
+  `origin/main`, the unchanged full suite passed **230/230** again in the
+  [post-push transcript](test-results/2026-07-19-submission-readiness-pushed.md).

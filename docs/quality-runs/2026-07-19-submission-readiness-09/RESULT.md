@@ -29,6 +29,9 @@ proved the refusal without relying on TypeScript execution.
 After the judge-facing documents and audit records were assembled, the complete
 local suite passed **230/230** and wrote the
 [named transcript](../../test-results/2026-07-19-submission-readiness-final.md).
+After those records reached `origin/main` at `91729b0`, the unchanged complete
+suite passed **230/230** again in the
+[post-push transcript](../../test-results/2026-07-19-submission-readiness-pushed.md).
 
 ## Experience defects found and corrected
 
