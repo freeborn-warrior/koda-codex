@@ -6,12 +6,17 @@ import path from "node:path";
 import test from "node:test";
 
 import { compatibleGhosttyRoleLauncherSource, ghosttyRoleLauncherSource } from "../src/ghostty.ts";
-import { codexProjectPermissionArgs, codexRolePermissionArgs } from "../src/codex-role-permissions.ts";
+import {
+  codexGuidePermissionArgs,
+  codexProjectPermissionArgs,
+  codexRolePermissionArgs,
+} from "../src/codex-role-permissions.ts";
 import {
   relayCodexEnvironment,
   relayNodeToolchainReadRoots,
   relayRoleEnvironment,
 } from "../src/relay-environment.ts";
+import { verifiedToolkitPermissionReadPaths } from "../src/toolkit-integrity.ts";
 
 test("PROJECT SANDBOX SUITE: role turns fail closed with project-scoped read and write access", () => {
   const args = codexRolePermissionArgs(
@@ -40,6 +45,25 @@ test("PROJECT SANDBOX SUITE: role turns fail closed with project-scoped read and
   assert.doesNotMatch(joined, /workspace-write/);
   assert.throws(() => codexRolePermissionArgs("relative/dist/cli.js", "/trusted/codex", []), /must be absolute/);
   assert.throws(() => codexRolePermissionArgs("/trusted/koda/dist/cli.js", "relative/codex", []), /must be absolute/);
+});
+
+test("PROJECT SANDBOX SUITE: Guide permission table stays bounded without granting the toolkit project", async () => {
+  const packageRoot = path.resolve(".");
+  const permissionRoots = await verifiedToolkitPermissionReadPaths();
+  const args = codexGuidePermissionArgs(
+    path.join(packageRoot, "dist", "cli.js"),
+    "/trusted/codex/bin/codex",
+    ["/trusted/toolchain"],
+    ["docs/guide"],
+    permissionRoots,
+  );
+  const filesystem = args.find((argument) => argument.startsWith("permissions.koda_guide.filesystem="));
+  assert.ok(filesystem);
+  assert.ok(filesystem.length < 2_000, `Guide permission table is too large for installed Codex: ${filesystem.length}`);
+  assert.match(filesystem, new RegExp(`${packageRoot.replaceAll("/", "\\/")}\\/src`));
+  assert.match(filesystem, new RegExp(`${packageRoot.replaceAll("/", "\\/")}\\/scripts`));
+  assert.doesNotMatch(filesystem, new RegExp(`${packageRoot.replaceAll("/", "\\/")}\\/docs\" = \"read\"`));
+  assert.doesNotMatch(filesystem, /\/\.koda\" = \"read\"/);
 });
 
 test("PROJECT SANDBOX SUITE: the Node toolchain root is a narrow explicit read capability", () => {

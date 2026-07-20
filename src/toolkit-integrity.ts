@@ -179,3 +179,32 @@ export async function verifiedToolkitReadPathsAt(root: string): Promise<string[]
 export async function verifiedToolkitReadPaths(): Promise<string[]> {
   return verifiedToolkitReadPathsAt(packageRoot());
 }
+
+/**
+ * Bounded roots used only for the Codex filesystem permission profile.
+ *
+ * The installed Codex 0.144.6 dynamic TOML parser falls back to a string for a
+ * sufficiently large inline table. Integrity verification still hashes every
+ * exact file, while the sandbox policy collapses only fixed public runtime-code
+ * groups. Evidence and human documentation remain exact-file grants, so this
+ * never grants the toolkit's `.koda`, all of `docs`, or a sibling project.
+ */
+export async function verifiedToolkitPermissionReadPathsAt(root: string): Promise<string[]> {
+  const exact = await verifiedToolkitReadPathsAt(root);
+  const collapsible = [
+    path.resolve(root, "dist"),
+    path.resolve(root, "src"),
+    path.resolve(root, "scripts"),
+    path.resolve(root, "demo", "full-session-project"),
+  ];
+  const result = new Set<string>();
+  for (const candidate of exact) {
+    const boundedRoot = collapsible.find((directory) => contained(directory, candidate));
+    result.add(boundedRoot ?? candidate);
+  }
+  return [...result].sort();
+}
+
+export async function verifiedToolkitPermissionReadPaths(): Promise<string[]> {
+  return verifiedToolkitPermissionReadPathsAt(packageRoot());
+}

@@ -18,6 +18,7 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
   const fakeCodex = path.join(parent, "codex");
   await writeFile(fakeCodex, [
     "#!/bin/sh",
+    "for argument do if [ ${#argument} -ge 2000 ]; then echo 'permission argument exceeded safe installed-client ceiling' >&2; exit 40; fi; done",
     "case \" $* \" in *'filesystem.\":workspace_roots\"'*) echo 'quoted dotted profile refused' >&2; exit 41 ;; esac",
     "case \" $* \" in *'filesystem={ \"'*' = \"read\"'*' sandbox -P '*' -- /usr/bin/true'*) ;; *) echo 'profile was not instantiated offline' >&2; exit 42 ;; esac",
     `printf '%s\\n' \"$*\" >> ${JSON.stringify(permissionLog)}`,

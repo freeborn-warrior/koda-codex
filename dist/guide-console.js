@@ -15,7 +15,7 @@ import { partialRecoveryRoles, requestGhosttyRecoveryWindows, requestGhosttyWind
 import { relayNodeToolchainReadRoots, relayCodexEnvironment, resolveRelayCodexExecutable } from "./relay-environment.js";
 import { sanitizeTerminalText, terminalBlock, terminalPanel } from "./terminal-ui.js";
 import { writeJsonAtomic } from "./project.js";
-import { verifiedToolkitReadPaths, verifyToolkitIntegrity } from "./toolkit-integrity.js";
+import { verifiedToolkitPermissionReadPaths, verifyToolkitIntegrity } from "./toolkit-integrity.js";
 import { loadGuideWorkSet } from "./workset.js";
 
 const GUIDE_AREA = path.join(".koda", "guide");
@@ -329,7 +329,7 @@ async function guideTurn(root        , state                   , prompt        )
     model: state.model,
     effort: state.effort,
     guideWritePaths: await guideConsoleWritePaths(root),
-    toolkitVerificationPaths: await verifiedToolkitReadPaths(),
+    toolkitVerificationPaths: await verifiedToolkitPermissionReadPaths(),
   });
   const area = await guideConsoleArea(root);
   const prefix = `GUIDE-${String(turn).padStart(3, "0")}`;

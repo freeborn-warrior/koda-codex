@@ -21,7 +21,7 @@ export function codexProjectPermissionArgs(options: {
   gitAccess?: "read" | "write";
   workspaceOverrides?: Record<string, "read" | "write" | "deny">;
 }): string[] {
-  const trustedReadRoots = options.trustedReadRoots ?? [];
+  const trustedReadRoots = [...new Set(options.trustedReadRoots ?? [])];
   const profileName = options.profileName ?? "koda_project";
   if (!/^[a-z][a-z0-9_]*$/.test(profileName)) {
     throw new Error("The Codex permission profile name must contain only lowercase letters, digits, and underscores.");

@@ -4,7 +4,11 @@ import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
-import { verifiedToolkitReadPathsAt, verifyToolkitIntegrityAt } from "../src/toolkit-integrity.ts";
+import {
+  verifiedToolkitPermissionReadPathsAt,
+  verifiedToolkitReadPathsAt,
+  verifyToolkitIntegrityAt,
+} from "../src/toolkit-integrity.ts";
 import { writeJsonAtomic } from "../src/project.ts";
 import { temporaryRoot } from "./helpers.ts";
 
@@ -61,6 +65,15 @@ test("TOOLKIT INTEGRITY CAPABILITY: a sandbox receives only exact verified read 
     path.join(h.root, "docs", "post-push.md"),
     path.join(h.root, "docs", "toolkit-integrity.json"),
     path.join(h.root, "src", "critical.ts"),
+  ]);
+});
+
+test("TOOLKIT INTEGRITY PERMISSIONS: public runtime code compacts without granting docs or runtime state", async (t) => {
+  const h = await integrityHarness(t);
+  assert.deepEqual(await verifiedToolkitPermissionReadPathsAt(h.root), [
+    path.join(h.root, "docs", "post-push.md"),
+    path.join(h.root, "docs", "toolkit-integrity.json"),
+    path.join(h.root, "src"),
   ]);
 });
 

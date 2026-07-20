@@ -10,7 +10,7 @@ import {
   relayNodeToolchainReadRoots,
   resolveRelayCodexExecutable,
 } from "../src/relay-environment.ts";
-import { verifiedToolkitReadPaths } from "../src/toolkit-integrity.ts";
+import { verifiedToolkitPermissionReadPaths } from "../src/toolkit-integrity.ts";
 
 const packageRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const templateRoot = path.join(packageRoot, "demo", "full-session-project");
@@ -149,7 +149,7 @@ async function preflightCodexPermissionProfiles(): Promise<void> {
       codex,
       toolchain,
       ["docs/guide"],
-      await verifiedToolkitReadPaths(),
+      await verifiedToolkitPermissionReadPaths(),
     ) },
     { name: "koda_project", args: codexRolePermissionArgs(cli, codex, toolchain) },
   ];
