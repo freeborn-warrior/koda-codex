@@ -81,8 +81,9 @@ Turn the proved two-context session relay into a project-level experience that c
     and one bounded visual language across Guide, Reviewer, and Producer. Complete
     deterministic, security, coverage, package, pushed-integrity, and only then
     human verification. The local product now passes **232/232**, terminal-control
-    mutation, coverage, package inspection, and zero-vulnerability audit; code push
-    and unchanged pushed-integrity proof are the remaining mechanical steps.
+    mutation, coverage, package inspection, and zero-vulnerability audit. Pushed
+    capability `owner-review-ceremony-v13` binds code commit `c1d55ea` and its
+    unchanged 232/232 transcript; human verification is the remaining step.
 
 ## Submission cut
 

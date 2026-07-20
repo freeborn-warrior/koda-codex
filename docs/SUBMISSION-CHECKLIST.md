@@ -34,9 +34,9 @@ truth for the exact submission requirements.
 - [x] The one-minute refusal fixture is documented in [DEMO.md](DEMO.md).
 - [x] Package safety, install hooks, dependencies, and model-harness boundaries
   are documented in [SECURITY.md](SECURITY.md).
-- [x] The current full suite passes 230/230 against the pushed atomic-role
-  ownership repair and preserves its
-  [bound transcript](test-results/2026-07-19-atomic-role-locks-pushed.md).
+- [x] The current full suite passes 232/232 against the pushed owner-ceremony
+  implementation and preserves its
+  [bound transcript](test-results/2026-07-20-owner-review-ceremony-pushed.md).
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.
 
 ## Submission form

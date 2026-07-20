@@ -5,7 +5,7 @@
 **Scope:** First-time human comprehension across the visible Guide, Reviewer, and
 Producer terminal windows.
 
-**Result:** LOCAL MECHANICS PASS — OWNER OBSERVATION PENDING
+**Result:** MECHANICAL PASS — OWNER OBSERVATION PENDING
 
 ## Failure being repaired
 
@@ -45,10 +45,10 @@ paste and moved nothing, but safe failure alone was not a usable product.
 
 ## What this proves and what it does not
 
-The local tests prove the implemented text, choices, disk effects, retries, and
-security properties. They cannot prove that a first-time person understands the
-experience. The preserved session must remain closed until this code is pushed and
-integrity-bound; only then should Kristian reopen the same unacknowledged Brief and
+The tests prove the implemented text, choices, disk effects, retries, and security
+properties. They cannot prove that a first-time person understands the experience.
+The exact implementation is pushed at `c1d55ea`, its unchanged 232/232 transcript
+is integrity-bound, and Kristian may now reopen the same unacknowledged Brief to
 judge the actual Ghostty experience.
 
 That observation must not be staged as success. A confusing instruction, duplicate

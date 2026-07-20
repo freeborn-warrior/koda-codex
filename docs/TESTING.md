@@ -1691,5 +1691,20 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **State:** LOCAL DETERMINISTIC, COVERAGE, PACKAGE, UX, AND SECURITY PASS. The
   [UX audit](quality-runs/2026-07-20-owner-review-ceremony-ux-audit-10/RESULT.md)
   and [security audit](security-runs/2026-07-20-owner-review-ceremony-audit-16/RESULT.md)
-  are durable. Code push, unchanged post-push test proof, and final integrity
-  binding remain before owner recovery.
+  are durable.
+- **Post-push result:** Code and cleanup commits `536d471` and `c1d55ea` reached
+  `origin/main`. The unchanged complete suite then passed **232/232** in the
+  [post-push transcript](test-results/2026-07-20-owner-review-ceremony-pushed.md).
+  Toolkit capability `owner-review-ceremony-v13` binds commit `c1d55ea`, that
+  transcript, and every critical Guide/Reviewer/Producer renderer and relay file.
+- **Integrity-assembly refusals:** The first focused evidence slice passed
+  **49/51**. Toolkit verification rejected a manifest timestamp that differed by
+  8.001 seconds from the transcript's exact recorded timestamp, and one submission
+  assertion still required the historical 230/230 checklist wording. The manifest
+  now carries the transcript timestamp byte-for-byte and the assertion requires the
+  stronger current 232/232 proof. No product, gate, or security assertion was
+  removed.
+- **Corrected integrity-assembly result:** Guide, Reviewer, security, submission,
+  and toolkit-integrity checks passed **51/51**.
+- **State:** PUSHED MECHANICAL PASS. The preserved live Brief remains unchanged;
+  Kristian's fresh human recovery observation is the next proof.

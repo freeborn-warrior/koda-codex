@@ -6,7 +6,7 @@
 acknowledgement; package contents; dependency metadata; preserved verification
 session safety.
 
-**Result:** LOCAL PASS — PUSHED INTEGRITY PROOF PENDING
+**Result:** MECHANICAL PASS — OWNER OBSERVATION PENDING
 
 ## Security-relevant changes
 
@@ -73,6 +73,7 @@ setup failure.
 - The preserved live verification project was not opened, edited, approved, or
   advanced during this audit.
 
-The next required proof is to push the exact audited implementation, run the
-unchanged complete suite against that pushed commit, and bind the transcript and
-critical file hashes in `docs/toolkit-integrity.json` before human recovery.
+The exact audited implementation is pushed at `c1d55ea`. The unchanged complete
+suite passed 232/232 from that commit, and toolkit capability
+`owner-review-ceremony-v13` binds the transcript and critical file hashes. Human
+recovery of the preserved Brief is the remaining product observation.

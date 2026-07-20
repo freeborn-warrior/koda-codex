@@ -22,7 +22,8 @@ the gate shut: zero ledger entries and zero advanced phases.
 
 Session `2026-07-19-02` remains safely recoverable with the same review and context
 identities. Do not create another session or manually start either role. The pushed
-230-check capability `atomic-role-ownership-v12` covers the exact recovery
+232-check capability `owner-review-ceremony-v13` covers the exact recovery and
+owner-interaction
 shapes that the live attempt exposed:
 
 - if Reviewer is still running, Koda opens only the missing Producer;

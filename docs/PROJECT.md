@@ -95,6 +95,9 @@ owner contract
   Producer explicitly marks every owner-free state as watch-only. The shared
   renderer strips terminal control and bidirectional-override characters from
   visible text while preserving the exact evidence bytes and hashes on disk.
+  Pushed toolkit capability `owner-review-ceremony-v13` binds code commit
+  `c1d55ea`, the unchanged 232/232 transcript, and every critical renderer and
+  relay file; the preserved live Brief still awaits owner observation.
 - The reviewer-window lock prevents two Window B processes from claiming the same run. Unsafe job paths, ambiguous unfinished runs, wrong receipts, changed reviews, and missing persistent context identity all refuse with named disk state.
 - Managed Producer and Reviewer model commands now use a strict Codex permission profile rather than broad-read `workspace-write`: active-project read/write, read-only Git/instructions/config, denied project `.env`, no sibling or ordinary home reads, no network/web search/login shell/user config/approval escape, and only the exact Koda/Codex executables plus Node toolchain added read-only. A live probe records two incomplete policies before the final five-condition pass. The separately started Guide remains governed by its own interactive Codex permissions and is not falsely claimed as contained by Koda.
 - `npm run relay:status` is a read-only owner view derived from current run, session, job, reviewer state, and process lock files. It names Guide, Producer, Reviewer, and their owner-input scopes, then prints exactly one safe start/recovery action: Reviewer first, Producer only after Reviewer is alive. It refuses corrupt/ambiguous runs and offers stale-lock recovery only after the recorded reviewer process is no longer alive.
@@ -225,6 +228,7 @@ owner contract
 - [Pushed 229-check secure persistent Guide proof](test-results/2026-07-19-secure-guide-console-pushed.md)
 - [Pushed 230-check deterministic launcher proof](test-results/2026-07-19-deterministic-launcher-migration-pushed.md)
 - [Pushed 230-check atomic role-ownership proof](test-results/2026-07-19-atomic-role-locks-pushed.md)
+- [Pushed 232-check owner review ceremony proof](test-results/2026-07-20-owner-review-ceremony-pushed.md)
 - [Secure persistent Guide security audit](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md)
 - [Secure persistent Guide UX audit](quality-runs/2026-07-19-secure-guide-console-ux-audit-08/RESULT.md)
 - [Pushed 204-check owner-surface proof](test-results/2026-07-19-owner-surface-pushed.md)

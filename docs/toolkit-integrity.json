@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "owner-terminal-ceremony-v13-development",
-  "verifiedAt": "2026-07-20T02:55:06.171Z",
-  "repairCommit": "e6890f4c7e59719c89d25cd111f6f457a0610494",
-  "testedCommit": "e6890f4c7e59719c89d25cd111f6f457a0610494",
-  "testCount": 230,
+  "capability": "owner-review-ceremony-v13",
+  "verifiedAt": "2026-07-20T13:40:00.999Z",
+  "repairCommit": "c1d55ea698f98ce525daa2c7c8ba6fe7effb093b",
+  "testedCommit": "c1d55ea698f98ce525daa2c7c8ba6fe7effb093b",
+  "testCount": 232,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-atomic-role-locks-pushed.md",
-    "sha256": "c4950498db9f4ab340ffc691fef919c6acd395f765faad69f5aa365d1265d468"
+    "path": "docs/test-results/2026-07-20-owner-review-ceremony-pushed.md",
+    "sha256": "a1d7c7f17b4031727f527196a8926fbfb4e7e053f92969afb8a8e4cb7ab32c5b"
   },
   "files": [
     {
