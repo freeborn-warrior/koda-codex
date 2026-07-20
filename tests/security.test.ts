@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -10,11 +10,14 @@ import {
   codexGuidePermissionArgs,
   codexProjectPermissionArgs,
   codexRolePermissionArgs,
+  verifiedCodexRolePermissionArgs,
 } from "../src/codex-role-permissions.ts";
 import {
   relayCodexEnvironment,
+  relayGitToolchainReadRoots,
   relayNodeToolchainReadRoots,
   relayRoleEnvironment,
+  validateEmptyRelayXdgScratch,
 } from "../src/relay-environment.ts";
 import { verifiedToolkitPermissionReadPaths } from "../src/toolkit-integrity.ts";
 
@@ -23,6 +26,7 @@ test("PROJECT SANDBOX SUITE: role turns fail closed with project-scoped read and
     "/trusted/koda/dist/cli.js",
     "/trusted/codex/bin/codex",
     ["/trusted/toolchain"],
+    ["/trusted/koda/docs/toolkit-integrity.json", "/trusted/koda/docs/test-results/proof.md"],
   );
   const joined = args.join("\n");
   assert.match(joined, /--strict-config/);
@@ -34,6 +38,8 @@ test("PROJECT SANDBOX SUITE: role turns fail closed with project-scoped read and
   assert.match(joined, /"\/trusted\/koda\/package\.json" = "read"/);
   assert.match(joined, /"\/trusted\/codex\/bin\/codex" = "read"/);
   assert.match(joined, /"\/trusted\/toolchain" = "read"/);
+  assert.match(joined, /"\/trusted\/koda\/docs\/toolkit-integrity\.json" = "read"/);
+  assert.match(joined, /"\/trusted\/koda\/docs\/test-results\/proof\.md" = "read"/);
   assert.match(joined, /filesystem=\{ ":minimal" = "read",/);
   assert.match(joined, /":workspace_roots" = \{ "\." = "write"/);
   assert.match(joined, /"\.git" = "read"/);
@@ -66,6 +72,21 @@ test("PROJECT SANDBOX SUITE: Guide permission table stays bounded without granti
   assert.doesNotMatch(filesystem, /\/\.koda\" = \"read\"/);
 });
 
+test("PROJECT SANDBOX SUITE: every verified session role carries the toolkit proof automatically", async () => {
+  const packageRoot = path.resolve(".");
+  const args = await verifiedCodexRolePermissionArgs(
+    path.join(packageRoot, "dist", "cli.js"),
+    "/trusted/codex/bin/codex",
+    ["/trusted/toolchain"],
+  );
+  const filesystem = args.find((argument) => argument.startsWith("permissions.koda_project.filesystem="));
+  assert.ok(filesystem);
+  assert.ok(filesystem.length < 2_000, `Role permission table is too large for installed Codex: ${filesystem.length}`);
+  assert.match(filesystem, new RegExp(`${packageRoot.replaceAll("/", "\\/")}\/docs\/toolkit-integrity\\.json`));
+  assert.doesNotMatch(filesystem, new RegExp(`${packageRoot.replaceAll("/", "\\/")}\/docs" = "read"`));
+  assert.doesNotMatch(filesystem, /\/\.koda" = "read"/);
+});
+
 test("PROJECT SANDBOX SUITE: the Node toolchain root is a narrow explicit read capability", () => {
   assert.deepEqual(
     relayNodeToolchainReadRoots("/opt/homebrew/Cellar/node/26.0.0/bin/node"),
@@ -74,6 +95,38 @@ test("PROJECT SANDBOX SUITE: the Node toolchain root is a narrow explicit read c
   assert.deepEqual(
     relayNodeToolchainReadRoots("/Users/example/.nvm/versions/node/v22.18.0/bin/node"),
     ["/Users/example/.nvm/versions/node/v22.18.0"],
+  );
+});
+
+test("PROJECT SANDBOX SUITE: the resolved Git toolchain avoids the macOS xcrun cache shim", () => {
+  assert.deepEqual(
+    relayGitToolchainReadRoots("/Applications/Xcode.app/Contents/Developer/usr/bin/git"),
+    ["/Applications/Xcode.app/Contents/Developer/usr"],
+  );
+  assert.deepEqual(
+    relayGitToolchainReadRoots("/trusted/native/git/bin/git"),
+    ["/trusted/native/git"],
+  );
+  assert.throws(() => relayGitToolchainReadRoots("relative/git"), /must be absolute/);
+});
+
+test("PROJECT SANDBOX MUTATION: only an empty real role-config directory may be omitted from the evidence archive", async (t) => {
+  const temporary = await mkdtemp(path.join(tmpdir(), "koda-xdg-archive-"));
+  t.after(() => rm(temporary, { recursive: true, force: true }));
+  const runRoot = path.join(temporary, "run");
+  const xdg = path.join(runRoot, ".xdg");
+  await mkdir(xdg, { recursive: true });
+  await validateEmptyRelayXdgScratch(runRoot);
+  await writeFile(path.join(xdg, "injected"), "not evidence\n", "utf8");
+  await assert.rejects(
+    validateEmptyRelayXdgScratch(runRoot),
+    /XDG scratch directory is not empty; evidence archival refuses/,
+  );
+  await rm(xdg, { recursive: true, force: true });
+  await symlink(temporary, xdg);
+  await assert.rejects(
+    validateEmptyRelayXdgScratch(runRoot),
+    /XDG scratch path is not a real directory; evidence archival refuses/,
   );
 });
 
@@ -151,6 +204,12 @@ test("SECURITY INTEGRITY SUITE: relay roles and model children never inherit amb
   };
   const role = relayRoleEnvironment("/safe/codex", ambient);
   const child = relayCodexEnvironment(ambient, "2026-07-19-01");
+  const childWithGit = relayCodexEnvironment(
+    ambient,
+    "2026-07-19-01",
+    "/trusted/git/bin/git",
+    "/safe/project/.koda/runtime/xdg",
+  );
   assert.deepEqual(role, {
     HOME: "/safe/home",
     TMPDIR: "/safe/tmp",
@@ -173,6 +232,14 @@ test("SECURITY INTEGRITY SUITE: relay roles and model children never inherit amb
     GIT_TERMINAL_PROMPT: "0",
     KODA_SESSION_ID: "2026-07-19-01",
   });
+  assert.equal(childWithGit.PATH, "/trusted/git/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin");
+  assert.equal(childWithGit.XDG_CONFIG_HOME, "/safe/project/.koda/runtime/xdg");
+  assert.equal(childWithGit.FIREWORKS_API_KEY, undefined);
+  assert.throws(() => relayCodexEnvironment(ambient, undefined, "relative/git"), /must be absolute/);
+  assert.throws(
+    () => relayCodexEnvironment(ambient, undefined, "/trusted/git/bin/git", "relative/xdg"),
+    /must be absolute/,
+  );
 });
 
 test("SECURITY INTEGRITY SUITE: role launcher bytes ignore ambient terminal locale and color", () => {
@@ -215,11 +282,12 @@ test("SECURITY INTEGRITY SUITE: owner receipt and ruling data never enter child-
 
 test("SECURITY INTEGRITY SUITE: fresh-model evidence runs strip ambient credentials and parent context identity", async () => {
   const runner = await readFile("scripts/run-guide-preflight-model-test.ts", "utf8");
-  assert.match(runner, /import \{ relayCodexEnvironment, relayNodeToolchainReadRoots \} from "\.\.\/src\/relay-environment\.ts"/);
+  assert.match(runner, /relayCodexEnvironment,[\s\S]*relayGitToolchainReadRoots,[\s\S]*relayNodeToolchainReadRoots,[\s\S]*resolveRelayGitExecutable/);
   assert.match(runner, /codexProjectPermissionArgs/);
   assert.match(runner, /"--ignore-rules"/);
   assert.match(runner, /const codex = resolveExecutable\(process\.env\.KODA_CODEX_BIN/);
-  assert.match(runner, /env: relayCodexEnvironment\(process\.env\)/);
+  assert.match(runner, /relayGitToolchainReadRoots\(git\)/);
+  assert.match(runner, /env: relayCodexEnvironment\(process\.env, undefined, git\)/);
   assert.doesNotMatch(runner, /spawnSync\(codex, args, \{ cwd, encoding:/);
 });
 
@@ -234,6 +302,21 @@ test("SECURITY INTEGRITY SUITE: every managed Codex exec ignores ambient command
   for (const file of files) {
     const source = await readFile(file, "utf8");
     assert.match(source, /"--ignore-user-config"[\s\S]{0,80}"--ignore-rules"/, `${file} must ignore config and rules together`);
+  }
+});
+
+test("SECURITY INTEGRITY SUITE: both live session roles bind verified toolkit, Git, and private config capabilities", async () => {
+  for (const file of ["scripts/execute-relay-run.ts", "scripts/run-relay-reviewer-window.ts"]) {
+    const source = await readFile(file, "utf8");
+    assert.match(source, /verifiedCodexRolePermissionArgs\(/, `${file} must use the proof-binding permission helper`);
+    assert.match(source, /resolveRelayGitExecutable\(\)/, `${file} must resolve Git before entering the role sandbox`);
+    assert.match(source, /relayGitToolchainReadRoots\(gitExecutable\)/, `${file} must grant only the resolved Git toolchain`);
+    assert.match(source, /const xdgConfigHome = path\.join\(runtime, "\.xdg"\)/, `${file} must contain Git config inside its own run`);
+    assert.match(
+      source,
+      /relayCodexEnvironment\(process\.env, (?:run|activeRun)\.sessionId, gitExecutable, xdgConfigHome\)/,
+      `${file} must pass the same Git and XDG bindings to its child`,
+    );
   }
 });
 

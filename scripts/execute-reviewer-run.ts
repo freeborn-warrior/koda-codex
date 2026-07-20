@@ -5,8 +5,10 @@ import path from "node:path";
 import { codexProjectPermissionArgs } from "../src/codex-role-permissions.ts";
 import {
   relayCodexEnvironment,
+  relayGitToolchainReadRoots,
   relayNodeToolchainReadRoots,
   resolveRelayCodexExecutable,
+  resolveRelayGitExecutable,
 } from "../src/relay-environment.ts";
 
 type RunRecord = {
@@ -59,6 +61,7 @@ if (!project.startsWith(`${runRoot}${path.sep}`)) {
   throw new Error("Reviewer project resolves outside its prepared run folder.");
 }
 const codex = resolveRelayCodexExecutable();
+const git = resolveRelayGitExecutable();
 const args = [
   "--ask-for-approval", "never",
   "exec",
@@ -77,6 +80,7 @@ const args = [
       path.join(root, "src"),
       path.join(root, "package.json"),
       codex,
+      ...relayGitToolchainReadRoots(git),
       ...relayNodeToolchainReadRoots(),
     ],
   }),
@@ -85,7 +89,7 @@ const args = [
 const executed = spawnSync(codex, args, {
   cwd: root,
   encoding: "utf8",
-  env: relayCodexEnvironment(process.env),
+  env: relayCodexEnvironment(process.env, undefined, git),
   maxBuffer: 50 * 1024 * 1024,
 });
 

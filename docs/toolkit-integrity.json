@@ -16,7 +16,7 @@
     },
     {
       "path": "src/relay-environment.ts",
-      "sha256": "3945dea6fc660fe9f44ecdfac2e615cff9bca08cbea7aa19aea2ea8800fc150b"
+      "sha256": "89d56a21acf631ad1007e3c9424c830005dcdf02baa48e0b9a8f079f93cf00b3"
     },
     {
       "path": "src/guide-runtime.ts",
@@ -24,19 +24,19 @@
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "f8ee21fc1c88c0f1cffd4c29c80880f98e3e7709a47165124de7fb6f5bb11bc0"
+      "sha256": "94bd00194a02e6b4db2d0d599417fb19e80f71e451bf0b811e5eae334fffdb67"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "8957570b80087e53177d5227b337fd7eb312e75d22cc10b3d22a9d18b3b0097f"
+      "sha256": "015099e5d3f89c54cd576347e7bad2624fb3a3b9ea50383cbe56a0114cf05b54"
     },
     {
       "path": "scripts/execute-reviewer-run.ts",
-      "sha256": "4a0a29d9d2e7572c8449b020b3953babe945e1be06b12ac4ac4b5e70339b5eea"
+      "sha256": "b8e3958d96d76b737e7e918b65f6eded49b62ba2ebd5876b2932ba1cd74c6ec1"
     },
     {
       "path": "scripts/run-guide-preflight-model-test.ts",
-      "sha256": "bca50194d1b119b6fdeade6e3daeb5a7398840caba72942affb586f322fe1b86"
+      "sha256": "cad2d9fbc1978bfb0381bd6259420560eb0ff637323503efe8311a3a5f7c1da8"
     },
     {
       "path": "scripts/relay-window-protocol.ts",
@@ -48,7 +48,7 @@
     },
     {
       "path": "dist/relay-environment.js",
-      "sha256": "77d0716e612f22e0dc65cdbe2fd1f229b7090ec291fa5a1d4270bb7f1aca4083"
+      "sha256": "14fba85ca64af4ba027b91f6700b0bbd635db1f87617f807e42ce2ec9ee11409"
     },
     {
       "path": "dist/guide-runtime.js",
@@ -80,11 +80,11 @@
     },
     {
       "path": "src/guide-console.ts",
-      "sha256": "1e5c691625c0de7b1a3648507d8388c63825278a92e74b1df68f912ee58422b4"
+      "sha256": "6a5098e7910b9a9a38fb232864d6b392c3121a00f8ecfaf6ea5c15118919cd90"
     },
     {
       "path": "dist/guide-console.js",
-      "sha256": "c4ea21914b910950f228e0a8fefe6c66a81dc4e0cb22ee6a7f2edd3536301bd1"
+      "sha256": "87923464f57a8f108bba191009b578d4b7f32a2740bcd92c74e5749de9ac7159"
     },
     {
       "path": "src/terminal-ui.ts",
@@ -148,11 +148,11 @@
     },
     {
       "path": "src/codex-role-permissions.ts",
-      "sha256": "f155c9d0658b34e3de105bbab46b60929a2856bf8a4dc24901bd44088a1836c7"
+      "sha256": "03ad22a49413d3364f3e86ff3257f85a7b9bfd84a4292c747975ece904d7d470"
     },
     {
       "path": "dist/codex-role-permissions.js",
-      "sha256": "edf5ccdd45f7e3b748169bf94c745ab269f5a8f92517c397a0275c5f3318b115"
+      "sha256": "4c4c64026354fb076385677a1adee775d5eaf5a0c829a493690bc48481bfce86"
     },
     {
       "path": "src/workset.ts",
@@ -164,7 +164,7 @@
     },
     {
       "path": "scripts/prepare-full-session-demo.ts",
-      "sha256": "a1f86e47c7f70cc787e427b9507e9b10aed6e7d9532474024332a03f3a5b4d31"
+      "sha256": "0a8bb1aca72102e3b879eb6a8967c271783bedda3b3d9ca16a3fbfc6dde11e9d"
     },
     {
       "path": "package.json",
@@ -172,7 +172,7 @@
     },
     {
       "path": "docs/QUICKSTART.md",
-      "sha256": "d90cb091480baf305be52b85e4123ea672d4afb7f9d538a9936cef368d1fab09"
+      "sha256": "aa5d622db38814cce70ff79d47d5c6e743988df8ed0ede0a953a98478b28f832"
     },
     {
       "path": "docs/COMMAND-MANUAL.md",

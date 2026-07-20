@@ -133,7 +133,8 @@ disabled, user configuration is ignored, approval is `never`, and strict config
 makes an older Codex client refuse rather than silently discard the profile.
 
 The allowlist also contains the exact installed Codex executable, the compiled
-Koda runtime and its one package manifest, and the current Node toolchain root.
+Koda runtime and its one package manifest, the exact verified toolkit manifest
+and bound test evidence, and the current Node and Git toolchain roots.
 On the tested Homebrew macOS installation that toolchain root is `/opt/homebrew`,
 read-only. Those are execution dependencies, not project workspaces; Koda grants
 no write access to them. The permission-profile mechanism is currently marked
@@ -164,7 +165,11 @@ The Guide's trusted Koda CLI must revalidate toolkit integrity. Its profile gran
 only the exact manifest, bound test transcript, and critical files returned by a
 successful controller-side verification—not the whole Koda-C development checkout.
 Model-child Git reads use repository-local `.git/config` while global/system config,
-terminal credential prompting, and optional locks are disabled. Trusted relay
+terminal credential prompting, and optional locks are disabled. Koda resolves the
+native Git executable before entering the sandbox so macOS's xcrun shim cannot
+probe blocked developer caches. Each role receives a private `<run>/.xdg`
+configuration directory; Guide-return archival omits it only when it is a real,
+empty directory. Trusted relay
 commit/push processes use a different environment and retain the repository's
 normal configured Git behavior.
 
@@ -364,4 +369,7 @@ and zero-vulnerability delta is recorded in
 The inline review-code ceremony, shared three-window renderer, terminal-control
 mutation, package contents, and zero-vulnerability delta are recorded in
 [`security-runs/2026-07-20-owner-review-ceremony-audit-16/RESULT.md`](security-runs/2026-07-20-owner-review-ceremony-audit-16/RESULT.md).
+The exact restricted first-session composition, native-Git/XDG containment, and
+empty-scratch archive mutation are recorded in
+[`security-runs/2026-07-20-integrated-role-preflight-audit-24/RESULT.md`](security-runs/2026-07-20-integrated-role-preflight-audit-24/RESULT.md).
 The latest named full-suite transcript is linked from the README.

@@ -21,9 +21,11 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
     "#!/bin/sh",
     "for argument do if [ ${#argument} -ge 2000 ]; then echo 'permission argument exceeded safe installed-client ceiling' >&2; exit 40; fi; done",
     "case \" $* \" in *'filesystem.\":workspace_roots\"'*) echo 'quoted dotted profile refused' >&2; exit 41 ;; esac",
-    "case \" $* \" in *'filesystem={ \"'*' = \"read\"'*' sandbox -P '*' -- /usr/bin/true'*) ;; *) echo 'profile was not instantiated offline' >&2; exit 42 ;; esac",
+    "case \" $* \" in *'filesystem={ \"'*' = \"read\"'*' sandbox -P '*' -- '*) ;; *) echo 'profile was not instantiated offline' >&2; exit 42 ;; esac",
     `printf '%s\\n' \"$*\" >> ${JSON.stringify(permissionLog)}`,
-    "printf '%s\\n' 'codex-cli fixture'",
+    "while [ \"$1\" != \"--\" ]; do shift; done",
+    "shift",
+    "exec \"$@\"",
   ].join("\n"), "utf8");
   await chmod(fakeCodex, 0o700);
   const result = spawnSync(process.execPath, [
@@ -43,12 +45,15 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
   });
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   assert.match(result.stdout, /READY — FULL SESSION/);
+  assert.match(result.stdout, /CHECKING THE REAL SESSION PATH/);
+  assert.match(result.stdout, /NO ACTION NEEDED/);
   assert.match(result.stdout, /confirmed, committed, pushed, and mechanically verified/);
   const permissionCalls = await readFile(permissionLog, "utf8");
   assert.match(permissionCalls, /default_permissions="koda_guide"/);
   assert.match(permissionCalls, /default_permissions="koda_project"/);
   assert.match(permissionCalls, /default_permissions="koda_guide"[\s\S]*sandbox -P koda_guide -- \/usr\/bin\/true/);
-  assert.match(permissionCalls, /default_permissions="koda_project"[\s\S]*sandbox -P koda_project -- \/usr\/bin\/true/);
+  assert.match(permissionCalls, /default_permissions="koda_project"[\s\S]*sandbox -P koda_project -- [^\n]*session new docs\/guide\/prompts\/first-session\.md --kind produce --independent/);
+  assert.match(permissionCalls, /docs\/toolkit-integrity\.json/);
   assert.match(permissionCalls, /":workspace_roots" = \{ "\." = "read"/);
   assert.match(permissionCalls, /":workspace_roots" = \{ "\." = "write"/);
   assert.doesNotMatch(permissionCalls, /filesystem\.":workspace_roots"/);

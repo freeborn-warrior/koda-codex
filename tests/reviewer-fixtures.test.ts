@@ -147,7 +147,9 @@ test("REVIEWER FIXTURES: Ghostty runs pin model and effort and preserve ephemera
   assert.match(execute, /--ignore-user-config/);
   assert.match(execute, /codexProjectPermissionArgs/);
   assert.match(execute, /workspaceAccess: "write"/);
-  assert.match(execute, /relayCodexEnvironment\(process\.env\)/);
+  assert.match(execute, /const git = resolveRelayGitExecutable\(\)/);
+  assert.match(execute, /relayGitToolchainReadRoots\(git\)/);
+  assert.match(execute, /relayCodexEnvironment\(process\.env, undefined, git\)/);
   assert.doesNotMatch(execute, /"-s", "workspace-write"/);
   assert.match(execute, /--json/);
   assert.match(execute, /"--ask-for-approval", "never",\s*\n\s*"exec"/);

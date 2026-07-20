@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { realpathSync } from "node:fs";
+import { lstat, readdir } from "node:fs/promises";
 import path from "node:path";
 
 const SAFE_ROLE_KEYS = [
@@ -47,6 +48,50 @@ export function relayNodeToolchainReadRoots(nodeExecutable = process.execPath): 
   return [path.dirname(path.dirname(actual))];
 }
 
+export function resolveRelayGitExecutable(
+  configured = process.env.KODA_GIT_BIN?.trim() || "git",
+  source: NodeJS.ProcessEnv = process.env,
+): string {
+  if (path.isAbsolute(configured)) return realpathSync(configured);
+  if (configured.includes("/") || configured.includes("\\")) {
+    throw new Error("KODA_GIT_BIN must be an absolute path or one executable name.");
+  }
+  if (configured === "git") {
+    const xcrun = spawnSync("/usr/bin/xcrun", ["--find", "git"], {
+      encoding: "utf8",
+      env: { PATH: source.PATH || DEFAULT_PATH },
+    });
+    const developerGit = (xcrun.stdout ?? "").trim();
+    if (xcrun.status === 0 && developerGit) return realpathSync(developerGit);
+  }
+  const found = spawnSync("/usr/bin/which", [configured], {
+    encoding: "utf8",
+    env: { PATH: source.PATH || DEFAULT_PATH },
+  });
+  const candidate = (found.stdout ?? "").trim();
+  if (found.status !== 0 || !candidate) {
+    throw new Error(`Koda cannot find the Git executable named ${configured}.`);
+  }
+  return realpathSync(candidate);
+}
+
+export function relayGitToolchainReadRoots(gitExecutable: string): string[] {
+  if (!path.isAbsolute(gitExecutable)) throw new Error("The Git executable path must be absolute.");
+  return [path.dirname(path.dirname(path.resolve(gitExecutable)))];
+}
+
+export async function validateEmptyRelayXdgScratch(runRoot: string): Promise<void> {
+  if (!path.isAbsolute(runRoot)) throw new Error("The relay runtime path must be absolute.");
+  const scratch = path.join(runRoot, ".xdg");
+  const metadata = await lstat(scratch);
+  if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
+    throw new Error("Guide runtime XDG scratch path is not a real directory; evidence archival refuses.");
+  }
+  if ((await readdir(scratch)).length > 0) {
+    throw new Error("Guide runtime XDG scratch directory is not empty; evidence archival refuses.");
+  }
+}
+
 function copySafe(source: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const clean: NodeJS.ProcessEnv = {};
   for (const key of SAFE_ROLE_KEYS) {
@@ -90,7 +135,15 @@ export function relayRoleEnvironment(
 export function relayCodexEnvironment(
   source: NodeJS.ProcessEnv = process.env,
   sessionId?: string,
+  gitExecutable?: string,
+  xdgConfigHome?: string,
 ): NodeJS.ProcessEnv {
+  if (gitExecutable && !path.isAbsolute(gitExecutable)) {
+    throw new Error("The trusted Git executable path must be absolute.");
+  }
+  if (xdgConfigHome && !path.isAbsolute(xdgConfigHome)) {
+    throw new Error("The isolated XDG configuration path must be absolute.");
+  }
   const clean: NodeJS.ProcessEnv = {
     ...copySafe(source),
     // Model-generated Git reads must use only the active repository's local
@@ -102,7 +155,9 @@ export function relayCodexEnvironment(
     GIT_OPTIONAL_LOCKS: "0",
     GIT_TERMINAL_PROMPT: "0",
     ...(sessionId ? { KODA_SESSION_ID: sessionId } : {}),
+    ...(xdgConfigHome ? { XDG_CONFIG_HOME: path.resolve(xdgConfigHome) } : {}),
   };
+  if (gitExecutable) clean.PATH = `${path.dirname(path.resolve(gitExecutable))}:${DEFAULT_PATH}`;
   // Deterministic relay fixtures use explicit KODA_TEST_* channels for fake
   // children. A real Guide-launched role never receives KODA_RELAY_RUNS_ROOT,
   // so ambient variables cannot opt themselves into this test-only path.

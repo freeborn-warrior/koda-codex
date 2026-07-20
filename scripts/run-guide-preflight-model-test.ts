@@ -8,7 +8,12 @@ import path from "node:path";
 import { DEFAULT_CONFIG } from "../src/config.ts";
 import { codexProjectPermissionArgs } from "../src/codex-role-permissions.ts";
 import { createSession, writeJsonAtomic } from "../src/project.ts";
-import { relayCodexEnvironment, relayNodeToolchainReadRoots } from "../src/relay-environment.ts";
+import {
+  relayCodexEnvironment,
+  relayGitToolchainReadRoots,
+  relayNodeToolchainReadRoots,
+  resolveRelayGitExecutable,
+} from "../src/relay-environment.ts";
 
 const root = process.cwd();
 const date = "2026-07-19";
@@ -26,6 +31,7 @@ function resolveExecutable(configured: string): string {
 // Resolve with the parent shell's PATH before the child receives the strict
 // allowlisted environment. The child gets no ambient credentials or parent ID.
 const codex = resolveExecutable(process.env.KODA_CODEX_BIN?.trim() || "codex");
+const git = resolveRelayGitExecutable();
 
 function runCodex(cwd: string, effort: "low" | "medium", prompt: string, skipGit: boolean) {
   const args = [
@@ -39,7 +45,7 @@ function runCodex(cwd: string, effort: "low" | "medium", prompt: string, skipGit
     "-c", `model_reasoning_effort=\"${effort}\"`,
     ...codexProjectPermissionArgs({
       workspaceAccess: "read",
-      trustedReadRoots: [codex, ...relayNodeToolchainReadRoots()],
+      trustedReadRoots: [codex, ...relayNodeToolchainReadRoots(), ...relayGitToolchainReadRoots(git)],
     }),
     ...(skipGit ? ["--skip-git-repo-check"] : []),
     prompt,
@@ -47,7 +53,7 @@ function runCodex(cwd: string, effort: "low" | "medium", prompt: string, skipGit
   const result = spawnSync(codex, args, {
     cwd,
     encoding: "utf8",
-    env: relayCodexEnvironment(process.env),
+    env: relayCodexEnvironment(process.env, undefined, git),
     maxBuffer: 32 * 1024 * 1024,
   });
   return {

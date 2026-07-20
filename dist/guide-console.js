@@ -12,7 +12,13 @@ import { runGuideCli } from "./guide-commands.js";
 import { currentGuideRuntime, listGuideRuntimes } from "./guide-runtime.js";
 import { guideRoot, hasGuideManifest, loadGuideManifest, pendingGuideLaunches } from "./guide.js";
 import { partialRecoveryRoles, requestGhosttyRecoveryWindows, requestGhosttyWindows,                           } from "./ghostty.js";
-import { relayNodeToolchainReadRoots, relayCodexEnvironment, resolveRelayCodexExecutable } from "./relay-environment.js";
+import {
+  relayCodexEnvironment,
+  relayGitToolchainReadRoots,
+  relayNodeToolchainReadRoots,
+  resolveRelayCodexExecutable,
+  resolveRelayGitExecutable,
+} from "./relay-environment.js";
 import { sanitizeTerminalText, terminalBlock, terminalPanel } from "./terminal-ui.js";
 import { writeJsonAtomic } from "./project.js";
 import { verifiedToolkitPermissionReadPaths, verifyToolkitIntegrity } from "./toolkit-integrity.js";
@@ -207,6 +213,7 @@ export function guideTurnArguments(input
 
 
 
+
  )           {
   const model = validateAssignment(input.model, "Guide model");
   const effort = validateAssignment(input.effort, "Guide effort");
@@ -222,7 +229,7 @@ export function guideTurnArguments(input
     ...codexGuidePermissionArgs(
       input.cli,
       input.codex,
-      relayNodeToolchainReadRoots(),
+      [...relayNodeToolchainReadRoots(), ...relayGitToolchainReadRoots(input.git)],
       input.guideWritePaths,
       input.toolkitVerificationPaths,
     ),
@@ -319,11 +326,16 @@ export async function guideConsoleWritePaths(root        )                    {
 
 async function guideTurn(root        , state                   , prompt        )                             {
   const codex = resolveRelayCodexExecutable();
+  const git = resolveRelayGitExecutable();
   const cli = fileURLToPath(new URL("./cli.js", import.meta.url));
   const turn = state.turns + 1;
+  const area = await guideConsoleArea(root);
+  const xdgConfigHome = path.join(area, ".xdg");
+  await mkdir(xdgConfigHome, { recursive: true });
   const args = guideTurnArguments({
     cli,
     codex,
+    git,
     prompt,
     threadId: state.threadId,
     model: state.model,
@@ -331,7 +343,6 @@ async function guideTurn(root        , state                   , prompt        )
     guideWritePaths: await guideConsoleWritePaths(root),
     toolkitVerificationPaths: await verifiedToolkitPermissionReadPaths(),
   });
-  const area = await guideConsoleArea(root);
   const prefix = `GUIDE-${String(turn).padStart(3, "0")}`;
   const eventsPartial = path.join(area, `${prefix}-EVENTS.partial.jsonl`);
   const stderrPartial = path.join(area, `${prefix}-STDERR.partial.txt`);
@@ -366,7 +377,7 @@ async function guideTurn(root        , state                   , prompt        )
   ]));
   const child = spawn(codex, args, {
     cwd: root,
-    env: relayCodexEnvironment(process.env),
+    env: relayCodexEnvironment(process.env, undefined, git, xdgConfigHome),
     stdio: ["ignore", "pipe", "pipe"],
   });
   let stdout = "";

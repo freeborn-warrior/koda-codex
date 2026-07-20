@@ -2088,3 +2088,42 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Release confirmation:** The promoted manifest, public evidence links, and
   submission assertions passed another **246/246** at commit `239c8e6` in the
   [release transcript](test-results/2026-07-20-full-session-prompt-contract-release.md).
+
+## 2026-07-20 — Integrated Producer-role preflight
+
+- **Owner-observed failure:** Launch
+  `02f73292-d90a-4f33-8369-35ec4e296614` reached Producer but created no session.
+  The exact restricted role could execute the Koda CLI yet could not read
+  `docs/toolkit-integrity.json`. No phase, review, receipt, approval, or gate
+  movement occurred.
+- **Test gap:** Quick Start had executed the correct session command outside the
+  role sandbox and instantiated the profile with a harmless command. It had not
+  composed the real command, project, profile, and external proof.
+- **Correction:** Quick Start now runs the exact first `session new` through
+  installed Codex's `koda_project` profile in a temporary clone before printing
+  `READY`. Both live roles use one helper that binds verified toolkit paths.
+- **Performance/security consequence:** The first downstream sandbox selection
+  passed 67/67 in about 456 seconds but emitted macOS xcrun/cache warnings, so it
+  was classified as failed quality evidence. Native Git reduced it to about 2.4
+  seconds but exposed an ambient `~/.config` probe, also classified as a failure.
+  Native Git plus project-contained XDG passed the same 67/67 in about 2.5 seconds
+  without those warnings.
+- **Full regression failure:** The first named complete run passed **232/248**.
+  Sixteen failures exposed one unbound Reviewer runtime variable, stale source
+  assertions, and then the private XDG directory colliding with strict archive
+  enumeration. See the [failed transcript](test-results/2026-07-20-integrated-role-preflight-local.md).
+- **Corrected local result:** After repairing the runtime binding, the intermediate
+  complete suite passed **249/249**. Adding an executable empty/non-empty/linked
+  XDG archive mutation and changing the protected Quick Start then correctly made
+  the manifest refuse; that [second failed transcript](test-results/2026-07-20-integrated-role-preflight-local-03.md)
+  is preserved. After rebinding that one protected documentation hash, all
+  **250/250** passed in the [final local transcript](test-results/2026-07-20-integrated-role-preflight-local-04.md).
+- **Exact starter result:** The installed-client headless Quick Start completed in
+  0.75 seconds, created exactly one session only in its temporary clone, removed
+  the clone, printed `READY — FULL SESSION`, and opened no model or Ghostty window.
+- **Evidence:** [incident and verification result](verification-runs/2026-07-20-integrated-role-preflight-03/RESULT.md),
+  [sealed review contract](quality-runs/2026-07-20-integrated-role-preflight-18/CONTRACT.md),
+  [quality result](quality-runs/2026-07-20-integrated-role-preflight-18/RESULT.md),
+  and [security audit](security-runs/2026-07-20-integrated-role-preflight-audit-24/RESULT.md).
+- **State:** LOCAL PASS ONLY. The independent review, unchanged post-push suite,
+  promoted toolkit manifest, and fresh owner-visible six-phase session remain.

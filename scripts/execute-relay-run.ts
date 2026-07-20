@@ -7,7 +7,7 @@ import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
 import { closePath, evaluateSessionClosure } from "../src/close.ts";
-import { codexRolePermissionArgs } from "../src/codex-role-permissions.ts";
+import { verifiedCodexRolePermissionArgs } from "../src/codex-role-permissions.ts";
 import { pathExists, readProjectConfig } from "../src/config.ts";
 import { evaluateGate } from "../src/gate.ts";
 import { acquireGitOperationLock } from "../src/git-operation-lock.ts";
@@ -28,8 +28,11 @@ import {
 import { readApprovalEntries, sha256 } from "../src/receipt.ts";
 import {
   relayCodexEnvironment,
+  relayGitToolchainReadRoots,
   relayNodeToolchainReadRoots,
   resolveRelayCodexExecutable,
+  resolveRelayGitExecutable,
+  validateEmptyRelayXdgScratch,
 } from "../src/relay-environment.ts";
 import {
   claimSessionPaths,
@@ -264,6 +267,9 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
 
   const turn = roleRecord.turns + 1;
   const codexExecutable = resolveRelayCodexExecutable();
+  const gitExecutable = resolveRelayGitExecutable();
+  const xdgConfigHome = path.join(runtime, ".xdg");
+  await mkdir(xdgConfigHome, { recursive: true });
   const prefix = `${role.toUpperCase()}-${String(turn).padStart(2, "0")}`;
   const eventFile = `${prefix}-EVENTS.jsonl`;
   const stderrFile = `${prefix}-STDERR.txt`;
@@ -277,7 +283,11 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
     "--json",
     "-m", roleRecord.model,
     "-c", `model_reasoning_effort=\"${roleRecord.effort}\"`,
-    ...codexRolePermissionArgs(run.cli, codexExecutable, relayNodeToolchainReadRoots()),
+    ...await verifiedCodexRolePermissionArgs(
+      run.cli,
+      codexExecutable,
+      [...relayNodeToolchainReadRoots(), ...relayGitToolchainReadRoots(gitExecutable)],
+    ),
   ];
   const args = roleRecord.threadId
     ? [...base, "resume", ...common, roleRecord.threadId, prompt]
@@ -289,7 +299,7 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
 
   const child = spawn(codexExecutable, args, {
     cwd: project,
-    env: relayCodexEnvironment(process.env, run.sessionId),
+    env: relayCodexEnvironment(process.env, run.sessionId, gitExecutable, xdgConfigHome),
     stdio: ["ignore", "pipe", "pipe"],
   });
   activeModelChild = child;
@@ -1059,6 +1069,10 @@ async function buildGuideReturnStage(session: NonNullable<Awaited<ReturnType<typ
   for (const entry of await readdir(runRoot, { withFileTypes: true })) {
     if (entry.name === "RUN.json" || entry.name === "GUIDE-RETURN-STAGE") continue;
     if (entry.name === REVIEWER_LOCK_DIR || entry.name === PRODUCER_LOCK_DIR) continue;
+    if (entry.name === ".xdg") {
+      await validateEmptyRelayXdgScratch(runRoot);
+      continue;
+    }
     if (entry.isDirectory()) throw new Error(`Guide runtime contains unexpected directory ${entry.name}; evidence archival refuses.`);
     if (!entry.isFile()) throw new Error(`Guide runtime contains symbolic link or special entry ${entry.name}; evidence archival refuses.`);
     await cp(path.join(runRoot, entry.name), path.join(stageArchive, entry.name), { errorOnExist: true });

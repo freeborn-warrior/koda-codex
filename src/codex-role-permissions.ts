@@ -1,5 +1,7 @@
 import path from "node:path";
 
+import { verifiedToolkitPermissionReadPaths } from "./toolkit-integrity.ts";
+
 function tomlString(value: string): string {
   return JSON.stringify(value);
 }
@@ -7,8 +9,9 @@ function tomlString(value: string): string {
 /**
  * Codex permission-profile arguments for a Koda Producer or Reviewer turn.
  *
- * The model may read and write its project, read the trusted compiled Koda CLI,
- * and read only the minimal operating-system paths Codex needs for local tools.
+ * The model may read and write its project, read the trusted compiled Koda CLI
+ * plus its exact verified integrity evidence, and read only the minimal
+ * operating-system paths Codex needs for local tools.
  * It cannot read sibling projects or ordinary home-directory files, mutate Git
  * metadata or repository-local agent/config instructions, use a login shell, or
  * reach the network or web-search tool. `--strict-config` makes older Codex
@@ -108,6 +111,7 @@ export function codexRolePermissionArgs(
   trustedCli: string,
   codexExecutable: string,
   toolchainReadRoots: string[],
+  toolkitVerificationPaths: string[],
 ): string[] {
   if (!path.isAbsolute(trustedCli) || !path.isAbsolute(codexExecutable)) {
     throw new Error("The trusted Koda CLI and Codex executable paths must be absolute before role permissions are built.");
@@ -120,7 +124,21 @@ export function codexRolePermissionArgs(
       toolkitRuntime,
       toolkitPackage,
       path.resolve(codexExecutable),
+      ...toolkitVerificationPaths,
       ...toolchainReadRoots,
     ],
   });
+}
+
+export async function verifiedCodexRolePermissionArgs(
+  trustedCli: string,
+  codexExecutable: string,
+  toolchainReadRoots: string[],
+): Promise<string[]> {
+  return codexRolePermissionArgs(
+    trustedCli,
+    codexExecutable,
+    toolchainReadRoots,
+    await verifiedToolkitPermissionReadPaths(),
+  );
 }

@@ -63,6 +63,13 @@ This is the on-disk working queue for the build. A checked item means its eviden
   consumes the bundled prompt through real session creation and Guide binding;
   the expanded Guide, plural-runtime, security, and integrity slice passes
   **68/68** and the complete local and unchanged post-push suites pass **246/246**.
+- [ ] Promote the integrated Producer-role preflight after independent review and
+  unchanged post-push testing. The owner-observed launch failed because the real
+  restricted Producer could not read toolkit integrity evidence even though the
+  command and profile had passed separately. Quick Start now composes them before
+  `READY`; native Git and private XDG remove blocked ambient probes; the first full
+  regression preserved 16 failures before the corrected local **250/250** pass.
+  Fresh owner-visible proof remains deliberately separate.
 
 ## Next
 

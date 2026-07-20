@@ -56,8 +56,12 @@ Koda then owns the instructions:
 2. Type the name you want in durable review and approval records.
 3. Choose `1` to confirm or `2` to create nothing.
 4. Koda creates an isolated project under `.koda/full-session-demos/`, gives it
-   a separate local Git remote, confirms and pushes the prompt, and opens Guide.
-5. Guide reconstructs the project from disk. When it displays `READY TO LAUNCH`,
+   a separate local Git remote, and confirms and pushes the prompt.
+5. Before printing `READY`, Koda clones that prepared project into temporary
+   scratch space and runs the exact first `session new` command through the
+   installed restricted Producer profile. No model or window opens during this
+   check, and the prepared human-demo project remains session-empty.
+6. Koda opens Guide. Guide reconstructs the project from disk. When it displays `READY TO LAUNCH`,
    choose `1`. The trusted controller opens exactly one Reviewer and one Producer.
 
 After launch:

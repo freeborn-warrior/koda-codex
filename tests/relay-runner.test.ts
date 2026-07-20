@@ -133,7 +133,7 @@ test("FULL RELAY RUNNER: execution preserves two contexts and binds owner acknow
   assert.doesNotMatch(execute, /--ephemeral/);
   assert.match(execute, /"exec",\s*\n/);
   assert.match(execute, /"resume"/);
-  assert.match(execute, /codexRolePermissionArgs\(run\.cli, codexExecutable, relayNodeToolchainReadRoots\(\)\)/);
+  assert.match(execute, /verifiedCodexRolePermissionArgs\([\s\S]*run\.cli,[\s\S]*codexExecutable,[\s\S]*relayNodeToolchainReadRoots\(\)[\s\S]*relayGitToolchainReadRoots\(gitExecutable\)/);
   assert.doesNotMatch(execute, /sandbox_mode="workspace-write"/);
   assert.match(execute, /\? \[\.\.\.base, "resume", \.\.\.common/);
   assert.match(execute, /run\.producer\.threadId === run\.reviewer\.threadId/);
@@ -143,6 +143,7 @@ test("FULL RELAY RUNNER: execution preserves two contexts and binds owner acknow
   assert.match(execute, /terminalPanel/);
   assert.match(execute, /evaluateGate/);
   assert.match(execute, /evaluateSessionClosure/);
+  assert.match(execute, /await validateEmptyRelayXdgScratch\(runRoot\)/);
   assert.match(execute, /dispatchReviewerWindowJob/);
   assert.match(execute, /KODA-C PRODUCER WINDOW/);
   assert.match(execute, /Owner input: CLOSED — watch here; speak only in the Reviewer window/);

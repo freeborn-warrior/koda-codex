@@ -24,6 +24,7 @@ test("GUIDE CONSOLE SECURITY: every turn ignores ambient config and rules under 
   const args = guideTurnArguments({
     cli: "/trusted/koda/dist/cli.js",
     codex: "/trusted/codex/bin/codex",
+    git: "/trusted/git/bin/git",
     prompt: "Reconstruct truth from disk.",
     threadId: null,
     model: "gpt-5.6-sol",
@@ -34,6 +35,7 @@ test("GUIDE CONSOLE SECURITY: every turn ignores ambient config and rules under 
   assert.match(rendered, /--ignore-user-config/);
   assert.match(rendered, /--ignore-rules/);
   assert.match(rendered, /default_permissions="koda_guide"/);
+  assert.match(rendered, /"\/trusted\/git" = "read"/);
   assert.match(rendered, /permissions\.koda_guide\.network\.enabled=false/);
   assert.match(rendered, /filesystem=\{ ":minimal" = "read",/);
   assert.match(rendered, /":workspace_roots" = \{ "\." = "read"/);
@@ -44,6 +46,7 @@ test("GUIDE CONSOLE SECURITY: every turn ignores ambient config and rules under 
   const resumed = guideTurnArguments({
     cli: "/trusted/koda/dist/cli.js",
     codex: "/trusted/codex/bin/codex",
+    git: "/trusted/git/bin/git",
     prompt: "Continue from disk.",
     threadId: "11111111-1111-4111-8111-111111111111",
     model: null,

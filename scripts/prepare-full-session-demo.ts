@@ -1,14 +1,17 @@
 import { spawnSync } from "node:child_process";
-import { cp, lstat, mkdir, readdir, readFile, realpath } from "node:fs/promises";
+import { cp, lstat, mkdir, mkdtemp, readdir, readFile, realpath, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 
-import { codexGuidePermissionArgs, codexRolePermissionArgs } from "../src/codex-role-permissions.ts";
+import { codexGuidePermissionArgs, verifiedCodexRolePermissionArgs } from "../src/codex-role-permissions.ts";
 import {
   relayCodexEnvironment,
+  relayGitToolchainReadRoots,
   relayNodeToolchainReadRoots,
   resolveRelayCodexExecutable,
+  resolveRelayGitExecutable,
 } from "../src/relay-environment.ts";
 import { verifiedToolkitPermissionReadPaths } from "../src/toolkit-integrity.ts";
 
@@ -120,7 +123,7 @@ async function prepare(target: string, owner: string): Promise<void> {
     LANG: "C",
     LC_ALL: "C",
   };
-  const git = "/usr/bin/git";
+  const git = resolveRelayGitExecutable();
   run(git, ["init", "-b", "main"], target, isolatedEnvironment);
   run(git, ["config", "user.name", "Koda-C Demo"], target, isolatedEnvironment);
   run(git, ["config", "user.email", "koda-c-demo@example.invalid"], target, isolatedEnvironment);
@@ -141,18 +144,17 @@ async function prepare(target: string, owner: string): Promise<void> {
 
 async function preflightCodexPermissionProfiles(): Promise<void> {
   const codex = resolveRelayCodexExecutable();
-  const environment = relayCodexEnvironment(process.env);
-  const toolchain = relayNodeToolchainReadRoots();
-  const profiles = [
-    { name: "koda_guide", args: codexGuidePermissionArgs(
-      cli,
-      codex,
-      toolchain,
-      ["docs/guide"],
-      await verifiedToolkitPermissionReadPaths(),
-    ) },
-    { name: "koda_project", args: codexRolePermissionArgs(cli, codex, toolchain) },
-  ];
+  const git = resolveRelayGitExecutable();
+  const environment = relayCodexEnvironment(process.env, undefined, git);
+  const toolchain = [...relayNodeToolchainReadRoots(), ...relayGitToolchainReadRoots(git)];
+  const toolkitVerificationPaths = await verifiedToolkitPermissionReadPaths();
+  const profiles = [{ name: "koda_guide", args: codexGuidePermissionArgs(
+    cli,
+    codex,
+    toolchain,
+    ["docs/guide"],
+    toolkitVerificationPaths,
+  ) }];
   for (const profile of profiles) {
     // `--version` accepts override syntax without constructing the filesystem
     // permission enum. The sandbox command resolves and applies the named profile
@@ -161,6 +163,39 @@ async function preflightCodexPermissionProfiles(): Promise<void> {
       ...profile.args.filter((argument) => argument !== "--strict-config"),
       "sandbox", "-P", profile.name, "--", "/usr/bin/true",
     ], packageRoot, environment);
+  }
+}
+
+async function preflightPreparedProducer(project: string): Promise<void> {
+  const scratch = await mkdtemp(path.join(tmpdir(), "koda-full-session-role-preflight-"));
+  try {
+    const git = resolveRelayGitExecutable();
+    run(git, ["clone", "--quiet", project, scratch], packageRoot, relayCodexEnvironment(process.env, undefined, git));
+    const xdgConfigHome = path.join(scratch, ".koda", "xdg");
+    await mkdir(xdgConfigHome, { recursive: true });
+    const environment = relayCodexEnvironment(process.env, undefined, git, xdgConfigHome);
+    const codex = resolveRelayCodexExecutable();
+    const profile = await verifiedCodexRolePermissionArgs(
+      cli,
+      codex,
+      [...relayNodeToolchainReadRoots(), ...relayGitToolchainReadRoots(git)],
+    );
+    run(codex, [
+      ...profile.filter((argument) => argument !== "--strict-config"),
+      "sandbox", "-P", "koda_project", "--",
+      process.execPath,
+      cli,
+      "session", "new", promptRelative,
+      "--kind", "produce",
+      "--independent",
+    ], scratch, environment);
+    const sessions = (await readdir(path.join(scratch, "docs", "sessions")))
+      .filter((name) => name !== ".gitkeep");
+    if (sessions.length !== 1) {
+      throw new Error("The restricted Producer preflight did not create exactly one bound session.");
+    }
+  } finally {
+    await rm(scratch, { recursive: true, force: true });
   }
 }
 
@@ -209,8 +244,17 @@ async function main(): Promise<void> {
     }
     if (choice !== "1") throw new Error("Choose exactly 1 or 2. Nothing was created.");
 
+    console.log("────────────────────────────────────────────────────────");
+    console.log("CHECKING THE REAL SESSION PATH");
+    console.log("");
+    console.log("Koda is validating Guide and opening one disposable session through");
+    console.log("the exact restricted Producer profile. No model or window opens here.");
+    console.log("NO ACTION NEEDED — Koda will show READY or a named refusal.");
+    console.log("────────────────────────────────────────────────────────");
+    console.log("");
     await preflightCodexPermissionProfiles();
     await prepare(target, owner);
+    await preflightPreparedProducer(target);
     console.log("────────────────────────────────────────────────────────");
     console.log("READY — FULL SESSION");
     console.log("");

@@ -2,14 +2,14 @@
 
 import { createHash } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
-import { lstat, readFile, readdir, realpath } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { createInterface as createPrompt } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 
 import { pathExists, readProjectConfig } from "../src/config.ts";
-import { codexRolePermissionArgs } from "../src/codex-role-permissions.ts";
+import { verifiedCodexRolePermissionArgs } from "../src/codex-role-permissions.ts";
 import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
 import { acquireGitOperationLock } from "../src/git-operation-lock.ts";
 import { pushCommandArgs } from "../src/git.ts";
@@ -19,8 +19,10 @@ import { currentPhase, displayPath, loadSession, writeTextAtomic } from "../src/
 import { parseReview } from "../src/receipt.ts";
 import {
   relayCodexEnvironment,
+  relayGitToolchainReadRoots,
   relayNodeToolchainReadRoots,
   resolveRelayCodexExecutable,
+  resolveRelayGitExecutable,
 } from "../src/relay-environment.ts";
 import { stagedProjectPaths } from "../src/workset.ts";
 import { sanitizeTerminalText, TERMINAL_DIVIDER, terminalBlock, terminalPanel } from "../src/terminal-ui.ts";
@@ -176,7 +178,7 @@ const resolved = await resolveRelayRunPaths({ packageRoot: root, configuredRunsR
   runtime: initialRun.runtime,
   cli: initialRun.cli,
 } }).catch((error) => refuse(error instanceof Error ? error.message : String(error)));
-const { project, cli } = resolved;
+const { project, runtime, cli } = resolved;
 const reviewerResumeCommand = resolved.mode === "guide-project"
   ? formatRelayCommand(path.join(root, "scripts", "run-relay-reviewer-window.ts"), runRoot)
   : "npm run relay:reviewer";
@@ -255,13 +257,20 @@ async function modelTurn(
   const base = ["--ask-for-approval", "never", "exec"];
   const activeRun = await readRun();
   const codexExecutable = resolveRelayCodexExecutable();
+  const gitExecutable = resolveRelayGitExecutable();
+  const xdgConfigHome = path.join(runtime, ".xdg");
+  await mkdir(xdgConfigHome, { recursive: true });
   const common = [
     "--ignore-user-config",
     "--ignore-rules",
     "--json",
     "-m", state.model,
     "-c", `model_reasoning_effort=\"${state.effort}\"`,
-    ...codexRolePermissionArgs(activeRun.cli, codexExecutable, relayNodeToolchainReadRoots()),
+    ...await verifiedCodexRolePermissionArgs(
+      activeRun.cli,
+      codexExecutable,
+      [...relayNodeToolchainReadRoots(), ...relayGitToolchainReadRoots(gitExecutable)],
+    ),
   ];
   const args = state.threadId
     ? [...base, "resume", ...common, state.threadId, prompt]
@@ -274,7 +283,7 @@ async function modelTurn(
     : terminalPanel(`REVIEWER ${turn} — ${purpose}`));
   const child = spawn(codexExecutable, args, {
     cwd: project,
-    env: relayCodexEnvironment(process.env, activeRun.sessionId),
+    env: relayCodexEnvironment(process.env, activeRun.sessionId, gitExecutable, xdgConfigHome),
     stdio: ["ignore", "pipe", "pipe"],
   });
   activeModelChild = child;

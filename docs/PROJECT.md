@@ -116,6 +116,15 @@ owner contract
   treating a window request as sufficient end-to-end evidence.
   Toolkit capability `full-session-prompt-contract-v20` binds the complete local
   and unchanged post-push **246/246** suites; a fresh owner recording remains.
+- The next owner recording exposed a deeper composition gap: Quick Start had
+  tested the first session command and the restricted role profile separately,
+  while the real Producer needed verified toolkit evidence through both at once.
+  Quick Start now runs the exact first-session command through installed Codex in
+  a disposable clone before `READY`; every live role automatically binds verified
+  toolkit proof, native Git, and private project-run configuration. The first full
+  regression honestly failed 16 checks and exposed two downstream consequences;
+  the corrected local suite passes **250/250**, with post-push promotion and fresh
+  owner-visible proof still pending.
 - The first owner-observed three-context launch created distinct persistent Sol Producer and Terra Reviewer contexts and reached formal Brief review, but it is pushed-halted failure evidence rather than a pass. The unsafe launch rendered an ambient credential, and a second race repeated a voided review after halt. Zero acknowledgements and zero phases advanced; the deterministic repair passes 181/181, while a fresh owner-observed Ghostty run remains owed.
 - The first retry draft exposed a second human-experience defect before launch: Guide required Kristian to carry repository paths, commit IDs, test counts, and evidence references from the builder context. The toolkit now validates its release manifest itself, `guide status` reports one verified capability, the session-prompter forbids owner technical relays, and every new confirmation freezes that toolkit proof alongside project truth.
 - The second owner-observed launch passed the repaired window/security boundary: one Reviewer and one Producer opened beside the existing Guide with no extra tabs or environment dump, and the distinct contexts reached an approved Brief. Its acknowledgement UX then failed when an ambiguous Return produced an empty receipt, correctly leaving zero ledger entries but exiting both role processes. The preserved run remains at Brief. Numbered, retryable owner decisions, stdin-only receipt/ruling transport, exact legacy recovery, and a two-choice Guide recovery surface pass a pushed 194-check transcript bound as toolkit capability `ghostty-owner-ceremony-v2`; real recovery and the remaining phases are still owed.
