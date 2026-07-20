@@ -1797,3 +1797,16 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   passed **234/234** again. The durable
   [submission-surface transcript](test-results/2026-07-20-submission-surface-final.md)
   names that exact base commit. No product or test file changed after this run.
+
+## 2026-07-20 — Unauthenticated repository access probe
+
+- **Target:** `https://github.com/freeborn-warrior/koda-codex`.
+- **Result:** BLOCKED FOR JUDGES. Authenticated push and `origin/main` synchronization
+  pass, but an unauthenticated HTTP request returned 404 and authenticated GitHub
+  metadata reports visibility `PRIVATE`.
+- **Rule check:** The live Devpost rules permit either a public repository or a
+  private repository shared with both `testing@devpost.com` and
+  `build-week-event@openai.com`.
+- **Owner decision required:** Make the repository public, or keep it private and
+  grant/verify both judging invitations. Koda must not represent the public clone
+  path as judge-ready until one route is observed working.

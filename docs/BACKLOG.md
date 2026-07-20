@@ -6,6 +6,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
+- [ ] **Submission access blocker:** GitHub reports `freeborn-warrior/koda-codex`
+  as private and an unauthenticated request returns 404. Kristian must choose the
+  intended public release or explicitly share the private repository with both
+  judging addresses before the entry is testable.
 - [x] Owner-test the new one-command `koda guide open` experience. Its
   persistent context, narrow Guide-owned write surface, ignored ambient config and
   rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex

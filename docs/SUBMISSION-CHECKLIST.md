@@ -14,13 +14,17 @@ truth for the exact submission requirements.
 
 ## Repository and runnable product
 
-- [x] Public repository: `https://github.com/freeborn-warrior/koda-codex`
+- [ ] **Repository access blocker:** `https://github.com/freeborn-warrior/koda-codex`
+  exists and receives authenticated pushes, but GitHub reports it as `PRIVATE` and
+  an unauthenticated request returned 404 on 2026-07-20. Before submission, either
+  make it public (the intended README path) or keep it private and share it with
+  both `testing@devpost.com` and `build-week-event@openai.com`, then verify access.
 - [x] The repository and npm package open on a root `README.md` with the problem,
   one-minute test, supported platform, safety boundary, Codex collaboration, and
   current evidence.
-- [x] If the repository ever becomes private before judging, share it with
-  `testing@devpost.com` and `build-week-event@openai.com`; the intended submission
-  state is public, so no invitation is currently required.
+- [ ] If the repository remains private, share it with `testing@devpost.com` and
+  `build-week-event@openai.com` and verify both invitations. The recommended path
+  is to make it public so the documented clone command works for every judge.
 - [x] GPLv3-only license and sole owner copyright are present.
 - [x] Product name, repository/package slug, and CLI command are distinguished:
   Koda-C / `koda-codex` / `koda`.
