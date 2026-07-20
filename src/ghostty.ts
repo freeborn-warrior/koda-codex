@@ -57,9 +57,16 @@ function windowRequest(options: {
   project: string;
   launcher: string;
 }): GhosttyWindowRequest {
-  const relativeLauncher = path.relative(options.project, options.launcher).split(path.sep).join("/");
-  if (!relativeLauncher.startsWith(".koda/runs/") || /\s/.test(relativeLauncher)) {
-    throw new Error("Ghostty role launcher must be a space-free path inside the project runtime.");
+  const project = path.resolve(options.project);
+  const launcher = path.resolve(options.launcher);
+  const runtime = path.join(project, ".koda", "runs");
+  const relativeLauncher = path.relative(runtime, launcher);
+  if (
+    relativeLauncher === "" ||
+    relativeLauncher.startsWith("..") ||
+    path.isAbsolute(relativeLauncher)
+  ) {
+    throw new Error("Ghostty role launcher must be an absolute path inside the project runtime.");
   }
   return {
     role: options.role,
@@ -69,11 +76,11 @@ function windowRequest(options: {
       "Ghostty.app",
       "--args",
       `--title=${options.title}`,
-      `--working-directory=${options.project}`,
+      `--working-directory=${project}`,
       "--wait-after-command=true",
       "--shell-integration=none",
       "-e",
-      `./${relativeLauncher}`,
+      launcher,
     ],
   };
 }

@@ -693,6 +693,7 @@ test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Review
   assert.equal(opened.length, 2);
   assert.match(opened[0]!.args.join("\n"), /Koda-C Reviewer/);
   assert.match(opened[1]!.args.join("\n"), /Koda-C Producer/);
+  const roleCommands: string[] = [];
   for (const request of opened) {
     assert.equal(request.cwd, h.root);
     assert.equal(request.args[0], "-na");
@@ -702,13 +703,27 @@ test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Review
     const executeIndex = request.args.indexOf("-e");
     assert.notEqual(executeIndex, -1);
     assert.equal(request.args.length, executeIndex + 2, "Ghostty must receive exactly one command token after -e");
-    assert.match(request.args[executeIndex + 1]!, /^\.\/\.koda\/runs\/[0-9a-f-]+\/launch-(reviewer|producer)\.sh$/);
+    const command = request.args[executeIndex + 1]!;
+    roleCommands.push(command);
+    assert.ok(path.isAbsolute(command), "Ghostty login changes directory, so its command must be absolute");
+    const runtimeCommand = path.relative(path.join(h.root, ".koda", "runs"), command).split(path.sep).join("/");
+    assert.match(runtimeCommand, /^[0-9a-f-]+\/launch-(reviewer|producer)\.sh$/);
+    assert.equal((await stat(command)).mode & 0o777, 0o700);
+    assert.equal(path.resolve("/private/tmp", command), command, "the command must survive a login-shell directory change");
     assert.ok(!request.args.includes("/usr/bin/env"));
     assert.ok(!request.args.some((item) => item.startsWith("PATH=")));
     assert.ok(!request.args.some((item) => item.startsWith("KODA_CODEX_BIN=")));
     assert.ok(!request.args.includes("/bin/zsh"));
     assert.ok(!request.args.includes("-lc"));
   }
+  await t.test("GHOSTTY LOGIN RESOLUTION MUTATION: a directory-changing login cannot strand either role command", () => {
+    for (const command of roleCommands) {
+      const simulatedHome = "/Users/simulated-owner";
+      assert.equal(path.resolve(simulatedHome, command), command);
+      const priorRelativeForm = `./${path.relative(h.root, command)}`;
+      assert.notEqual(path.resolve(simulatedHome, priorRelativeForm), command);
+    }
+  });
   const runRoot = path.join(h.root, ".koda", "runs", confirmed.launch.id);
   const reviewerLauncher = await readFile(path.join(runRoot, "launch-reviewer.sh"), "utf8");
   const producerLauncher = await readFile(path.join(runRoot, "launch-producer.sh"), "utf8");
