@@ -81,7 +81,13 @@ async function requireEmptyTarget(target: string): Promise<void> {
 async function prepare(target: string, owner: string): Promise<void> {
   await requireEmptyTarget(target);
   await requireSafeTree(templateRoot, "The bundled full-session template");
-  await cp(templateRoot, target, { recursive: true, errorOnExist: true, force: false });
+  for (const entry of await readdir(templateRoot, { withFileTypes: true })) {
+    await cp(path.join(templateRoot, entry.name), path.join(target, entry.name), {
+      recursive: entry.isDirectory(),
+      errorOnExist: true,
+      force: false,
+    });
+  }
 
   const skillTarget = path.join(target, ".agents", "skills");
   await mkdir(skillTarget, { recursive: true });
