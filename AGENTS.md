@@ -9,7 +9,7 @@
 
 ## Repository boundaries
 
-- Keep every persistent output inside this repository. Put human-facing documentation under `docs/` except this Codex-native `AGENTS.md` file.
+- Keep every persistent output inside this repository. Put human-facing documentation under `docs/`, except the root `README.md` competition landing page and this Codex-native `AGENTS.md` file.
 - Keep repository-local skills only under `.agents/skills/`; never install Koda-C skills globally while developing this project.
 - Invoke the current Koda-C relay skill explicitly at each phase/task handoff; do not assume a prior skill remains active across later work.
 - Keep the CLI small and domain-general. Phase and role behavior belongs in skills; gate truth belongs in plain files and deterministic code.

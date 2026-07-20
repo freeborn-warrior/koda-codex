@@ -2,6 +2,15 @@
   "name": "koda-codex",
   "version": "0.1.0",
   "description": "A plain-file phase gate that requires peer-review receipts before work advances.",
+  "author": "Kristian Bengtsson",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freeborn-warrior/koda-codex.git"
+  },
+  "homepage": "https://github.com/freeborn-warrior/koda-codex#readme",
+  "bugs": {
+    "url": "https://github.com/freeborn-warrior/koda-codex/issues"
+  },
   "type": "module",
   "bin": {
     "koda": "./dist/cli.js"
@@ -9,6 +18,7 @@
   "files": [
     "AGENTS.md",
     "LICENSE",
+    "README.md",
     "src",
     "dist",
     "demo",

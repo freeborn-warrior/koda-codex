@@ -4,12 +4,13 @@
 
 This fixture proves the gate and receipt without invoking a model. Run it from the repository root with Node.js 22.18+:
 
-For a zero-build first check, run `node dist/cli.js --help`. The recorded fixture
-below uses the documented local package path so it also exercises packaging.
+For a zero-build first check, run `node dist/cli.js --help`. The primary fixture
+uses that same committed binary, so npm cache or network state cannot obscure the
+gate. Packaging has its own real-tarball installation test in the full suite.
 
 ```bash
 KODA_DEMO_DIR=$(mktemp -d /tmp/koda-c-demo.XXXXXX)
-npx --yes . init "$KODA_DEMO_DIR" --demo
+node dist/cli.js init "$KODA_DEMO_DIR" --demo
 cd "$KODA_DEMO_DIR"
 ```
 
@@ -47,7 +48,13 @@ Expected time after the first package run: about one minute.
 
 ## Two-Codex-task collaboration
 
-This is the operating architecture, not the deterministic fixture. The repository's current full-relay supervisor has already proved the backend with two persistent contexts, but its Window B is still an interim review reader rather than the mature owner-facing reviewer conversation described here.
+This is the operating architecture, not the deterministic fixture. The repository's
+genuine full relay has proved one persistent Producer and a separate persistent
+Reviewer across all six phases. The current runtime adds an ongoing Guide beside
+those two roles and gives the Reviewer the owner-facing conversation. Its
+mechanical recovery path passes the complete suite; the preserved three-window
+retry still needs its final owner-observed completion and is not used as proof for
+the one-minute core demo.
 
 ### Setup
 

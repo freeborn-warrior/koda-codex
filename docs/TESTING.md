@@ -1565,3 +1565,37 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   capability `atomic-role-ownership-v12` binds that commit, transcript, launcher,
   and role-lock surface.
 - **State:** PUSHED MECHANICAL PASS. The owner's next recovery observation remains.
+
+## 2026-07-19 — Submission landing and literal first-time path audit
+
+- **Scope:** Root GitHub/npm landing page, official no-rebuild judge path,
+  submission/video totals, real tarball installation, package contents, and the
+  exact one-minute refusal/receipt/open ceremony. No active verification-session
+  file or runtime was touched.
+- **Document defects found:** The repository had no root `README.md`, so GitHub
+  and npm did not open on the required collaboration, install, and testing story.
+  The submission checklist still named 210 checks and the video narration still
+  named 179 even though the bound suite had reached 230. Both totals now derive
+  from the current pushed transcript.
+- **Environment failures preserved:** A direct `npm pack --dry-run --json` and the
+  literal `npx --yes . init ...` command both stopped before Koda because the
+  machine's global npm cache contains root-owned entries. No `sudo`, ownership
+  change, retry-as-success, or global-cache mutation was used. The corrected
+  package inspection uses an isolated cache; the primary judge demo now uses the
+  committed `node dist/cli.js` binary and does not depend on npm cache health.
+- **Operator setup failure:** The first isolated audit-copy command was run from
+  the empty temporary directory with a relative `package.json` source and failed
+  by name. Re-running with the explicit repository source path succeeded; this
+  changed no product or assertion.
+- **Corrected results:** Package/security/submission slice **18/18**. A real
+  tarball installed and ran the CLI and demo. The exact primary path produced
+  `GATE CLOSED — BRIEF`, accepted only the complete receipt, then produced
+  `GATE OPEN — BRIEF` and activated `orient`.
+- **Package and dependency result:** Isolated dry-run reports 1,009,289 compressed
+  bytes, 4,816,071 unpacked bytes, 797 declared file entries, and zero bundled
+  dependencies. The real tarball contains the root README, full GPLv3 license,
+  and local skills, while excluding `.git`, `.koda`, `.env`, `.DS_Store`,
+  `node_modules`, and nested tarballs. An isolated production lockfile audit
+  reports zero known vulnerabilities at every severity.
+- **State:** LOCAL JUDGE-LANDING AND PACKAGE PASS. A pushed fresh-checkout proof
+  is still required after this documentation milestone is committed.

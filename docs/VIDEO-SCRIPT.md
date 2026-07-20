@@ -18,7 +18,7 @@ memory while recording.
 4. Hide notifications, menu-bar distractions, bookmarks, unrelated tabs, shell
    history, usernames, tokens, and personal paths where practical.
 5. Do not play music. Record only voice and terminal output.
-6. Warm npm's local package cache by completing one off-camera rehearsal.
+6. Complete one off-camera rehearsal from the intended checkout.
 7. Start from the repository root with a clean `git status`.
 8. Keep this script on a phone or second display outside the capture.
 
@@ -45,7 +45,7 @@ Screen: paste these first two lines, then paste the `cd` line printed by Koda:
 
 ```bash
 KODA_DEMO_DIR=$(mktemp -d /tmp/koda-c-demo.XXXXXX)
-npx --yes . init "$KODA_DEMO_DIR" --demo
+node dist/cli.js init "$KODA_DEMO_DIR" --demo
 ```
 
 Narration:
@@ -135,16 +135,16 @@ npm test
 If the full suite threatens the time limit, use the saved result instead:
 
 ```bash
-sed -n '1,16p' docs/test-results/2026-07-18-security-hardening-final.md
+sed -n '1,16p' docs/test-results/2026-07-19-atomic-role-locks-pushed.md
 ```
 
 Narration:
 
 > I brought the product discipline and made the calls about roles, gates, owner
 > attention, and honest limits. GPT-5.6 Codex implemented the CLI, ten skills,
-> relay, security fixes, and one hundred and seventy-nine checks. We kept every failed attempt and
-> correction in dated Git history. The discipline lives in the tool; I chose to
-> let Codex build it in its own engineering order.
+> relay, security fixes, and two hundred and thirty checks. We kept every failed
+> attempt and correction in dated Git history. The discipline lives in the tool;
+> I chose to let Codex build it in its own engineering order.
 
 ## Final line, 2:38–2:45
 
@@ -157,7 +157,8 @@ Stop recording. Do not add an animated outro.
 
 ## If something goes wrong on camera
 
-- If npm pauses, stop and restart after an off-camera cache warmup.
+- If initialization fails, stop and restart from a clean checkout; do not repair
+  the disposable fixture on camera.
 - If a path wraps, widen the terminal; do not shrink the font below readability.
 - If the wrong text is pasted, restart the disposable fixture. Do not edit its
   ledger or state to fake the intended output.

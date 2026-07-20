@@ -13,11 +13,17 @@ test("JUDGE JOURNEY SUITE: the committed binary runs without rebuilding", () => 
 });
 
 test("JUDGE JOURNEY SUITE: video and submission documents preserve every live rule", async () => {
-  const [readme, video, checklist] = await Promise.all([
+  const [landing, readme, video, checklist] = await Promise.all([
+    readFile("README.md", "utf8"),
     readFile("docs/README.md", "utf8"),
     readFile("docs/VIDEO-SCRIPT.md", "utf8"),
     readFile("docs/SUBMISSION-CHECKLIST.md", "utf8"),
   ]);
+  assert.match(landing, /## Try the refusal in one minute/);
+  assert.match(landing, /node dist\/cli\.js init/);
+  assert.match(landing, /230-check post-push transcript/);
+  assert.match(landing, /How Codex and GPT-5\.6 built it/);
+  assert.match(landing, /does \*\*not\*\* prove comprehension/);
   assert.match(readme, /## Judge path/);
   assert.match(readme, /node dist\/cli\.js --help/);
   assert.match(
@@ -36,6 +42,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(video, /GATE CLOSED — BRIEF/);
   assert.match(video, /Nothing advanced\./);
   assert.match(video, /GATE OPEN — BRIEF/);
+  assert.match(video, /node dist\/cli\.js init/);
   assert.match(video, /Codex and GPT-5\.6 explicitly/);
   assert.match(video, /Do not play music/);
   assert.match(checklist, /2026-07-21 at 5:00 pm Pacific/);
@@ -45,10 +52,12 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /testing@devpost\.com/);
   assert.match(checklist, /build-week-event@openai\.com/);
   assert.match(checklist, /https:\/\/openai\.devpost\.com\/rules/);
+  assert.match(checklist, /passes 230\/230/);
 });
 
 test("JUDGE JOURNEY SUITE: local links in the judge documents resolve", async () => {
   const documents = [
+    "README.md",
     "docs/README.md",
     "docs/DEMO.md",
     "docs/VIDEO-SCRIPT.md",

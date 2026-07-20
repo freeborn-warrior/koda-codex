@@ -1,6 +1,6 @@
 # Koda-C submission checklist
 
-**Verified against the live rules:** 2026-07-18
+**Verified against the live rules:** 2026-07-19
 
 **Hard deadline:** 2026-07-21 at 5:00 pm Pacific
 
@@ -15,6 +15,9 @@ truth for the exact submission requirements.
 ## Repository and runnable product
 
 - [x] Public repository: `https://github.com/freeborn-warrior/koda-codex`
+- [x] The repository and npm package open on a root `README.md` with the problem,
+  one-minute test, supported platform, safety boundary, Codex collaboration, and
+  current evidence.
 - [x] If the repository ever becomes private before judging, share it with
   `testing@devpost.com` and `build-week-event@openai.com`; the intended submission
   state is public, so no invitation is currently required.
@@ -31,7 +34,9 @@ truth for the exact submission requirements.
 - [x] The one-minute refusal fixture is documented in [DEMO.md](DEMO.md).
 - [x] Package safety, install hooks, dependencies, and model-harness boundaries
   are documented in [SECURITY.md](SECURITY.md).
-- [x] The current full suite passes 210/210 against the pushed stable-handover recovery repair and preserves its [bound transcript](test-results/2026-07-19-stable-handover-recovery-pushed.md).
+- [x] The current full suite passes 230/230 against the pushed atomic-role
+  ownership repair and preserves its
+  [bound transcript](test-results/2026-07-19-atomic-role-locks-pushed.md).
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.
 
 ## Submission form
@@ -48,6 +53,10 @@ truth for the exact submission requirements.
 
 - [ ] Paste the final text description from the draft below.
 - [ ] Add the public repository URL.
+- [ ] Add the no-rebuild judge path from the root README as the testing
+  instructions: `node dist/cli.js --help`, then the `node dist/cli.js init ...`
+  one-minute fixture. Keep `npx --yes . --help` as separate package evidence,
+  not a prerequisite for seeing the gate.
 - [ ] In this primary Codex build task, Kristian runs `/feedback` and records the
   returned Codex Session ID in the form. Do not substitute the relay's producer
   or reviewer thread IDs; the rules ask for the project thread where most core
@@ -90,6 +99,7 @@ The exact shot order, narration, fallback lines, and recording checks are in
 - [ ] `git rev-list --count origin/main..HEAD` prints `0`.
 - [ ] `npm test` passes from the submission commit.
 - [ ] Public fresh checkout prints help and remains clean after the demo path.
+- [ ] Root `README.md` renders correctly on GitHub and its local links resolve.
 - [ ] All Markdown links needed by judges resolve from `docs/README.md`.
 - [ ] Create and push a submission tag only after the video/form references the
   exact commit. Suggested tag: `build-week-2026-submission`.
