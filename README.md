@@ -107,9 +107,8 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The current [246-check local full-session prompt-contract transcript](docs/test-results/2026-07-20-full-session-prompt-contract-local.md)
-  is hash-bound by the toolkit integrity manifest. Unchanged post-push proof is
-  still owed and is not claimed here.
+- The current [246-check post-push full-session prompt-contract transcript](docs/test-results/2026-07-20-full-session-prompt-contract-pushed.md)
+  is hash-bound by the toolkit integrity manifest.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
   encountered an unplanned Summary `REVISE`, recovered through a fresh review,

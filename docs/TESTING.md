@@ -2078,8 +2078,10 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   and [security audit](security-runs/2026-07-20-full-session-prompt-contract-audit-23/RESULT.md).
 - **Complete local result:** Every one of **246** named tests passed in the
   [local transcript](test-results/2026-07-20-full-session-prompt-contract-local.md).
-- **State:** LOCAL COMPLETE PASS. Capability
-  `full-session-prompt-contract-v20` binds repair/tested commit `1adcd1a` and the
-  246-check local transcript. The failed live attempt is discarded rather than
-  recovered because the required owner proof is a fresh recording from the start.
-  Pushed and fresh owner-visible proof remain.
+- **Post-push result:** The unchanged complete suite passed **246/246** in the
+  [post-push transcript](test-results/2026-07-20-full-session-prompt-contract-pushed.md).
+- **State:** POST-PUSH PASS. Capability `full-session-prompt-contract-v20` binds
+  repair commit `1adcd1a`, pushed tested commit `beb4c38`, the 246-check post-push
+  transcript, and every critical demo/launch file. The failed live attempt is
+  discarded rather than recovered because the required owner proof is a fresh
+  recording from the start. Fresh owner-visible proof remains.

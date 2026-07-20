@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "full-session-prompt-contract-v20",
-  "verifiedAt": "2026-07-20T20:18:15.737Z",
+  "verifiedAt": "2026-07-20T20:21:37.850Z",
   "repairCommit": "1adcd1a35dfc4ae4ff2be40fd9f0a65890cb02ef",
-  "testedCommit": "1adcd1a35dfc4ae4ff2be40fd9f0a65890cb02ef",
+  "testedCommit": "beb4c38e2fbc4c4d9a5775f17c8ba802745402da",
   "testCount": 246,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-full-session-prompt-contract-local.md",
-    "sha256": "06954c485e4c336d4006464daa9cf3a36309028f979b8fe4cea1376937751acb"
+    "path": "docs/test-results/2026-07-20-full-session-prompt-contract-pushed.md",
+    "sha256": "e8567af63b04ae6d4e2cc5b0dbf3da431e6ce52b7b6b56bc78bb15e9bb746f07"
   },
   "files": [
     {

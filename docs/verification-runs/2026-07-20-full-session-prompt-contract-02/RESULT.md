@@ -43,4 +43,5 @@ fresh start. It will not be recovered or represented as a successful session.
 
 The reusable demo prompt is corrected, the Guide core now checks explicit handover
 fields against the launch before windows open, and Quick Start now proves actual
-session creation and binding. A fresh owner-visible run remains required.
+session creation and binding. Complete local and unchanged post-push suites pass
+246/246. A fresh owner-visible run remains required.

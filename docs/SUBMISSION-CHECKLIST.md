@@ -38,10 +38,9 @@ truth for the exact submission requirements.
 - [x] The one-minute refusal fixture is documented in [DEMO.md](DEMO.md).
 - [x] Package safety, install hooks, dependencies, and model-harness boundaries
   are documented in [SECURITY.md](SECURITY.md).
-- [ ] The current full suite passes 246/246 locally against the full-session
-  prompt-contract repair and preserves its
-  [bound local transcript](test-results/2026-07-20-full-session-prompt-contract-local.md).
-  Repeat unchanged after push before checking this item.
+- [x] The current full suite passes 246/246 unchanged after push against the
+  full-session prompt-contract repair and preserves its
+  [bound post-push transcript](test-results/2026-07-20-full-session-prompt-contract-pushed.md).
 - [x] A first-time user has one documented command for a complete session;
   confirmation, launch, owner choices, and safe recovery remain inside Koda.
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.

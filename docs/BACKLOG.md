@@ -62,8 +62,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
   field with the launch request before windows can open. The Quick Start test now
   consumes the bundled prompt through real session creation and Guide binding;
   the expanded Guide, plural-runtime, security, and integrity slice passes
-  **68/68** and the complete local suite passes **246/246**. Pushed proof remains
-  in progress.
+  **68/68** and the complete local and unchanged post-push suites pass **246/246**.
 
 ## Next
 

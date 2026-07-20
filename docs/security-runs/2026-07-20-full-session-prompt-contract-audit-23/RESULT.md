@@ -29,5 +29,6 @@ containment, role separation, receipt, and gate checks remain unchanged.
 - Expanded Guide, Quick Start, real/plural runtime, security, and integrity slice:
   **68/68 passed**.
 - Complete local suite: **246/246 passed**.
+- Unchanged post-push suite: **246/246 passed**.
 
-Post-push regression remains required before human handoff.
+Fresh owner-visible proof remains required before human handoff.
