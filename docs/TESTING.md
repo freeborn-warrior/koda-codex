@@ -1857,3 +1857,8 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   234/234` checklist text after the checklist and primary link had correctly moved
   to 238. The assertion now requires the stronger current evidence; no product,
   security, gate, or receipt condition changed.
+- **Final pushed release result:** The corrected judge documents, current assertion,
+  and post-push evidence reached `origin/main` at `e31ef7e`. The unchanged complete
+  suite passed **238/238** again in the
+  [release transcript](test-results/2026-07-20-bounded-guide-startup-release.md).
+  No product or test file changed after that run.

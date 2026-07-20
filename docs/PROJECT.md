@@ -262,6 +262,7 @@ owner contract
 - [Bounded Guide startup security audit](security-runs/2026-07-20-bounded-guide-startup-audit-18/RESULT.md)
 - [Bounded Guide startup committed-code 238-check proof](test-results/2026-07-20-bounded-guide-startup-committed.md)
 - [Bounded Guide startup post-push 238-check proof](test-results/2026-07-20-bounded-guide-startup-pushed.md)
+- [Bounded Guide startup final release 238-check proof](test-results/2026-07-20-bounded-guide-startup-release.md)
 - [Secure persistent Guide security audit](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md)
 - [Secure persistent Guide UX audit](quality-runs/2026-07-19-secure-guide-console-ux-audit-08/RESULT.md)
 - [Pushed 204-check owner-surface proof](test-results/2026-07-19-owner-surface-pushed.md)

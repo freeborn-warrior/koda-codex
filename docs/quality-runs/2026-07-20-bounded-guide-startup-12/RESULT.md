@@ -57,6 +57,7 @@ merely to make the interface look fast.
 - [Development failures](../../test-results/2026-07-20-bounded-guide-startup-development-failures.md)
 - [Committed-code 238-check transcript](../../test-results/2026-07-20-bounded-guide-startup-committed.md)
 - [Unchanged post-push 238-check transcript](../../test-results/2026-07-20-bounded-guide-startup-pushed.md)
+- [Final pushed release 238-check transcript](../../test-results/2026-07-20-bounded-guide-startup-release.md)
 - Focused Guide/skill/security/integrity slice: **42/42 passed**.
 - Coverage: **87.04% lines, 71.55% branches, 85.74% functions** overall.
 - Toolkit capability `bounded-guide-startup-v15` binds repair commit `8c126ea`,

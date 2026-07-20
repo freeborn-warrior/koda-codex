@@ -44,6 +44,8 @@ security after the startup repair.
 - Repair commit `8c126ea` and evidence commit `104dbbe` reached `origin/main`.
   The unchanged full suite passed **238/238** afterward; toolkit capability
   `bounded-guide-startup-v15` binds that post-push transcript.
+- The judge-facing release assembly reached `e31ef7e` and passed the unchanged
+  complete suite **238/238** again.
 
 ## Honest boundaries
 
