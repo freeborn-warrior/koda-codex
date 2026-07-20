@@ -339,4 +339,7 @@ resume are proved in
 The live terminal-context launcher mismatch and its fail-closed migration contract
 are preserved in
 [`verification-runs/2026-07-19-markdown-headings-01/LAUNCHER-CONTEXT-MISMATCH-INCIDENT.md`](verification-runs/2026-07-19-markdown-headings-01/LAUNCHER-CONTEXT-MISMATCH-INCIDENT.md).
+The final public-clone, package-lifecycle, no-build demo, current role-boundary,
+and zero-vulnerability delta is recorded in
+[`security-runs/2026-07-19-submission-readiness-audit-15/RESULT.md`](security-runs/2026-07-19-submission-readiness-audit-15/RESULT.md).
 The latest named full-suite transcript is linked from the README.

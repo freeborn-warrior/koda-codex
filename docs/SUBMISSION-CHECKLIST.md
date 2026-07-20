@@ -98,7 +98,8 @@ The exact shot order, narration, fallback lines, and recording checks are in
 - [ ] `git log -1 --oneline` names the intended submission commit.
 - [ ] `git rev-list --count origin/main..HEAD` prints `0`.
 - [ ] `npm test` passes from the submission commit.
-- [ ] Public fresh checkout prints help and remains clean after the demo path.
+- [x] Public fresh checkout at `eed2084` prints help, completes the exact external
+  one-minute fixture, and remains clean after both demo and package tests.
 - [ ] Root `README.md` renders correctly on GitHub and its local links resolve.
 - [ ] All Markdown links needed by judges resolve from `docs/README.md`.
 - [ ] Create and push a submission tag only after the video/form references the

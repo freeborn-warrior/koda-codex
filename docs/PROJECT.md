@@ -163,6 +163,12 @@ owner contract
   legacy directory lock already held by the preserved Reviewer. Commit `e6890f4`
   passes the unchanged pushed 230/230 transcript under toolkit capability
   `atomic-role-ownership-v12`.
+- Submission-readiness audit now starts from the same public surface a judge sees.
+  Commit `eed2084` adds the root GitHub/npm landing page, makes the primary
+  one-minute gate demo independent of npm cache health, corrects stale public
+  totals, and passes a fresh unauthenticated clone through help, refusal, exact
+  receipt, advancement, real tarball install, security/license/judge checks, and
+  clean-checkout verification. No active verification-session state was touched.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.

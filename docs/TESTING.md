@@ -1599,3 +1599,13 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   reports zero known vulnerabilities at every severity.
 - **State:** LOCAL JUDGE-LANDING AND PACKAGE PASS. A pushed fresh-checkout proof
   is still required after this documentation milestone is committed.
+- **Public-clone result:** After commit `eed2084` reached `origin/main`, a new
+  unauthenticated HTTPS clone matched that commit, passed Git object verification,
+  ran the exact refusal → receipt → open path outside the checkout, and remained
+  clean. The clone's package/security/license/judge slice passed **19/19**,
+  including a real tarball install. See the
+  [UX audit](quality-runs/2026-07-19-submission-readiness-09/RESULT.md) and
+  [security audit 15](security-runs/2026-07-19-submission-readiness-audit-15/RESULT.md).
+- **Assembled-suite result:** The completed judge landing, refreshed submission
+  documents, project records, and audit links passed the full **230/230** suite in
+  the [named local transcript](test-results/2026-07-19-submission-readiness-final.md).

@@ -73,6 +73,10 @@ same disk relay can be started from manually opened terminals.
   catch from verdict temperament and preserves every scored run.
 - The [security boundary](docs/SECURITY.md) states what installation, the core,
   managed Codex roles, and the optional relay can and cannot do.
+- The final [public-clone UX audit](docs/quality-runs/2026-07-19-submission-readiness-09/RESULT.md)
+  and [submission security audit](docs/security-runs/2026-07-19-submission-readiness-audit-15/RESULT.md)
+  preserve the literal judge path, package contents, zero-vulnerability result,
+  failure handling, and remaining human work.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history; the current optional three-window recovery still awaits its final
   owner-observed completion and is not represented as finished proof.

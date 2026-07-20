@@ -44,6 +44,13 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
+- [x] Give judges and npm a root landing page, remove npm cache health from the
+  primary no-build demo, update stale public test totals, and prove the exact
+  refusal → receipt → open path from an unauthenticated public clone. Commit
+  `eed2084` passed the fresh-clone package/security/license/judge slice **19/19**
+  and left the checkout clean; the remaining items are human rehearsal, live
+  recovery observation, video, `/feedback`, and Devpost submission.
+
 - [x] Publish Reviewer and Producer ownership with complete bytes in one
   no-clobber filesystem operation, while continuing to read the earlier directory
   lock held by an already-running window. Commit `e6890f4` passes the unchanged

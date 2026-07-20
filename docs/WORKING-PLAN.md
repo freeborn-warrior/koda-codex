@@ -70,6 +70,11 @@ Turn the proved two-context session relay into a project-level experience that c
     directory before its owner file exists; preserve strict legacy-lock reads for
     already-running windows. Commit `e6890f4` passes the unchanged pushed 230/230
     transcript under `atomic-role-ownership-v12`.
+29. [x] Make the competition surface literal: root README, no-build/no-cache core
+    demo, current evidence totals, public fresh-clone execution, real package
+    install, security audit, and clean-checkout proof. Preserve live recovery,
+    video, `/feedback`, and Devpost submission as explicit owner work rather than
+    inferred completion.
 
 ## Submission cut
 
