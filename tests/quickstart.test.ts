@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { readdir } from "node:fs/promises";
+import { lstat, readdir } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
@@ -12,12 +12,22 @@ import { temporaryRoot } from "./helpers.ts";
 test("FULL-SESSION QUICK START: one command creates a pushed project and numbered Guide launch", async (t) => {
   const parent = await temporaryRoot(t, "koda-full-session-quickstart-");
   const project = path.join(parent, "project");
+  const hostileGitDirectory = path.join(parent, "ambient-git-dir");
+  const hostileGitIndex = path.join(parent, "ambient-git-index");
   const result = spawnSync(process.execPath, [
     path.resolve("scripts/prepare-full-session-demo.ts"),
     "--confirm",
     "--owner", "Fixture Owner",
     "--directory", project,
-  ], { cwd: path.resolve("."), encoding: "utf8", env: process.env });
+  ], {
+    cwd: path.resolve("."),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      GIT_DIR: hostileGitDirectory,
+      GIT_INDEX_FILE: hostileGitIndex,
+    },
+  });
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
   assert.match(result.stdout, /READY — FULL SESSION/);
   assert.match(result.stdout, /confirmed, committed, pushed, and mechanically verified/);
@@ -28,6 +38,8 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
     encoding: "utf8",
   }).trim(), "0\t0");
   assert.equal(execFileSync("git", ["remote", "get-url", "origin"], { cwd: project, encoding: "utf8" }).trim(), ".runtime/remote.git");
+  await assert.rejects(lstat(hostileGitDirectory), /ENOENT/);
+  await assert.rejects(lstat(hostileGitIndex), /ENOENT/);
   assert.deepEqual(await readdir(path.join(project, "docs", "sessions")), [".gitkeep"]);
   assert.equal((await readdir(path.join(project, ".agents", "skills"))).filter((name) => name.startsWith("koda-c-")).length, 10);
 

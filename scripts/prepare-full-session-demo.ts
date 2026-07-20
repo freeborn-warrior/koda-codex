@@ -37,8 +37,8 @@ function flag(args: string[], name: string): boolean {
   return true;
 }
 
-function run(executable: string, args: string[], cwd: string): string {
-  const result = spawnSync(executable, args, { cwd, encoding: "utf8", env: process.env });
+function run(executable: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = process.env): string {
+  const result = spawnSync(executable, args, { cwd, encoding: "utf8", env });
   if (result.status !== 0) {
     const detail = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
     throw new Error(detail || `${path.basename(executable)} exited ${result.status ?? "without a status"}.`);
@@ -86,6 +86,7 @@ async function prepare(target: string, owner: string): Promise<void> {
       recursive: entry.isDirectory(),
       errorOnExist: true,
       force: false,
+      filter(source) { return path.basename(source) !== ".DS_Store"; },
     });
   }
 
@@ -94,26 +95,40 @@ async function prepare(target: string, owner: string): Promise<void> {
   for (const name of skillNames) {
     const source = path.join(packageRoot, ".agents", "skills", name);
     await requireSafeTree(source, `Skill ${name}`);
-    await cp(source, path.join(skillTarget, name), { recursive: true, errorOnExist: true, force: false });
+    await cp(source, path.join(skillTarget, name), {
+      recursive: true,
+      errorOnExist: true,
+      force: false,
+      filter(candidate) { return path.basename(candidate) !== ".DS_Store"; },
+    });
   }
 
-  run("git", ["init", "-b", "main"], target);
-  run("git", ["config", "user.name", "Koda-C Demo"], target);
-  run("git", ["config", "user.email", "koda-c-demo@example.invalid"], target);
-  run("git", ["add", "--all"], target);
-  run("git", ["commit", "-m", "chore: initialize Koda-C full-session demo"], target);
-
   const remote = path.join(target, ".runtime", "remote.git");
-  await mkdir(path.dirname(remote), { recursive: true });
-  run("git", ["init", "--bare", "--initial-branch=main", remote], target);
-  run("git", ["remote", "add", "origin", ".runtime/remote.git"], target);
-  run("git", ["push", "--set-upstream", "origin", "main"], target);
+  const runtimeHome = path.join(target, ".runtime", "home");
+  await mkdir(runtimeHome, { recursive: true });
+  const isolatedEnvironment: NodeJS.ProcessEnv = {
+    HOME: runtimeHome,
+    PATH: "/usr/bin:/bin",
+    LANG: "C",
+    LC_ALL: "C",
+  };
+  const git = "/usr/bin/git";
+  run(git, ["init", "-b", "main"], target, isolatedEnvironment);
+  run(git, ["config", "user.name", "Koda-C Demo"], target, isolatedEnvironment);
+  run(git, ["config", "user.email", "koda-c-demo@example.invalid"], target, isolatedEnvironment);
+  run(git, ["add", "--all"], target, isolatedEnvironment);
+  run(git, ["commit", "-m", "chore: initialize Koda-C full-session demo"], target, isolatedEnvironment);
 
-  run(process.execPath, [cli, "guide", "confirm", promptRelative, "--owner", owner, "--kind", "produce"], target);
-  run("git", ["add", "--", "docs/guide/launches"], target);
-  run("git", ["commit", "-m", "guide: confirm full-session demo"], target);
-  run("git", ["push", "origin", "main"], target);
-  run(process.execPath, [cli, "guide", "verify"], target);
+  await mkdir(path.dirname(remote), { recursive: true });
+  run(git, ["init", "--bare", "--initial-branch=main", remote], target, isolatedEnvironment);
+  run(git, ["remote", "add", "origin", ".runtime/remote.git"], target, isolatedEnvironment);
+  run(git, ["push", "--set-upstream", "origin", "main"], target, isolatedEnvironment);
+
+  run(process.execPath, [cli, "guide", "confirm", promptRelative, "--owner", owner, "--kind", "produce"], target, isolatedEnvironment);
+  run(git, ["add", "--", "docs/guide/launches"], target, isolatedEnvironment);
+  run(git, ["commit", "-m", "guide: confirm full-session demo"], target, isolatedEnvironment);
+  run(git, ["push", "origin", "main"], target, isolatedEnvironment);
+  run(process.execPath, [cli, "guide", "verify"], target, isolatedEnvironment);
 }
 
 async function main(): Promise<void> {
@@ -145,7 +160,9 @@ async function main(): Promise<void> {
     console.log("");
 
     const owner = (requestedOwner ?? await terminal.question("Name to use in review and approval records: ")).trim();
-    if (!owner || /[\u0000-\u001f\u007f-\u009f]/.test(owner)) throw new Error("The owner name must be visible non-control text.");
+    if (!owner || owner.length > 120 || /[\u0000-\u001f\u007f-\u009f]/.test(owner)) {
+      throw new Error("The owner name must be 1–120 visible characters without terminal controls.");
+    }
     let choice = confirmed ? "1" : "";
     if (!confirmed) {
       console.log("────────────────────────────────────────────────────────");
