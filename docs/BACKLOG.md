@@ -69,9 +69,10 @@ This is the on-disk working queue for the build. A checked item means its eviden
   session ID existed. The owner did nothing wrong; the interface announced a false
   readiness state. Reviewer now starts visibly but input-closed, binds the exact
   Producer-created session, then opens conversation; Producer and Guide refuse
-  until that same live identity is present. The complete local suite passes
-  **252/252**. Finish unchanged post-push proof, fresh independent review, and only
-  then ask Kristian for another recording attempt.
+  until that same live identity is present. The complete local and unchanged
+  post-push suites pass **252/252** under promoted capability
+  `reviewer-session-binding-v22`. Finish fresh independent review and only then ask
+  Kristian for another recording attempt.
 
 ## Next
 

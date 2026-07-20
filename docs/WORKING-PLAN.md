@@ -132,8 +132,9 @@ Turn the proved two-context session relay into a project-level experience that c
     fresh Terra/medium review, but the next launch exposed owner input before the
     Reviewer had a session ID. The repaired transition is explicit `STARTING` →
     exact session binding → `SESSION READY`; Producer and Guide require the same
-    live binding. Local regression passes **252/252**. Record unchanged post-push
-    proof, obtain fresh independent review, then perform one clean six-phase run.
+    live binding. Local and unchanged post-push regressions pass **252/252** under
+    promoted capability `reviewer-session-binding-v22`. Obtain fresh independent
+    review, then perform one clean six-phase run.
 
 ## Submission cut
 

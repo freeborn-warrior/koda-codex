@@ -2180,5 +2180,18 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Evidence:** [incident](verification-runs/2026-07-20-reviewer-session-binding-race-04/RESULT.md),
   [sealed review contract](quality-runs/2026-07-20-reviewer-session-binding-19/CONTRACT.md),
   and [security audit](security-runs/2026-07-20-reviewer-session-binding-audit-25/RESULT.md).
-- **State:** LOCAL PASS. Post-push regression, manifest promotion, independent
-  review, and fresh owner-visible rehearsal remain separate pending proofs.
+- **Post-push result:** Pushed commit `ec1df13` exactly matched `origin/main` and
+  passed the unchanged complete [252/252 suite](test-results/2026-07-20-reviewer-session-binding-pushed.md).
+  Its transcript is SHA-256
+  `646a122261309cf015bc1b740648c058934f13104143dfc9e77e408add11e5cd`.
+- **Promotion-document failure:** The first 26-check toolkit/security/submission
+  slice passed 25/26. Submission truth still required the older literal
+  `250-check post-push integrated Producer-role transcript` after README had
+  correctly promoted the newer 252-check proof. The assertion was updated to
+  require the exact new transcript in README and the docs index, plus the
+  unchanged-pushed 252/252 claim in the checklist. The corrected slice passed
+  26/26; no assertion was removed or generalized.
+- **State:** POST-PUSH PASS. Capability `reviewer-session-binding-v22` binds
+  repair/tested commit `ec1df13`, the unchanged transcript, and the critical
+  startup surface. Independent review and fresh owner-visible rehearsal remain
+  separate pending proofs.

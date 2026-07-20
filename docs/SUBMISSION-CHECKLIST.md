@@ -43,9 +43,11 @@ truth for the exact submission requirements.
   [bound post-push transcript](test-results/2026-07-20-integrated-role-preflight-pushed.md).
   The final promoted manifest and public evidence pass a further
   [250/250 release suite](test-results/2026-07-20-integrated-role-preflight-release-final.md).
-- [ ] Promote the later Reviewer/session startup repair. Its complete
+- [x] Promote the later Reviewer/session startup repair. Its complete
   [local suite passes 252/252](test-results/2026-07-20-reviewer-session-binding-local.md),
-  while unchanged post-push and fresh independent proof remain pending.
+  and the unchanged pushed commit passes a second
+  [252/252](test-results/2026-07-20-reviewer-session-binding-pushed.md) under
+  capability `reviewer-session-binding-v22`. Fresh independent proof remains pending.
 - [x] A first-time user has one documented command for a complete session;
   confirmation, launch, owner choices, and safe recovery remain inside Koda.
 - [x] A fresh Terra/medium task independently reviewed the complete integrated

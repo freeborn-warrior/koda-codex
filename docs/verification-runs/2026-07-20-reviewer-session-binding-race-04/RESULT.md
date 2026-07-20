@@ -4,7 +4,9 @@
 - Owner-observed launch: `115c716e-1c9c-43c5-8e5d-edead043b29a`
 - Result: **FAIL — REVIEWER EXPOSED INPUT BEFORE SESSION BINDING**
 - Local corrected suite: [252/252](../../test-results/2026-07-20-reviewer-session-binding-local.md)
-- Fresh owner-visible retry: required only after post-push and independent proof
+- Unchanged post-push suite: [252/252](../../test-results/2026-07-20-reviewer-session-binding-pushed.md)
+- Promoted capability: `reviewer-session-binding-v22`, repair/tested commit `ec1df13`
+- Fresh owner-visible retry: required only after independent proof
 
 ## What happened
 
@@ -64,4 +66,5 @@ startup code changed. After development hashes were rebound, 87/88 checks passed
 the one remaining failure was the old banner assertion. That assertion was
 strengthened to require both `STARTING SESSION` and `SESSION READY`; the focused
 slice then passed 88/88, the race/security subset passed, and the complete recorded
-suite passed 252/252.
+local suite passed 252/252. The unchanged pushed repair at `ec1df13` then passed a
+second recorded 252/252 and was promoted into toolkit integrity.

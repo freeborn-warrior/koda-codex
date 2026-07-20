@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "reviewer-session-binding-local-v22",
-  "verifiedAt": "2026-07-20T22:03:41.431Z",
-  "repairCommit": "1799f4bfa10a97501ad0ffdbe8620326f140b698",
-  "testedCommit": "1799f4bfa10a97501ad0ffdbe8620326f140b698",
+  "capability": "reviewer-session-binding-v22",
+  "verifiedAt": "2026-07-20T22:11:06.288Z",
+  "repairCommit": "ec1df137fae3ffcaa1a15648112497fcdc32d20f",
+  "testedCommit": "ec1df137fae3ffcaa1a15648112497fcdc32d20f",
   "testCount": 252,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-reviewer-session-binding-local.md",
-    "sha256": "278a7c543be0f0c82d759fb15b909e13c36ea017d7b5a3fa36afc09ca95c2ad2"
+    "path": "docs/test-results/2026-07-20-reviewer-session-binding-pushed.md",
+    "sha256": "646a122261309cf015bc1b740648c058934f13104143dfc9e77e408add11e5cd"
   },
   "files": [
     {

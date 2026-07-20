@@ -107,7 +107,7 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The current [250-check post-push integrated Producer-role transcript](docs/test-results/2026-07-20-integrated-role-preflight-pushed.md)
+- The current [252-check post-push Reviewer/session-binding transcript](docs/test-results/2026-07-20-reviewer-session-binding-pushed.md)
   is hash-bound by the toolkit integrity manifest.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
@@ -152,8 +152,8 @@ direct final answer instead of flooding the owner with procedural inspection.
   [sealed review contract](docs/quality-runs/2026-07-20-reviewer-session-binding-19/CONTRACT.md),
   and [security audit](docs/security-runs/2026-07-20-reviewer-session-binding-audit-25/RESULT.md)
   preserve the later false-ready prompt, the exact owner question that exposed it,
-  and the 252-check local repair. Post-push, independent, and fresh human proof are
-  kept distinct until each actually exists.
+  and the 252-check local plus unchanged post-push repair. Independent and fresh
+  human proof remain distinct until each actually exists.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

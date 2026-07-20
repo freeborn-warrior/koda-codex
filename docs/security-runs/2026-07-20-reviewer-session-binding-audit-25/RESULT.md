@@ -3,8 +3,9 @@
 - Date: 2026-07-20
 - Scope: visible role startup, owner-input timing, session identity, liveness,
   permissions, direction evidence, recovery, and terminal output
-- Status: **LOCAL PASS — POST-PUSH AND INDEPENDENT REVIEW PENDING**
+- Status: **POST-PUSH PASS — INDEPENDENT REVIEW PENDING**
 - Local complete regression: [252/252](../../test-results/2026-07-20-reviewer-session-binding-local.md)
+- Unchanged post-push regression: [252/252](../../test-results/2026-07-20-reviewer-session-binding-pushed.md)
 
 ## Findings
 
@@ -30,4 +31,5 @@
 
 The deterministic tests prove ordering and refusal with real processes and terminal
 input. Only a fresh owner-visible Ghostty session can prove that the complete human
-experience now feels correct on the target desktop.
+experience now feels correct on the target desktop. Fresh independent review of the
+pushed transition also remains separate from this security audit.
