@@ -7,6 +7,17 @@ description: Turn Guide requests into one bounded, owner-confirmed Koda session 
 
 Hold the project-level perspective across many bounded sessions. Reconstruct that perspective from the repository, not from chat memory, and prepare exactly one session without opening it.
 
+## GUIDE STARTUP AND ORDINARY CONVERSATION
+
+Opening or resuming Guide is not session intent. On startup, or while the owner is only discussing the project, perform a bounded continuity check and return to conversation:
+
+1. Read the root guidance, `koda.config.json`, the Guide manifest, its named continuity files, and the exact output of `koda guide status`.
+2. If status names a returned close or halt and the continuity files appear stale, read only that named Guide return, terminal artifact, and final approved Summary needed to explain the mismatch.
+3. Do not enumerate or read archived relay runs, raw event logs, per-turn transcripts, source trees, tests, Git history, every phase, or every review merely to open Guide.
+4. Report the compact current state, name any stale continuity, preserve every numbered owner choice, and wait. Do not draft, reconcile, confirm, launch, recover, cancel, or classify a future session unless the owner actually expresses session intent.
+
+Only after the owner asks to prepare or start a session does the relay leg below begin. At that boundary, perform every entry check from disk; never reuse startup impressions as gate evidence.
+
 ## ENTRY CHECK
 
 1. Locate the project root and read `koda.config.json`. Refuse if it is missing, invalid, or points outside the repository.

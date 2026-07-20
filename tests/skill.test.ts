@@ -125,6 +125,10 @@ test("session open and close remain ceremonies outside producer phase routing", 
     readFile(".agents/skills/koda-c-close/SKILL.md", "utf8"),
   ]);
   assert.match(prompt, /project-level perspective across many bounded sessions/i);
+  assert.match(prompt, /Opening or resuming Guide is not session intent/i);
+  assert.match(prompt, /bounded continuity check/i);
+  assert.match(prompt, /Do not enumerate or read archived relay runs, raw event logs, per-turn transcripts, source trees, tests, Git history, every phase, or every review/i);
+  assert.match(prompt, /Only after the owner asks to prepare or start a session.*every entry check from disk/is);
   assert.match(prompt, /Before drafting, editing, confirming, or launching.*run `koda guide status`/is);
   assert.match(prompt, /Dependent successor:.*If any is active or lacks pushed close\/halt evidence, refuse before drafting/is);
   assert.match(prompt, /Independent sibling:.*explicit owner\/Guide ruling.*`--independent`/is);

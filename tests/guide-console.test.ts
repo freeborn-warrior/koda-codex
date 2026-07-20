@@ -9,6 +9,7 @@ import { DEFAULT_CONFIG } from "../src/config.ts";
 import {
   acquireGuideConsole,
   guideConsoleWritePaths,
+  guideStartupPrompt,
   guideTurnArguments,
   renderGuideEvent,
   sanitizeGuideTerminalText,
@@ -116,6 +117,20 @@ test("GUIDE CONSOLE VISIBILITY: low-level inspection commands stay in evidence i
     type: "item.completed",
     item: { type: "agent_message", text: "The project is ready." },
   })), "GUIDE UPDATE\nThe project is ready.");
+});
+
+test("GUIDE CONSOLE STARTUP: reconstruction is explicitly bounded to compact continuity evidence", () => {
+  const prompt = guideStartupPrompt("KODA GUIDE — fixture\nBETWEEN SESSIONS", true);
+  assert.match(prompt, /startup status turn/i);
+  assert.match(prompt, /named continuity files/i);
+  assert.match(prompt, /Guide return/i);
+  assert.match(prompt, /Do not enumerate or read archived run files/i);
+  assert.match(prompt, /Do not read raw event logs/i);
+  assert.match(prompt, /Do not draft a session prompt/i);
+  assert.match(prompt, /resumed Guide context/i);
+  assert.match(prompt, /trusted Koda controller ran `koda guide status`/i);
+  assert.match(prompt, /KODA GUIDE — fixture\\nBETWEEN SESSIONS/);
+  assert.match(prompt, /do not rerun the command/i);
 });
 
 test("GUIDE CONSOLE LOCK: a live duplicate refuses and a released console can reopen", async (t) => {
@@ -231,7 +246,9 @@ test("GUIDE CONSOLE PERSISTENCE: a closed console resumes the same independent G
   assert.match(first.output, /─{20}/);
   assert.match(first.output, /Fixture Guide reconstructed disk state/);
   assert.doesNotMatch(first.output, /command_execution|--ignore-user-config/);
-  assert.doesNotMatch(first.output, /GUIDE CHECK|inspecting disk-backed project state/);
+  assert.match(first.output, /GUIDE CHECK — STARTED/);
+  assert.match(first.output, /Compact project continuity and current status only/);
+  assert.doesNotMatch(first.output, /inspect project|inspecting disk-backed project state/);
   const firstState = JSON.parse(await readFile(path.join(root, ".koda", "guide", "STATE.json"), "utf8"));
   assert.equal(firstState.threadId, "11111111-1111-4111-8111-111111111111");
   assert.equal(firstState.turns, 1);
@@ -242,4 +259,148 @@ test("GUIDE CONSOLE PERSISTENCE: a closed console resumes the same independent G
   assert.equal(secondState.threadId, firstState.threadId);
   assert.equal(secondState.turns, 2);
   assert.equal(secondState.status, "READY");
+});
+
+test("GUIDE CONSOLE INPUT RECOVERY: input closing during a long startup exits cleanly after preserving the turn", async (t) => {
+  const root = await temporaryRoot(t, "koda-guide-closed-input-");
+  await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
+  await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
+  await mkdir(path.join(root, "docs", "guide"), { recursive: true });
+  await writeFile(path.join(root, "docs", "PROJECT.md"), "# Fixture project\n", "utf8");
+  await writeJsonAtomic(path.join(root, "docs", "guide", "project.json"), {
+    version: 1,
+    project: "Closed input fixture",
+    continuityFiles: ["docs/PROJECT.md"],
+  });
+  const fakeCodex = path.join(root, "fake-codex");
+  await writeFile(fakeCodex, [
+    "#!/bin/sh",
+    "printf '%s\\n' '{\"type\":\"thread.started\",\"thread_id\":\"11111111-1111-4111-8111-111111111111\"}'",
+    "sleep 0.2",
+    "printf '%s\\n' '{\"type\":\"item.completed\",\"item\":{\"type\":\"agent_message\",\"text\":\"Long startup completed.\"}}'",
+    "printf '%s\\n' '{\"type\":\"turn.completed\"}'",
+  ].join("\n"), "utf8");
+  await chmod(fakeCodex, 0o700);
+
+  const child = spawn(process.execPath, [path.resolve("dist/guide-console-cli.js"), "--model", "fixture-guide", "--effort", "low"], {
+    cwd: root,
+    env: { ...process.env, KODA_CODEX_BIN: fakeCodex },
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  let output = "";
+  child.stdout.on("data", (chunk) => { output += String(chunk); });
+  child.stderr.on("data", (chunk) => { output += String(chunk); });
+  child.stdin.end();
+  const status = await new Promise<number>((resolve, reject) => {
+    child.once("error", reject);
+    child.once("close", (code) => resolve(code ?? -1));
+  });
+
+  assert.equal(status, 0, output);
+  assert.match(output, /GUIDE INPUT CLOSED SAFELY/);
+  assert.doesNotMatch(output, /ERROR|readline was closed/);
+  const state = JSON.parse(await readFile(path.join(root, ".koda", "guide", "STATE.json"), "utf8"));
+  assert.equal(state.status, "READY");
+  assert.equal(state.threadId, "11111111-1111-4111-8111-111111111111");
+  await assert.rejects(readFile(path.join(root, ".koda", "guide", ".window.lock", "OWNER.json"), "utf8"), /ENOENT/);
+});
+
+test("GUIDE CONSOLE CRASH EVIDENCE: raw events are durable while a model turn is still running", async (t) => {
+  const root = await temporaryRoot(t, "koda-guide-live-events-");
+  await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
+  await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
+  await mkdir(path.join(root, "docs", "guide"), { recursive: true });
+  await writeFile(path.join(root, "docs", "PROJECT.md"), "# Fixture project\n", "utf8");
+  await writeJsonAtomic(path.join(root, "docs", "guide", "project.json"), {
+    version: 1,
+    project: "Live event fixture",
+    continuityFiles: ["docs/PROJECT.md"],
+  });
+  const fakeCodex = path.join(root, "fake-codex");
+  await writeFile(fakeCodex, [
+    "#!/bin/sh",
+    "printf '%s\\n' '{\"type\":\"thread.started\",\"thread_id\":\"11111111-1111-4111-8111-111111111111\"}'",
+    "sleep 1",
+    "printf '%s\\n' '{\"type\":\"item.completed\",\"item\":{\"type\":\"agent_message\",\"text\":\"Finished.\"}}'",
+    "printf '%s\\n' '{\"type\":\"turn.completed\"}'",
+  ].join("\n"), "utf8");
+  await chmod(fakeCodex, 0o700);
+
+  const child = spawn(process.execPath, [path.resolve("dist/guide-console-cli.js"), "--model", "fixture-guide", "--effort", "low"], {
+    cwd: root,
+    env: { ...process.env, KODA_CODEX_BIN: fakeCodex },
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  let output = "";
+  let answered = false;
+  child.stdout.on("data", (chunk) => {
+    output += String(chunk);
+    if (!answered && output.includes("guide> ")) {
+      answered = true;
+      child.stdin.end("q\n");
+    }
+  });
+  child.stderr.on("data", (chunk) => { output += String(chunk); });
+
+  const partial = path.join(root, ".koda", "guide", "GUIDE-001-EVENTS.partial.jsonl");
+  let observed = "";
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    try {
+      observed = await readFile(partial, "utf8");
+      if (observed.includes("thread.started")) break;
+    } catch {
+      // The model process may not have emitted its first line yet.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  assert.match(observed, /thread\.started/);
+
+  const status = await new Promise<number>((resolve, reject) => {
+    child.once("error", reject);
+    child.once("close", (code) => resolve(code ?? -1));
+  });
+  assert.equal(status, 0, output);
+  const final = await readFile(path.join(root, ".koda", "guide", "GUIDE-001-EVENTS.jsonl"), "utf8");
+  assert.match(final, /turn\.completed/);
+  await assert.rejects(readFile(partial, "utf8"), /ENOENT/);
+});
+
+test("GUIDE CONSOLE CRASH EVIDENCE MUTATION: existing or linked evidence refuses before the model runs", async (t) => {
+  const root = await temporaryRoot(t, "koda-guide-linked-events-");
+  await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
+  await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
+  await mkdir(path.join(root, "docs", "guide"), { recursive: true });
+  await writeFile(path.join(root, "docs", "PROJECT.md"), "# Fixture project\n", "utf8");
+  await writeJsonAtomic(path.join(root, "docs", "guide", "project.json"), {
+    version: 1,
+    project: "Linked evidence fixture",
+    continuityFiles: ["docs/PROJECT.md"],
+  });
+  const outside = path.join(root, "outside.txt");
+  await writeFile(outside, "unchanged\n", "utf8");
+  const area = path.join(root, ".koda", "guide");
+  await mkdir(area, { recursive: true });
+  await symlink(outside, path.join(area, "GUIDE-001-EVENTS.partial.jsonl"));
+  const fakeCodex = path.join(root, "fake-codex");
+  await writeFile(fakeCodex, "#!/bin/sh\nprintf 'MODEL RAN\\n'\n", "utf8");
+  await chmod(fakeCodex, 0o700);
+
+  const child = spawn(process.execPath, [path.resolve("dist/guide-console-cli.js"), "--model", "fixture-guide", "--effort", "low"], {
+    cwd: root,
+    env: { ...process.env, KODA_CODEX_BIN: fakeCodex },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  let output = "";
+  child.stdout.on("data", (chunk) => { output += String(chunk); });
+  child.stderr.on("data", (chunk) => { output += String(chunk); });
+  const status = await new Promise<number>((resolve, reject) => {
+    child.once("error", reject);
+    child.once("close", (code) => resolve(code ?? -1));
+  });
+
+  assert.equal(status, 1, output);
+  assert.match(output, /Guide event evidence already exists/);
+  assert.match(output, /will not overwrite or follow existing Guide turn evidence/);
+  assert.doesNotMatch(output, /MODEL RAN/);
+  assert.equal(await readFile(outside, "utf8"), "unchanged\n");
 });
