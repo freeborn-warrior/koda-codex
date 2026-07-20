@@ -1,10 +1,11 @@
 # Integrated Producer-role preflight — result
 
 - Date: 2026-07-20
-- Status: **LOCAL PASS — PUSHED RELEASE PROOF PENDING**
+- Status: **POST-PUSH PASS — FRESH OWNER-VISIBLE RUN PENDING**
 - Owner-observed launch: `02f73292-d90a-4f33-8369-35ec4e296614`
 - Failed local suite: [232/248](../../test-results/2026-07-20-integrated-role-preflight-local.md)
 - Corrected local suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-local-04.md)
+- Unchanged post-push suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-pushed.md)
 - Fresh owner-visible full session: still required
 
 ## What the owner found

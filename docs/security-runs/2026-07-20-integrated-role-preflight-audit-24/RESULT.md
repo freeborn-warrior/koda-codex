@@ -1,10 +1,11 @@
 # Integrated Producer-role preflight — security audit
 
 - Date: 2026-07-20
-- Status: **LOCAL PASS — INDEPENDENT REVIEW AND POST-PUSH PROOF PENDING**
+- Status: **POST-PUSH PASS — INDEPENDENT REVIEW NOT RUN**
 - Scope: permission proof, Git resolution, child environment, scratch cleanup,
   Guide-return archival, and repository boundaries
 - Complete local regression: [250/250](../../test-results/2026-07-20-integrated-role-preflight-local-04.md)
+- Unchanged post-push regression: [250/250](../../test-results/2026-07-20-integrated-role-preflight-pushed.md)
 
 ## Findings
 

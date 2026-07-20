@@ -2121,9 +2121,18 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Exact starter result:** The installed-client headless Quick Start completed in
   0.75 seconds, created exactly one session only in its temporary clone, removed
   the clone, printed `READY — FULL SESSION`, and opened no model or Ghostty window.
+- **Post-push result:** The unchanged implementation at pushed commit `5380f51`
+  passed **250/250** in the
+  [post-push transcript](test-results/2026-07-20-integrated-role-preflight-pushed.md).
+- **Independent review:** Its contract was pushed before execution. A fresh
+  Terra/medium attempt was refused before start by the private-repository export
+  boundary. No repository bytes were sent by that attempt, no workaround was
+  used, and no verdict is claimed.
 - **Evidence:** [incident and verification result](verification-runs/2026-07-20-integrated-role-preflight-03/RESULT.md),
   [sealed review contract](quality-runs/2026-07-20-integrated-role-preflight-18/CONTRACT.md),
   [quality result](quality-runs/2026-07-20-integrated-role-preflight-18/RESULT.md),
   and [security audit](security-runs/2026-07-20-integrated-role-preflight-audit-24/RESULT.md).
-- **State:** LOCAL PASS ONLY. The independent review, unchanged post-push suite,
-  promoted toolkit manifest, and fresh owner-visible six-phase session remain.
+- **State:** POST-PUSH PASS. Capability `integrated-role-preflight-v21` binds
+  repair/tested commit `5380f51`, the unchanged 250-check transcript, and every
+  critical role/startup file. Independent review and a fresh owner-visible
+  six-phase session remain.

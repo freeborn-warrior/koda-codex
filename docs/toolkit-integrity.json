@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "full-session-prompt-contract-v20",
-  "verifiedAt": "2026-07-20T20:21:37.850Z",
-  "repairCommit": "1adcd1a35dfc4ae4ff2be40fd9f0a65890cb02ef",
-  "testedCommit": "beb4c38e2fbc4c4d9a5775f17c8ba802745402da",
-  "testCount": 246,
+  "capability": "integrated-role-preflight-v21",
+  "verifiedAt": "2026-07-20T21:20:49.458Z",
+  "repairCommit": "5380f5114fbb917d217cb7b75e8a434879737078",
+  "testedCommit": "5380f5114fbb917d217cb7b75e8a434879737078",
+  "testCount": 250,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-full-session-prompt-contract-pushed.md",
-    "sha256": "e8567af63b04ae6d4e2cc5b0dbf3da431e6ce52b7b6b56bc78bb15e9bb746f07"
+    "path": "docs/test-results/2026-07-20-integrated-role-preflight-pushed.md",
+    "sha256": "fdb2dcd37a8cfc9578b75967a6453b3ddf0d6138023002e56c29e33ea31865bd"
   },
   "files": [
     {

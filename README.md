@@ -107,7 +107,7 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The current [246-check post-push full-session prompt-contract transcript](docs/test-results/2026-07-20-full-session-prompt-contract-pushed.md)
+- The current [250-check post-push integrated Producer-role transcript](docs/test-results/2026-07-20-integrated-role-preflight-pushed.md)
   is hash-bound by the toolkit integrity manifest.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It

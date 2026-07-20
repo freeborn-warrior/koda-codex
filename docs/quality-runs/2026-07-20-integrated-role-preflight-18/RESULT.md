@@ -1,9 +1,10 @@
 # Integrated Producer-role preflight — quality result
 
 - Date: 2026-07-20
-- Status: **AWAITING SEALED INDEPENDENT REVIEW**
+- Status: **DETERMINISTIC PASS — INDEPENDENT REVIEW NOT RUN**
 - Contract: [CONTRACT.md](CONTRACT.md)
 - Local complete suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-local-04.md)
+- Unchanged post-push suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-pushed.md)
 
 ## Deterministic assessment
 
@@ -23,8 +24,13 @@ Both now have end-to-end relay coverage. The complete suite contains 250 named
 tests and preserves both the preceding 232/248 behavioral failure and the later
 protected-document integrity refusal as product evidence.
 
-## Remaining assessment
+## Independent-review boundary
 
-A fresh reviewer must inspect the integrated source/evidence object under the
-committed contract above. A fresh owner-visible six-phase run remains outside
-this deterministic result.
+The contract was committed and pushed at `5380f51` before any review attempt.
+The attempted fresh Terra/medium task did not start: the execution security layer
+refused transmitting this private repository to another external model service
+without a new explicit owner approval tied to that export. No workaround was
+attempted and no verdict is implied. The sealed review remains available for an
+owner-approved fresh task.
+
+A fresh owner-visible six-phase run also remains outside this deterministic result.
