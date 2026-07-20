@@ -1815,3 +1815,35 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   No credential was found. The only match was a substring crossing the filename
   `disk-role-handovers-final`; redacted context confirmed it was not token data.
   This is a strong heuristic check, not a guarantee against every credential form.
+
+## 2026-07-20 — Bounded and recoverable Guide startup
+
+- **Owner-observed defect:** Guide startup read far beyond compact continuity,
+  appeared inactive for several minutes, and ended with `readline was closed` after
+  the terminal input disappeared. The saved turn showed 821,942 input tokens.
+- **Development failures:** The red import test, integrity refusals, stdin lifecycle
+  defects, one sandbox-blocked real probe, the 191-second model-side status call,
+  and a package-parser mistake are preserved in the
+  [development record](test-results/2026-07-20-bounded-guide-startup-development-failures.md).
+- **Correction:** Startup is explicitly bounded; Koda's trusted controller supplies
+  exact status as untrusted JSON data; progress appears immediately and every 30
+  seconds; raw evidence is durable while the model works; EOF completes safely; and
+  pre-existing or linked evidence refuses before model execution.
+- **Focused result:** Guide, skill, security, and integrity passed **42/42**.
+- **Complete result:** The suite passed **238/238** against implementation commit
+  `8c126ea` in the
+  [committed-code transcript](test-results/2026-07-20-bounded-guide-startup-committed.md).
+- **Coverage result:** **238/238** passed at **87.04% lines, 71.55% branches, and
+  85.74% functions** overall.
+- **Real-model result:** The corrected Sol/medium startup resumed the same Guide
+  context, performed seven bounded checks, displayed a 30-second heartbeat, returned
+  to `guide>` in about 41 seconds, and closed cleanly with `q`. It created no session
+  or role window and changed no project steering file.
+- **Package/security result:** 819 package entries, zero bundled dependencies, zero
+  audited vulnerabilities, no repository symlinks, clean whitespace/object checks,
+  and no excluded runtime or credential file in the tarball. See the
+  [quality audit](quality-runs/2026-07-20-bounded-guide-startup-12/RESULT.md) and
+  [security audit 18](security-runs/2026-07-20-bounded-guide-startup-audit-18/RESULT.md).
+- **State:** COMMITTED LOCAL PASS. Toolkit capability
+  `bounded-guide-startup-v15` binds the repair commit and 238-check transcript.
+  Push and an unchanged post-push suite remain before the next owner recording.

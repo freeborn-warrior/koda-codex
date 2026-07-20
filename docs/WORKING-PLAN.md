@@ -95,6 +95,12 @@ Turn the proved two-context session relay into a project-level experience that c
     quiet Guide inspection, and direct Reviewer conversation with complete raw
     events retained on disk. The unchanged pushed release suite passes **234/234**
     under toolkit capability `conversational-owner-surface-v14`.
+32. [x] Repair the owner-observed Guide startup failure without broadening scope:
+    distinguish opening Guide from session intent, precompute exact status in the
+    trusted controller, bound model reads, show 30-second progress, preserve evidence
+    during execution, recover safely from terminal EOF, and refuse existing/linked
+    evidence. The corrected real Sol/medium context returned in about 41 seconds;
+    the local product passes **238/238** pending pushed integrity promotion.
 
 ## Submission cut
 

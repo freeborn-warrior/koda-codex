@@ -33,6 +33,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
   phase-aware, Reviewer owner conversation leads with its direct answer, and empty
   conversation output refuses. The unchanged pushed suite passes **234/234** under
   toolkit capability `conversational-owner-surface-v14`.
+- [x] Repair the owner-observed slow/closed Guide startup before another recording:
+  bounded continuity only, controller-owned status, visible heartbeat, durable
+  in-progress evidence, safe input loss, exclusive no-follow evidence files, and a
+  real Sol/medium resume. The local suite passes **238/238**; pushed integrity proof
+  is the remaining release step.
 
 ## Next
 

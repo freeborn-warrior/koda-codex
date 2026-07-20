@@ -164,6 +164,14 @@ owner contract
   boundary and an end-to-end reopen of the same Guide context. Repair commit
   `01e8055` passes the unchanged pushed 229/229 transcript under toolkit capability
   `secure-persistent-guide-v10`.
+- Guide startup now distinguishes ordinary project conversation from actual session
+  intent. Koda computes status in its trusted controller, supplies it to the model
+  as untrusted data, limits startup to named continuity and exact returned-session
+  evidence, shows a 30-second heartbeat, and persists mode-600 raw events while the
+  turn is active. Closed terminal input preserves the completed turn and same Guide
+  context instead of surfacing a readline error. The corrected real Sol/medium
+  startup returned to `guide>` in about 41 seconds after seven bounded checks; the
+  local complete suite passes **238/238** pending pushed capability promotion.
 - A real secure-Guide recovery then proved that the saved role launcher still
   depended on the terminal which created it. Guide refused safely twice with zero
   gate movement. Role launchers now use deterministic presentation/environment
@@ -249,6 +257,9 @@ owner contract
 - [Pushed 234-check conversational owner-surface proof](test-results/2026-07-20-conversational-reviewer-pushed.md)
 - [Conversational owner-surface quality audit](quality-runs/2026-07-20-conversational-owner-surface-11/RESULT.md)
 - [Conversational owner-surface security audit](security-runs/2026-07-20-conversational-owner-surface-audit-17/RESULT.md)
+- [Bounded Guide startup quality audit](quality-runs/2026-07-20-bounded-guide-startup-12/RESULT.md)
+- [Bounded Guide startup security audit](security-runs/2026-07-20-bounded-guide-startup-audit-18/RESULT.md)
+- [Bounded Guide startup committed-code 238-check proof](test-results/2026-07-20-bounded-guide-startup-committed.md)
 - [Secure persistent Guide security audit](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md)
 - [Secure persistent Guide UX audit](quality-runs/2026-07-19-secure-guide-console-ux-audit-08/RESULT.md)
 - [Pushed 204-check owner-surface proof](test-results/2026-07-19-owner-surface-pushed.md)

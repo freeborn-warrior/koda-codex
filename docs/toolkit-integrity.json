@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "conversational-owner-surface-v14",
-  "verifiedAt": "2026-07-20T15:12:09.161Z",
-  "repairCommit": "1abdf68708d1419e75665b4ef107f6065d902ae8",
-  "testedCommit": "975678e8aaa2bd8f93e325d9be065f292ba6ae86",
-  "testCount": 234,
+  "capability": "bounded-guide-startup-v15",
+  "verifiedAt": "2026-07-20T17:27:22.378Z",
+  "repairCommit": "8c126eaa01544beaf5c453e7691ba2bbb4149183",
+  "testedCommit": "8c126eaa01544beaf5c453e7691ba2bbb4149183",
+  "testCount": 238,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-conversational-reviewer-pushed.md",
-    "sha256": "2013fe6df2863559b2fa9adef3f8ebc8012675a750a58dd8db5bdf73ba083bc8"
+    "path": "docs/test-results/2026-07-20-bounded-guide-startup-committed.md",
+    "sha256": "3c05aa5ff5b3a437ad2b5d01157359833cbdedd08240b32284cb17a5d5322080"
   },
   "files": [
     {
@@ -80,11 +80,11 @@
     },
     {
       "path": "src/guide-console.ts",
-      "sha256": "3a40c0df643b543a97949dec92cbf6683811555cdd270191d74910f1cd42b636"
+      "sha256": "5d6b4bf6ffda72b2bbd06d8e2232f2492b342abbc6055d3d576ffa6ed51c1956"
     },
     {
       "path": "dist/guide-console.js",
-      "sha256": "aaf71f08d9d865028e6e0001aeccb143158804b095c6da12e4e0de450d245c35"
+      "sha256": "5eef2f4f72250e0b33f8fb273c8e097a0dfc1d6a519611a43e04d7caf9577e22"
     },
     {
       "path": "src/terminal-ui.ts",
@@ -104,7 +104,7 @@
     },
     {
       "path": ".agents/skills/koda-c-session-prompt/SKILL.md",
-      "sha256": "9fa96742f87c920699d7f96480dc80aaf486acff5a4170c1702d4c64f6996015"
+      "sha256": "efa6b6ee5d1b2866da45b02ba5d4774f79541762b679e58f72a66f21a55e2b7c"
     },
     {
       "path": ".agents/skills/koda-c-review/SKILL.md",
