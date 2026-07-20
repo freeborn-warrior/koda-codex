@@ -1,14 +1,17 @@
 # Koda-C video script
 
-**Target length:** 2:35
+**Target length:** 2:40
 
 **Hard maximum:** under 3:00
 
-**Format:** Ghostty terminal capture, large type, Kristian narrating in English
+**Format:** silent high-quality Ghostty source capture, edited to time, with
+Kristian's English voiceover added afterward
 
-This is a recording script, not another product test. Perform one silent
-rehearsal first. Use the commands Koda prints; do not type long commands from
-memory while recording.
+This is an editing script, not another product test. First record the complete
+session at normal speed without narration; then record the short mechanical gate
+fixture separately. Build the final sub-three-minute video from those real source
+captures with voiceover. Never speed up or cut across a failure in a way that makes
+it look successful.
 
 ## Before recording
 
@@ -17,10 +20,16 @@ memory while recording.
 3. Make the terminal roughly 90 characters wide so Koda's lines do not wrap.
 4. Hide notifications, menu-bar distractions, bookmarks, unrelated tabs, shell
    history, usernames, tokens, and personal paths where practical.
-5. Do not play music. Record only voice and terminal output.
+5. Do not play music. Capture system audio off; add only the English voiceover in
+   the edit.
 6. Complete one off-camera rehearsal from the intended checkout.
-7. Start from the repository root with a clean `git status`.
-8. Keep this script on a phone or second display outside the capture.
+7. Start from the repository root with a clean `git status` and no old Koda role
+   processes or confusing Ghostty tabs.
+8. Record the complete `npm run demo:session` journey at normal speed: Guide,
+   Reviewer `STARTING SESSION` → `SESSION READY`, watch-only Producer, phase
+   handovers, at least one review decision, pushed close, and return to Guide.
+9. Record the one-minute mechanical fixture as a separate source clip.
+10. Keep this script on a phone or second display outside the capture.
 
 ## Shot 1 — the problem and product, 0:00–0:28
 
@@ -106,47 +115,45 @@ Narration:
 > The same command now opens the gate from evidence on disk and activates the
 > next configured phase.
 
-## Shot 6 — prove this is more than one fixture, 1:52–2:15
+## Shot 6 — show the complete human workflow, 1:52–2:19
 
-Screen: return to the repository and show the top of the genuine relay result:
-
-```bash
-cd -
-sed -n '1,22p' docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md
-```
+Screen: use the real full-session recording as a 6×–12× montage. Pause briefly on
+these truthful moments: Reviewer `STARTING SESSION`, Reviewer `SESSION READY`, one
+phase-aware Producer panel, one Reviewer decision, and immutable pushed close.
+Keep all three contexts visible where practical. Do not show a receipt or hidden
+metadata.
 
 Narration:
 
-> We also ran a full six-phase session with one persistent Sol producer and a
-> separate persistent Terra reviewer. The reviewer found an unplanted false claim
-> in Summary, returned REVISE, and the same contexts recovered through a fresh
-> review. Seven real acknowledgements produced six advances and a verified pushed
-> close.
+> The complete workflow keeps three independent contexts visible. Guide holds the
+> project path, Producer works watch-only through six phases, and Reviewer is the
+> only session conversation I use. Reviewer does not open input until Producer's
+> exact disk session is bound. Every phase then returns through independent review,
+> my acknowledgement, and the same mechanical gate before pushed close.
 
-## Shot 7 — collaboration and close, 2:15–2:38
+If the fresh session has an interesting real revision, show it. Never imply a
+revision occurred if that run approved cleanly.
 
-Screen: show the test total and final Git history:
+## Shot 7 — committed evidence, 2:19–2:36
+
+Screen: return to the repository and show the newest complete result plus recent
+history:
 
 ```bash
+sed -n '1,12p' docs/test-results/2026-07-20-reviewer-session-binding-review-release.md
 git log --oneline -6
-npm test
-```
-
-If the full suite threatens the time limit, use the saved result instead:
-
-```bash
-sed -n '1,16p' docs/test-results/2026-07-19-atomic-role-locks-pushed.md
 ```
 
 Narration:
 
 > I brought the product discipline and made the calls about roles, gates, owner
 > attention, and honest limits. GPT-5.6 Codex implemented the CLI, ten skills,
-> relay, security fixes, and two hundred and thirty checks. We kept every failed
-> attempt and correction in dated Git history. The discipline lives in the tool;
-> I chose to let Codex build it in its own engineering order.
+> relay, security boundaries, and two hundred and fifty-two checks. Fresh
+> Terra independently approved the final startup repair. We kept every failed
+> attempt and correction in dated Git history—including the owner-visible failures
+> that made the workflow sharper.
 
-## Final line, 2:38–2:45
+## Final line, 2:36–2:43
 
 Screen: return to the refusal/open pair or Koda help.
 
@@ -159,11 +166,13 @@ Stop recording. Do not add an animated outro.
 
 - If initialization fails, stop and restart from a clean checkout; do not repair
   the disposable fixture on camera.
+- If the complete three-context session fails, preserve it as failure evidence but
+  do not use it as the video's successful-session montage. Fix, reverify, and record
+  a fresh attempt from the beginning.
 - If a path wraps, widen the terminal; do not shrink the font below readability.
 - If the wrong text is pasted, restart the disposable fixture. Do not edit its
   ledger or state to fake the intended output.
-- If the full test suite runs longer than the remaining video time, use the saved
-  transcript command in Shot 7.
+- Do not run the full suite on camera. Use the exact saved transcript in Shot 7.
 - If audio clips or a notification appears, record again; do not try to hide a
   broken segment with music.
 

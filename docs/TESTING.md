@@ -2232,6 +2232,13 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   `advance` reported `GATE OPEN — BRIEF` and activated `orient`. No npm, rebuild,
   model, network request, or unprinted command was needed. The disposable fixture
   was removed afterward.
+- **Recording-script integrity refusal:** Updating the final video plan also
+  sharpened one sentence in protected `docs/COMMAND-MANUAL.md`. The first focused
+  submission/security/toolkit run passed 24/26 because toolkit integrity correctly
+  refused that unpromoted documentation hash. Quick Start already states the exact
+  `STARTING` → session binding → `SESSION READY` transition, so the protected
+  manual change was withdrawn instead of casually rebinding the release. The video
+  script and its stronger submission assertions remain in scope.
 - **State:** INDEPENDENT APPROVE. The only remaining proof for this repair is a
   clean owner-visible Ghostty run. After the review record strengthened submission
   assertions, pushed commit `ca198d3` passed a final

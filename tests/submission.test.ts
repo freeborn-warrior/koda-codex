@@ -49,6 +49,10 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(video, /Nothing advanced\./);
   assert.match(video, /GATE OPEN — BRIEF/);
   assert.match(video, /node dist\/cli\.js init/);
+  assert.match(video, /npm run demo:session/);
+  assert.match(video, /STARTING SESSION/);
+  assert.match(video, /SESSION READY/);
+  assert.match(video, /two hundred and fifty-two checks/);
   assert.match(video, /Codex and GPT-5\.6 explicitly/);
   assert.match(video, /Do not play music/);
   assert.match(checklist, /2026-07-21 at 5:00 pm Pacific/);
