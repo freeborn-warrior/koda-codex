@@ -541,6 +541,63 @@ function validatePromptShape(content        )       {
   }
 }
 
+function declaredHandoverValue(content        , label        )                {
+  const prefix = `- ${label}:`;
+  const matches = content
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .filter((line) => line.startsWith(prefix));
+  if (matches.length > 1) throw new Error(`The Guide prompt declares ${label} more than once.`);
+  if (matches.length === 0) return null;
+  const value = matches[0] .slice(prefix.length).trim();
+  if (!value) throw new Error(`The Guide prompt declares an empty ${label}.`);
+  return value;
+}
+
+function validatePromptLaunchContract(
+  content        ,
+  sessionKind        ,
+  launchMode                   ,
+  dependencyIds          ,
+)       {
+  const declaredKind = declaredHandoverValue(content, "Session kind");
+  if (declaredKind !== null && declaredKind !== sessionKind) {
+    throw new Error(`The Guide prompt declares session kind "${declaredKind}", but the confirmed launch kind is "${sessionKind}".`);
+  }
+
+  const relationship = declaredHandoverValue(content, "Launch relationship");
+  if (relationship !== null) {
+    const normalized = relationship.toLowerCase();
+    const declaredMode                           = normalized.startsWith("independent")
+      ? "independent"
+      : normalized.startsWith("continuation")
+        ? "continuation"
+        : normalized.startsWith("dependent")
+          ? "dependent"
+          : null;
+    if (declaredMode === null) {
+      throw new Error(`The Guide prompt declares an unknown launch relationship: "${relationship}".`);
+    }
+    if (declaredMode !== launchMode) {
+      throw new Error(`The Guide prompt declares launch relationship "${relationship}", but the confirmed launch mode is "${launchMode}".`);
+    }
+  }
+
+  const dependencies = declaredHandoverValue(content, "Dependencies");
+  if (dependencies !== null) {
+    const declaredIds = dependencies.toLowerCase() === "none"
+      ? []
+      : dependencies.split(",").map((value) => value.trim()).filter(Boolean);
+    if (
+      declaredIds.length !== dependencyIds.length ||
+      declaredIds.some((id, index) => id !== dependencyIds[index])
+    ) {
+      const expected = dependencyIds.length > 0 ? dependencyIds.join(", ") : "none";
+      throw new Error(`The Guide prompt declares dependencies "${dependencies}", but the confirmed launch dependencies are "${expected}".`);
+    }
+  }
+}
+
 async function validatePromptLocation(
   root        ,
   config               ,
@@ -620,6 +677,12 @@ export async function confirmGuideLaunch(
     requiredPromptIds = previous.requiredPromptIds;
     launchMode = previous.previousSessionId ? "continuation" : "independent";
   }
+  validatePromptLaunchContract(
+    prompt.content,
+    sessionKind,
+    launchMode,
+    dependencies.map((dependency) => dependency.sessionId),
+  );
   const missingPriorIds = requiredPromptIds.filter((id) => !prompt.content.includes(id));
   if (missingPriorIds.length > 0) {
     const source = launchMode === "continuation"
@@ -696,6 +759,12 @@ export async function verifyGuideLaunch(
   if (sha256(prompt.content) !== launch.promptSha256) {
     throw new Error("The session prompt changed after owner confirmation; the launch is stale.");
   }
+  validatePromptLaunchContract(
+    prompt.content,
+    launch.sessionKind,
+    launch.launchMode,
+    launch.dependencies.map((dependency) => dependency.sessionId),
+  );
   if (expectedPromptFile) {
     const [expected, actual] = await Promise.all([realpath(expectedPromptFile), realpath(promptFile)]);
     if (expected !== actual) throw new Error("This prompt is not the owner-confirmed READY_TO_LAUNCH prompt.");

@@ -264,6 +264,28 @@ test("GUIDE CONFIRMATION: one request binds prompt, manifest, continuity, and ow
   assert.deepEqual((await readdir(guideLaunchesDir(h.root, DEFAULT_CONFIG))).sort(), [`${result.launch.id}.json`]);
 });
 
+test("GUIDE PROMPT CONTRACT MUTATION: an explicit relationship mismatch refuses before confirmation", async (t) => {
+  const h = await guideHarness(t);
+  await writeFile(
+    h.promptFile,
+    prompt.replace(
+      "- Configured receiver: brief",
+      [
+        "- Session kind: produce",
+        "- Launch relationship: continuation (first session with no predecessor)",
+        "- Dependencies: none",
+        "- Configured receiver: brief",
+      ].join("\n"),
+    ),
+    "utf8",
+  );
+  await assert.rejects(
+    confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian"),
+    /declares launch relationship .*continuation.*confirmed launch mode is "independent"/,
+  );
+  assert.equal(await pathExists(guideLaunchesDir(h.root, DEFAULT_CONFIG)), false);
+});
+
 test("GUIDE OWNER IDENTITY MUTATION: terminal control characters refuse before confirmation", async (t) => {
   const h = await guideHarness(t);
   await assert.rejects(

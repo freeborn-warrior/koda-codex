@@ -42,7 +42,7 @@ full Guide, Producer, Reviewer, receipt-gate, and immutable-close workflow visib
 ## Relay handover
 
 - Session kind: produce
-- Launch relationship: continuation (first session with no predecessor)
+- Launch relationship: independent first session (no predecessor or active sibling)
 - Dependencies: none
 - Configured receiver: brief
 - Ground prepared: AGENTS.md, docs/PROJECT.md, docs/BACKLOG.md, docs/WORKING-PLAN.md, docs/IN-PHASE-CONSULTATION.md, and the verified Koda toolkit capability

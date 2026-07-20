@@ -2033,3 +2033,49 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Release confirmation:** The promoted manifest, public evidence links, and
   submission assertions passed another **245/245** at commit `140cebd` in the
   [release transcript](test-results/2026-07-20-ghostty-absolute-role-command-release.md).
+
+## 2026-07-20 — Full-session bundled prompt contract
+
+- **Owner-observed failure:** In a fresh recording attempt, launch
+  `e774b89e-c5f1-4cd9-b9f0-a2af4ee865c0` opened the visible roles, but Producer
+  refused before session creation. The launch request said `independent`; the
+  bundled prompt said `continuation (first session with no predecessor)`.
+- **Disk truth:** Runtime state became `PAUSED_ERROR`; Producer preserved one Sol
+  context and its complete raw turn; Reviewer had created no context; `docs/sessions`
+  still contained only `.gitkeep`; the isolated repository stayed clean and even
+  with its local origin. There was no session, phase, review, receipt, approval, or
+  gate movement.
+- **Known-regression truth:** The same semantic contradiction had been found in the
+  earlier representative verification prompt on 2026-07-19 and corrected there to
+  `independent first session`. The later `demo/full-session-project` template
+  reintroduced the superseded wording. The earlier correction fixed one artifact;
+  it did not make the reusable demo contract mechanically safe.
+- **Why 245 green checks missed it:** Quick Start verified preparation, Git,
+  confirmation, launch readiness, and requested Reviewer/Producer windows, then
+  stopped. It never consumed the shipped prompt through the real first-session
+  open. The real Producer skill performed a semantic check the fixture did not.
+- **Correction:** The bundled prompt again declares `independent first session
+  (no predecessor or active sibling)`. Guide confirmation and verification now
+  compare every explicit prompt `Session kind`, `Launch relationship`, and
+  `Dependencies` field with the computed launch contract and refuse before writing
+  or opening windows when they disagree.
+- **Expanded Quick Start proof:** The test now reads the actual bundled prompt and
+  launch request, asserts their three handover fields, executes the exact
+  `session new ... --kind produce --independent` path, and requires one dated
+  session with a matching `guide-launch.json` binding.
+- **First focused run:** **4/46** passed because the intended source and prompt
+  changes invalidated the toolkit manifest. The remaining 42 tests refused at the
+  integrity boundary before exercising the changed behavior; no assertion was
+  weakened.
+- **Corrected focused run:** After updating only the provisional hashes for the
+  three changed integrity-bound files, Guide and Quick Start passed **47/47**,
+  including the new mismatch mutation and bundled-session open.
+- **Expanded changed slice:** Guide, Quick Start, real-project relay,
+  plural-runtime relay, security, and toolkit-integrity tests passed **68/68**.
+- **Evidence:** See the
+  [owner-observed incident](verification-runs/2026-07-20-full-session-prompt-contract-02/RESULT.md),
+  [quality audit](quality-runs/2026-07-20-full-session-prompt-contract-17/RESULT.md),
+  and [security audit](security-runs/2026-07-20-full-session-prompt-contract-audit-23/RESULT.md).
+- **State:** LOCAL FOCUSED PASS. The failed live attempt is discarded rather than
+  recovered because the required owner proof is a fresh recording from the start.
+  Complete, pushed, and fresh owner-visible proof remain.

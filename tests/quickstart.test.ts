@@ -4,6 +4,7 @@ import { chmod, lstat, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { runCli } from "../src/commands.ts";
 import { performGuideLaunchChoice } from "../src/guide-console.ts";
 import { runGuideCli } from "../src/guide-commands.ts";
 import type { GhosttyWindowRequest } from "../src/ghostty.ts";
@@ -63,6 +64,17 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
   assert.deepEqual(await readdir(path.join(project, "docs", "sessions")), [".gitkeep"]);
   assert.equal((await readdir(path.join(project, ".agents", "skills"))).filter((name) => name.startsWith("koda-c-")).length, 10);
 
+  const launchFiles = await readdir(path.join(project, "docs", "guide", "launches"));
+  assert.equal(launchFiles.length, 1);
+  const launch = JSON.parse(await readFile(path.join(project, "docs", "guide", "launches", launchFiles[0]!), "utf8"));
+  const bundledPrompt = await readFile(path.join(project, "docs", "guide", "prompts", "first-session.md"), "utf8");
+  assert.equal(launch.sessionKind, "produce");
+  assert.equal(launch.launchMode, "independent");
+  assert.deepEqual(launch.dependencies, []);
+  assert.match(bundledPrompt, /- Session kind: produce/);
+  assert.match(bundledPrompt, /- Launch relationship: independent first session \(no predecessor or active sibling\)/);
+  assert.match(bundledPrompt, /- Dependencies: none/);
+
   const verification: string[] = [];
   await runGuideCli(["verify"], project, { out(message) { verification.push(message); } });
   assert.match(verification.join("\n"), /READY TO LAUNCH/);
@@ -99,4 +111,17 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
   assert.equal(choice.handled, true);
   assert.deepEqual(choice.requests?.map((item) => item.role), ["reviewer", "producer"]);
   assert.match(choice.message!, /THREE-CONTEXT START REQUESTED/);
+
+  const opened: string[] = [];
+  await runCli(
+    ["session", "new", "docs/guide/prompts/first-session.md", "--kind", "produce", "--independent"],
+    project,
+    { out: (message) => opened.push(message), error: () => undefined, prompt: async () => "" },
+  );
+  assert.match(opened.join("\n"), /Opened session \d{4}-\d{2}-\d{2}-01/);
+  assert.match(opened.join("\n"), /Launch: independent/);
+  const sessionIds = (await readdir(path.join(project, "docs", "sessions"))).filter((name) => name !== ".gitkeep");
+  assert.equal(sessionIds.length, 1);
+  const binding = JSON.parse(await readFile(path.join(project, "docs", "sessions", sessionIds[0]!, "guide-launch.json"), "utf8"));
+  assert.equal(binding.launchId, launch.id);
 });

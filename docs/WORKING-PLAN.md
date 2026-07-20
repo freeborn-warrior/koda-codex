@@ -120,6 +120,13 @@ Turn the proved two-context session relay into a project-level experience that c
     old test that required a relative command and add a named directory-change
     mutation. Focused Guide/Ghostty coverage passes **82/82** and the complete local
     and unchanged post-push suites pass **245/245**.
+36. [x] Close the bundled-demo semantic gap exposed by launch
+    `e774b89e-c5f1-4cd9-b9f0-a2af4ee865c0`. Restore the already settled
+    independent-first-session wording, reject explicit prompt/launch contract
+    mismatches before confirmation, and make Quick Start open and bind the real
+    bundled prompt instead of stopping at requested windows. The expanded Guide,
+    Quick Start, plural-runtime, security, and integrity slice passes **68/68**;
+    complete and pushed proof remain.
 
 ## Submission cut
 

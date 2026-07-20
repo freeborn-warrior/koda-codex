@@ -64,11 +64,11 @@
     },
     {
       "path": "src/guide.ts",
-      "sha256": "cf23d653178d8ed122c1203677c9ec9ed1041519f6c319a95c2d4ea60c6ecf33"
+      "sha256": "6a8e606dda02e14dba227d2d06adaca578c30b022c3d2d8f2a3899ca0ea54935"
     },
     {
       "path": "dist/guide.js",
-      "sha256": "8e6e0651a499d762b3de656821815c4c1e19ef87b029fa6ea5b208d5d35aa241"
+      "sha256": "b2e27d588a4d2f8106d443c34cde8c4c90eb1bbb47960e9d8a7ee1354e300811"
     },
     {
       "path": "src/guide-commands.ts",
@@ -188,7 +188,7 @@
     },
     {
       "path": "demo/full-session-project/docs/guide/prompts/first-session.md",
-      "sha256": "372284ad03445cb308327e14caf43bcacaf87dfd156ffe40523a140476a1f813"
+      "sha256": "1e64b78b723501a78778f79ce182dee1135d50b5e4c93654cd1ea1ac2e5d3d01"
     }
   ]
 }

@@ -138,6 +138,11 @@ direct final answer instead of flooding the owner with procedural inspection.
   and [security audit](docs/security-runs/2026-07-20-ghostty-login-resolution-audit-22/RESULT.md)
   preserve the later real-window failure, the incorrect relative-path test, and
   the absolute project-contained correction.
+- The [full-session prompt-contract incident](docs/verification-runs/2026-07-20-full-session-prompt-contract-02/RESULT.md),
+  [quality audit](docs/quality-runs/2026-07-20-full-session-prompt-contract-17/RESULT.md),
+  and [security audit](docs/security-runs/2026-07-20-full-session-prompt-contract-audit-23/RESULT.md)
+  preserve the later Producer refusal, the known contradiction that was
+  reintroduced into the bundled demo, and the new pre-window mechanical check.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

@@ -55,6 +55,14 @@ This is the on-disk working queue for the build. A checked item means its eviden
   Producer was withheld. Both role commands are now absolute, project-contained,
   and mode 700; the named login-resolution mutation and 82 focused checks pass.
   The complete local and unchanged post-push suites pass **245/245**.
+- [x] Prevent the full-session demo from reintroducing a known prompt/launch
+  relationship contradiction. The bundled first-session prompt now declares the
+  independent mode Koda actually confirms. Guide confirmation and verification
+  mechanically compare every explicit prompt kind, relationship, and dependency
+  field with the launch request before windows can open. The Quick Start test now
+  consumes the bundled prompt through real session creation and Guide binding;
+  the expanded Guide, plural-runtime, security, and integrity slice passes
+  **68/68**. Complete and pushed proof remain in progress.
 
 ## Next
 
