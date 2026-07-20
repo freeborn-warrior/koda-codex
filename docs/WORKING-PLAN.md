@@ -100,7 +100,8 @@ Turn the proved two-context session relay into a project-level experience that c
     trusted controller, bound model reads, show 30-second progress, preserve evidence
     during execution, recover safely from terminal EOF, and refuse existing/linked
     evidence. The corrected real Sol/medium context returned in about 41 seconds;
-    the local product passes **238/238** pending pushed integrity promotion.
+    repair and evidence reached `origin/main`, and the unchanged product passes
+    **238/238** under `bounded-guide-startup-v15`.
 
 ## Submission cut
 

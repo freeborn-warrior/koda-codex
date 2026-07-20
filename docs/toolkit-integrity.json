@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "bounded-guide-startup-v15",
-  "verifiedAt": "2026-07-20T17:27:22.378Z",
+  "verifiedAt": "2026-07-20T17:30:07.243Z",
   "repairCommit": "8c126eaa01544beaf5c453e7691ba2bbb4149183",
-  "testedCommit": "8c126eaa01544beaf5c453e7691ba2bbb4149183",
+  "testedCommit": "104dbbeeea9496846e38d3b2f90d4098da6a4323",
   "testCount": 238,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-bounded-guide-startup-committed.md",
-    "sha256": "3c05aa5ff5b3a437ad2b5d01157359833cbdedd08240b32284cb17a5d5322080"
+    "path": "docs/test-results/2026-07-20-bounded-guide-startup-pushed.md",
+    "sha256": "aae49611dd568fddcb215a9418bab4da1d8b47fcecd883d2dafddfa806a0c671"
   },
   "files": [
     {

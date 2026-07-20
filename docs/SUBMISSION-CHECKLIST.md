@@ -38,9 +38,9 @@ truth for the exact submission requirements.
 - [x] The one-minute refusal fixture is documented in [DEMO.md](DEMO.md).
 - [x] Package safety, install hooks, dependencies, and model-harness boundaries
   are documented in [SECURITY.md](SECURITY.md).
-- [x] The current full suite passes 234/234 against the pushed conversational
-  owner-surface implementation and preserves its
-  [bound transcript](test-results/2026-07-20-conversational-reviewer-pushed.md).
+- [x] The current full suite passes 238/238 against the pushed bounded-Guide
+  implementation and preserves its
+  [bound transcript](test-results/2026-07-20-bounded-guide-startup-pushed.md).
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.
 
 ## Submission form

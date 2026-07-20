@@ -6,7 +6,7 @@
 input loss, real-model latency, and the boundary between deterministic mechanics and
 model work.
 
-**Result:** LOCAL MECHANICAL AND REAL-MODEL PASS — POST-PUSH PROOF PENDING
+**Result:** PUSHED MECHANICAL AND REAL-MODEL PASS
 
 ## Owner finding
 
@@ -56,5 +56,8 @@ merely to make the interface look fast.
 
 - [Development failures](../../test-results/2026-07-20-bounded-guide-startup-development-failures.md)
 - [Committed-code 238-check transcript](../../test-results/2026-07-20-bounded-guide-startup-committed.md)
+- [Unchanged post-push 238-check transcript](../../test-results/2026-07-20-bounded-guide-startup-pushed.md)
 - Focused Guide/skill/security/integrity slice: **42/42 passed**.
 - Coverage: **87.04% lines, 71.55% branches, 85.74% functions** overall.
+- Toolkit capability `bounded-guide-startup-v15` binds repair commit `8c126ea`,
+  pushed tested commit `104dbbe`, and the unchanged post-push transcript.

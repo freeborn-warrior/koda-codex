@@ -1847,3 +1847,13 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **State:** COMMITTED LOCAL PASS. Toolkit capability
   `bounded-guide-startup-v15` binds the repair commit and 238-check transcript.
   Push and an unchanged post-push suite remain before the next owner recording.
+- **Post-push result:** Repair `8c126ea` and evidence `104dbbe` reached
+  `origin/main`. The unchanged suite then passed **238/238** in the
+  [post-push transcript](test-results/2026-07-20-bounded-guide-startup-pushed.md).
+  Toolkit capability `bounded-guide-startup-v15` now binds that exact pushed commit,
+  transcript, and changed Guide/skill bytes.
+- **Final assembly refusal:** The first current-document slice passed **44/45**.
+  One sequential submission assertion still required the historical `passes
+  234/234` checklist text after the checklist and primary link had correctly moved
+  to 238. The assertion now requires the stronger current evidence; no product,
+  security, gate, or receipt condition changed.

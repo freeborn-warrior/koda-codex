@@ -36,8 +36,8 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Repair the owner-observed slow/closed Guide startup before another recording:
   bounded continuity only, controller-owned status, visible heartbeat, durable
   in-progress evidence, safe input loss, exclusive no-follow evidence files, and a
-  real Sol/medium resume. The local suite passes **238/238**; pushed integrity proof
-  is the remaining release step.
+  real Sol/medium resume. Repair and evidence reached `origin/main`; the unchanged
+  suite passes **238/238** under `bounded-guide-startup-v15`.
 
 ## Next
 

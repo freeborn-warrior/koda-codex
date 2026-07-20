@@ -23,14 +23,14 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(landing, /git clone https:\/\/github\.com\/freeborn-warrior\/koda-codex\.git/);
   assert.match(landing, /No `npm install` or build is required/);
   assert.match(landing, /node dist\/cli\.js init/);
-  assert.match(landing, /234-check post-push transcript/);
+  assert.match(landing, /238-check post-push transcript/);
   assert.match(landing, /How Codex and GPT-5\.6 built it/);
   assert.match(landing, /does \*\*not\*\* prove comprehension/);
   assert.match(readme, /## Judge path/);
   assert.match(readme, /node dist\/cli\.js --help/);
   assert.match(
     readme,
-    /\[bound 234-check transcript\]\(test-results\/2026-07-20-conversational-reviewer-pushed\.md\)/,
+    /\[bound 238-check transcript\]\(test-results\/2026-07-20-bounded-guide-startup-pushed\.md\)/,
   );
   assert.match(
     readme,
@@ -54,7 +54,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /testing@devpost\.com/);
   assert.match(checklist, /build-week-event@openai\.com/);
   assert.match(checklist, /https:\/\/openai\.devpost\.com\/rules/);
-  assert.match(checklist, /passes 234\/234/);
+  assert.match(checklist, /passes 238\/238/);
 });
 
 test("JUDGE JOURNEY SUITE: local links in the judge documents resolve", async () => {

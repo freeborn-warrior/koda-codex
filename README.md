@@ -89,7 +89,7 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The current [234-check post-push transcript](docs/test-results/2026-07-20-conversational-reviewer-pushed.md)
+- The current [238-check post-push transcript](docs/test-results/2026-07-20-bounded-guide-startup-pushed.md)
   is hash-bound by the toolkit integrity manifest.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
@@ -103,6 +103,10 @@ direct final answer instead of flooding the owner with procedural inspection.
   and [submission security audit](docs/security-runs/2026-07-19-submission-readiness-audit-15/RESULT.md)
   preserve the literal judge path, package contents, zero-vulnerability result,
   failure handling, and remaining human work.
+- The [bounded Guide startup quality audit](docs/quality-runs/2026-07-20-bounded-guide-startup-12/RESULT.md)
+  and [security audit](docs/security-runs/2026-07-20-bounded-guide-startup-audit-18/RESULT.md)
+  preserve the owner-observed failure, real-model correction, honest latency
+  boundary, and 238-check regression proof.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

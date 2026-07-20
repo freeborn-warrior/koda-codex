@@ -6,7 +6,7 @@
 filesystem containment, package contents, dependency exposure, and unchanged gate
 security after the startup repair.
 
-**Result:** LOCAL PASS WITH STATED BOUNDARIES — POST-PUSH PROOF PENDING
+**Result:** PUSHED PASS WITH STATED BOUNDARIES
 
 ## Security properties
 
@@ -41,6 +41,9 @@ security after the startup repair.
   and zero bundled dependencies. Required README, GPLv3 license, compiled CLI, and
   project-local Guide skill are present; `.git`, `.koda`, `.env`, `.DS_Store`,
   `node_modules`, and nested tarballs are absent.
+- Repair commit `8c126ea` and evidence commit `104dbbe` reached `origin/main`.
+  The unchanged full suite passed **238/238** afterward; toolkit capability
+  `bounded-guide-startup-v15` binds that post-push transcript.
 
 ## Honest boundaries
 
