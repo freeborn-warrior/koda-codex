@@ -20,6 +20,8 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
     readFile("docs/SUBMISSION-CHECKLIST.md", "utf8"),
   ]);
   assert.match(landing, /## Try the refusal in one minute/);
+  assert.match(landing, /git clone https:\/\/github\.com\/freeborn-warrior\/koda-codex\.git/);
+  assert.match(landing, /No `npm install` or build is required/);
   assert.match(landing, /node dist\/cli\.js init/);
   assert.match(landing, /230-check post-push transcript/);
   assert.match(landing, /How Codex and GPT-5\.6 built it/);

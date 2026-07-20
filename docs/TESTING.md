@@ -1612,3 +1612,8 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Post-push result:** After the assembled audit commit `91729b0` reached
   `origin/main`, the unchanged full suite passed **230/230** again in the
   [post-push transcript](test-results/2026-07-19-submission-readiness-pushed.md).
+- **Final instruction audit:** Freeze review found that “from a fresh checkout”
+  still assumed the judge knew the clone and repository-entry commands. Both
+  READMEs now give the exact public `git clone`, `cd`, and no-build `node` path and
+  say no `npm install` is required. A new submission assertion plus the complete
+  package/security slice passed **18/18**; no product mechanic changed.

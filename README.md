@@ -17,9 +17,11 @@ Requirements: Node.js 22.18+ and Git. The tested release platform is macOS
 26.5.1 arm64 with Node.js 26.0.0 and Apple Git 2.50.1. Other platforms are not
 claimed as tested.
 
-From a fresh checkout:
+Install by cloning the public repository. No `npm install` or build is required:
 
 ```bash
+git clone https://github.com/freeborn-warrior/koda-codex.git
+cd koda-codex
 node dist/cli.js --help
 KODA_DEMO_DIR=$(mktemp -d /tmp/koda-c-demo.XXXXXX)
 node dist/cli.js init "$KODA_DEMO_DIR" --demo

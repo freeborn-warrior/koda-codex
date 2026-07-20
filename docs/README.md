@@ -57,13 +57,19 @@ Requirements: Git and Node.js 22.18 or newer. The source is TypeScript; `prepack
 
 The core has no runtime dependencies, install hook, daemon, or network call. Its exact write and trust boundaries—including the model-launching relay scripts—are documented in [SECURITY.md](SECURITY.md).
 
-From a fresh checkout:
+Install and run the committed binary without rebuilding:
 
 ```bash
-npx --yes . --help
+git clone https://github.com/freeborn-warrior/koda-codex.git
+cd koda-codex
+node dist/cli.js --help
 ```
 
-That exact path is preserved as a [fresh public-checkout proof](package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md): the first run exposed an executable-mode defect, and the corrected pushed checkout prints help without changing any tracked or untracked file.
+The separately tested `npx --yes . --help` package path is preserved as a
+[fresh public-checkout proof](package-runs/2026-07-18-fresh-checkout-npx-01/RESULT.md):
+the first run exposed an executable-mode defect, and the corrected pushed checkout
+prints help without changing any tracked or untracked file. It is not a prerequisite
+for the primary demo, so npm cache health cannot obscure the gate.
 
 Then follow the [one-minute fixture](DEMO.md#one-minute-mechanical-proof). Its money moment is:
 

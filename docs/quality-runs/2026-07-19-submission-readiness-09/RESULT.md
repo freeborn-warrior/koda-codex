@@ -40,6 +40,11 @@ suite passed **230/230** again in the
   Codex collaboration. The new root page leads with the receipt distinction,
   gives the exact one-minute path, states platform support and limitations, and
   routes to the deeper evidence.
+- **Implicit installation wording:** The first landing revision still began at
+  “from a fresh checkout.” The final instructions now provide the exact public
+  `git clone`, `cd`, and committed-binary commands and explicitly require no
+  `npm install` or build. The package/security/submission slice passed **18/18**
+  with the new instruction assertion.
 - **Stale public totals:** The checklist still said 210 tests and the video script
   still narrated 179. Both now say 230 and link to the bound post-push transcript.
 - **Demo coupled to npm cache health:** The literal `npx --yes . init` path stopped
