@@ -6,12 +6,13 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Push and owner-test the new one-command `koda guide open` experience. Its
+- [ ] Owner-test the new one-command `koda guide open` experience. Its
   persistent context, narrow Guide-owned write surface, ignored ambient config and
   rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex
-  resume, and live boundary probe now pass locally. The preserved production
-  session remains untouched until the pushed audit is complete.
-- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, hardened Git locking, dynamic owner binding, and strict role containment now pass a pushed 216/216 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
+  resume, and live boundary probe now pass pushed capability
+  `secure-persistent-guide-v10` at **229/229**. The preserved production session
+  remains untouched until Kristian chooses to resume it.
+- [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Both times the gate stayed shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, hardened Git locking, dynamic owner binding, strict role containment, and the secure persistent Guide now pass a pushed 229/229 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
 - [ ] Resume the preserved `2026-07-19-02` session only after the full pre-handoff
   quality and security audit is pushed. Reopen the same contexts and same
   unacknowledged review through Guide; do not create a third attempt or manually run
@@ -44,10 +45,12 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Completed and pushed
 
-- [ ] Promote the secure persistent Guide console to pushed toolkit evidence. Local
-  deterministic, fake-context persistence, real-context resume, ambient-rule,
-  project/session/Git/environment/network boundary, and end-to-end console checks
-  are complete; pushed-code transcript and final manifest binding remain.
+- [x] Promote the secure persistent Guide console to pushed toolkit evidence.
+  Commit `01e8055` passes the unchanged **229/229** transcript under toolkit
+  capability `secure-persistent-guide-v10`. Deterministic persistence and recovery,
+  real-context resume, ambient-rule refusal, project/session/Git/environment/network
+  boundaries, package install, and end-to-end console checks all pass. Kristian's
+  Ghostty observation remains a separate release blocker above.
 
 - [x] Bind the confirmed project owner's validated name into new Guide runtimes and
   managed relay output, and replace broad-read role sandboxes with strict project-

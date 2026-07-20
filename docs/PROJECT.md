@@ -148,7 +148,9 @@ owner contract
   model cannot mutate active session paths or Git. A real low-effort Sol probe
   preserved a malformed patch, found and repaired real `exec resume` ordering,
   global-Git-config, and toolkit-capability defects, then passed the seven-part
-  boundary and an end-to-end reopen of the same Guide context.
+  boundary and an end-to-end reopen of the same Guide context. Repair commit
+  `01e8055` passes the unchanged pushed 229/229 transcript under toolkit capability
+  `secure-persistent-guide-v10`.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.
@@ -193,6 +195,9 @@ owner contract
 - [Stable-handover security audit](security-runs/2026-07-19-stable-handover-recovery-audit-12/RESULT.md)
 - [Pushed 210-check stable-handover proof](test-results/2026-07-19-stable-handover-recovery-pushed.md)
 - [Pushed 216-check owner-bound project-sandbox proof](test-results/2026-07-19-owner-bound-project-sandbox-pushed.md)
+- [Pushed 229-check secure persistent Guide proof](test-results/2026-07-19-secure-guide-console-pushed.md)
+- [Secure persistent Guide security audit](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md)
+- [Secure persistent Guide UX audit](quality-runs/2026-07-19-secure-guide-console-ux-audit-08/RESULT.md)
 - [Pushed 204-check owner-surface proof](test-results/2026-07-19-owner-surface-pushed.md)
 - [Ghostty launcher development failures](test-results/2026-07-18-ghostty-launcher-development-failures.md)
 - [Ghostty launcher 132-check result](test-results/2026-07-18-ghostty-launcher-final.md)

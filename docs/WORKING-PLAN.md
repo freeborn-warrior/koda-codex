@@ -55,11 +55,12 @@ Turn the proved two-context session relay into a project-level experience that c
     adapter as separate from the core workflow. Repair commit `93efd1a` passes an
     unchanged pushed 210/210 transcript under toolkit capability
     `ghostty-stable-handover-recovery-v8`; Kristian's observation remains.
-26. [ ] Finish the secure Guide entry milestone: one command opens or resumes one
+26. [x] Finish the secure Guide entry milestone: one command opens or resumes one
     project-scoped Guide, ordinary text remains conversational, exact numeric
     recovery stays behind a trusted controller, active session files and Git are
     outside the model's write set, ambient config/rules/network are disabled, and
-    real Codex plus the complete suite pass after the repair is pushed.
+    real Codex plus the complete suite pass after the repair is pushed. Commit
+    `01e8055` passes 229/229 under `secure-persistent-guide-v10`.
 
 ## Submission cut
 

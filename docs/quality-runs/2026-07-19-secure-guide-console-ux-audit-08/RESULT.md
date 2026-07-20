@@ -4,7 +4,7 @@
 - **Scope:** first-use Guide opening, paused-session recovery, failed recovery,
   terminal ownership, and Ghostty dependence
 - **Production session touched:** no
-- **Verdict:** LOCAL PASS; OWNER OBSERVATION PENDING
+- **Verdict:** PUSHED MECHANICAL PASS; OWNER OBSERVATION PENDING
 
 ## The simplified path
 

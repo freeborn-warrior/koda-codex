@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "owner-bound-project-sandbox-v9",
-  "verifiedAt": "2026-07-20T00:50:37.867Z",
-  "repairCommit": "74f9067fd6347b3827c634e599c863621af867af",
-  "testedCommit": "74f9067fd6347b3827c634e599c863621af867af",
-  "testCount": 216,
+  "capability": "secure-persistent-guide-v10",
+  "verifiedAt": "2026-07-20T02:07:18.236Z",
+  "repairCommit": "01e80559065c202a631abd86538500cfcbb9f77b",
+  "testedCommit": "01e80559065c202a631abd86538500cfcbb9f77b",
+  "testCount": 229,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-owner-bound-project-sandbox-pushed.md",
-    "sha256": "ff41fefe6c7cfc2592c85795747b7dc02238430ac8a58c42faa2a416b0bf4fbc"
+    "path": "docs/test-results/2026-07-19-secure-guide-console-pushed.md",
+    "sha256": "1da7686bffd933af7f3c4936c7e5f520896092c593eaf60438cdcf8a319f9f62"
   },
   "files": [
     {

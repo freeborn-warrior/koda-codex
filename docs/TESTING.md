@@ -1499,4 +1499,10 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   records the one-command Guide, one-number recovery, mistake behavior, optional
   Ghostty boundary, and the remaining future-session publisher work.
 - **State:** LOCAL MECHANICS, SECURITY, PACKAGE, AND REAL-CODEX BOUNDARY PASS.
-  Pushed toolkit binding and Kristian's recovered Ghostty observation remain.
+  The unchanged pushed-code run passed **229/229** and wrote the
+  [durable transcript](test-results/2026-07-19-secure-guide-console-pushed.md).
+  Toolkit capability `secure-persistent-guide-v10` binds repair commit `01e8055`,
+  that transcript, and the exact managed Guide/relay surface. Kristian's recovered
+  Ghostty observation remains. After the manifest, current judge links, backlog,
+  project record, and failure ledger were assembled, the unchanged complete suite
+  passed **229/229** again.

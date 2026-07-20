@@ -117,5 +117,6 @@ relocate Codex's own account state.
   missing reachable object; its reported unreachable development objects are
   recoverable and outside committed history.
 
-The pushed manifest binding and Kristian's resumed Ghostty observation remain
-separate evidence and are not claimed by these local results.
+Toolkit capability `secure-persistent-guide-v10` binds the pushed repair commit and
+229-check transcript. Kristian's resumed Ghostty observation remains separate
+evidence and is not claimed by these mechanical results.

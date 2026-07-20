@@ -1,7 +1,7 @@
 # Secure persistent Guide console
 
 **Date:** 2026-07-19
-**Status:** implemented locally; pushed binding and owner recovery observation pending
+**Status:** pushed mechanical proof complete; owner recovery observation pending
 
 ## Decision
 

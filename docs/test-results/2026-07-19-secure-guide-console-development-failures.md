@@ -57,6 +57,14 @@ an isolated lockfile with scripts disabled, and reran the production audit there
 That audit reported zero vulnerabilities. The setup refusal remains recorded here
 instead of being omitted from the result.
 
+## Final judge-link assembly refusal
+
+The first 72-test Guide/security/submission/integrity slice passed 71/72. Updating
+the judge path to the new persistent-Guide probe had accidentally replaced the
+existing Producer/Reviewer project-boundary probe. The unchanged submission test
+named the missing link. The README now carries both distinct security proofs; no
+assertion was removed or weakened.
+
 ## Real Codex failures
 
 - The first live model probe stopped on a malformed patch hunk before testing
