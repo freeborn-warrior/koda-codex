@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "capability": "codex-permission-instantiation-v18",
+  "capability": "ghostty-absolute-role-command-v19",
   "verifiedAt": "2026-07-20T19:10:58.179Z",
-  "repairCommit": "2aef8cabd20b42c70fdf208b9b63cea1f1be73ed",
+  "repairCommit": "59d6267704d4b489fc8cafdd656cf9d421ef2259",
   "testedCommit": "b40f2df74f7081de4ba926b3a44c480a7ed41f42",
   "testCount": 244,
   "evidence": {
@@ -12,7 +12,7 @@
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "5c156c81123fb11ea55da129bd3901df9bd92b6056bf9b43e48ce7803a8e46d3"
+      "sha256": "1f6ca78d660bc704725d6107d449f1777bcd0ce96dbd381cbd2d6aec58e0b0e8"
     },
     {
       "path": "src/relay-environment.ts",
@@ -44,7 +44,7 @@
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "70d62b2afc19cb9262bab7128233ad9c3b7761cc3b92b1d26433e6db88ecabc1"
+      "sha256": "fee4185342138fc6dce1620ade79929f2a446beea956337c69091cb2dcc587c1"
     },
     {
       "path": "dist/relay-environment.js",

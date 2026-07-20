@@ -114,6 +114,12 @@ Turn the proved two-context session relay into a project-level experience that c
     both exact profiles are deserialized and applied before project creation. The
     unchanged post-push suite passes **244/244** under
     `codex-permission-instantiation-v18`.
+35. [x] Repair the real Ghostty login-directory command failure. Preserve the
+    single-token launcher design but pass its absolute, project-contained path so
+    `/usr/bin/login` cannot resolve it from the owner's home directory. Reverse the
+    old test that required a relative command and add a named directory-change
+    mutation. Focused Guide/Ghostty coverage passes **82/82**; full and pushed proof
+    remain in progress.
 
 ## Submission cut
 

@@ -44,8 +44,10 @@ parent, and ignored project-local runtime under `.koda/`:
   character names refuse. Unrelated unstaged claimed work may remain.
 - explicit `guide launch ... --open ghostty` additionally invokes macOS
   `/usr/bin/open` twice to request labeled Reviewer then Producer windows. Each
-  request gives Ghostty exactly one project-relative, mode-700 launcher token;
-  loose role-command arguments are never passed through `open --args`.
+  request gives Ghostty exactly one absolute, project-contained, mode-700 launcher
+  token. The absolute form is required because Ghostty's macOS login wrapper changes
+  directory before executing it; loose role-command arguments are never passed
+  through `open --args`.
 
 Koda refuses a configured sessions directory that resolves outside the project.
 Session state must retain valid configured phase names. Artifacts, reviews,

@@ -1989,3 +1989,39 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [release transcript](test-results/2026-07-20-codex-permission-instantiation-bounded-release.md).
   Against the final pushed manifest, installed Codex again applied Guide and role
   profiles with exit 0; the durable installed-client record includes both results.
+
+## 2026-07-20 — Ghostty login-directory command resolution
+
+- **Owner-observed failure:** The next real launch opened a Reviewer window that
+  immediately printed `login: launch-reviewer.sh: No such file or directory`.
+  Ghostty showed that its internal command was `/usr/bin/login ...
+  ./.koda/runs/<launch-id>/launch-reviewer.sh`.
+- **Disk truth:** Launch `b6e50ec4-ddd8-400e-a734-10ba12a28f21` remained
+  `PREPARED`; Reviewer and Producer thread IDs stayed null; only `.gitkeep` existed
+  under `docs/sessions`; the isolated project remained clean and synchronized with
+  its local origin. Producer was correctly withheld when Reviewer never became
+  ready. No receipt, approval, phase, or session existed.
+- **Root cause:** Koda supplied both `--working-directory=<project>` and a relative
+  command after `-e`. Ghostty's macOS login wrapper changed directory before
+  resolving the command, so the working-directory option did not protect the
+  relative launcher token.
+- **Test failure:** The deterministic Guide test explicitly required the broken
+  `./.koda/runs/...` form and stubbed window opening without simulating Ghostty's
+  login-directory change. It therefore encoded the defect as success.
+- **Correction:** Ghostty still receives one command token per role, but it is now
+  an absolute path proven to remain inside `<project>/.koda/runs/`. The launcher
+  remains a real mode-700 file; its `env -i`, credential stripping, content
+  verification, readiness ordering, and duplicate refusal are unchanged.
+- **Host boundary result:** macOS `/usr/bin/login -q -flp freeborn /usr/bin/true`
+  completed with exit 0, proving the real wrapper accepts an absolute executable.
+- **Regression result:** A named mutation changes the simulated login directory,
+  proves the old relative form resolves elsewhere, and proves both new role
+  commands remain stable. Guide, Guide-console, Quick Start, security, and
+  integrity tests pass **82/82**.
+- **Evidence:** See the
+  [owner-observed incident](verification-runs/2026-07-20-ghostty-login-resolution-01/RESULT.md),
+  [quality audit](quality-runs/2026-07-20-ghostty-login-resolution-16/RESULT.md),
+  and [security audit](security-runs/2026-07-20-ghostty-login-resolution-audit-22/RESULT.md).
+- **State:** LOCAL FOCUSED PASS. Repair commit `59d6267` exists locally. Complete,
+  post-push, and fresh owner-visible window proof remain; they are not represented
+  as passed.

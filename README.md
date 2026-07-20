@@ -133,6 +133,11 @@ direct final answer instead of flooding the owner with procedural inspection.
   and [security audit](docs/security-runs/2026-07-20-codex-permission-instantiation-audit-21/RESULT.md)
   preserve both real first-use refusals, the false `--version` proof, and the
   installed CLI's actual fail-before-creation sandbox/profile check.
+- The [Ghostty login-resolution incident](docs/verification-runs/2026-07-20-ghostty-login-resolution-01/RESULT.md),
+  [quality audit](docs/quality-runs/2026-07-20-ghostty-login-resolution-16/RESULT.md),
+  and [security audit](docs/security-runs/2026-07-20-ghostty-login-resolution-audit-22/RESULT.md)
+  preserve the later real-window failure, the incorrect relative-path test, and
+  the absolute project-contained correction.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

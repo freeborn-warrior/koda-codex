@@ -49,6 +49,12 @@ This is the on-disk working queue for the build. A checked item means its eviden
   instantiate and apply both exact profiles through its offline sandbox path before
   creating a project. The unchanged post-push suite passes **244/244** under
   `codex-permission-instantiation-v18`.
+- [x] Correct the owner-observed Ghostty login-directory failure. The real adapter
+  proved that `--working-directory` does not keep a relative `-e` command valid
+  after Ghostty invokes `/usr/bin/login`. Reviewer failed before startup and
+  Producer was withheld. Both role commands are now absolute, project-contained,
+  and mode 700; the named login-resolution mutation and 82 focused checks pass.
+  Complete and pushed proof remain in progress.
 
 ## Next
 
