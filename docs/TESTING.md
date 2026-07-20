@@ -2124,6 +2124,16 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Post-push result:** The unchanged implementation at pushed commit `5380f51`
   passed **250/250** in the
   [post-push transcript](test-results/2026-07-20-integrated-role-preflight-pushed.md).
+- **Promoted release result:** After the integrity manifest and public evidence
+  were promoted at pushed commit `701d17a`, the complete suite passed a further
+  **250/250** in the
+  [release transcript](test-results/2026-07-20-integrated-role-preflight-release.md).
+- **Final documentation-bound result:** Two redundant complete console runs also
+  passed while the release pages were being aligned, but their output was not
+  durably captured per test and is therefore not used as release evidence. The
+  mistake was corrected with a fresh recorded **250/250**
+  [final release transcript](test-results/2026-07-20-integrated-role-preflight-release-final.md)
+  against the complete final working tree.
 - **Independent review:** Its contract was pushed before execution. A fresh
   Terra/medium attempt was refused before start by the private-repository export
   boundary. No repository bytes were sent by that attempt, no workaround was
@@ -2134,5 +2144,6 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   and [security audit](security-runs/2026-07-20-integrated-role-preflight-audit-24/RESULT.md).
 - **State:** POST-PUSH PASS. Capability `integrated-role-preflight-v21` binds
   repair/tested commit `5380f51`, the unchanged 250-check transcript, and every
-  critical role/startup file. Independent review and a fresh owner-visible
+  critical role/startup file. The promoted release and final documentation-bound
+  working tree each pass 250/250. Independent review and a fresh owner-visible
   six-phase session remain.

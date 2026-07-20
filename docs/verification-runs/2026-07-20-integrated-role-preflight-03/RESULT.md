@@ -6,6 +6,7 @@
 - Failed local suite: [232/248](../../test-results/2026-07-20-integrated-role-preflight-local.md)
 - Corrected local suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-local-04.md)
 - Unchanged post-push suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-pushed.md)
+- Final promoted release suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-release-final.md)
 - Fresh owner-visible full session: still required
 
 ## What the owner found

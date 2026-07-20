@@ -143,6 +143,11 @@ direct final answer instead of flooding the owner with procedural inspection.
   and [security audit](docs/security-runs/2026-07-20-full-session-prompt-contract-audit-23/RESULT.md)
   preserve the later Producer refusal, the known contradiction that was
   reintroduced into the bundled demo, and the new pre-window mechanical check.
+- The [integrated Producer-role incident](docs/verification-runs/2026-07-20-integrated-role-preflight-03/RESULT.md),
+  [quality audit](docs/quality-runs/2026-07-20-integrated-role-preflight-18/RESULT.md),
+  and [security audit](docs/security-runs/2026-07-20-integrated-role-preflight-audit-24/RESULT.md)
+  preserve the next owner-visible refusal, the missing whole-journey test, its
+  failed 232/248 regression, native Git/XDG correction, and promoted 250-check proof.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

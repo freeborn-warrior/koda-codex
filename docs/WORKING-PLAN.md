@@ -127,12 +127,13 @@ Turn the proved two-context session relay into a project-level experience that c
     bundled prompt instead of stopping at requested windows. The expanded Guide,
     Quick Start, plural-runtime, security, and integrity slice passes **68/68**;
     the complete local and unchanged post-push suites pass **246/246**.
-37. [ ] Promote the integrated Producer-role acceptance boundary. Compose the
-    bundled project, installed Codex profile, verified toolkit proof, exact
-    `session new`, native Git, private XDG, and immutable archive in one tested
-    journey; preserve the 232/248 regression failure, obtain a fresh independent
-    review under a precommitted contract, pass unchanged post-push tests, and only
-    then return the full visible session to Kristian.
+37. [ ] Complete independent and owner-visible review of the promoted integrated
+    Producer-role acceptance boundary. The bundled project, installed Codex
+    profile, verified toolkit proof, exact `session new`, native Git, private XDG,
+    and immutable archive now pass local, unchanged post-push, and promoted
+    **250/250** suites under `integrated-role-preflight-v21`. Preserve the
+    232/248 regression failure and private-repository review refusal; only a fresh
+    independent verdict and fresh owner-visible six-phase session remain.
 
 ## Submission cut
 

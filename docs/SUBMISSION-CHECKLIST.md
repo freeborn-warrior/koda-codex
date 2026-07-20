@@ -41,6 +41,8 @@ truth for the exact submission requirements.
 - [x] The current full suite passes 250/250 unchanged after push against the
   integrated Producer-role preflight repair and preserves its
   [bound post-push transcript](test-results/2026-07-20-integrated-role-preflight-pushed.md).
+  The final promoted manifest and public evidence pass a further
+  [250/250 release suite](test-results/2026-07-20-integrated-role-preflight-release-final.md).
 - [x] A first-time user has one documented command for a complete session;
   confirmation, launch, owner choices, and safe recovery remain inside Koda.
 - [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.

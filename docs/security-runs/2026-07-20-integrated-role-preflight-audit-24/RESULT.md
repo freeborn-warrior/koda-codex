@@ -6,6 +6,7 @@
   Guide-return archival, and repository boundaries
 - Complete local regression: [250/250](../../test-results/2026-07-20-integrated-role-preflight-local-04.md)
 - Unchanged post-push regression: [250/250](../../test-results/2026-07-20-integrated-role-preflight-pushed.md)
+- Final promoted release regression: [250/250](../../test-results/2026-07-20-integrated-role-preflight-release-final.md)
 
 ## Findings
 

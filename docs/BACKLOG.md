@@ -69,10 +69,12 @@ This is the on-disk working queue for the build. A checked item means its eviden
   command and profile had passed separately. Quick Start now composes them before
   `READY`; native Git and private XDG remove blocked ambient probes; the first full
   regression preserved 16 failures before the corrected local and unchanged
-  post-push **250/250** passes. Capability `integrated-role-preflight-v21` is
-  promoted. The sealed Terra/medium review did not run because private-repository
-  export required fresh explicit owner approval; no verdict is claimed. Fresh
-  owner-visible proof remains deliberately separate.
+  post-push **250/250** passes. The promoted manifest then passed a further
+  **250/250** release suite at commit `701d17a`. Capability
+  `integrated-role-preflight-v21` is promoted. The sealed Terra/medium review did
+  not run because private-repository export required fresh explicit owner
+  approval; no verdict is claimed. Fresh owner-visible proof remains deliberately
+  separate.
 
 ## Next
 

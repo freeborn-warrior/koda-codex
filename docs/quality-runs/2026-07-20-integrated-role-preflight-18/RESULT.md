@@ -5,6 +5,7 @@
 - Contract: [CONTRACT.md](CONTRACT.md)
 - Local complete suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-local-04.md)
 - Unchanged post-push suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-pushed.md)
+- Final promoted release suite: [250/250](../../test-results/2026-07-20-integrated-role-preflight-release-final.md)
 
 ## Deterministic assessment
 
