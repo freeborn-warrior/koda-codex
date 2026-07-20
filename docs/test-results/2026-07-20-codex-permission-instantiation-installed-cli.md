@@ -41,3 +41,18 @@ again to the installed client:
 
 Both profiles were deserialized and applied successfully. This is an offline
 installed-client proof, not a claim that a networked Guide model turn succeeded.
+
+## Exact starter preparation
+
+The real `prepare-full-session-demo.ts` path was then run with confirmation and a
+fixed owner label, without `--open`. It repeated both installed profile checks,
+created an isolated project under `.koda/full-session-preflight/`, initialized and
+pushed its local-only Git remote, wrote the immutable Guide confirmation, and
+finished with:
+
+```text
+READY — FULL SESSION
+The prompt is confirmed, committed, pushed, and mechanically verified.
+```
+
+No Guide model, Producer, Reviewer, network request, or Ghostty window was started.

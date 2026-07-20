@@ -47,7 +47,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] Replace the superficial Codex permission preflight exposed by the owner's
   second real startup refusal. Koda now makes installed Codex CLI 0.144.6
   instantiate and apply both exact profiles through its offline sandbox path before
-  creating a project. The corrected local suite passes **242/242** under
+  creating a project. The corrected local suite passes **244/244** under
   `codex-permission-instantiation-v18`; pushed proof is pending.
 
 ## Next

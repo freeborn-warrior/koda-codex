@@ -35,7 +35,7 @@ verifier still hashes every exact manifest entry before those roots are returned
 - It rejects quoted dotted filesystem keys.
 - It requires one Guide and one role sandbox invocation with the correct profile.
 - Primary configuration stderr remains owner-visible and sanitized.
-- Full security and product suite: **242/242 passed**.
+- Full security and product suite: **244/244 passed**.
 - The [installed-client proof](../../test-results/2026-07-20-codex-permission-instantiation-installed-cli.md)
   records the Guide-only oversized failure and final two-profile exit-0 result.
 

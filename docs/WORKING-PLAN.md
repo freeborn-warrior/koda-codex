@@ -112,7 +112,7 @@ Turn the proved two-context session relay into a project-level experience that c
     isolation. The first `--version` preflight was insufficient and failed again
     for the owner; replace it with the installed CLI's offline `sandbox -P` path so
     both exact profiles are deserialized and applied before project creation. The
-    corrected local suite passes **242/242** under
+    corrected local suite passes **244/244** under
     `codex-permission-instantiation-v18`; pushed proof is pending.
 
 ## Submission cut

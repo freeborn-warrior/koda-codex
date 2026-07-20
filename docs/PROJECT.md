@@ -189,7 +189,7 @@ owner contract
   Guide run. Koda now submits the exact Guide and role profiles to installed Codex
   CLI 0.144.6 through its offline `sandbox -P` execution path before creating a
   demo project. Both profiles deserialize and apply with exit 0; toolkit capability
-  `codex-permission-instantiation-v18` binds the corrected **242/242** local suite.
+  `codex-permission-instantiation-v18` binds the corrected **244/244** local suite.
   Pushed proof and a fresh owner-visible model connection remain.
 - A real secure-Guide recovery then proved that the saved role launcher still
   depended on the terminal which created it. Guide refused safely twice with zero

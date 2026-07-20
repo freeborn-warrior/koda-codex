@@ -1,13 +1,13 @@
 {
   "version": 1,
   "capability": "codex-permission-instantiation-v18",
-  "verifiedAt": "2026-07-20T18:52:18.208Z",
+  "verifiedAt": "2026-07-20T19:07:21.022Z",
   "repairCommit": "2aef8cabd20b42c70fdf208b9b63cea1f1be73ed",
-  "testedCommit": "ec8284747f42bbc24bbcadd8b033fe3f654d3113",
-  "testCount": 242,
+  "testedCommit": "14739a2bd9503bdb158530e97d0394ef0e399062",
+  "testCount": 244,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-codex-permission-instantiation-local.md",
-    "sha256": "aa2e2e543ccf8c063798c2a1cdba76f37bead9e11b4f64d574d547a4e583dc17"
+    "path": "docs/test-results/2026-07-20-codex-permission-instantiation-bounded-local.md",
+    "sha256": "f1f3e6b236170df484654baddee6fa6de9cd41abac4e88b43c6e0480c0d044ad"
   },
   "files": [
     {

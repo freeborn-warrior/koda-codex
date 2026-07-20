@@ -1969,12 +1969,17 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Regression result:** The fake installed client rejects both superseded
   serialization shapes and requires the two real sandbox/profile calls. Focused
   Guide, security, Quick Start, and integrity tests pass **35/35**.
-- **Complete result:** Every one of **242** named tests passed in the
-  [local transcript](test-results/2026-07-20-codex-permission-instantiation-local.md).
+- **Complete result:** Every one of **244** named tests passed in the
+  [local transcript](test-results/2026-07-20-codex-permission-instantiation-bounded-local.md).
+- **Exact starter result:** The actual full-session starter repeated both installed
+  profile applications, created and locally pushed an isolated project, verified
+  its immutable launch, and reached `READY — FULL SESSION` without opening a model
+  or Ghostty. The installed-client record preserves that boundary.
 - **Development and audits:** See the
   [development record](test-results/2026-07-20-codex-permission-instantiation-development-failures.md),
   [quality audit](quality-runs/2026-07-20-codex-permission-instantiation-15/RESULT.md),
   and [security audit](security-runs/2026-07-20-codex-permission-instantiation-audit-21/RESULT.md).
 - **State:** LOCAL PASS. Capability `codex-permission-instantiation-v18` binds
-  repair commit `ec82847` and the local 242-check transcript. Pushed proof and a
+  repair commit `2aef8ca`, tested documentation commit `14739a2`, and the local
+  244-check transcript. Pushed proof and a
   fresh owner-visible networked Guide run remain before human handoff.

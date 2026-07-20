@@ -30,11 +30,13 @@ automated check and then failed in the owner's real Guide window.
 - Installed Codex CLI 0.144.6 instantiated and applied both generated profiles:
   **Guide exit 0; role exit 0**.
 - Focused changed slice: **35/35 passed**.
-- Complete local suite: **242/242 passed**.
+- Complete local suite: **244/244 passed**.
+- Exact full-session preparation reached `READY — FULL SESSION` with an isolated
+  locally pushed project and no model or Ghostty launch.
 - Named evidence:
   [development record](../../test-results/2026-07-20-codex-permission-instantiation-development-failures.md)
   [installed-client proof](../../test-results/2026-07-20-codex-permission-instantiation-installed-cli.md),
-  and [local transcript](../../test-results/2026-07-20-codex-permission-instantiation-local.md).
+  and [local transcript](../../test-results/2026-07-20-codex-permission-instantiation-bounded-local.md).
 
 ## Boundary
 

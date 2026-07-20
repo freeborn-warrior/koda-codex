@@ -54,10 +54,12 @@ deserialize and apply the profile. Calling that fixed was incorrect.
   permission argument.
 - The newly added bounded-root and size-ceiling regressions pass in the focused
   Guide, security, Quick Start, and integrity suite.
-- Complete local suite: **242/242 passed** in the
-  [named transcript](2026-07-20-codex-permission-instantiation-local.md).
+- Complete local suite: **244/244 passed** in the
+  [named transcript](2026-07-20-codex-permission-instantiation-bounded-local.md).
 - The [installed-client transcript](2026-07-20-codex-permission-instantiation-installed-cli.md)
   preserves the Guide-only oversized failure and the final two-profile pass.
+- The exact no-model full-session starter repeated those checks and reached a
+  clean, locally pushed `READY — FULL SESSION` project.
 
 This is stronger automated evidence than the failed `--version` check. It is not
 called a live Guide pass: the remaining networked model connection still belongs to
