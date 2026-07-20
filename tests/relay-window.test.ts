@@ -296,18 +296,42 @@ test("TWO-WINDOW VISIBILITY: progress is readable without exposing review receip
   assert.equal(rendered, "REVIEWER UPDATE\nReview complete.");
   assert.equal(redactRelayOutput(`Review complete; ${receipt}`), "Review complete; [receipt redacted]");
   assert.equal(renderCodexEvent(JSON.stringify({ type: "turn.completed" }), "PRODUCER"), "PRODUCER TURN COMPLETE");
+  assert.equal(renderCodexEvent(JSON.stringify({
+    type: "item.completed",
+    item: { type: "agent_message", text: "Live evidence is saved." },
+  }), "PRODUCER", { stage: "live" }), "PRODUCER LIVE UPDATE\nLive evidence is saved.");
+  assert.equal(renderCodexEvent(JSON.stringify({
+    type: "item.completed",
+    item: { type: "command_execution", exit_code: 0, command: "node --test" },
+  }), "PRODUCER", { stage: "live", showSuccessfulChecks: false, showCommandText: false }), null);
+  assert.equal(renderCodexEvent(JSON.stringify({
+    type: "item.completed",
+    item: { type: "command_execution", exit_code: 1, command: "secret --argument" },
+  }), "PRODUCER", { stage: "live", showSuccessfulChecks: false, showCommandText: false }), "PRODUCER LIVE CHECK — exit 1");
 });
 
 test("REVIEWER OPEN CONVERSATION: an idle owner question resumes the Reviewer but changes no project file", async (t) => {
   const result = await preparedIdleConversationRun("The current disk evidence proves only that Brief is active; Producer has not handed it over yet.");
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
   assert.equal(result.executed.status, 0, result.executed.stderr);
-  assert.match(result.executed.stdout, /owner conversation while Producer works/);
-  assert.match(result.executed.stdout, /REVIEWER CONVERSATION COMPLETE[\s\S]*No Producer handback was created/);
+  assert.match(result.executed.stdout, /REVIEWER BRIEF — THINKING/);
+  assert.match(result.executed.stdout, /REVIEWER BRIEF RESPONSE[\s\S]*The current disk evidence proves only that Brief is active/);
+  assert.match(result.executed.stdout, /KODA NOTE[\s\S]*did not change the Producer's inputs/);
+  assert.doesNotMatch(result.executed.stdout, /REVIEWER BRIEF UPDATE/);
   assert.equal(result.projectStatusAfter, result.projectStatusBefore);
   const state = await readReviewerWindowState(result.runRoot);
   assert.equal(state?.threadId, "019f0000-0000-7000-8000-000000000099");
   assert.equal(state?.turns, 3);
+  assert.equal(await pathExists(path.join(result.session.directory, "owner-handbacks")), false);
+});
+
+test("REVIEWER OPEN CONVERSATION MUTATION: an empty final answer refuses instead of pretending conversation completed", async (t) => {
+  const result = await preparedIdleConversationRun("");
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 1, result.executed.stderr);
+  assert.match(result.executed.stderr, /REVIEWER PAUSED SAFELY[\s\S]*emitted no final answer/);
+  assert.doesNotMatch(result.executed.stdout, /KODA NOTE/);
+  assert.equal(result.projectStatusAfter, result.projectStatusBefore);
   assert.equal(await pathExists(path.join(result.session.directory, "owner-handbacks")), false);
 });
 
@@ -345,8 +369,9 @@ test("REVIEWER OPEN CONVERSATION TTY: a real terminal line reaches the idle Revi
   t.after(() => rm(result.temporary, { recursive: true, force: true }));
   assert.equal(result.executed.status, 0, result.executed.stderr);
   assert.match(result.executed.stdout, /reviewer> /);
-  assert.match(result.executed.stdout, /owner conversation while Producer works/);
-  assert.match(result.executed.stdout, /REVIEWER CONVERSATION COMPLETE[\s\S]*No Producer handback was created/);
+  assert.match(result.executed.stdout, /REVIEWER BRIEF — THINKING/);
+  assert.match(result.executed.stdout, /REVIEWER BRIEF RESPONSE[\s\S]*changed no file/);
+  assert.match(result.executed.stdout, /KODA NOTE[\s\S]*did not change the Producer's inputs/);
   assert.equal(result.projectStatusAfter, result.projectStatusBefore);
 });
 
@@ -896,7 +921,7 @@ test("TWO-WINDOW RELAY: a pending formal-review job wakes one persistent reviewe
   });
   assert.equal(executed.status, 0, executed.stderr);
   assert.match(executed.stdout, /REVIEWER 1 — formal review of brief/);
-  assert.match(executed.stdout, /REVIEWER UPDATE\nReview written/);
+  assert.match(executed.stdout, /REVIEWER BRIEF UPDATE\nReview written/);
   assert.match(executed.stdout, /REVIEW CODE: [0-9A-F]{8}/);
   assert.equal((await readReviewerJob(runRoot))?.status, "COMPLETE");
   const state = await readReviewerWindowState(runRoot);
@@ -1034,7 +1059,9 @@ test("TWO-WINDOW SESSION: separate producer and reviewer processes rendezvous th
   assert.match(reviewerResult.stdout, /KODA-C REVIEWER WINDOW/);
   assert.match(reviewerResult.stdout, /Owner input: OPEN — active-session conversation belongs here/);
   assert.match(reviewerResult.stdout, /REVIEWER 1 — formal review of brief/);
-  assert.match(reviewerResult.stdout, /REVIEWER 2 — explain brief review/);
+  assert.match(reviewerResult.stdout, /REVIEWER BRIEF — THINKING/);
+  assert.match(reviewerResult.stdout, /REVIEWER BRIEF RESPONSE[\s\S]*OWNER DIRECTION — WAIT FOR GATE/);
+  assert.doesNotMatch(reviewerResult.stdout, /REVIEWER 2 — explain brief review/);
   assert.match(reviewerResult.stdout, /DIRECTION RECORDED — WAITING FOR GATE/);
   assert.match(reviewerResult.stdout, /Phase 1 of 1/);
   assert.match(reviewerResult.stdout, /REVIEWER HANDOVER — BRIEF — ACKNOWLEDGED/);

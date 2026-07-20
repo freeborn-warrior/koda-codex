@@ -295,10 +295,32 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
   activeModelChild = child;
   let stdout = "";
   let stderr = "";
+  let completedChecks = 0;
+  let failedChecks = 0;
+  const activeBeforeTurn = await latest().catch(() => null);
+  const activePhase = activeBeforeTurn ? currentPhase(activeBeforeTurn.state)?.phase.name : null;
+  const stage = purpose.includes("session close")
+    ? "close"
+    : purpose.includes("open the Koda session")
+      ? "session"
+      : activePhase ?? undefined;
   const lines = createInterface({ input: child.stdout });
   lines.on("line", (line) => {
     stdout += `${line}\n`;
-    const rendered = renderCodexEvent(line, role === "producer" ? "PRODUCER" : "REVIEWER");
+    try {
+      const event = JSON.parse(line) as { type?: string; item?: { type?: string; exit_code?: number } };
+      if (event.type === "item.completed" && event.item?.type === "command_execution") {
+        completedChecks += 1;
+        if (event.item.exit_code !== 0) failedChecks += 1;
+      }
+    } catch {
+      // The complete raw stream remains the source for detailed diagnostics.
+    }
+    const rendered = renderCodexEvent(line, role === "producer" ? "PRODUCER" : "REVIEWER", {
+      stage,
+      showSuccessfulChecks: false,
+      showCommandText: false,
+    });
     if (rendered) console.log(terminalBlock(rendered));
   });
   child.stderr.on("data", (chunk) => { stderr += String(chunk); });
@@ -312,6 +334,13 @@ async function modelTurn(role: Role, purpose: string, prompt: string): Promise<v
     writeTextAtomic(path.join(runRoot, eventFile), stdout),
     writeTextAtomic(path.join(runRoot, stderrFile), stderr),
   ]);
+  if (completedChecks > 0) {
+    const label = `${role.toUpperCase()}${stage ? ` ${stage.toUpperCase()}` : ""} CHECK`;
+    console.log(terminalBlock([
+      `${label} — ${completedChecks - failedChecks} passed${failedChecks > 0 ? `, ${failedChecks} failed` : ""}`,
+      `Detailed commands: ${eventFile}`,
+    ].join("\n")));
+  }
 
   roleRecord.turns = turn;
   const observedThread = eventThreadId(stdout);

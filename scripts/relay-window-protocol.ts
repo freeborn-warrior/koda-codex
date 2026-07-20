@@ -346,33 +346,52 @@ export function redactRelayOutput(value: string): string {
     .join("\n");
 }
 
-export function renderCodexEvent(line: string, role: "PRODUCER" | "REVIEWER"): string | null {
+export type RelayEventRenderOptions = {
+  stage?: string;
+  showSuccessfulChecks?: boolean;
+  showCommandText?: boolean;
+};
+
+function eventLabel(role: "PRODUCER" | "REVIEWER", stage?: string): string {
+  const normalized = stage?.trim().toUpperCase();
+  return normalized ? `${role} ${normalized}` : role;
+}
+
+export function renderCodexEvent(
+  line: string,
+  role: "PRODUCER" | "REVIEWER",
+  options: RelayEventRenderOptions = {},
+): string | null {
   let event: Record<string, unknown>;
   try {
     event = JSON.parse(line) as Record<string, unknown>;
   } catch {
     return null;
   }
-  if (event.type === "thread.started") return `${role} CONTEXT — ${String(event.thread_id)}`;
-  if (event.type === "turn.completed") return `${role} TURN COMPLETE`;
+  const label = eventLabel(role, options.stage);
+  if (event.type === "thread.started") return `${label} CONTEXT — ${String(event.thread_id)}`;
+  if (event.type === "turn.completed") return `${label} TURN COMPLETE`;
   const item = event.item as Record<string, unknown> | undefined;
   if (!item) return null;
   if (event.type === "item.completed" && item.type === "agent_message" && typeof item.text === "string") {
     const text = redactRelayOutput(item.text).trim();
-    return text ? `${role} UPDATE\n${text}` : null;
+    return text ? `${label} UPDATE\n${text}` : null;
   }
   if (event.type === "item.completed" && item.type === "file_change" && Array.isArray(item.changes)) {
     const files = item.changes
       .map((change) => change && typeof change === "object" ? String((change as Record<string, unknown>).path ?? "") : "")
       .filter(Boolean);
-    return files.length ? `${role} FILE — ${files.join(", ")}` : null;
+    return files.length ? `${label} FILE — ${files.join(", ")}` : null;
   }
   if (event.type === "item.completed" && item.type === "command_execution") {
-    const status = item.exit_code === 0 ? "passed" : `exit ${String(item.exit_code)}`;
+    const successful = item.exit_code === 0;
+    if (successful && options.showSuccessfulChecks === false) return null;
+    const status = successful ? "passed" : `exit ${String(item.exit_code)}`;
+    if (options.showCommandText === false) return `${label} CHECK — ${status}`;
     const command = typeof item.command === "string"
       ? redactRelayOutput(item.command.split(/\r?\n/, 1)[0]).slice(0, 140)
       : "check";
-    return `${role} CHECK — ${status}: ${command}`;
+    return `${label} CHECK — ${status}: ${command}`;
   }
   return null;
 }

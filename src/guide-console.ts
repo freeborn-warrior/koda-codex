@@ -205,7 +205,7 @@ export function sanitizeGuideTerminalText(value: string): string {
   return sanitizeTerminalText(value);
 }
 
-function renderGuideEvent(line: string): string | null {
+export function renderGuideEvent(line: string): string | null {
   try {
     const event = JSON.parse(line) as { type?: string; thread_id?: string; item?: { type?: string; text?: string; command?: string } };
     if (event.type === "thread.started") return UUID.test(event.thread_id ?? "")
@@ -215,9 +215,7 @@ function renderGuideEvent(line: string): string | null {
     if (event.type === "item.completed" && event.item?.type === "agent_message" && event.item.text?.trim()) {
       return `GUIDE UPDATE\n${sanitizeGuideTerminalText(event.item.text.trim())}`;
     }
-    if (event.type === "item.started" && event.item?.type === "command_execution") {
-      return "GUIDE CHECK — inspecting disk-backed project state";
-    }
+    if (event.type === "item.started" && event.item?.type === "command_execution") return null;
   } catch {
     return null;
   }

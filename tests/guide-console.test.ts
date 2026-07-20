@@ -10,6 +10,7 @@ import {
   acquireGuideConsole,
   guideConsoleWritePaths,
   guideTurnArguments,
+  renderGuideEvent,
   sanitizeGuideTerminalText,
   validateGuideConsoleState,
 } from "../src/guide-console.ts";
@@ -104,6 +105,17 @@ test("GUIDE CONSOLE TERMINAL SAFETY: model output cannot inject terminal or bidi
     sanitizeGuideTerminalText("ordinary\u001b[31m red\u0007 \u202ereversed"),
     "ordinary[31m red reversed",
   );
+});
+
+test("GUIDE CONSOLE VISIBILITY: low-level inspection commands stay in evidence instead of flooding the screen", () => {
+  assert.equal(renderGuideEvent(JSON.stringify({
+    type: "item.started",
+    item: { type: "command_execution", command: "inspect project" },
+  })), null);
+  assert.equal(renderGuideEvent(JSON.stringify({
+    type: "item.completed",
+    item: { type: "agent_message", text: "The project is ready." },
+  })), "GUIDE UPDATE\nThe project is ready.");
 });
 
 test("GUIDE CONSOLE LOCK: a live duplicate refuses and a released console can reopen", async (t) => {
@@ -207,6 +219,7 @@ test("GUIDE CONSOLE PERSISTENCE: a closed console resumes the same independent G
     "#!/bin/sh",
     "thread=11111111-1111-4111-8111-111111111111",
     "printf '%s\\n' '{\"type\":\"thread.started\",\"thread_id\":\"'\"$thread\"'\"}'",
+    "printf '%s\\n' '{\"type\":\"item.started\",\"item\":{\"type\":\"command_execution\",\"command\":\"inspect project\"}}'",
     "printf '%s\\n' '{\"type\":\"item.completed\",\"item\":{\"type\":\"agent_message\",\"text\":\"Fixture Guide reconstructed disk state.\"}}'",
     "printf '%s\\n' '{\"type\":\"turn.completed\"}'",
   ].join("\n"), "utf8");
@@ -218,6 +231,7 @@ test("GUIDE CONSOLE PERSISTENCE: a closed console resumes the same independent G
   assert.match(first.output, /─{20}/);
   assert.match(first.output, /Fixture Guide reconstructed disk state/);
   assert.doesNotMatch(first.output, /command_execution|--ignore-user-config/);
+  assert.doesNotMatch(first.output, /GUIDE CHECK|inspecting disk-backed project state/);
   const firstState = JSON.parse(await readFile(path.join(root, ".koda", "guide", "STATE.json"), "utf8"));
   assert.equal(firstState.threadId, "11111111-1111-4111-8111-111111111111");
   assert.equal(firstState.turns, 1);

@@ -1736,3 +1736,25 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   window. Default model-event output still overemphasized inspection commands, and
   Reviewer conversation felt procedural. These findings are queued as presentation
   corrections; they did not alter the completed gate or close result.
+
+## 2026-07-20 — Conversational Reviewer and phase-aware terminal development
+
+- **Trigger:** Kristian reported that Reviewer chat felt mechanical and that the
+  default streams overused inspection/check output without consistently naming the
+  active phase.
+- **Implementation under test:** Owner conversation now displays only the model's
+  final direct answer, while raw intermediate events remain saved. The shared event
+  renderer attaches the active phase, suppresses successful command spam, keeps
+  failures visible without exposing command text, and emits one aggregate check
+  summary. Guide no longer repeats one inspection line per command. The shared
+  Reviewer skill now gives positive natural-conversation guidance without changing
+  review criteria or routing markers.
+- **Preserved failures:** The first focused run passed **22/31**; a missing import
+  broke eight Reviewer paths and the toolkit integrity seal correctly refused the
+  locally changed Guide path. After the import fix, the Reviewer slice passed
+  **21/22**; the remaining assertion expected the old procedural title. The skill
+  validator's non-executable file also produced one `permission denied` invocation.
+  See the [development record](test-results/2026-07-20-conversational-reviewer-development-failures.md).
+- **Corrected focused result:** Reviewer/relay **23/23**, Guide renderer **2/2**,
+  skill validation PASS, dependency-free build PASS, and whitespace check PASS.
+  Full release verification remains pending and is not implied here.

@@ -29,6 +29,7 @@ import {
   acquireReviewerWindow,
   readReviewerJob,
   readReviewerWindowState,
+  redactRelayOutput,
   renderCodexEvent,
   reviewerWindowState,
   writeReviewerJob,
@@ -240,7 +241,13 @@ function threadIdFromEvents(output: string): string | null {
   return null;
 }
 
-async function modelTurn(purpose: string, prompt: string, ownerMessage: string | null = null): Promise<string> {
+async function modelTurn(
+  purpose: string,
+  prompt: string,
+  ownerMessage: string | null = null,
+  presentation: "work" | "conversation" = "work",
+  requestedStage?: string,
+): Promise<string> {
   const turn = state.turns + 1;
   state = reviewerWindowState({ ...state, status: "WORKING", turns: turn, lastError: null });
   await writeReviewerWindowState(runRoot, state);
@@ -260,7 +267,11 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
     ? [...base, "resume", ...common, state.threadId, prompt]
     : [...base, ...common, "--color", "never", prompt];
 
-  console.log(terminalPanel(`REVIEWER ${turn} — ${purpose}`));
+  const current = await activeSession().catch(() => null);
+  const stage = requestedStage ?? (current ? currentPhase(current.state)?.phase.name : undefined);
+  console.log(presentation === "conversation"
+    ? terminalPanel(`REVIEWER ${stage?.toUpperCase() ?? "SESSION"} — THINKING`)
+    : terminalPanel(`REVIEWER ${turn} — ${purpose}`));
   const child = spawn(codexExecutable, args, {
     cwd: project,
     env: relayCodexEnvironment(process.env, activeRun.sessionId),
@@ -270,6 +281,8 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
   let stdout = "";
   let stderr = "";
   let lastAgentMessage = "";
+  let completedChecks = 0;
+  let failedChecks = 0;
   const lines = createInterface({ input: child.stdout });
   lines.on("line", (line) => {
     stdout += `${line}\n`;
@@ -281,8 +294,23 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
     } catch {
       // The raw event remains saved; malformed diagnostics never become conversation state.
     }
-    const rendered = renderCodexEvent(line, "REVIEWER");
-    if (rendered) console.log(terminalBlock(rendered));
+    try {
+      const event = JSON.parse(line) as { type?: string; item?: { type?: string; exit_code?: number } };
+      if (event.type === "item.completed" && event.item?.type === "command_execution") {
+        completedChecks += 1;
+        if (event.item.exit_code !== 0) failedChecks += 1;
+      }
+    } catch {
+      // The raw event remains saved; diagnostics never become inferred check state.
+    }
+    if (presentation === "work") {
+      const rendered = renderCodexEvent(line, "REVIEWER", {
+        stage,
+        showSuccessfulChecks: false,
+        showCommandText: false,
+      });
+      if (rendered) console.log(terminalBlock(rendered));
+    }
   });
   child.stderr.on("data", (chunk) => { stderr += String(chunk); });
   const exit = await new Promise<number>((resolve, reject) => {
@@ -297,6 +325,12 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
     writeTextAtomic(path.join(runRoot, `${prefix}-EVENTS.jsonl`), stdout),
     writeTextAtomic(path.join(runRoot, `${prefix}-STDERR.txt`), stderr),
   ]);
+  if (presentation === "work" && completedChecks > 0) {
+    console.log(terminalBlock([
+      `REVIEWER${stage ? ` ${stage.toUpperCase()}` : ""} CHECK — ${completedChecks - failedChecks} passed${failedChecks > 0 ? `, ${failedChecks} failed` : ""}`,
+      `Detailed commands: ${prefix}-EVENTS.jsonl`,
+    ].join("\n")));
+  }
   const observed = threadIdFromEvents(stdout);
   if (!state.threadId && observed) state.threadId = observed;
   if (observed && observed !== state.threadId) throw new Error(`Reviewer context changed from ${state.threadId} to ${observed}.`);
@@ -329,8 +363,14 @@ async function modelTurn(purpose: string, prompt: string, ownerMessage: string |
   }
   if (!state.threadId) throw new Error("The reviewer turn emitted no persistent context identifier.");
   if (exit !== 0) throw new Error(`Reviewer turn ${turn} exited ${exit}. See ${prefix}-STDERR.txt.`);
+  if (presentation === "conversation" && !lastAgentMessage.trim()) {
+    throw new Error(`Reviewer conversation turn ${turn} emitted no final answer.`);
+  }
   state = reviewerWindowState({ ...state, status: "READY", lastError: null });
   await writeReviewerWindowState(runRoot, state);
+  if (presentation === "conversation" && lastAgentMessage.trim()) {
+    console.log(terminalBlock(`REVIEWER ${stage?.toUpperCase() ?? "SESSION"} RESPONSE\n${sanitizeTerminalText(redactRelayOutput(lastAgentMessage).trim())}`));
+  }
   return lastAgentMessage;
 }
 
@@ -444,9 +484,10 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
       `Read ${path.join(project, ".agents", "skills", "koda-c-review", "SKILL.md")} completely and explicitly use koda-c-review in owner-explanation mode.`,
       `The active review is ${review}.`,
       `The owner's exact question is ${JSON.stringify(question)}.`,
+      "Lead with a direct, natural answer. Do not narrate skill selection, file inspection, entry checks, or commands.",
       "Explain only from the review and evidence it cites. Do not edit any file, run Koda, approve, advance, or quote the receipt.",
       "If this introduces new product direction, follow the skill's exact WAIT FOR GATE marker. Direction must be recorded now but cannot enter the current phase contract.",
-    ].join(" "));
+    ].join(" "), question, "conversation", job.phase);
     await requireUnchangedReview();
     state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: null });
     await writeReviewerWindowState(runRoot, state);
@@ -693,7 +734,7 @@ async function completeConsultation(job: ReviewerJob, response: string): Promise
       `Resume koda-c-review consultation mode for ${response}.`,
       "Record the owner's response verbatim, change the disposition to ANSWERED, preserve the request link and evidence, and state the consequence for the active phase.",
       "Do not create a formal review, verdict, receipt, approval, or advancement.",
-    ].join(" "));
+    ].join(" "), null, "work", job.phase);
   }
   throw new Error("The consultation still awaits owner input after five reviewer handbacks.");
 }
@@ -733,6 +774,9 @@ async function processJob(job: ReviewerJob): Promise<void> {
         "Treat any expected output file as incomplete and untrusted; inspect and replace or complete it from the original evidence before handing it back.",
         "Resume this exact job in the same reviewer context. Do not approve, advance, or quote a receipt.",
       ].join(" ") : job.prompt,
+      null,
+      "work",
+      job.phase,
     );
     if (interrupted) {
       state = reviewerWindowState({ ...state, status: "READY", lastError: null, interruption: null });
@@ -783,14 +827,14 @@ async function recordOwnerConversationResponse(question: string, response: strin
       "Nothing from this Reviewer conversation changed the active session.",
     ]));
   } else {
-    console.log(terminalPanel("REVIEWER CONVERSATION COMPLETE", [
-      "No Producer handback was created.",
-    ]));
+    console.log(terminalBlock("KODA NOTE\nThis conversation did not change the Producer's inputs."));
   }
 }
 
 async function holdOwnerConversation(question: string): Promise<void> {
-  const response = await modelTurn("owner conversation while Producer works", ownerConversationPrompt(question), question);
+  const session = await activeSession();
+  const stage = currentPhase(session.state)?.phase.name;
+  const response = await modelTurn("owner conversation while Producer works", ownerConversationPrompt(question), question, "conversation", stage);
   await recordOwnerConversationResponse(question, response);
 }
 
@@ -799,6 +843,7 @@ function ownerConversationPrompt(question: string): string {
     `Read ${path.join(project, ".agents", "skills", "koda-c-review", "SKILL.md")} completely and explicitly use koda-c-review in owner-conversation mode.`,
     `The owner's exact message is ${JSON.stringify(question)}.`,
     "Answer at the owner's altitude from the active session files and cited evidence. Distinguish disk fact from inference.",
+    "Lead with the answer and speak as an ongoing conversation partner. Do not narrate skill selection, entry checks, file inspection, or commands.",
     "Do not edit any file, create a review or handback, run Koda, approve, advance, quote a receipt, or claim the Producer received this conversation.",
     "Use the skill's exact boundary marker if the message is project-level Guide scope or actionable direction for the active session.",
   ].join(" ");
@@ -824,6 +869,8 @@ async function recoverInterruptedOwnerConversation(): Promise<void> {
       "Re-read current disk state before answering. Do not infer that any partial response or file handback completed.",
     ].join(" "),
     interrupted.ownerMessage,
+    "conversation",
+    currentPhase((await activeSession()).state)?.phase.name,
   );
   state = reviewerWindowState({ ...state, status: "READY", lastError: null, interruption: null });
   await writeReviewerWindowState(runRoot, state);
