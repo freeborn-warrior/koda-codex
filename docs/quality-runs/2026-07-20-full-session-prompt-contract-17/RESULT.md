@@ -1,7 +1,7 @@
 # Quality audit 17 — bundled full-session prompt contract
 
 **Date:** 2026-07-20  
-**Result:** LOCAL FOCUSED PASS; COMPLETE AND FRESH OWNER RUN OWED
+**Result:** LOCAL COMPLETE PASS; POST-PUSH AND FRESH OWNER RUN OWED
 
 ## Product failure
 
@@ -28,5 +28,6 @@ journey the README promised and was too shallow to authorize another recording.
 - Focused Guide and Quick Start slice: **47/47 passed**.
 - Expanded Guide, Quick Start, real/plural runtime, security, and integrity slice:
   **68/68 passed**.
+- Complete local suite: **246/246 passed**.
 
-Complete, post-push, and fresh owner-visible proof remain open.
+Post-push and fresh owner-visible proof remain open.

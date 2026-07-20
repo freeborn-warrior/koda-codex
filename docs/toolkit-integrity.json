@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "ghostty-absolute-role-command-v19",
-  "verifiedAt": "2026-07-20T19:37:21.618Z",
-  "repairCommit": "59d6267704d4b489fc8cafdd656cf9d421ef2259",
-  "testedCommit": "ff0a7b86d005a351f03ea483f361906a878f624c",
-  "testCount": 245,
+  "capability": "full-session-prompt-contract-v20",
+  "verifiedAt": "2026-07-20T20:18:15.737Z",
+  "repairCommit": "1adcd1a35dfc4ae4ff2be40fd9f0a65890cb02ef",
+  "testedCommit": "1adcd1a35dfc4ae4ff2be40fd9f0a65890cb02ef",
+  "testCount": 246,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-ghostty-absolute-role-command-pushed.md",
-    "sha256": "aeb009681d9e055c887e326741ac46153e0d39ac1f63755a80289086c65a427b"
+    "path": "docs/test-results/2026-07-20-full-session-prompt-contract-local.md",
+    "sha256": "06954c485e4c336d4006464daa9cf3a36309028f979b8fe4cea1376937751acb"
   },
   "files": [
     {

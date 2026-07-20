@@ -126,7 +126,7 @@ Turn the proved two-context session relay into a project-level experience that c
     mismatches before confirmation, and make Quick Start open and bind the real
     bundled prompt instead of stopping at requested windows. The expanded Guide,
     Quick Start, plural-runtime, security, and integrity slice passes **68/68**;
-    complete and pushed proof remain.
+    the complete local suite passes **246/246**, with pushed proof still owed.
 
 ## Submission cut
 

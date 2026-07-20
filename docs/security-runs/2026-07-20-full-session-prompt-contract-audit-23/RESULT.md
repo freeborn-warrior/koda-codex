@@ -28,5 +28,6 @@ containment, role separation, receipt, and gate checks remain unchanged.
 - The corrected bundled prompt opens exactly one bound independent session.
 - Expanded Guide, Quick Start, real/plural runtime, security, and integrity slice:
   **68/68 passed**.
+- Complete local suite: **246/246 passed**.
 
-Complete and post-push regression remain required before human handoff.
+Post-push regression remains required before human handoff.

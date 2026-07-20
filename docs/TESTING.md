@@ -2076,6 +2076,10 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [owner-observed incident](verification-runs/2026-07-20-full-session-prompt-contract-02/RESULT.md),
   [quality audit](quality-runs/2026-07-20-full-session-prompt-contract-17/RESULT.md),
   and [security audit](security-runs/2026-07-20-full-session-prompt-contract-audit-23/RESULT.md).
-- **State:** LOCAL FOCUSED PASS. The failed live attempt is discarded rather than
+- **Complete local result:** Every one of **246** named tests passed in the
+  [local transcript](test-results/2026-07-20-full-session-prompt-contract-local.md).
+- **State:** LOCAL COMPLETE PASS. Capability
+  `full-session-prompt-contract-v20` binds repair/tested commit `1adcd1a` and the
+  246-check local transcript. The failed live attempt is discarded rather than
   recovered because the required owner proof is a fresh recording from the start.
-  Complete, pushed, and fresh owner-visible proof remain.
+  Pushed and fresh owner-visible proof remain.
