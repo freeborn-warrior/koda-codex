@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "deterministic-role-launchers-v11",
-  "verifiedAt": "2026-07-20T02:40:05.362Z",
-  "repairCommit": "461824b50d82469dcd53f3ccb38788f91fdbe134",
-  "testedCommit": "461824b50d82469dcd53f3ccb38788f91fdbe134",
+  "capability": "atomic-role-ownership-v12",
+  "verifiedAt": "2026-07-20T02:55:06.171Z",
+  "repairCommit": "e6890f4c7e59719c89d25cd111f6f457a0610494",
+  "testedCommit": "e6890f4c7e59719c89d25cd111f6f457a0610494",
   "testCount": 230,
   "evidence": {
-    "path": "docs/test-results/2026-07-19-deterministic-launcher-migration-pushed.md",
-    "sha256": "6fb429a3819f776539c1e9a613267896a5624bd6ce2f64faf4d91d7325c43650"
+    "path": "docs/test-results/2026-07-19-atomic-role-locks-pushed.md",
+    "sha256": "c4950498db9f4ab340ffc691fef919c6acd395f765faad69f5aa365d1265d468"
   },
   "files": [
     {

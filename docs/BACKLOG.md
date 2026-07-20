@@ -10,7 +10,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
   persistent context, narrow Guide-owned write surface, ignored ambient config and
   rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex
   resume, live boundary probe, and deterministic legacy-launcher migration now
-  pass pushed capability `deterministic-role-launchers-v11` at **230/230**.
+  pass pushed capability `atomic-role-ownership-v12` at **230/230**.
 - [ ] **Release blocker:** finish the owner-observed retry. Launch `6371ade2-3002-42aa-87ab-a613220b7eab` proved clean initial windows and reached an approved Brief, then exposed an ambiguous receipt interaction. Its first recovery restored Reviewer but Producer failed to rejoin the existing formal-review job. Later, the secure Guide correctly stayed open when terminal-specific launcher bytes mismatched. Every event left the gate shut with zero acknowledgements. Exact Producer rejoin, live-role classification, ordered and repeatable recovery at every stable owner handover, numbered retry, hidden technical commands, fresh-model isolation, hardened Git locking, dynamic owner binding, strict role containment, the secure persistent Guide, and bounded legacy-launcher migration now pass a pushed 230/230 proof; Kristian's recovery observation, the remaining five phase decisions, and pushed close are still required.
 - [ ] Resume the preserved `2026-07-19-02` session now that the deterministic
   launcher-migration repair and its full audit are pushed. Reopen the same contexts and same
@@ -43,6 +43,12 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [ ] Prove adaptation with at least one writing project and one software project; compare their artifact and review criteria while keeping the same gate semantics.
 
 ## Completed and pushed
+
+- [x] Publish Reviewer and Producer ownership with complete bytes in one
+  no-clobber filesystem operation, while continuing to read the earlier directory
+  lock held by an already-running window. Commit `e6890f4` passes the unchanged
+  pushed **230/230** transcript under toolkit capability
+  `atomic-role-ownership-v12`.
 
 - [x] Make saved role launchers deterministic across terminal contexts and migrate
   the exact historical Koda shape without weakening tamper refusal. Both role files

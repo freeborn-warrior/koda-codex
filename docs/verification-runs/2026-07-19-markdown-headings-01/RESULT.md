@@ -93,3 +93,7 @@ unchanged pushed **230/230** transcript under capability
 `deterministic-role-launchers-v11`. The preserved launchers have been validated
 read-only but not yet migrated or executed. The same session and review remain the
 next human observation.
+
+The subsequent atomic role-ownership repair is bound by pushed capability
+`atomic-role-ownership-v12` at **230/230**. It retains read compatibility with the
+Reviewer's already-open legacy lock; the live session remains untouched.

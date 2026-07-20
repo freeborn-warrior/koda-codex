@@ -1559,5 +1559,9 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   **230/230** at **87.60% lines, 70.93% branches, and 86.04% functions** overall.
   The dependency-free package dry-run passed at 1,001,772 compressed bytes,
   4,782,431 unpacked bytes, 795 files, and zero bundled dependencies.
-- **State:** PUSHED LAUNCHER PASS; ATOMIC-LOCK LOCAL PASS. The lock repair still
-  needs pushed-code evidence before the owner's next recovery observation.
+- **Atomic-lock post-push result:** Commit `e6890f4` reached `origin/main`, then
+  the unchanged complete suite passed **230/230** in the
+  [pushed transcript](test-results/2026-07-19-atomic-role-locks-pushed.md). Toolkit
+  capability `atomic-role-ownership-v12` binds that commit, transcript, launcher,
+  and role-lock surface.
+- **State:** PUSHED MECHANICAL PASS. The owner's next recovery observation remains.

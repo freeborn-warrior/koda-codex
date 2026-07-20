@@ -66,6 +66,10 @@ Turn the proved two-context session relay into a project-level experience that c
     either changes; hostile or command-divergent files still refuse. Commit
     `461824b` passes the unchanged pushed 230/230 transcript under
     `deterministic-role-launchers-v11`.
+28. [x] Publish visible role ownership atomically instead of exposing a lock
+    directory before its owner file exists; preserve strict legacy-lock reads for
+    already-running windows. Commit `e6890f4` passes the unchanged pushed 230/230
+    transcript under `atomic-role-ownership-v12`.
 
 ## Submission cut
 
