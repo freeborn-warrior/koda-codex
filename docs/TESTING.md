@@ -2573,3 +2573,9 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **State:** POST-PUSH PASS. Toolkit capability `reviewer-halt-status-v24` binds
   repair/tested commit `53bebfc`, the exact transcript timestamp/hash/count, the
   changed Reviewer/Guide/status surface, and the halt classifier/compiled engine.
+- **Promoted release confirmation:** After capability v24 and the public evidence
+  links were committed and pushed at `beec682`, the complete unchanged suite passed
+  **258/258** again in the
+  [release transcript](test-results/2026-07-21-reviewer-halt-status-release.md).
+  Its SHA-256 is
+  `b3323064b31953e25e2ae1b4ebfc497c8807fa2296a41473a610c49ff0d3042b`.

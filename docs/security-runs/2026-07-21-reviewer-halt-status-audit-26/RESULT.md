@@ -9,6 +9,7 @@
   and final documented-tree [258/258](../../test-results/2026-07-21-reviewer-halt-status-final-local.md)
 - Focused security, integrity, status, and halt slice: **33/33**
 - Unchanged pushed regression: [258/258](../../test-results/2026-07-21-reviewer-halt-status-pushed.md)
+- Promoted release regression: [258/258](../../test-results/2026-07-21-reviewer-halt-status-release.md)
 
 ## Incident
 
