@@ -12,8 +12,13 @@ This is the on-disk working queue for the build. A checked item means its eviden
   refuse duplicate/mixed-role starts, execute every printed command from the state
   that printed it, and merge only after focused security plus complete durable
   verification pass. Capability `dual-launch-surface-v25`, audit 27, unchanged
-  post-push proof, and promoted release proof all pass **262/262**; merge is the
-  remaining Git operation, not a product gap.
+  post-push proof, and promoted release proof all passed **262/262** and were
+  merged to `main`.
+- [x] Repair the owner-observed manual-terminal `APPROVE WITH COMMENTS` failure.
+  The gate wrote no partial acknowledgement and did not advance. Receipt/comments
+  and receipt/ruling transport now pass explicit regressions while remaining
+  stdin-only; pushed capability `multi-part-owner-ack-v26`, audit 28, and the
+  complete suite pass **264/264**.
 - [x] **Submission access:** GitHub is public. A fresh unauthenticated clone at
   `c918bc0` ran the committed help and refusal → receipt → advancement path and
   remained clean. The public-clone evidence is preserved under `docs/package-runs/`.

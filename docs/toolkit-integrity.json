@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "owner-comments-pipe-development-v0",
-  "verifiedAt": "2026-07-21T15:01:56.275Z",
+  "capability": "multi-part-owner-ack-v26",
+  "verifiedAt": "2026-07-21T15:06:50.746Z",
   "repairCommit": "4dc31b5eb8bced595947cf1e119e79a844defcbf",
-  "testedCommit": "4dc31b5eb8bced595947cf1e119e79a844defcbf",
-  "testCount": 3,
+  "testedCommit": "f77f10c414d2d3dfa733147546a67495e3b23e0d",
+  "testCount": 264,
   "evidence": {
-    "path": "docs/test-results/2026-07-21-owner-comments-corrected-bootstrap.md",
-    "sha256": "46765ec92fec195f2ee0b9a091ae80f682d20fb80735ebfec96d21b6218c1b2c"
+    "path": "docs/test-results/2026-07-21-owner-comments-pushed.md",
+    "sha256": "f02c4025643341a32c3848cc198a23c34c1c90f8566a19437e0c27653dbfa0a9"
   },
   "files": [
     {

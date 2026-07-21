@@ -1,7 +1,7 @@
 # Manual-terminal multi-part acknowledgement — result 10
 
 **Date:** 2026-07-21  
-**Status:** COMPLETE LOCAL PASS — POST-PUSH PROOF PENDING
+**Status:** POST-PUSH PASS — TOOLKIT PROMOTED
 
 ## Owner-observed failure
 
@@ -68,6 +68,10 @@ The first integrity-enabled complete suite passed **264/264** in
 [`../../test-results/2026-07-21-owner-comments-local.md`](../../test-results/2026-07-21-owner-comments-local.md),
 whose SHA-256 is
 `5dca2b914f6ab217f720430970d450e0ea6d29dabc7b0828d89a3f7e190b5f3c`.
-Post-push verification remains required before this repair is release-ready. The
-interrupted owner run predates that proof and will not be represented as a clean
-completed post-repair session.
+Pushed commit `f77f10c` then passed the unchanged complete **264/264** suite in
+[`../../test-results/2026-07-21-owner-comments-pushed.md`](../../test-results/2026-07-21-owner-comments-pushed.md),
+whose SHA-256 is
+`f02c4025643341a32c3848cc198a23c34c1c90f8566a19437e0c27653dbfa0a9`.
+Toolkit capability `multi-part-owner-ack-v26` binds that exact commit, count,
+transcript, and every protected runtime file. The interrupted owner run predates
+the repair and is not represented as a clean completed post-repair session.

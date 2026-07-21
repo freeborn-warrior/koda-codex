@@ -27,7 +27,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(landing, /No `npm install` or build is required/);
   assert.match(landing, /node dist\/cli\.js init/);
   assert.match(landing, /npm test/);
-  assert.match(landing, /262-check post-push transcript/);
+  assert.match(landing, /264-check post-push transcript/);
   assert.match(
     landing,
     /To reproduce the competition video:[\s\S]*Ghostty[\s\S]*installed[\s\S]*choose[\s\S]*`1`/,
@@ -46,7 +46,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(readme, /node dist\/cli\.js --help/);
   assert.match(
     readme,
-    /\[bound 262-check post-push transcript\]\(test-results\/2026-07-21-manual-terminal-pushed\.md\)/,
+    /\[bound 264-check post-push transcript\]\(test-results\/2026-07-21-owner-comments-pushed\.md\)/,
   );
   assert.match(
     readme,

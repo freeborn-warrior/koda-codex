@@ -154,7 +154,12 @@ video upload, final repository freeze, and Devpost submission—not new product 
     unsafe mixing, test printed commands and recovery consequences, update current
     guides, and merge only after focused security plus complete durable proof.
     Capability `dual-launch-surface-v25`, audit 27, and both post-push and promoted
-    release regressions pass **262/262**.
+    release regressions passed **262/262** before merge to `main`.
+41. [x] Repair the owner-observed manual-terminal multi-part acknowledgement path.
+    Preserve the failed Produce decision, prove the pre-fix warning, queue piped
+    receipt/comments and receipt/ruling input without exposing it in arguments or
+    environment, and promote capability `multi-part-owner-ack-v26` only after the
+    exact pushed **264/264** suite passes.
 
 ## Submission cut
 

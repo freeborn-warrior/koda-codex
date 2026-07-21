@@ -2759,6 +2759,14 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   `5dca2b914f6ab217f720430970d450e0ea6d29dabc7b0828d89a3f7e190b5f3c`.
 - **Detailed incident:** [Result 10](verification-runs/2026-07-21-manual-comments-10/RESULT.md)
   preserves the live identifiers, zero-write outcome, repair, and recovery boundary.
-- **State:** COMPLETE LOCAL PASS. Post-push full proof and final integrity promotion
-  remain required. The interrupted owner session is not called a clean
-  post-repair completion.
+- **Post-push result:** Commit `f77f10c` exactly matched `origin/main` before the
+  unchanged complete suite passed **264/264** in the
+  [post-push transcript](test-results/2026-07-21-owner-comments-pushed.md), SHA-256
+  `f02c4025643341a32c3848cc198a23c34c1c90f8566a19437e0c27653dbfa0a9`.
+- **Security:** [Audit 28](security-runs/2026-07-21-owner-comments-audit-28/RESULT.md)
+  records the stdin queue, argument/environment boundary, fail-closed live result,
+  and unchanged same-user/process-input limitations.
+- **State:** POST-PUSH PASS. Capability `multi-part-owner-ack-v26` binds repair
+  commit `4dc31b5`, pushed tested commit `f77f10c`, all 264 named checks, the exact
+  transcript hash, and every protected runtime file. The interrupted owner session
+  is not called a clean post-repair completion.

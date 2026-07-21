@@ -95,11 +95,11 @@ owner contract
   distinguished from historical Ghostty development records, and the release
   states its one-person/macOS-only test boundary without implying a macOS
   filesystem dependency.
-- Toolkit capability `dual-launch-surface-v25` binds repair commit `4a134f0`, exact
-  pushed test commit `f3b93fa`, its complete 262/262 post-push transcript, and
-  every protected launch file. The shared role-launcher engine is protected
-  independently from the optional Ghostty adapter. This supersedes v24 without
-  discarding the earlier halt/status, public-guide, or Reviewer/session evidence.
+- Toolkit capability `multi-part-owner-ack-v26` binds repair commit `4dc31b5`,
+  exact pushed test commit `f77f10c`, its complete 264/264 post-push transcript,
+  and every protected runtime file. It adds explicit `APPROVE WITH COMMENTS` and
+  `DISCUSS` transport coverage while retaining the dual Ghostty/manual launch,
+  halt/status, public-guide, and Reviewer/session evidence from v25 and earlier.
 - The Build Week repository contract is now explicit in the root README and
   submission checklist: repository URL, Developer Tools track, setup, generated
   sample data, no-rebuild test path, supported-platform boundary, GPLv3 license,
@@ -292,8 +292,8 @@ owner contract
   it. The attempt is honestly pushed-halted at `cb8d372`; the exact owner reason is
   preserved in halt `6cbb0460-a7fb-4308-a12f-e5a33df469ea`. The controller repair,
   disk-derived terminal status, and recovery refusal passed 258/258 and were
-  promoted under v24. The later dual-launch v25 suite retains those checks while
-  expanding the current total to 262/262.
+  promoted under v24. The later v25 and v26 suites retain those checks while
+  expanding the current total to 264/264.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.
@@ -501,9 +501,11 @@ the same bound runtime, clean role environment, disk relay, review ceremony, gat
 and recovery truth. Prompt confirmation, real-project preparation, separate-context
 execution, recovery, six-phase owner acknowledgement, pushed close, and Guide return
 have completed through Ghostty in one owner-observed run. The manual interface now
-passes the same complete 262-check release suite and focused security audit; a later
-owner-observed manual model session remains optional UX evidence rather than an
-unproved gate claim. A future graphical interface remains another layer over the
+passes the same complete 264-check release suite and focused security audit. Its
+first owner-observed model session proved launch and three gates, then exposed the
+multi-part acknowledgement defect at Produce; the gate stayed closed and v26
+repairs both comments and ruling transport. A fresh clean manual completion remains
+useful UX evidence, not an unproved gate claim. A future graphical interface remains another layer over the
 same headless workflow.
 
 ## Open owner decision

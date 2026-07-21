@@ -172,12 +172,13 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The latest [262-check post-push transcript from merged `main`](docs/test-results/2026-07-21-dual-launch-main.md)
+- The latest [264-check post-push transcript from `main`](docs/test-results/2026-07-21-owner-comments-pushed.md)
   validates both Ghostty and manual-terminal launch over the same runtime together
   with the complete gate, receipt, stale-review, status-truth, package, security,
-  recovery, and full-session regression. The launcher-critical surface is hash-bound
-  by toolkit capability `dual-launch-surface-v25`; its focused threat review is
-  preserved in [security audit 27](docs/security-runs/2026-07-21-manual-terminal-audit-27/RESULT.md).
+  recovery, multi-part owner acknowledgement, and full-session regression. The
+  protected runtime is hash-bound by toolkit capability `multi-part-owner-ack-v26`;
+  its focused threat review is preserved in
+  [security audit 28](docs/security-runs/2026-07-21-owner-comments-audit-28/RESULT.md).
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
   encountered an unplanned Summary `REVISE`, recovered through a fresh review,
