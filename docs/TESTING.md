@@ -2336,5 +2336,20 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   fixture-recording step and bound final narration to the existing 2:24 picture
   duration. The focused judge-document and local-link suite still passed **3/3**;
   `git diff --check` also passed.
+- **First clean post-push run:** The full suite at pushed commit `a521ebd` passed
+  **251/252**. The Guide crash-evidence check read its partial event file for only
+  750 ms while the full suite was under concurrent process load; model startup had
+  not emitted `thread.started`, so the observed string was empty. The failure is
+  preserved in
+  [the post-push transcript](test-results/2026-07-20-build-week-picture-lock-pushed.md).
+- **Timing diagnosis:** The same crash-evidence condition passed **5/5** isolated
+  repetitions. The test now allows a bounded three-second startup window but also
+  asserts the model process is still running at the instant `thread.started` is
+  read from partial evidence. This retains the durability requirement and adds a
+  direct check that the observation occurred before turn completion.
+- **Corrected verification:** The strengthened condition passed **5/5** focused
+  repetitions and the complete suite then passed **252/252** under concurrent
+  load. This was a test-timing correction, not a relaxed product condition: the
+  test now makes the required pre-completion observation explicit.
 - **Evidence:** [picture-lock result](verification-runs/2026-07-20-build-week-picture-lock-06/RESULT.md)
   and [timed video script](VIDEO-SCRIPT.md).

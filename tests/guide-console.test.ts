@@ -469,24 +469,31 @@ test("GUIDE CONSOLE CRASH EVIDENCE: raw events are durable while a model turn is
     }
   });
   child.stderr.on("data", (chunk) => { output += String(chunk); });
+  let closed = false;
+  const closePromise = new Promise<number>((resolve, reject) => {
+    child.once("error", reject);
+    child.once("close", (code) => {
+      closed = true;
+      resolve(code ?? -1);
+    });
+  });
 
   const partial = path.join(root, ".koda", "guide", "GUIDE-001-EVENTS.partial.jsonl");
   let observed = "";
-  for (let attempt = 0; attempt < 30; attempt += 1) {
+  for (let attempt = 0; attempt < 120; attempt += 1) {
     try {
       observed = await readFile(partial, "utf8");
       if (observed.includes("thread.started")) break;
     } catch {
       // The model process may not have emitted its first line yet.
     }
+    if (closed) break;
     await new Promise((resolve) => setTimeout(resolve, 25));
   }
   assert.match(observed, /thread\.started/);
+  assert.equal(closed, false, "Partial crash evidence must be observable before the model turn exits.");
 
-  const status = await new Promise<number>((resolve, reject) => {
-    child.once("error", reject);
-    child.once("close", (code) => resolve(code ?? -1));
-  });
+  const status = await closePromise;
   assert.equal(status, 0, output);
   const final = await readFile(path.join(root, ".koda", "guide", "GUIDE-001-EVENTS.jsonl"), "utf8");
   assert.match(final, /turn\.completed/);
