@@ -179,6 +179,12 @@ direct final answer instead of flooding the owner with procedural inspection.
   protected runtime is hash-bound by toolkit capability `bound-owner-ack-recovery-v27`;
   its focused threat review is preserved in
   [security audit 29](docs/security-runs/2026-07-21-owner-ack-recovery-audit-29/RESULT.md).
+- The [owner-visible manual-terminal recovery](docs/verification-runs/2026-07-21-manual-terminal-recovery-11/RESULT.md)
+  resumed the exact pre-repair `APPROVE WITH COMMENTS` decision without replacing
+  its session, review, or persistent role contexts. The owner comment entered the
+  ledger, all six phases completed, and pushed close returned to Guide. The
+  preserved record distinguishes this real repaired continuation from a fresh
+  uninterrupted run.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
   encountered an unplanned Summary `REVISE`, recovered through a fresh review,

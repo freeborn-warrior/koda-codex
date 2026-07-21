@@ -160,13 +160,16 @@ video upload, final repository freeze, and Devpost submission—not new product 
     receipt/comments and receipt/ruling input without exposing it in arguments or
     environment, and promote capability `multi-part-owner-ack-v26` only after the
     exact pushed **264/264** suite passes.
-42. [ ] Recover the preserved pre-fix Produce acknowledgement without inventing
+42. [x] Recover the preserved pre-fix Produce acknowledgement without inventing
     state. Bind the exact failure to the same launch, session, phase, review job,
     artifact/review hash, absent ledger entry, and both persistent role contexts;
     mutation-test every binding, promote unchanged pushed proof, then resume only
     through Guide's numbered recovery choice. Capability
-    `bound-owner-ack-recovery-v27` now binds the unchanged pushed **267/267** proof;
-    the owner-observed continuation is the remaining action.
+    `bound-owner-ack-recovery-v27` binds the unchanged pushed **267/267** proof.
+    Kristian's manual-terminal recovery retained both original role contexts,
+    recorded the same Produce review and owner comment, completed all six phases,
+    pushed close `ed4ad4d`, and returned the archive to Guide at `2a9bd706`
+    ([result](verification-runs/2026-07-21-manual-terminal-recovery-11/RESULT.md)).
 
 ## Submission cut
 

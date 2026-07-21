@@ -2815,10 +2815,45 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   `a7b30086cdb08baa5be494d1b8a45d22ee12fbc1c9a0508dbcdf847af973b2a0`.
 - **State:** POST-PUSH PASS. Capability `bound-owner-ack-recovery-v27` binds the
   exact repair/test commit, transcript, count, and protected runtime files.
-  Owner-observed continuation of the preserved session remains required.
+  Owner-observed continuation of the preserved session remained required at this
+  point and was completed in the follow-up below.
 - **Promoted release confirmation:** After the v27 manifest and public evidence
   were pushed at `a496742`, the unchanged complete suite passed **267/267** again
   in the
   [release transcript](test-results/2026-07-21-owner-ack-recovery-release.md),
   SHA-256
   `68d0df3f3167566f41ae54b56824bb181bb388bef14f1e04f54e373d8b083269`.
+
+## 2026-07-21 — Owner-visible manual-terminal recovery and pushed close
+
+- **Surface:** Guide's manual-terminal choice using the generated Reviewer-first
+  and Producer-second launchers; the same relay and gate as the Ghostty adapter.
+- **Preserved state:** Launch `1c2a5c0f-d578-4d64-822b-ee99fa184133`, session
+  `2026-07-21-01`, original Sol/medium Producer context, original Terra/medium
+  Reviewer context, original Produce review, and no pre-existing Produce ledger
+  entry.
+- **Observed recovery:** The old Guide process was safely closed so the promoted
+  v27 controller could load. Fresh disk status then reported `SESSION RECOVERY
+  READY`. Guide restored Reviewer before Producer; neither a replacement session
+  nor a replacement review was created.
+- **Acknowledgement result:** The same `APPROVE WITH COMMENTS` review accepted the
+  displayed review code and saved Kristian's one-line comment. The ledger contains
+  one Produce entry, and the gate advanced to Live.
+- **End-to-end result:** Live and Summary received fresh approvals. Final state is
+  **6/6**, with **6** owner acknowledgements, pushed close commit `ed4ad4d`, and
+  Guide-return commit `2a9bd706`. Both role contexts remained unchanged; no
+  waiting direction or Reviewer job remained.
+- **Security check:** The complete demonstration working tree, every reachable
+  commit, and the selected public copies produced no match for the bounded
+  credential/provider-key/private-key signature scan. The restorable bundle
+  verified as complete with `HEAD`, `main`, and `origin/main` equal.
+- **Evidence:** [Owner-visible result 11](verification-runs/2026-07-21-manual-terminal-recovery-11/RESULT.md)
+  includes the review, ledger, final state, close, Guide return, compact transcript,
+  pre-repair Reviewer events, Git evidence, and complete history bundle.
+- **Complete repository result:** The durable
+  [per-test transcript](test-results/2026-07-21-manual-terminal-recovery-complete.md)
+  passed **267/267** with zero failures or skips. Transcript SHA-256:
+  `63d6f52d97685b656152eb98fdf23bb0ba1fef4a682932cb04638af46e501987`.
+- **Honest boundary:** This was a repaired continuation of a real pre-repair
+  failure, not a fresh uninterrupted post-repair run. It proves exact saved-state
+  recovery and completion; it does not relabel the failed first attempt as clean.

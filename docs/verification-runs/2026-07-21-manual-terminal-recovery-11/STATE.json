@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "id": "2026-07-21-01",
+  "createdAt": "2026-07-21T14:32:31.918Z",
+  "phases": [
+    {
+      "name": "brief",
+      "description": "What we are doing, why, and the limits"
+    },
+    {
+      "name": "orient",
+      "description": "Read and record the actual ground before planning"
+    },
+    {
+      "name": "plan",
+      "description": "Set out the work in checkable steps"
+    },
+    {
+      "name": "produce",
+      "description": "Create the session's real output"
+    },
+    {
+      "name": "live",
+      "description": "Exercise the real output and record what happened"
+    },
+    {
+      "name": "summary",
+      "description": "Verify and record what was completed"
+    }
+  ],
+  "currentPhaseIndex": 6,
+  "advances": [
+    {
+      "phase": "brief",
+      "receipt": "RECEIPT: Review read — 86b8c29d-370c-4dfa-b834-f610176cf26d",
+      "reviewId": "86b8c29d-370c-4dfa-b834-f610176cf26d",
+      "advancedAt": "2026-07-21T14:38:30.776Z"
+    },
+    {
+      "phase": "orient",
+      "receipt": "RECEIPT: Review read — e5d9a0a3-3524-441d-bf97-55a32f44e6f9",
+      "reviewId": "e5d9a0a3-3524-441d-bf97-55a32f44e6f9",
+      "advancedAt": "2026-07-21T14:41:29.330Z"
+    },
+    {
+      "phase": "plan",
+      "receipt": "RECEIPT: Review read — f46e9391-965c-47d8-bc62-4b39bf6f87fe",
+      "reviewId": "f46e9391-965c-47d8-bc62-4b39bf6f87fe",
+      "advancedAt": "2026-07-21T14:46:14.693Z"
+    },
+    {
+      "phase": "produce",
+      "receipt": "RECEIPT: Review read — 0cbe0804-1f0a-4ce4-904a-2130445464f7",
+      "reviewId": "0cbe0804-1f0a-4ce4-904a-2130445464f7",
+      "advancedAt": "2026-07-21T15:52:43.872Z"
+    },
+    {
+      "phase": "live",
+      "receipt": "RECEIPT: Review read — 6e45a409-62d7-4bbf-9e85-461992540eb3",
+      "reviewId": "6e45a409-62d7-4bbf-9e85-461992540eb3",
+      "advancedAt": "2026-07-21T15:57:31.101Z"
+    },
+    {
+      "phase": "summary",
+      "receipt": "RECEIPT: Review read — b59e0dd6-cdbd-443b-93e6-5a641b949306",
+      "reviewId": "b59e0dd6-cdbd-443b-93e6-5a641b949306",
+      "advancedAt": "2026-07-21T16:00:49.971Z"
+    }
+  ],
+  "kind": "produce",
+  "launchMode": "independent",
+  "dependencies": []
+}

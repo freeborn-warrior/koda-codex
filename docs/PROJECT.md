@@ -100,7 +100,9 @@ owner contract
   runtime file. In addition to v26's multi-part input repair, it permits only the
   exact preserved zero-write failure to re-enter the existing Reviewer-first
   recovery path after launch, session, phase, job, context, gate, and absent-ledger
-  evidence all revalidate.
+  evidence all revalidate. The original manually launched session then passed that
+  recovery in owner-visible use: same review and role contexts, saved owner comment,
+  six completed gates, pushed immutable close, and returned Guide archive.
 - The Build Week repository contract is now explicit in the root README and
   submission checklist: repository URL, Developer Tools track, setup, generated
   sample data, no-rebuild test path, supported-platform boundary, GPLv3 license,
@@ -501,13 +503,17 @@ run Koda-C's exact Reviewer-first and Producer-second launchers. Both interfaces
 the same bound runtime, clean role environment, disk relay, review ceremony, gate,
 and recovery truth. Prompt confirmation, real-project preparation, separate-context
 execution, recovery, six-phase owner acknowledgement, pushed close, and Guide return
-have completed through Ghostty in one owner-observed run. The manual interface now
-passes the same complete 264-check release suite and focused security audit. Its
-first owner-observed model session proved launch and three gates, then exposed the
-multi-part acknowledgement defect at Produce; the gate stayed closed and v26
-repairs both comments and ruling transport. A fresh clean manual completion remains
-useful UX evidence, not an unproved gate claim. A future graphical interface remains another layer over the
-same headless workflow.
+have completed through Ghostty in one owner-observed run. The manual interface
+passes the same complete gate suite and focused security audit. Its first
+owner-observed model session exposed the multi-part acknowledgement defect at
+Produce; the gate stayed closed, v26 repaired the input transport, and v27
+authorized only that exact unchanged zero-write state. Kristian then restored the
+same Reviewer and Producer contexts through Guide, recorded the original
+`APPROVE WITH COMMENTS` decision, completed Live and Summary, and returned a
+pushed close ([evidence](verification-runs/2026-07-21-manual-terminal-recovery-11/RESULT.md)).
+A future fresh uninterrupted manual completion remains optional UX evidence, not
+an unproved gate or recovery claim. A future graphical interface remains another
+layer over the same headless workflow.
 
 ## Open owner decision
 

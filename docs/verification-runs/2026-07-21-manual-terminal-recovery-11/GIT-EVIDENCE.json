@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "mode": "guide-project",
+  "launchId": "1c2a5c0f-d578-4d64-822b-ee99fa184133",
+  "sessionId": "2026-07-21-01",
+  "branch": "main",
+  "upstream": "origin/main",
+  "head": "ed4ad4de0dde9628cc6eb7ab97c64c1d8cc15e81",
+  "remoteHead": "ed4ad4de0dde9628cc6eb7ab97c64c1d8cc15e81",
+  "aheadCount": 0,
+  "projectStatus": "",
+  "kodaStatus": "KODA — 2026-07-21-01 — produce\nLaunch: independent\nWrite set: 6 external path(s)\n  bin/heading-report.js\n  package.json\n  test/fixtures/fenced.md\n  test/fixtures/no-headings.md\n  test/fixtures/ordinary.md\n  test/heading-report.test.js\nSESSION CLOSED",
+  "capturedAt": "2026-07-21T16:03:27.037Z"
+}
