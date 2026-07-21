@@ -18,13 +18,22 @@ company or team. Kristian owns and tests on one Mac, so macOS 26.5.1 arm64 is th
 only operating system personally tested for this release. The core has no macOS
 filesystem dependency, but no other platform is claimed as certified yet.
 
-## Try the refusal in one minute
+## Install and test for judging
+
+- **Repository:** [github.com/freeborn-warrior/koda-codex](https://github.com/freeborn-warrior/koda-codex)
+- **Submission track:** Developer Tools
+- **License:** [GPL-3.0-only](LICENSE)
+
+Everything needed for the fast test ships in this repository. `init --demo`
+generates its own sample project, artifact, review, and approval ledger; there is
+no external sample data, API key, account, network service, package install, or
+build step. The committed CLI is the test build.
 
 Requirements: Node.js 22.18+ and Git. The tested release platform is macOS
 26.5.1 arm64 with Node.js 26.0.0 and Apple Git 2.50.1. Other platforms are not
 claimed as tested.
 
-Install by cloning the public repository. No `npm install` or build is required:
+Install by cloning the repository. No `npm install` or build is required:
 
 ```bash
 git clone https://github.com/freeborn-warrior/koda-codex.git
@@ -48,6 +57,12 @@ Read the review, use the exact `approve` command Koda-C printed, paste its compl
 final `RECEIPT:` line when prompted, and run the printed `advance` command again.
 The same gate opens and activates `orient`. The complete copy-and-paste path is in
 the [one-minute demo](docs/DEMO.md#one-minute-mechanical-proof).
+
+To run the complete deterministic regression suite from the checkout:
+
+```bash
+npm test
+```
 
 `npx --yes . --help` is separately tested as the local package path. It is not
 required for this primary demo, so a damaged or cold npm cache cannot obscure the
@@ -145,8 +160,10 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The current [252-check post-push Reviewer/session-binding transcript](docs/test-results/2026-07-20-reviewer-session-binding-pushed.md)
-  is hash-bound by the toolkit integrity manifest.
+- The current [253-check post-push public-guide truth transcript](docs/test-results/2026-07-20-public-guide-truth-pushed.md)
+  is hash-bound by the toolkit integrity manifest. It includes the complete gate,
+  receipt, stale-review, status-truth, package, security, recovery, and full-session
+  regression rather than a documentation-only test.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
   encountered an unplanned Summary `REVISE`, recovered through a fresh review,
@@ -202,7 +219,7 @@ direct final answer instead of flooding the owner with procedural inspection.
   [owner-observed result](docs/verification-runs/2026-07-19-markdown-headings-01/RESULT.md)
   preserves the failures and final pass together.
 
-## How Codex and GPT-5.6 built it
+## How Kristian, Codex, and GPT-5.6 built it
 
 Koda-C was Kristian's first project built with Codex, created as an entry for
 OpenAI's Build Week. Work began Saturday morning, July 18, 2026; the state
@@ -211,15 +228,25 @@ hours, neither continuous work nor a controlled speed benchmark. The
 repository's dated decisions, failures, repairs, tests, and completed sessions
 preserve what that first collaboration actually produced.
 
-Kristian Bengtsson developed the underlying phase method while directing C++,
+**Key owner decisions.** Kristian Bengtsson developed the underlying phase method while directing C++,
 Swift, and Rust products as a designer: session prompt, brief, orient, plan,
 produce, live, summary, then push, with independent review between phases. He
 made the product decisions about the receipt, one shared reviewer, the
 producer/reviewer relay, owner-facing reviewer, immutable Git close, model tests,
 and honest limits.
 
-GPT-5.6 Codex translated those rulings into the CLI, repository-local skills,
-relay runtime, tests, model fixtures, security hardening, and inspectable evidence.
+**Where Codex accelerated the work.** GPT-5.6 Codex translated those rulings into
+the CLI, repository-local skills, relay runtime, tests, model fixtures, security
+hardening, and inspectable evidence in roughly 51 elapsed hours. Codex repeatedly
+ran the evolving regression suite, diagnosed failures, repaired the implementation,
+and recorded both failed and corrected results instead of hiding the iteration.
+
+**How GPT-5.6 and Codex were used.** GPT-5.6 powered the Codex engineering
+collaboration and the product's own separated model seats. The preserved real
+relay used a GPT-5.6 Sol Producer and GPT-5.6 Terra Reviewer; sealed reviewer
+fixtures also exercised Sol, Terra, and Luna with scoring contracts committed
+before their runs.
+
 Kristian explicitly chose to let Codex build in its own engineering order: the
 discipline lives in the product, not in the process that made it. Dated commits
 and recorded failed tests preserve that collaboration instead of retrofitting it

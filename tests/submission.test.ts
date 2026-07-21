@@ -19,18 +19,26 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
     readFile("docs/VIDEO-SCRIPT.md", "utf8"),
     readFile("docs/SUBMISSION-CHECKLIST.md", "utf8"),
   ]);
-  assert.match(landing, /## Try the refusal in one minute/);
+  assert.match(landing, /## Install and test for judging/);
+  assert.match(landing, /\*\*Submission track:\*\* Developer Tools/);
   assert.match(landing, /git clone https:\/\/github\.com\/freeborn-warrior\/koda-codex\.git/);
+  assert.match(landing, /\[GPL-3\.0-only\]\(LICENSE\)/);
+  assert.match(landing, /no external sample data, API key, account, network service, package install, or[\s\S]*build step/);
   assert.match(landing, /No `npm install` or build is required/);
   assert.match(landing, /node dist\/cli\.js init/);
-  assert.match(landing, /252-check post-push Reviewer\/session-binding transcript/);
-  assert.match(landing, /How Codex and GPT-5\.6 built it/);
+  assert.match(landing, /npm test/);
+  assert.match(landing, /253-check post-push public-guide truth transcript/);
+  assert.match(landing, /How Kristian, Codex, and GPT-5\.6 built it/);
+  assert.match(landing, /\*\*Key owner decisions\.\*\*/);
+  assert.match(landing, /\*\*Where Codex accelerated the work\.\*\*/);
+  assert.match(landing, /\*\*How GPT-5\.6 and Codex were used\.\*\*/);
+  assert.match(landing, /GPT-5\.6 Sol Producer and GPT-5\.6 Terra Reviewer/);
   assert.match(landing, /does \*\*not\*\* prove comprehension/);
   assert.match(readme, /## Judge path/);
   assert.match(readme, /node dist\/cli\.js --help/);
   assert.match(
     readme,
-    /\[bound 252-check post-push transcript\]\(test-results\/2026-07-20-reviewer-session-binding-pushed\.md\)/,
+    /\[bound 253-check post-push transcript\]\(test-results\/2026-07-20-public-guide-truth-pushed\.md\)/,
   );
   assert.match(
     readme,
@@ -73,6 +81,9 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /publicly to YouTube/);
   assert.match(checklist, /testing@devpost\.com/);
   assert.match(checklist, /build-week-event@openai\.com/);
+  assert.match(checklist, /## Official repository requirement map/);
+  assert.match(checklist, /Run `\/feedback` in this primary build task/);
+  assert.match(checklist, /Test without rebuilding/);
   assert.match(checklist, /https:\/\/openai\.devpost\.com\/rules/);
   assert.match(checklist, /passes 250\/250 unchanged after push/);
   assert.match(checklist, /unchanged pushed commit passes a second[\s\S]*252\/252/);

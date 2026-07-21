@@ -88,6 +88,19 @@ owner contract
   distinguished from historical Ghostty development records, and the release
   states its one-person/macOS-only test boundary without implying a macOS
   filesystem dependency.
+- Toolkit capability `public-guide-truth-v23` binds the exact pushed wording and
+  runtime commit `1d95af0`, its unchanged complete 253/253 transcript, and every
+  protected launch file. This supersedes v22 as the current launch proof without
+  discarding the earlier Reviewer/session-binding evidence.
+- The Build Week repository contract is now explicit in the root README and
+  submission checklist: repository URL, Developer Tools track, setup, generated
+  sample data, no-rebuild test path, supported-platform boundary, GPLv3 license,
+  Kristian's key decisions, Codex acceleration, and GPT-5.6 model use. The
+  `/feedback` Session ID remains a submission-form owner action and is never
+  inferred from a relay context. Live GitHub inspection found that a custom
+  preface made the full GPLv3 file appear as `Other`; the preface was removed so
+  the root license is the unmodified standard text, while Kristian's sole
+  copyright line remains in the README and project metadata.
 - A preserved historical fresh ephemeral Codex startup proves the original nine session-runtime skills and root guidance were injected before any tool call or repository read.
 - A second fresh ephemeral startup proof covers the current ten-skill set, including `koda-c-session-prompt`, with zero tools or repository reads. A separate sealed Sol/medium task exercised that skill against an active Brief and refused before drafting without changing fixture bytes.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.

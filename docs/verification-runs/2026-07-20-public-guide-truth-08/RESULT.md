@@ -1,6 +1,6 @@
 # Public guide truth and Koda-C naming
 
-**Status:** LOCAL PASS — POST-PUSH PROOF PENDING
+**Status:** POST-PUSH PASS — PROMOTED AS `public-guide-truth-v23`
 
 ## Owner contract
 
@@ -63,8 +63,22 @@ The complete suite's mutation, adversarial receipt, stale review, status truth,
 printed command, security, package, concurrency, recovery, and full-session tests
 remain present. No gate condition was weakened.
 
-## Remaining proof
+## Pushed proof
 
-This record does not yet claim pushed release proof. The exact documentation and
-runtime wording commit must be pushed, rerun unchanged, and then promoted in the
-toolkit integrity manifest with its own preserved transcript.
+Commit `1d95af04e27a904679e61fe3baac06d9d64c148b` exactly matched
+`origin/main` before the unchanged complete suite ran. All **253/253** tests passed
+in the [post-push transcript](../../test-results/2026-07-20-public-guide-truth-pushed.md),
+SHA-256
+`c5fb7c6be73b090a52aa77b67634ac30b112c6012c3a346bb01e0a6222f6b1c0`.
+
+Toolkit capability `public-guide-truth-v23` binds that exact commit, transcript,
+count, and protected file set. A final release regression after this promotion is
+kept as a separate proof rather than inferred here.
+
+The first focused promotion run passed **28/31** because `verifiedAt` named the
+promotion moment instead of the transcript's exact recorded time. Koda-C refused
+Quick Start and both permission-path checks by name. The field was corrected to
+`2026-07-21T03:15:22.013Z`; the verifier and tests were not changed.
+The corrected focused run passed **31/31**, and the complete promoted local
+[release suite](../../test-results/2026-07-20-public-guide-truth-release-local.md)
+passed **253/253**.

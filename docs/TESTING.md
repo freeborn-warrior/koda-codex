@@ -2441,5 +2441,57 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Complete result:** The full suite passed **253/253**. Two durable local passes
   are preserved: the first [253/253 transcript](test-results/2026-07-20-public-guide-truth-local.md)
   and the final naming-consistent [253/253 transcript](test-results/2026-07-20-public-guide-truth-final-local.md).
-- **State:** LOCAL PASS. Exact pushed-commit proof and toolkit-manifest promotion
-  remain pending and must be recorded rather than inferred.
+- **Post-push result:** Commit `1d95af0` exactly matched `origin/main` before the
+  run and passed the complete unchanged [253/253 suite](test-results/2026-07-20-public-guide-truth-pushed.md).
+  Its transcript SHA-256 is
+  `c5fb7c6be73b090a52aa77b67634ac30b112c6012c3a346bb01e0a6222f6b1c0`.
+- **State:** POST-PUSH PASS. Toolkit capability `public-guide-truth-v23` now binds
+  that exact tested commit, transcript, count, and every protected launch file.
+  A final release regression after promotion remains separate proof.
+- **Promotion failure retained:** The first focused promotion run passed **28/31**.
+  The manifest used the later promotion time as `verifiedAt`, while the verifier
+  correctly requires the exact bound transcript's `Recorded at` value. Quick Start
+  and both toolkit-backed permission checks refused with the named missing claim.
+  `verifiedAt` was corrected to the transcript's
+  `2026-07-21T03:15:22.013Z`; no verifier or assertion changed.
+- **Corrected promotion result:** The same focused package, Quick Start, security,
+  submission, and toolkit slice passed **31/31**. The complete promoted local
+  [release suite](test-results/2026-07-20-public-guide-truth-release-local.md)
+  then passed **253/253**.
+
+## 2026-07-20 — Build Week repository contract and GPL detection
+
+- **Live requirement audit:** The Build Week FAQ and official rules were read
+  again. The repository must expose setup, sample data where needed, running
+  guidance, Codex acceleration, key decisions, GPT-5.6 use, installation,
+  supported platforms, and a no-rebuild judge path. The `/feedback` ID must come
+  from the primary build task and belongs in Devpost, not in public repository
+  evidence.
+- **Documentation change:** The root README now names the repository, Developer
+  Tools track, GPLv3 license, generated sample fixture, runtime/platform boundary,
+  committed CLI, complete suite command, and no-install/no-build path together.
+  Its collaboration section is titled “How Kristian, Codex, and GPT-5.6 built it”
+  and explicitly separates owner decisions, Codex acceleration, and GPT-5.6 use.
+- **Integrity refusal retained:** An initial redundant edit to the hash-protected
+  Quick Start made the complete durable suite pass **186/252** and fail **66**
+  Guide/security checks with the single named cause `Toolkit integrity file
+  changed after verification: docs/QUICKSTART.md`. The full failure is preserved
+  in the [stale-integrity transcript](test-results/2026-07-20-build-week-requirements-stale-integrity.md).
+  The new official wording did not require changing the launch-bound document, so
+  only that redundant addition was removed. The verified Quick Start hash returned
+  exactly, and the affected Guide/security/submission slice passed **91/91**. No
+  test or verifier was weakened.
+- **Corrected requirement result:** The complete durable suite then passed
+  **253/253** in the [requirements transcript](test-results/2026-07-20-build-week-requirements-local.md).
+- **Live GitHub defect:** Authenticated GitHub inspection reported the repository
+  as `PRIVATE` and its license as `Other`. The license text was complete, but a
+  custom Koda-C/copyright preface prevented standard detection. `LICENSE` now
+  contains the unmodified GPLv3 text; Kristian's sole copyright line remains in
+  both READMEs. The license test was strengthened to require the standard opening
+  and both sole-copyright notices instead of preserving the detector-breaking
+  preface.
+- **Final local result:** License plus judge-document checks passed **5/5**;
+  `git diff --check` passed; the complete durable
+  [repository-contract suite](test-results/2026-07-20-build-week-repository-contract-local.md)
+  passed **253/253**. Public visibility and GitHub's post-push license detection
+  remain external owner/verifier checks.

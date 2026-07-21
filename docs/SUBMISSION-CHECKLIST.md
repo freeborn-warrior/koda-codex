@@ -12,6 +12,19 @@ solution, and approach. The
 [official Devpost rules](https://openai.devpost.com/rules) remain the source of
 truth for the exact submission requirements.
 
+## Official repository requirement map
+
+| Official requirement | Koda-C evidence or action | Status |
+| --- | --- | --- |
+| Repository URL and judge access | `https://github.com/freeborn-warrior/koda-codex`; make public, or share with both judge addresses | **Owner action open** |
+| Relevant license | Root `LICENSE` contains the unmodified standard GPLv3 text; README carries Kristian's sole copyright line; package declares `GPL-3.0-only` | Ready; recheck GitHub detection after push |
+| Setup, sample data, and run guidance | Root README and Quick Start; `init --demo` generates every sample file | Complete |
+| Codex acceleration and key decisions | README section “How Kristian, Codex, and GPT-5.6 built it” explicitly separates Kristian's decisions from Codex engineering | Complete |
+| GPT-5.6 and Codex use | README, dated Git/test evidence, real Sol/Terra relay, and sealed Sol/Terra/Luna fixture runs | Complete |
+| `/feedback` Session ID | Run `/feedback` in this primary build task and paste the generated ID into Devpost—not into the repository and not from a relay task | **Owner action open** |
+| Developer-tool installation and supported platforms | Root README and Quick Start name Node.js 22.18+, Git, tested macOS 26.5.1 arm64, and optional Ghostty requirements | Complete |
+| Test without rebuilding | Committed `dist/` CLI, generated one-minute fixture, `npm test`, and preserved full-session evidence; no package install or build required | Complete |
+
 ## Owner handoff order
 
 These are the submission actions in the order that avoids rework:
@@ -62,6 +75,9 @@ neither visibility nor submission state has been changed by Codex.
 - [x] GPLv3-only license and sole owner copyright are present.
 - [x] Product name, repository/package slug, and CLI command are distinguished:
   Koda-C / `koda-codex` / `koda`.
+- [x] Current public guides and live CLI prose use Koda-C consistently; the
+  complete unchanged pushed [253/253 suite](test-results/2026-07-20-public-guide-truth-pushed.md)
+  is hash-bound by toolkit capability `public-guide-truth-v23`.
 - [x] Required runtime is documented: Node.js 22.18+ and Git.
 - [x] Tested platform is stated honestly: macOS 26.5.1 arm64, Node 26.0.0,
   Apple Git 2.50.1. Other platforms are not represented as tested.
