@@ -9,11 +9,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 - [x] **Submission access:** GitHub is public. A fresh unauthenticated clone at
   `c918bc0` ran the committed help and refusal → receipt → advancement path and
   remained clean. The public-clone evidence is preserved under `docs/package-runs/`.
-- [ ] Promote the Reviewer conversational-halt repair exposed by the July 20
+- [x] Promote the Reviewer conversational-halt repair exposed by the July 20
   submission rehearsal. The exact owner request was incorrectly classified as a
   waiting direction; the live attempt is now immutably pushed-halted, deterministic
-  routing and disk-derived terminal status pass 258/258 locally, and the unchanged
-  pushed repair still needs to be integrity-bound before release freeze.
+  routing and disk-derived terminal status pass 258/258 locally and unchanged from
+  pushed repair commit `53bebfc` under capability `reviewer-halt-status-v24`.
 - [x] Owner-test the new one-command `koda guide open` experience. Its
   persistent context, narrow Guide-owned write surface, ignored ambient config and
   rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex
@@ -83,9 +83,9 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Next
 
-- [ ] Finish submission-critical proof and polish only: promote the halt/status
-  repair, record and mux narration, perform final full playback and hygiene,
-  publish the video, and complete the external submission. The repository is
+- [ ] Finish submission-critical proof and polish only: record and mux narration,
+  perform final full playback and hygiene, publish the video, and complete the
+  external submission. The halt/status repair is promoted and the repository is
   public; the product runtime, fresh owner rehearsal, and silent picture lock are
   proved.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.

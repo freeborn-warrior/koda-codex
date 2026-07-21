@@ -78,8 +78,8 @@ owner action.
 - [x] Product name, repository/package slug, and CLI command are distinguished:
   Koda-C / `koda-codex` / `koda`.
 - [x] Current public guides and live CLI prose use Koda-C consistently; the
-  complete unchanged pushed [253/253 suite](test-results/2026-07-20-public-guide-truth-pushed.md)
-  is hash-bound by toolkit capability `public-guide-truth-v23`.
+  complete unchanged pushed [258/258 suite](test-results/2026-07-21-reviewer-halt-status-pushed.md)
+  is hash-bound by toolkit capability `reviewer-halt-status-v24`.
 - [x] Required runtime is documented: Node.js 22.18+ and Git.
 - [x] Tested platform is stated honestly: macOS 26.5.1 arm64, Node 26.0.0,
   Apple Git 2.50.1. Other platforms are not represented as tested.

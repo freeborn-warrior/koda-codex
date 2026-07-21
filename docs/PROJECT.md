@@ -94,10 +94,10 @@ owner contract
   distinguished from historical Ghostty development records, and the release
   states its one-person/macOS-only test boundary without implying a macOS
   filesystem dependency.
-- Toolkit capability `public-guide-truth-v23` binds the exact pushed wording and
-  runtime commit `1d95af0`, its unchanged complete 253/253 transcript, and every
-  protected launch file. This supersedes v22 as the current launch proof without
-  discarding the earlier Reviewer/session-binding evidence.
+- Toolkit capability `reviewer-halt-status-v24` binds repair commit `53bebfc`, its
+  unchanged complete 258/258 post-push transcript, and every protected launch
+  file, including the halt classifier and compiled halt engine. This supersedes
+  v23 without discarding the earlier public-guide or Reviewer/session evidence.
 - The Build Week repository contract is now explicit in the root README and
   submission checklist: repository URL, Developer Tools track, setup, generated
   sample data, no-rebuild test path, supported-platform boundary, GPLv3 license,

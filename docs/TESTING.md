@@ -2565,6 +2565,11 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   `BETWEEN SESSIONS`, `State: HALTED`, and that the saved `PAUSED_ERROR` label is
   superseded by pushed halt evidence. Relay status agrees. `guide recover` refuses
   with `No active session needs recovery`.
-- **State:** LOCAL PASS. The fail-closed repair must now be committed and pushed,
-  rerun unchanged from that code commit, and promoted into the toolkit integrity
-  manifest before release freeze.
+- **Post-push result:** Repair commit `53bebfc` exactly matched `origin/main` before
+  the unchanged complete suite ran. All **258/258** checks passed in the
+  [post-push transcript](test-results/2026-07-21-reviewer-halt-status-pushed.md),
+  whose SHA-256 is
+  `d2410fd34dc84bb36c3739b77fad405702c2314e310e111340f296a25382fbce`.
+- **State:** POST-PUSH PASS. Toolkit capability `reviewer-halt-status-v24` binds
+  repair/tested commit `53bebfc`, the exact transcript timestamp/hash/count, the
+  changed Reviewer/Guide/status surface, and the halt classifier/compiled engine.

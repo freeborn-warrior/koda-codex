@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "public-guide-truth-v23",
-  "verifiedAt": "2026-07-21T03:15:22.013Z",
-  "repairCommit": "1d95af04e27a904679e61fe3baac06d9d64c148b",
-  "testedCommit": "1d95af04e27a904679e61fe3baac06d9d64c148b",
-  "testCount": 253,
+  "capability": "reviewer-halt-status-v24",
+  "verifiedAt": "2026-07-21T04:27:20.366Z",
+  "repairCommit": "53bebfc8d9386dbdf8f4cfd16f1cf6d5fa92e58f",
+  "testedCommit": "53bebfc8d9386dbdf8f4cfd16f1cf6d5fa92e58f",
+  "testCount": 258,
   "evidence": {
-    "path": "docs/test-results/2026-07-20-public-guide-truth-pushed.md",
-    "sha256": "c5fb7c6be73b090a52aa77b67634ac30b112c6012c3a346bb01e0a6222f6b1c0"
+    "path": "docs/test-results/2026-07-21-reviewer-halt-status-pushed.md",
+    "sha256": "d2410fd34dc84bb36c3739b77fad405702c2314e310e111340f296a25382fbce"
   },
   "files": [
     {
@@ -20,7 +20,7 @@
     },
     {
       "path": "src/guide-runtime.ts",
-      "sha256": "e912b8d9f53618d5dde6f17bf0e9c65586c97ea0d659c690864bad439d15e501"
+      "sha256": "4bb2b3ad2ef41ceed1e67dfb2f8c9d78516e1b732b46ccb3623b065efc524657"
     },
     {
       "path": "scripts/execute-relay-run.ts",
@@ -28,7 +28,7 @@
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "0603a31107b3ceb8d44688c5bb71ca7c0cadc35a0f0e4a21cd19643f02a87191"
+      "sha256": "b86a94f9d5468e6efad895acf0d13b59b6503e0c60b3ed92bfae26099a81f578"
     },
     {
       "path": "scripts/execute-reviewer-run.ts",
@@ -52,7 +52,7 @@
     },
     {
       "path": "dist/guide-runtime.js",
-      "sha256": "c39d63e2d9fedeb78da51e8f4fd82b312caca39f70ba49e6b90e932610b191bf"
+      "sha256": "ed6ecfdf1146623102ca46c77357f9e3051f025b138a0b6cc12528d1c1cd9ebb"
     },
     {
       "path": "src/toolkit-integrity.ts",
@@ -72,19 +72,19 @@
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "cb51de16adff9ed610110154e8fe0e33c1306dffbab282cc26f7cbd8add8025e"
+      "sha256": "8cf71c111cb0a90f109009c107cb86468d2e4812deb9897c577e9a4525789a21"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "eaa6c16085bbbe97eafa510a4a862bc95e115dd829d9aa73e4b1de2ccd43cb07"
+      "sha256": "228dc4b7d2c3d9b6274b38b91249b7f7c06a0da445208af171aab8cd0225d2f4"
     },
     {
       "path": "src/guide-console.ts",
-      "sha256": "819b2dfd2a1a863140172b8425da973071c7e03464cee2b9ee120a4d88b55aeb"
+      "sha256": "6230e9f145b50b441609bab4b2f147223c6498f2e6752e6e7193637d21e5e154"
     },
     {
       "path": "dist/guide-console.js",
-      "sha256": "fce460a47846e14a17d34a5fc8ff02f8565ec052d12320fc9c477bf803f589b8"
+      "sha256": "0548810629876029ec2f950dad572bba7b645d5d2ea6e5de4266682bb92b09a3"
     },
     {
       "path": "src/terminal-ui.ts",
@@ -108,7 +108,7 @@
     },
     {
       "path": ".agents/skills/koda-c-review/SKILL.md",
-      "sha256": "22452bc6334008b1f819a27cb80c2ecf2e41e7bf035d10d6cf3ec4ce4c00ed58"
+      "sha256": "d5923219a3e6a071a69bfad68e41926c2a34086b793c2df1185fdc40124d14af"
     },
     {
       "path": "src/commands.ts",
@@ -120,7 +120,15 @@
     },
     {
       "path": "scripts/show-relay-status.ts",
-      "sha256": "73816d8d430051e38f73f3119bac05b8f2b6031a25bb7e531b12fda2f49efa5c"
+      "sha256": "f956ff1c1b435a5292e1645b93d1bb0cbc92150dee5f6c661f46d3c037abacc1"
+    },
+    {
+      "path": "src/halt.ts",
+      "sha256": "7eb4af5cd227be6f1b6c96ebd1ed16faea0699ce750a4dbef92686d713d6bb6b"
+    },
+    {
+      "path": "dist/halt.js",
+      "sha256": "1c574a741e10def3b5564b310fc2a2aefff4724b0d160175fdc90a537d4862ff"
     },
     {
       "path": "src/direction.ts",

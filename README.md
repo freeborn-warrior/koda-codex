@@ -160,11 +160,11 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The latest [253-check post-push repository-contract transcript](docs/test-results/2026-07-20-build-week-repository-contract-pushed.md)
-  validates the exact pushed README, standard GPLv3 license, committed CLI, and
-  complete gate, receipt, stale-review, status-truth, package, security, recovery,
-  and full-session regression. The launcher-critical surface is separately
-  hash-bound by toolkit capability `public-guide-truth-v23`.
+- The latest [258-check post-push transcript](docs/test-results/2026-07-21-reviewer-halt-status-pushed.md)
+  validates the exact pushed halt/status repair together with the complete gate,
+  receipt, stale-review, status-truth, package, security, recovery, and full-session
+  regression. The launcher-critical surface is hash-bound by toolkit capability
+  `reviewer-halt-status-v24`.
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
   encountered an unplanned Summary `REVISE`, recovered through a fresh review,

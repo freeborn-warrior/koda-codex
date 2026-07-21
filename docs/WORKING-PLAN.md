@@ -6,9 +6,9 @@ This file records the current engineering direction above individual implementat
 
 ## Current objective
 
-Freeze a truthful, safe, reproducible competition release: promote the observed
-Reviewer-halt repair, finish narration and final playback, publish the video, and
-submit without adding another product feature. The repository is already public.
+Freeze a truthful, safe, reproducible competition release: finish narration and
+final playback, publish the video, and submit without adding another product
+feature. The observed Reviewer-halt repair is promoted and the repository is public.
 
 ## Active sequence
 
@@ -140,11 +140,11 @@ submit without adding another product feature. The repository is already public.
     License map, a clear reference-process-versus-project-method boundary, an
     honest one-person macOS test boundary, and no historical Ghostty recovery text
     presented as current onboarding.
-39. [ ] Promote the live conversational-halt repair. An explicit owner request to
+39. [x] Promote the live conversational-halt repair. An explicit owner request to
     halt must open one confirmed halt ceremony, never become waiting direction;
     pushed halt must outrank a stale local runtime label in Guide, relay status,
-    and recovery. Local durable proof is 258/258; exact pushed proof and toolkit
-    integrity promotion remain.
+    and recovery. Local and exact pushed proof pass 258/258; toolkit capability
+    `reviewer-halt-status-v24` binds repair commit `53bebfc` and its transcript.
 
 ## Submission cut
 
@@ -153,10 +153,10 @@ an isolated pushed project and enters Guide, while the preserved representative
 Produce session proves the two-context relay, all six gates, pushed close, and Guide
 return with Guide, Producer, and Reviewer visible. The fresh human rehearsal passes;
 its source recording and silent branded picture lock exist. The remaining submission
-work is the observed halt/status repair promotion, narration, audio mux and full
-playback, video publication, form completion, and freezing the exact pushed
-commit—not another product feature or a retrofitted self-hosting run. Repository
-publication and fresh-clone verification are complete.
+work is narration, audio mux and full playback, video publication, form completion,
+and freezing the exact pushed commit—not another product feature or a retrofitted
+self-hosting run. Halt/status promotion, repository publication, and fresh-clone
+verification are complete.
 
 ## Current constraints
 

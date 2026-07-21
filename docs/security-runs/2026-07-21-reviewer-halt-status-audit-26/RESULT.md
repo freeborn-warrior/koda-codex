@@ -4,10 +4,11 @@
 - Scope: conversational halt intent, confirmation, exact-path Git mutation,
   waiting-direction separation, pushed terminal truth, Guide recovery refusal,
   environment and permission regression
-- Status: **LOCAL PASS — PUSHED PROMOTION PENDING**
+- Status: **POST-PUSH PASS — TOOLKIT PROMOTED**
 - Complete local regressions: initial [258/258](../../test-results/2026-07-20-reviewer-halt-status-local.md)
   and final documented-tree [258/258](../../test-results/2026-07-21-reviewer-halt-status-final-local.md)
 - Focused security, integrity, status, and halt slice: **33/33**
+- Unchanged pushed regression: [258/258](../../test-results/2026-07-21-reviewer-halt-status-pushed.md)
 
 ## Incident
 
@@ -54,7 +55,7 @@ toolkit-mutation, status-truth, and halt mutations pass.
 ## Remaining boundary
 
 The deterministic suite proves the controller routes and mutations with real
-processes and temporary Git remotes. Promotion still requires an unchanged
-complete run from the pushed repair commit and a new toolkit-integrity binding.
-A same-user attacker who replaces the controller, verifier, manifest, and evidence
+processes and temporary Git remotes. The unchanged complete run from pushed repair
+commit `53bebfc` is bound by toolkit capability `reviewer-halt-status-v24`. A
+same-user attacker who replaces the controller, verifier, manifest, and evidence
 together remains outside Koda-C's stated security claim.
