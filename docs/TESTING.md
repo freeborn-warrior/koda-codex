@@ -2296,3 +2296,45 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   the exact security, submission, and toolkit-integrity slice passed **26/26**.
   This made the repository's own tracked-file scan inspect the preserved transcript,
   Guide event, reviews, approvals, close, and bundle before commit.
+
+## 2026-07-20 — Build Week silent picture lock
+
+- **Result:** PASS for silent picture lock; narration and public upload remain.
+- **Source binding:** The untouched ReplayKit recording and its editing duplicate
+  remain byte-identical at SHA-256
+  `b4a2f0627d3ce951f052769e2eaf656958d96f2d2d8428e241bc43b46d56c3fc`.
+- **Editorial binding:** The source-session transcript determined every cut. The
+  30:39.542 run is compressed to 2:23.967, with phase and source-time labels. The
+  unstaged Orient `REVISE` and the corrected fresh `APPROVE`/acknowledgement are
+  preserved at real time rather than hidden inside a uniform speed-up.
+- **Media checks:** Full-file decode passed. The H.264 picture lock is 2560×1440,
+  30 fps, `yuv420p`, BT.709, contains one video stream and no audio, and carries
+  no inherited ReplayKit author or creation-time metadata. Its SHA-256 is
+  `5ed9539f73f994f5d82c3eca3776b1b338488a7c9cff94de61eeaac69529e014`.
+- **Visual checks:** An eight-second contact sheet plus dedicated full-resolution
+  opening, `REVISE`, corrected `APPROVE`, close, and ending frames passed. The
+  irrelevant local path in Guide window chrome is masked. No credential,
+  notification, environment dump, unrelated history, or protected machine-only
+  review metadata was found in the sampled frames. Full human playback remains
+  mandatory before upload.
+- **Narration timing:** The revised English voiceover is 324 words, exactly 2:24
+  at 135 words per minute. It explicitly covers the product, the real refusal,
+  receipt limitation, Codex/GPT-5.6 collaboration, model matrix, and immutable
+  close.
+- **Honest suite failure:** The first full repository run passed **251/252**. The
+  one failure was the judge-document test correctly noticing that its contract
+  still required the superseded separate one-minute `GATE CLOSED`/`GATE OPEN`
+  video plan. The test was not removed. Its assertions were replaced with the
+  stronger evidence now required from this real recording: the 30:39 source,
+  `npm run demo:session`, unstaged Orient `REVISE`, explicit non-advance,
+  corrected fresh review, source-time disclosure, exact Sol/Terra seats,
+  Sol/Terra/Luna fixture statement, and no music.
+- **Corrected durable result:** The strengthened judge contract and every other
+  named product check pass **252/252** in the
+  [recorded picture-lock suite](test-results/2026-07-20-build-week-picture-lock.md).
+- **Post-record wording check:** The checklist then removed the obsolete separate
+  fixture-recording step and bound final narration to the existing 2:24 picture
+  duration. The focused judge-document and local-link suite still passed **3/3**;
+  `git diff --check` also passed.
+- **Evidence:** [picture-lock result](verification-runs/2026-07-20-build-week-picture-lock-06/RESULT.md)
+  and [timed video script](VIDEO-SCRIPT.md).

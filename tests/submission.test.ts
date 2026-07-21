@@ -45,16 +45,19 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
     /\[fresh plural-session Guide preflight\]\(guide-preflight-runs\/2026-07-19-sol-medium-05\/RESULT\.md\)/,
   );
   assert.match(video, /Hard maximum:\*\* under 3:00/);
-  assert.match(video, /GATE CLOSED — BRIEF/);
-  assert.match(video, /Nothing advanced\./);
-  assert.match(video, /GATE OPEN — BRIEF/);
-  assert.match(video, /node dist\/cli\.js init/);
-  assert.match(video, /npm run demo:session/);
-  assert.match(video, /STARTING SESSION/);
-  assert.match(video, /SESSION READY/);
+  assert.match(video, /one silent, real 30:39 Ghostty session/);
+  assert.match(video, /Entry command:[\s\S]*npm run demo:session/);
+  assert.match(video, /unplanned Orient[\s\S]*`REVISE`/);
+  assert.match(video, /No approval, no receipt, no advance\./);
+  assert.match(video, /corrected work[\s\S]*eight-character code/);
+  assert.match(video, /receipt[\s\S]*before the gate opens/);
+  assert.match(video, /source-session time/);
+  assert.match(video, /Sol \/ medium/);
+  assert.match(video, /Terra \/ medium/);
   assert.match(video, /two hundred and fifty-two checks/);
-  assert.match(video, /Codex and GPT-5\.6 explicitly/);
-  assert.match(video, /Do not play music/);
+  assert.match(video, /GPT-5\.6 Codex built the CLI/);
+  assert.match(video, /Sol, Terra, and Luna as reviewers against sealed fixtures/);
+  assert.match(video, /No music/);
   assert.match(checklist, /2026-07-21 at 5:00 pm Pacific/);
   assert.match(checklist, /## Owner handoff order/);
   assert.match(checklist, /Record one fresh complete source run[\s\S]*npm run demo:session/);

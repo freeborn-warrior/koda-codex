@@ -21,10 +21,16 @@ These are the submission actions in the order that avoids rework:
    recording and preserve the failure; do not continue as if it passed. The passing
    run and live `REVISE` recovery are preserved in the
    [owner-visible result](verification-runs/2026-07-20-owner-full-session-05/RESULT.md).
-2. After a successful pushed close and Guide return, record the separate
-   one-minute mechanical refusal/open fixture from the root README.
-3. Build the final video from those real captures using
-   [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md): English voiceover, no music, under 3:00.
+2. Keep the one-minute mechanical refusal/open fixture as the repository's fast
+   judge path. It remains runnable from the root README; a separate recording is
+   no longer required for the final video because the genuine full session
+   contains the stronger unstaged refusal and recovery.
+3. **Silent picture lock completed:** the real 30:39 session is speed-ramped to
+   2:24 with its unstaged Orient `REVISE` and corrected acknowledgement preserved
+   at readable speed. The [verification result](verification-runs/2026-07-20-build-week-picture-lock-06/RESULT.md)
+   binds the source and output hashes. Record Kristian's English voiceover from
+   [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md), mux it without music, and perform the final
+   full playback check.
 4. **Completed here:** Let Codex record the successful human rehearsal in this
    repository and rerun final checks. Push the resulting evidence commit before
    freezing the exact intended submission commit.
@@ -115,8 +121,12 @@ neither visibility nor submission state has been changed by Codex.
 
 ## Video
 
+- [x] Silent 2:24 picture lock is rendered from the genuine full-session capture,
+  labels every phase and real-session time, preserves the unstaged `REVISE`, and
+  strips inherited source metadata.
 - [ ] Record in English with audible narration.
-- [ ] Keep the finished video below 3:00; target 2:30–2:40.
+- [ ] Keep the finished video below 3:00; the verified silent picture lock is
+  2:24 and the voiceover must fit that existing duration.
 - [ ] Show a real refusal and a real successful advancement.
 - [ ] Explain what was built and how Codex plus GPT-5.6 were used.
 - [ ] Name Kristian's product/design decisions and Codex's engineering work.
