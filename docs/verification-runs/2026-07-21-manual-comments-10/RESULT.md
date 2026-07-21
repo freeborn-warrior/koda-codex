@@ -1,7 +1,7 @@
 # Manual-terminal multi-part acknowledgement — result 10
 
 **Date:** 2026-07-21  
-**Status:** REPAIR UNDER VERIFICATION
+**Status:** COMPLETE LOCAL PASS — POST-PUSH PROOF PENDING
 
 ## Owner-observed failure
 
@@ -64,6 +64,10 @@ Two controller-level regression cases exercise the complete Reviewer path:
   expected integrity bootstrap before a new tested capability is issued; no
   integrity assertion was changed or bypassed.
 
-Full durable and post-push verification remain required before this repair is
-release-ready. The interrupted owner run predates that proof and will not be
-represented as a clean completed post-repair session.
+The first integrity-enabled complete suite passed **264/264** in
+[`../../test-results/2026-07-21-owner-comments-local.md`](../../test-results/2026-07-21-owner-comments-local.md),
+whose SHA-256 is
+`5dca2b914f6ab217f720430970d450e0ea6d29dabc7b0828d89a3f7e190b5f3c`.
+Post-push verification remains required before this repair is release-ready. The
+interrupted owner run predates that proof and will not be represented as a clean
+completed post-repair session.

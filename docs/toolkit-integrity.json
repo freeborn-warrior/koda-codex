@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "dual-launch-surface-v25",
-  "verifiedAt": "2026-07-21T12:35:49.766Z",
-  "repairCommit": "4a134f0180e2689492dc2e4535cf6d07e2930c23",
-  "testedCommit": "f3b93fa4bfcb1dee758042404bdf8b77e2157722",
-  "testCount": 262,
+  "capability": "owner-comments-pipe-development-v0",
+  "verifiedAt": "2026-07-21T15:01:56.275Z",
+  "repairCommit": "4dc31b5eb8bced595947cf1e119e79a844defcbf",
+  "testedCommit": "4dc31b5eb8bced595947cf1e119e79a844defcbf",
+  "testCount": 3,
   "evidence": {
-    "path": "docs/test-results/2026-07-21-manual-terminal-pushed.md",
-    "sha256": "672e3cb0dcc51d8ab9e96f506909121505d35f40b027aa55c961448d9d8ec7ec"
+    "path": "docs/test-results/2026-07-21-owner-comments-corrected-bootstrap.md",
+    "sha256": "46765ec92fec195f2ee0b9a091ae80f682d20fb80735ebfec96d21b6218c1b2c"
   },
   "files": [
     {
@@ -120,11 +120,11 @@
     },
     {
       "path": "src/commands.ts",
-      "sha256": "6563e8aedf674a2c4da18d318b84aed9e3d49bdb261c272a787ec044cd930ba9"
+      "sha256": "8882444dc4fb34ef4d9f79b9881f65beac8b26421025a960aabd37765aedcb28"
     },
     {
       "path": "dist/commands.js",
-      "sha256": "5c53e48ea761a8dcbae42bfdfe2e307636c73e491e7a348b17709e9a7fe2349a"
+      "sha256": "6fa3dbd61e051362a559246c551ca96b234db5207955e738d088f59c07412622"
     },
     {
       "path": "scripts/show-relay-status.ts",

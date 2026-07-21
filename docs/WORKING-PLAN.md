@@ -9,9 +9,9 @@ This file records the current engineering direction above individual implementat
 Freeze a truthful, safe, reproducible competition release. Automatic Ghostty and
 manually opened terminals now coexist over the same verified runtime on pushed
 `main`; the recorded Ghostty path remains available. Kristian's twelve narration
-parts are fitted into a mechanically verified 2:24 candidate master. The remaining
-sequence is owner playback and any requested audio correction, public video upload,
-final repository freeze, and Devpost submission—not new product scope.
+parts are fitted into a mechanically verified 2:24 v02 master, which he selected
+after playback as substantially better than v01. The remaining sequence is public
+video upload, final repository freeze, and Devpost submission—not new product scope.
 
 ## Active sequence
 
@@ -162,10 +162,10 @@ The submission demonstration and its first-use entry now exist: one command crea
 an isolated pushed project and enters Guide, while the preserved representative
 Produce session proves the two-context relay, all six gates, pushed close, and Guide
 return with Guide, Producer, and Reviewer visible. The fresh human rehearsal passes;
-its source recording and silent branded picture lock exist. The remaining submission
-work is narration, audio mux and
-full playback, video publication, form completion, and freezing the exact pushed
-commit—not a video replacement or retrofitted self-hosting run. Halt/status
+its source recording, silent branded picture lock, and owner-approved narrated v02
+master exist. The remaining submission work is video publication, form completion,
+and freezing the exact pushed commit—not a video replacement or retrofitted
+self-hosting run. Halt/status
 promotion, repository publication, and fresh-clone verification are complete.
 
 ## Current constraints

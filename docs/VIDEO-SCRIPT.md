@@ -18,13 +18,14 @@ lock; no music
 - Source audio: none
 - Voice originals: twelve untouched `.m4a` parts under `.koda/video/voice/`, named
   for their intended output intervals from `01-000-008` through `12-134-144`
-- Narration render: `.koda/video/analysis/render-narration-v01.sh`
-- Narration mix: `.koda/video/koda-c-build-week-narration-mix-v01.m4a`
-- Candidate submission master: `.koda/video/koda-c-build-week-submission-v01.mp4`
-- Candidate SHA-256:
-  `e0f021c07c8d7f8cf12e8f19d6213cea4684552c2be64ad66f3e3d425ae728f7`
-- Candidate duration: 2:24.000
-- Candidate audio: AAC stereo, 48 kHz, -16.3 LUFS integrated, -1.3 dBFS true peak
+- Selected narration render: `.koda/video/analysis/render-narration-v02.sh`
+- Selected narration mix: `.koda/video/koda-c-build-week-narration-mix-v02.m4a`
+- Owner-approved submission master: `.koda/video/koda-c-build-week-submission-v02.mp4`
+- Master SHA-256:
+  `9d0783aaef627d50cf4080837c3f2fe847a9bf12f2ad4a9729236a0e68e39a4e`
+- Master duration: 2:24.000
+- Master audio: AAC stereo, 48 kHz, -16.3 LUFS integrated, -1.4 dBFS true peak
+- Owner playback: v02 selected on 2026-07-21 as substantially better than v01
 - Entry command: `npm run demo:session`
 - Guide launch: `e974b805-fac5-4648-a9e2-b66348effa47`
 - Koda-C session: `2026-07-20-01`
@@ -47,7 +48,7 @@ claim to what the files supported and received a fresh review.
 |---|---|
 | Under three minutes | The verified picture duration is 2:23.967. Narration must fit the existing picture; the export may not add time. |
 | Clear demo | The visible material is one genuine `npm run demo:session` execution, including live role windows, a blocking verdict, owner acknowledgement, phase advancement, Git close, and Guide return. It is not a slide presentation. |
-| Audio | Kristian's twelve English voice parts are trimmed, lightly time-fitted, normalized, and muxed into the 2:24 candidate master. Mechanical audio and decode QA pass; the checkbox remains open only for Kristian's full beginning-to-end listening check. |
+| Audio | Kristian's twelve English voice parts are trimmed, pause-compressed, lightly time-fitted, normalized, and muxed into the 2:24 v02 master. Mechanical audio and decode QA pass, and Kristian selected v02 after playback. |
 | What was built | 0:16–1:31 explains the plain-file workflow, Guide/Producer/Reviewer roles, evidence, verdict, receipt, gate, correction, and example Markdown heading reporter. |
 | How Codex and GPT-5.6 were used | 1:31–1:59 explicitly explains Kristian's role, GPT-5.6 Codex's engineering work, the Sol Producer/Terra Reviewer pairing, and the sealed Sol/Terra/Luna reviewer tests. |
 | No third-party trademarks or unlicensed copyrighted material | No unrelated third-party brand or logo is presented. The edit contains no music, stock imagery, or borrowed artwork. Its two typefaces are permitted under the SIL Open Font License 1.1, and the unrelated macOS menu/status bar is masked. |
@@ -169,7 +170,9 @@ cut.
 
 Completed on 2026-07-21 as twelve interval-named Voice Memos. The untouched
 recordings remain beside the rendered mix inside the ignored repository-local
-video workspace. The steps below remain the recording contract that produced them.
+video workspace. v02 shortens detected sentence gaps before applying smaller tempo
+changes; Kristian selected it over v01 after playback. The steps below remain the
+recording contract that produced the source parts.
 
 1. Watch the silent picture once before recording.
 2. Record in a quiet room with headphones, no music, and the microphone 15–20 cm

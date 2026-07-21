@@ -91,12 +91,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Next
 
-- [ ] Finish submission-critical proof and polish only. Narration is recorded,
-  fitted, normalized, muxed, and mechanically verified in the 2:24 candidate
-  master. Kristian must now perform the subjective full playback, approve or request
-  audio edits, publish the video, and complete the external submission. The product
-  runtime, both launch surfaces, fresh owner rehearsal, and public repository are
-  proved.
+- [ ] Finish submission-critical proof and polish only. Kristian selected the
+  silence-first 2:24 v02 master after playback; narration, timing, normalization,
+  metadata hygiene, and decode are complete. Publish the video, freeze the exact
+  repository commit, and complete the external submission. The product runtime,
+  both launch surfaces, fresh owner rehearsal, and public repository are proved.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Add project staffing config after proving cross-model thread continuation: Guide assignment, session-kind reviewer/defaults, and per-phase producer model/effort must resolve independently and snapshot into the session. Use sealed matrix evidence, not skill frontmatter, for recommendations.

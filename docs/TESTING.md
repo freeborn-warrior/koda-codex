@@ -2704,3 +2704,61 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **State:** POST-PUSH MECHANICAL PASS. Repository behavior and judge documents
   agree. Final listening approval, YouTube publication, and Devpost submission
   remain owner actions.
+
+## 2026-07-21 — Narrated video v02 owner selection
+
+- **Owner decision:** After listening to both complete exports, Kristian selected
+  v02 as sufficient and substantially better than v01. v01 remains untouched as
+  a mechanically valid fallback; v02 is the submission master.
+- **Editorial change:** v02 shortens detected pauses of at least 250 ms to 150 ms
+  before calculating any tempo fit. This kept six narrated parts closer to their
+  recorded cadence; two of those parts now require no speed change at all.
+- **Exact result:** The selected 144.000-second H.264/AAC master has SHA-256
+  `9d0783aaef627d50cf4080837c3f2fe847a9bf12f2ad4a9729236a0e68e39a4e`,
+  measures -16.3 LUFS integrated and -1.4 dBFS true peak, decodes completely, and
+  has video frames identical to picture-lock v04. Raw Voice Memos identity and
+  creation metadata are absent.
+- **Evidence:** Timing changes, file hashes, media inspection, and the remaining
+  publication actions are preserved in
+  [result 09](verification-runs/2026-07-21-video-audio-master-09/RESULT.md).
+- **Repository result:** The first complete suite containing the exact v02 master
+  assertions passed **264/264** in the
+  [local transcript](test-results/2026-07-21-owner-comments-local.md).
+
+## 2026-07-21 — Manual-terminal multi-part acknowledgement repair
+
+- **Owner-observed defect:** The manual Apple Terminal session bound to launch
+  `1c2a5c0f-d578-4d64-822b-ee99fa184133` reached Produce after three successful
+  acknowledgements. Terra returned `APPROVE WITH COMMENTS`; after Kristian entered
+  the correct code and comments, the CLI stopped with Node's unsettled-top-level-
+  await warning. Status reported phase 4 of 6 and no Produce acknowledgement or
+  advancement. The gate failed closed.
+- **Root cause and scope:** Reviewer sent receipt plus comments through stdin, but
+  a new readline interface per prompt let the first interface consume both lines.
+  The second prompt waited on an exhausted stream. `DISCUSS` owner rulings shared
+  the same risk; one-line `APPROVE` did not.
+- **Red proof:** The first new `APPROVE WITH COMMENTS` controller regression failed
+  **0/1** with the same warning before implementation changed.
+- **Repair:** Non-terminal stdin is read once and queued line by line. Interactive
+  terminal prompting is unchanged. Receipt, comments, and rulings remain out of
+  process arguments and environment variables.
+- **Green focused proof:** The affected comments and ruling cases passed **2/2**;
+  gate mutation plus printed commands passed **36/36**; and the exact security
+  boundary passed **1/1**.
+- **Honest integrity bootstrap:** The first protected slice passed **78/92** and
+  the first complete durable run passed **191/263**. Every one of the respective
+  14 and 72 refusals named changed protected `src/commands.ts` before a new
+  capability existed. The full refusal transcript is preserved
+  [here](test-results/2026-07-21-owner-comments-bootstrap-refusal.md), SHA-256
+  `b64690e2936a5f1dffba11d2fd7ded73830e4b6dac751e25d2004fe78bbc857b`.
+- **Integrity-enabled result:** Provisional capability
+  `owner-comments-pipe-development-v0` binds repair commit `4dc31b5` to the exact
+  three-check [bootstrap pass](test-results/2026-07-21-owner-comments-corrected-bootstrap.md).
+  The complete suite then passed **264/264** in the
+  [local transcript](test-results/2026-07-21-owner-comments-local.md), SHA-256
+  `5dca2b914f6ab217f720430970d450e0ea6d29dabc7b0828d89a3f7e190b5f3c`.
+- **Detailed incident:** [Result 10](verification-runs/2026-07-21-manual-comments-10/RESULT.md)
+  preserves the live identifiers, zero-write outcome, repair, and recovery boundary.
+- **State:** COMPLETE LOCAL PASS. Post-push full proof and final integrity promotion
+  remain required. The interrupted owner session is not called a clean
+  post-repair completion.

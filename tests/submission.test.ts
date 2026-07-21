@@ -79,11 +79,11 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(video, /No third-party trademarks or unlicensed copyrighted material/);
   assert.match(video, /SIL Open Font License 1\.1/);
   assert.match(video, /Functions as depicted/);
-  assert.match(video, /Candidate submission master:[\s\S]*koda-c-build-week-submission-v01\.mp4/);
-  assert.match(video, /e0f021c07c8d7f8cf12e8f19d6213cea4684552c2be64ad66f3e3d425ae728f7/);
-  assert.match(video, /Candidate duration: 2:24\.000/);
-  assert.match(video, /-16\.3 LUFS integrated, -1\.3 dBFS true peak/);
-  assert.match(video, /checkbox remains open only for Kristian's full[\s\S]*listening check/);
+  assert.match(video, /Owner-approved submission master:[\s\S]*koda-c-build-week-submission-v02\.mp4/);
+  assert.match(video, /9d0783aaef627d50cf4080837c3f2fe847a9bf12f2ad4a9729236a0e68e39a4e/);
+  assert.match(video, /Master duration: 2:24\.000/);
+  assert.match(video, /-16\.3 LUFS integrated, -1\.4 dBFS true peak/);
+  assert.match(video, /Owner playback:[\s\S]*v02 selected/);
   assert.match(checklist, /2026-07-21 at 5:00 pm Pacific/);
   assert.match(checklist, /## Owner handoff order/);
   assert.match(checklist, /Record one fresh complete source run[\s\S]*npm run demo:session/);
@@ -106,9 +106,9 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /Fresh Terra\/medium independently ran the full suite[\s\S]*APPROVE/);
   assert.match(checklist, /branded picture lock v04/);
   assert.match(checklist, /official-rule picture audit/);
-  assert.match(checklist, /Narrated candidate completed/);
+  assert.match(checklist, /Narrated master selected/);
   assert.match(checklist, /\[x\] Record and mux Kristian's English narration/);
-  assert.match(checklist, /\[ \] Export, watch from beginning to end with sound/);
+  assert.match(checklist, /\[x\] Export and review with sound/);
 });
 
 test("PUBLIC GUIDE CONTRACT: current entry docs use the product name and describe the shipped workflow", async () => {

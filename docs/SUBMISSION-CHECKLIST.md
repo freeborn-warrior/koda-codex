@@ -38,14 +38,16 @@ These are the submission actions in the order that avoids rework:
    judge path. It remains runnable from the root README; a separate recording is
    no longer required for the final video because the genuine full session
    contains the stronger unstaged refusal and recovery.
-3. **Narrated candidate completed:** the real 30:39 session is speed-ramped to
+3. **Narrated master selected:** the real 30:39 session is speed-ramped to
    2:24 with its unstaged Orient `REVISE` and corrected acknowledgement preserved
    at readable speed. The [branded verification result](verification-runs/2026-07-20-build-week-picture-lock-07/RESULT.md)
    binds the source and v04 output hashes, visual system, full decode, privacy
    masks, and official-rule audit. Kristian's twelve English voice parts are now
-   fitted and muxed without music; [audio-master evidence](verification-runs/2026-07-21-video-audio-master-08/RESULT.md)
+   fitted and muxed without music. v02 shortens sentence gaps before using smaller
+   tempo changes; Kristian selected it as substantially better than v01.
+   [Selected-master evidence](verification-runs/2026-07-21-video-audio-master-09/RESULT.md)
    verifies duration, loudness, true peak, metadata removal, unchanged decoded
-   picture frames, and full decode. Kristian must still perform the final playback.
+   picture frames, full decode, and the owner selection.
 4. **Completed here:** Let Codex record the successful human rehearsal in this
    repository and rerun final checks. Push the resulting evidence commit before
    freezing the exact intended submission commit.
@@ -146,16 +148,17 @@ owner action.
   unstaged `REVISE`, masks unrelated desktop material, strips inherited source
   metadata, and passes the
   [official-rule picture audit](verification-runs/2026-07-20-build-week-picture-lock-07/RESULT.md).
-- [x] Record and mux Kristian's English narration; the candidate contains one
+- [x] Record and mux Kristian's English narration; the selected master contains one
   stereo voice track and no music.
-- [x] Keep the finished video below 3:00; the candidate is exactly 2:24.000.
+- [x] Keep the finished video below 3:00; the selected master is exactly 2:24.000.
 - [x] Show a real refusal and a real successful advancement.
-- [ ] Explain what was built and how Codex plus GPT-5.6 were used.
-- [ ] Name Kristian's product/design decisions and Codex's engineering work.
+- [x] Explain what was built and how Codex plus GPT-5.6 were used.
+- [x] Name Kristian's product/design decisions and Codex's engineering work.
 - [x] Include no unrelated third-party trademark or unlicensed copyrighted
   material. Use no music, stock imagery, or borrowed artwork. Show only the
   terminal evidence and repository-generated graphics needed for the demo.
-- [ ] Export, watch from beginning to end with sound, and verify text legibility.
+- [x] Export and review with sound; Kristian selected v02 as sufficient and
+  substantially better than v01.
 - [ ] Upload publicly to YouTube.
 - [ ] Open the public URL in a signed-out/private browser window.
 - [ ] Add the YouTube URL to the submission form.
