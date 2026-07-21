@@ -90,6 +90,14 @@ windows, not the session, roles, evidence, review, or gate. See the
 [nontechnical Quick Start](docs/QUICKSTART.md) and the consequence-oriented
 [Command Manual](docs/COMMAND-MANUAL.md).
 
+**To reproduce the competition video:** use macOS with
+[Ghostty](https://ghostty.org/) installed, run `npm run demo:session`, and choose
+`1` when Guide offers the launch surfaces. Koda-C then opens the owner-facing
+Reviewer and watch-only Producer automatically. Personal Ghostty themes, fonts,
+and shell decoration may change how the windows look, but they are not required
+by the workflow. Choose `2` instead to exercise the same session from two ordinary
+terminal windows you open yourself; Ghostty is not required for that route.
+
 ## What ships
 
 - A small CLI whose gate and status truth are re-derived from ordinary files.
@@ -164,7 +172,7 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The latest [262-check post-push transcript](docs/test-results/2026-07-21-manual-terminal-pushed.md)
+- The latest [262-check post-push transcript from merged `main`](docs/test-results/2026-07-21-dual-launch-main.md)
   validates both Ghostty and manual-terminal launch over the same runtime together
   with the complete gate, receipt, stale-review, status-truth, package, security,
   recovery, and full-session regression. The launcher-critical surface is hash-bound

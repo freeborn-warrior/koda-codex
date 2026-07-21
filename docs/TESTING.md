@@ -2664,3 +2664,38 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **State:** RELEASE PASS. The branch satisfies the mechanical and security merge
   condition. A later owner-observed manual-terminal model session is welcome UX
   proof, not a hidden requirement for the gate or recorded Ghostty demonstration.
+
+## 2026-07-21 — Ghostty judge path and narrated video candidate
+
+- **Owner requirement:** Tell judges exactly how to reproduce the recorded Ghostty
+  flow while keeping the ordinary-terminal choice explicit, then fit the supplied
+  narration parts to the established 2:24 picture without changing any source.
+- **README correction:** The complete-session section now says that reproducing
+  the video requires macOS, Ghostty, `npm run demo:session`, and launch choice `1`.
+  It separately states that choice `2` uses ordinary terminals and does not require
+  Ghostty. Personal terminal theming is presentation, not a workflow dependency.
+- **Media failures retained:** The first filter expression refused on literal
+  continuation characters. The next timeline attempt yielded 0.15 seconds. The
+  first full-length master reached +0.3 dBFS true peak after AAC encoding and was
+  rejected. The corrected finite loudness pass produced a 144.000-second candidate
+  at -16.3 LUFS and -1.3 dBFS true peak. Sources were never overwritten.
+- **Media result:** Full decode passed; the candidate's decoded video frames are
+  identical to picture-lock v04; inherited Voice Memos identity and creation tags
+  are absent. Exact hashes and the still-open owner listening check are preserved
+  in [result 08](verification-runs/2026-07-21-video-audio-master-08/RESULT.md).
+- **First focused documentation result:** **27/28**. The judge contract correctly
+  refused when “post-push” was removed from the public evidence label. The README
+  now says the linked 262-check merged-main evidence is post-push; no assertion
+  changed.
+- **Second focused documentation result:** **27/28**. The only refusal was the old
+  assertion requiring narration to remain unrecorded. Because that product state
+  had genuinely changed, it was replaced with stricter checks for the candidate
+  filename, exact hash, duration, loudness, true peak, Ghostty reproduction steps,
+  completed mux, and still-open full playback. The corrected slice passed **28/28**.
+- **Complete local result:** The durable
+  [audio-master transcript](test-results/2026-07-21-ghostty-readme-audio-master.md)
+  passed **262/262**. Transcript SHA-256:
+  `3c4224207e943acea883b6f3bc563536554e063a309eb341615cbbf90f5eda48`.
+- **State:** MECHANICAL PASS. Repository behavior and judge documents agree. Final
+  listening approval, YouTube publication, and Devpost submission remain owner
+  actions.

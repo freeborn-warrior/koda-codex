@@ -109,6 +109,13 @@ owner contract
   preface made the full GPLv3 file appear as `Other`; the preface was removed so
   the root license is the unmodified standard text, while Kristian's sole
   copyright line remains in the README and project metadata.
+- The 2:24 competition candidate now combines the unchanged silent picture lock
+  with Kristian's twelve English narration parts. The rendered master measures
+  -16.3 LUFS integrated with a -1.3 dBFS true peak, contains no inherited Voice
+  Memos identifier, decodes completely, and preserves decoded picture frames
+  exactly. Kristian's full subjective playback and public upload remain owner
+  actions; the mechanical result is preserved in
+  `verification-runs/2026-07-21-video-audio-master-08/RESULT.md`.
 - A preserved historical fresh ephemeral Codex startup proves the original nine session-runtime skills and root guidance were injected before any tool call or repository read.
 - A second fresh ephemeral startup proof covers the current ten-skill set, including `koda-c-session-prompt`, with zero tools or repository reads. A separate sealed Sol/medium task exercised that skill against an active Brief and refused before drafting without changing fixture bytes.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.

@@ -28,6 +28,14 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(landing, /node dist\/cli\.js init/);
   assert.match(landing, /npm test/);
   assert.match(landing, /262-check post-push transcript/);
+  assert.match(
+    landing,
+    /To reproduce the competition video:[\s\S]*Ghostty[\s\S]*installed[\s\S]*choose[\s\S]*`1`/,
+  );
+  assert.match(
+    landing,
+    /Choose `2` instead[\s\S]*ordinary[\s\S]*terminal windows[\s\S]*Ghostty is not required/,
+  );
   assert.match(landing, /How Kristian, Codex, and GPT-5\.6 built it/);
   assert.match(landing, /\*\*Key owner decisions\.\*\*/);
   assert.match(landing, /\*\*Where Codex accelerated the work\.\*\*/);
@@ -71,7 +79,11 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(video, /No third-party trademarks or unlicensed copyrighted material/);
   assert.match(video, /SIL Open Font License 1\.1/);
   assert.match(video, /Functions as depicted/);
-  assert.match(video, /checkbox remains open until the audio is recorded, muxed, and verified/);
+  assert.match(video, /Candidate submission master:[\s\S]*koda-c-build-week-submission-v01\.mp4/);
+  assert.match(video, /e0f021c07c8d7f8cf12e8f19d6213cea4684552c2be64ad66f3e3d425ae728f7/);
+  assert.match(video, /Candidate duration: 2:24\.000/);
+  assert.match(video, /-16\.3 LUFS integrated, -1\.3 dBFS true peak/);
+  assert.match(video, /checkbox remains open only for Kristian's full[\s\S]*listening check/);
   assert.match(checklist, /2026-07-21 at 5:00 pm Pacific/);
   assert.match(checklist, /## Owner handoff order/);
   assert.match(checklist, /Record one fresh complete source run[\s\S]*npm run demo:session/);
@@ -94,6 +106,9 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /Fresh Terra\/medium independently ran the full suite[\s\S]*APPROVE/);
   assert.match(checklist, /branded picture lock v04/);
   assert.match(checklist, /official-rule picture audit/);
+  assert.match(checklist, /Narrated candidate completed/);
+  assert.match(checklist, /\[x\] Record and mux Kristian's English narration/);
+  assert.match(checklist, /\[ \] Export, watch from beginning to end with sound/);
 });
 
 test("PUBLIC GUIDE CONTRACT: current entry docs use the product name and describe the shipped workflow", async () => {

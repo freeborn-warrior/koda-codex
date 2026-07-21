@@ -91,10 +91,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Next
 
-- [ ] Finish submission-critical proof and polish only: record and mux narration,
-  perform final full playback and hygiene, publish the video, and complete the
-  external submission. The halt/status repair is promoted and the repository is
-  public; the product runtime, fresh owner rehearsal, and silent picture lock are
+- [ ] Finish submission-critical proof and polish only. Narration is recorded,
+  fitted, normalized, muxed, and mechanically verified in the 2:24 candidate
+  master. Kristian must now perform the subjective full playback, approve or request
+  audio edits, publish the video, and complete the external submission. The product
+  runtime, both launch surfaces, fresh owner rehearsal, and public repository are
   proved.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.

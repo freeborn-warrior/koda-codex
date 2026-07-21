@@ -6,12 +6,12 @@ This file records the current engineering direction above individual implementat
 
 ## Current objective
 
-Freeze a truthful, safe, reproducible competition release. The owner authorized
-one isolated pre-submission exploration: make automatic Ghostty and manually
-opened terminals coexist over the same runtime. Keep the recorded video and
-Ghostty path unchanged, merge only after complete proof, then finish narration,
-playback, publication, and submission. The promoted `main` release remains the
-rollback point while this branch is unverified.
+Freeze a truthful, safe, reproducible competition release. Automatic Ghostty and
+manually opened terminals now coexist over the same verified runtime on pushed
+`main`; the recorded Ghostty path remains available. Kristian's twelve narration
+parts are fitted into a mechanically verified 2:24 candidate master. The remaining
+sequence is owner playback and any requested audio correction, public video upload,
+final repository freeze, and Devpost submission—not new product scope.
 
 ## Active sequence
 

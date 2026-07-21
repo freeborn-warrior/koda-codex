@@ -5,8 +5,8 @@
 **Hard maximum:** under 3:00
 
 **Format:** one real 30:39 Koda-C session; speed-ramped rather than uniformly
-accelerated; the picture lock remains silent until Kristian's English voiceover
-is added; no music
+accelerated; Kristian's English voiceover is fitted to the unchanged picture
+lock; no music
 
 ## Source truth
 
@@ -16,6 +16,15 @@ is added; no music
   `b4a2f0627d3ce951f052769e2eaf656958d96f2d2d8428e241bc43b46d56c3fc`
 - Source duration: 30:39.542
 - Source audio: none
+- Voice originals: twelve untouched `.m4a` parts under `.koda/video/voice/`, named
+  for their intended output intervals from `01-000-008` through `12-134-144`
+- Narration render: `.koda/video/analysis/render-narration-v01.sh`
+- Narration mix: `.koda/video/koda-c-build-week-narration-mix-v01.m4a`
+- Candidate submission master: `.koda/video/koda-c-build-week-submission-v01.mp4`
+- Candidate SHA-256:
+  `e0f021c07c8d7f8cf12e8f19d6213cea4684552c2be64ad66f3e3d425ae728f7`
+- Candidate duration: 2:24.000
+- Candidate audio: AAC stereo, 48 kHz, -16.3 LUFS integrated, -1.3 dBFS true peak
 - Entry command: `npm run demo:session`
 - Guide launch: `e974b805-fac5-4648-a9e2-b66348effa47`
 - Koda-C session: `2026-07-20-01`
@@ -38,11 +47,11 @@ claim to what the files supported and received a fresh review.
 |---|---|
 | Under three minutes | The verified picture duration is 2:23.967. Narration must fit the existing picture; the export may not add time. |
 | Clear demo | The visible material is one genuine `npm run demo:session` execution, including live role windows, a blocking verdict, owner acknowledgement, phase advancement, Git close, and Guide return. It is not a slide presentation. |
-| Audio | The timed English narration below is mandatory. This checkbox remains open until the audio is recorded, muxed, and verified in a full playback. |
+| Audio | Kristian's twelve English voice parts are trimmed, lightly time-fitted, normalized, and muxed into the 2:24 candidate master. Mechanical audio and decode QA pass; the checkbox remains open only for Kristian's full beginning-to-end listening check. |
 | What was built | 0:16–1:31 explains the plain-file workflow, Guide/Producer/Reviewer roles, evidence, verdict, receipt, gate, correction, and example Markdown heading reporter. |
 | How Codex and GPT-5.6 were used | 1:31–1:59 explicitly explains Kristian's role, GPT-5.6 Codex's engineering work, the Sol Producer/Terra Reviewer pairing, and the sealed Sol/Terra/Luna reviewer tests. |
 | No third-party trademarks or unlicensed copyrighted material | No unrelated third-party brand or logo is presented. The edit contains no music, stock imagery, or borrowed artwork. Its two typefaces are permitted under the SIL Open Font License 1.1, and the unrelated macOS menu/status bar is masked. |
-| Functions as depicted | The recording is bound to launch `e974b805-fac5-4648-a9e2-b66348effa47` and its pushed evidence. No runtime source file changed after that successful run; subsequent repository changes are tests, evidence, documentation, and this edit. |
+| Functions as depicted | The recording is bound to launch `e974b805-fac5-4648-a9e2-b66348effa47` and its pushed evidence. The current release still provides that automatic Ghostty workflow. Later runtime work added a separately tested manual-terminal launch surface over the same session, role, evidence, review, and gate contract; it did not turn the recorded behavior into an unavailable path. |
 
 ## Edit contract
 
@@ -157,6 +166,10 @@ cut.
 > the loop. The discipline lives in the workflow.
 
 ## Narration recording
+
+Completed on 2026-07-21 as twelve interval-named Voice Memos. The untouched
+recordings remain beside the rendered mix inside the ignored repository-local
+video workspace. The steps below remain the recording contract that produced them.
 
 1. Watch the silent picture once before recording.
 2. Record in a quiet room with headphones, no music, and the microphone 15–20 cm
