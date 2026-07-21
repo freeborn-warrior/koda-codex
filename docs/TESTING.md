@@ -2808,5 +2808,11 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   The run name anticipated an integrity refusal, but the already-installed
   development manifest allowed the complete suite to execute; the file truthfully
   records PASS and the name is retained rather than rewritten after the result.
-- **State:** DEVELOPMENT PASS. Pushed unchanged proof, capability promotion,
-  security audit 29, and owner-observed continuation remain required.
+- **Post-push result:** Repair commit `894a747` exactly matched `origin/main`
+  before the unchanged complete suite passed **267/267** in the
+  [post-push transcript](test-results/2026-07-21-owner-ack-recovery-pushed.md),
+  SHA-256
+  `a7b30086cdb08baa5be494d1b8a45d22ee12fbc1c9a0508dbcdf847af973b2a0`.
+- **State:** POST-PUSH PASS. Capability `bound-owner-ack-recovery-v27` binds the
+  exact repair/test commit, transcript, count, and protected runtime files.
+  Owner-observed continuation of the preserved session remains required.

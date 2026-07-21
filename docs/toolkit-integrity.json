@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "owner-ack-recovery-development-v0",
-  "verifiedAt": "2026-07-21T15:27:53.000Z",
-  "repairCommit": "16f696a4c6b16bd10f06b0decbf8c3110ee7bb11",
-  "testedCommit": "16f696a4c6b16bd10f06b0decbf8c3110ee7bb11",
-  "testCount": 1,
+  "capability": "bound-owner-ack-recovery-v27",
+  "verifiedAt": "2026-07-21T15:35:16.629Z",
+  "repairCommit": "894a74700349034d4ce3e4f626d351153fe4c5ca",
+  "testedCommit": "894a74700349034d4ce3e4f626d351153fe4c5ca",
+  "testCount": 267,
   "evidence": {
-    "path": "docs/test-results/2026-07-21-owner-ack-recovery-bootstrap.md",
-    "sha256": "35514233f5f2ac9dc9b8b508ae4296616abb59799e1cb34b0cd8cbf292869b9e"
+    "path": "docs/test-results/2026-07-21-owner-ack-recovery-pushed.md",
+    "sha256": "a7b30086cdb08baa5be494d1b8a45d22ee12fbc1c9a0508dbcdf847af973b2a0"
   },
   "files": [
     {

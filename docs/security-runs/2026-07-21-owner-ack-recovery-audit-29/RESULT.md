@@ -3,9 +3,10 @@
 - Date: 2026-07-21
 - Scope: migration of one pre-fix multi-part acknowledgement failure into the
   existing numbered Guide recovery path
-- Status: **DEVELOPMENT PASS — PROMOTION PENDING**
+- Status: **POST-PUSH PASS — TOOLKIT PROMOTED**
 - Preserved launch: `1c2a5c0f-d578-4d64-822b-ee99fa184133`
 - Complete local regression: [267/267](../../test-results/2026-07-21-owner-ack-recovery-bootstrap-refusal.md)
+- Unchanged pushed regression: [267/267](../../test-results/2026-07-21-owner-ack-recovery-pushed.md)
 
 ## Finding
 
@@ -48,3 +49,8 @@ clipboard behavior, credential transport, or model permission was added. The
 same-user local-state boundary remains unchanged: a user able to rewrite every
 runtime and project file can fabricate evidence, while Koda-C's contract is to
 detect inconsistent or incomplete disk state and refuse to guess.
+
+Toolkit capability `bound-owner-ack-recovery-v27` binds repair/test commit
+`894a747`, the exact 267-check post-push transcript, and every changed source and
+compiled runtime file. Owner observation is still reported separately; it is not
+inferred from deterministic tests.

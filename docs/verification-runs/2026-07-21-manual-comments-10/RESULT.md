@@ -107,5 +107,6 @@ Guide/Reviewer slice. The complete development suite passes **267/267** in
 SHA-256
 `6e21f2ef4033316569ca0397265e216fc3643f811f77e6eee54c8ee0039d9509`.
 The misleading historical `bootstrap-refusal` label is retained as the immutable
-run name; the recorded result itself is PASS. Pushed capability promotion and the
-owner-observed continuation remain pending.
+run name; the recorded result itself is PASS. Repair commit `894a747` then passed
+the unchanged **267/267** post-push suite and is bound as toolkit capability
+`bound-owner-ack-recovery-v27`. The owner-observed continuation remains pending.

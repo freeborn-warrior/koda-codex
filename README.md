@@ -172,13 +172,13 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The latest [264-check post-push transcript from `main`](docs/test-results/2026-07-21-owner-comments-pushed.md)
+- The latest [267-check post-push transcript from `main`](docs/test-results/2026-07-21-owner-ack-recovery-pushed.md)
   validates both Ghostty and manual-terminal launch over the same runtime together
   with the complete gate, receipt, stale-review, status-truth, package, security,
   recovery, multi-part owner acknowledgement, and full-session regression. The
-  protected runtime is hash-bound by toolkit capability `multi-part-owner-ack-v26`;
+  protected runtime is hash-bound by toolkit capability `bound-owner-ack-recovery-v27`;
   its focused threat review is preserved in
-  [security audit 28](docs/security-runs/2026-07-21-owner-comments-audit-28/RESULT.md).
+  [security audit 29](docs/security-runs/2026-07-21-owner-ack-recovery-audit-29/RESULT.md).
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
   encountered an unplanned Summary `REVISE`, recovered through a fresh review,

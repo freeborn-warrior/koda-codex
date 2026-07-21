@@ -164,7 +164,9 @@ video upload, final repository freeze, and Devpost submission—not new product 
     state. Bind the exact failure to the same launch, session, phase, review job,
     artifact/review hash, absent ledger entry, and both persistent role contexts;
     mutation-test every binding, promote unchanged pushed proof, then resume only
-    through Guide's numbered recovery choice.
+    through Guide's numbered recovery choice. Capability
+    `bound-owner-ack-recovery-v27` now binds the unchanged pushed **267/267** proof;
+    the owner-observed continuation is the remaining action.
 
 ## Submission cut
 

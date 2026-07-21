@@ -95,11 +95,12 @@ owner contract
   distinguished from historical Ghostty development records, and the release
   states its one-person/macOS-only test boundary without implying a macOS
   filesystem dependency.
-- Toolkit capability `multi-part-owner-ack-v26` binds repair commit `4dc31b5`,
-  exact pushed test commit `f77f10c`, its complete 264/264 post-push transcript,
-  and every protected runtime file. It adds explicit `APPROVE WITH COMMENTS` and
-  `DISCUSS` transport coverage while retaining the dual Ghostty/manual launch,
-  halt/status, public-guide, and Reviewer/session evidence from v25 and earlier.
+- Toolkit capability `bound-owner-ack-recovery-v27` binds repair and tested commit
+  `894a747`, its complete 267/267 post-push transcript, and every protected
+  runtime file. In addition to v26's multi-part input repair, it permits only the
+  exact preserved zero-write failure to re-enter the existing Reviewer-first
+  recovery path after launch, session, phase, job, context, gate, and absent-ledger
+  evidence all revalidate.
 - The Build Week repository contract is now explicit in the root README and
   submission checklist: repository URL, Developer Tools track, setup, generated
   sample data, no-rebuild test path, supported-platform boundary, GPLv3 license,

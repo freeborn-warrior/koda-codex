@@ -23,8 +23,9 @@ This is the on-disk working queue for the build. A checked item means its eviden
   session or weakening generic recovery. The controller now requires the original
   launch/session/context/job bindings, unchanged gate evidence, and an absent
   current approval; five one-condition mutations refuse. The complete development
-  suite passes **267/267**. Promote unchanged pushed proof, then let Kristian choose
-  Guide option `1` and continue the same session.
+  suite passes **267/267** unchanged from pushed repair commit `894a747`, now bound
+  as toolkit capability `bound-owner-ack-recovery-v27`. The only remaining step is
+  for Kristian to choose Guide option `1` and continue the same session.
 - [x] **Submission access:** GitHub is public. A fresh unauthenticated clone at
   `c918bc0` ran the committed help and refusal → receipt → advancement path and
   remained clean. The public-clone evidence is preserved under `docs/package-runs/`.
