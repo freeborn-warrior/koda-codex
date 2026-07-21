@@ -4,10 +4,11 @@
 - Scope: shared role-launcher extraction, manual command display, Ghostty coexistence,
   duplicate-role refusal, recovery routing, path quoting, environment isolation,
   launcher migration/tamper checks, platform and same-user threat boundaries
-- Status: **POST-PUSH PASS — PROMOTION PENDING**
+- Status: **POST-PUSH PASS — TOOLKIT PROMOTED**
 - Initial integrity-enabled full regression: **258/262** with four named corrections
 - Corrected local regression: [262/262](../../test-results/2026-07-21-manual-terminal-local.md)
 - Unchanged pushed regression: [262/262](../../test-results/2026-07-21-manual-terminal-pushed.md)
+- Promoted release regression: [262/262](../../test-results/2026-07-21-dual-launch-release.md)
 
 ## Architecture finding
 
@@ -47,7 +48,10 @@ environment, or session implementations.
 
 ## Regression and mutation result
 
-The unchanged pushed branch commit `f3b93fa` passed all **262/262** tests. This
+The unchanged pushed branch commit `f3b93fa` passed all **262/262** tests. Toolkit
+capability `dual-launch-surface-v25` binds that commit, its transcript, count, and
+every protected launch file. Promoted commit `c7c7cb0` then passed the complete
+**262/262** suite again without changing the protected implementation. This
 includes gate and receipt mutations, stale-review and status truth, printed-command
 execution, Guide/runtime integration, two-process session closure, clean launcher
 execution, credential scanning, symlink refusal, sandbox permissions, duplicate

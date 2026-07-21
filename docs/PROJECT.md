@@ -492,9 +492,11 @@ run Koda-C's exact Reviewer-first and Producer-second launchers. Both interfaces
 the same bound runtime, clean role environment, disk relay, review ceremony, gate,
 and recovery truth. Prompt confirmation, real-project preparation, separate-context
 execution, recovery, six-phase owner acknowledgement, pushed close, and Guide return
-have completed through Ghostty in one owner-observed run; the manual interface is
-under isolated branch verification before release. A future graphical interface
-remains another layer over the same headless workflow.
+have completed through Ghostty in one owner-observed run. The manual interface now
+passes the same complete 262-check release suite and focused security audit; a later
+owner-observed manual model session remains optional UX evidence rather than an
+unproved gate claim. A future graphical interface remains another layer over the
+same headless workflow.
 
 ## Open owner decision
 

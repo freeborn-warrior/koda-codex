@@ -6,13 +6,14 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## In progress
 
-- [ ] Prove the owner-authorized dual launch surface on isolated branch
+- [x] Prove the owner-authorized dual launch surface on isolated branch
   `codex/manual-terminal-launch`: preserve the automatic Ghostty path and recorded
   video, add a first-class manually opened terminal choice over the same runtime,
   refuse duplicate/mixed-role starts, execute every printed command from the state
   that printed it, and merge only after focused security plus complete durable
-  verification pass. Active development makes the root toolkit intentionally
-  unverified; do not run a human demo from this checkout until promotion finishes.
+  verification pass. Capability `dual-launch-surface-v25`, audit 27, unchanged
+  post-push proof, and promoted release proof all pass **262/262**; merge is the
+  remaining Git operation, not a product gap.
 - [x] **Submission access:** GitHub is public. A fresh unauthenticated clone at
   `c918bc0` ran the committed help and refusal → receipt → advancement path and
   remained clean. The public-clone evidence is preserved under `docs/package-runs/`.

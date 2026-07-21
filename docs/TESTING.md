@@ -2649,6 +2649,13 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   records a post-push pass for shared clean launchers, path quoting, environment
   isolation, tamper and duplicate refusal, surface switching, recovery, status
   truth, and the unchanged same-user threat boundary.
-- **State:** POST-PUSH PASS; release capability promotion and final regression are
-  next. Human Ghostty/manual testing from this checkout remains paused until that
-  promotion is complete.
+- **Promotion:** Capability `dual-launch-surface-v25` binds repair commit `4a134f0`,
+  pushed test commit `f3b93fa`, all **262** named checks, the exact transcript hash,
+  and the shared launcher plus Ghostty/Guide protected files.
+- **Promoted release result:** Commit `c7c7cb0` exactly matched its pushed branch
+  before the complete [release transcript](test-results/2026-07-21-dual-launch-release.md)
+  passed **262/262** again. Transcript SHA-256:
+  `69b9d66c3d9df69b4a7364fda4065d6400709668a0c03f5214c130c7780b5734`.
+- **State:** RELEASE PASS. The branch satisfies the mechanical and security merge
+  condition. A later owner-observed manual-terminal model session is welcome UX
+  proof, not a hidden requirement for the gate or recorded Ghostty demonstration.
