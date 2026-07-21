@@ -20,6 +20,10 @@ import {
   prepareHaltArtifact,
 } from "../src/halt.ts";
 import { relayOwnerName } from "../src/owner.ts";
+import {
+  assertLegacyMultiPartOwnerAcknowledgementRecovery,
+  isLegacyMultiPartOwnerAcknowledgementError,
+} from "../src/owner-ack-recovery.ts";
 import { currentPhase, displayPath, loadSession, writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
 import {
@@ -799,6 +803,25 @@ async function processJob(job: ReviewerJob): Promise<void> {
       console.log(terminalPanel("REVIEWER RECOVERY", [
         "The earlier acknowledgement attempt changed nothing.",
         `Reopening the same bound review for ${ownerName}.`,
+      ]));
+      job.status = "AWAITING_OWNER";
+      job.error = null;
+      await writeReviewerJob(runRoot, job);
+      state = reviewerWindowState({ ...state, status: "AWAITING_OWNER", currentJobId: job.id, lastError: null });
+      await writeReviewerWindowState(runRoot, state);
+    } else if (isLegacyMultiPartOwnerAcknowledgementError(job.error, root) && job.completion === null) {
+      const recoveryRun = await readRun();
+      await assertLegacyMultiPartOwnerAcknowledgementRecovery({
+        packageRoot: root,
+        project,
+        runRoot,
+        run: recoveryRun,
+        job,
+        reviewerState: state,
+      });
+      console.log(terminalPanel("REVIEWER RECOVERY", [
+        "The repaired toolkit verified the exact saved zero-write failure.",
+        `Reopening the same bound review for ${ownerName}; the original role contexts and gate remain unchanged.`,
       ]));
       job.status = "AWAITING_OWNER";
       job.error = null;

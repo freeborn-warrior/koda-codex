@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "capability": "multi-part-owner-ack-v26",
-  "verifiedAt": "2026-07-21T15:06:50.746Z",
-  "repairCommit": "4dc31b5eb8bced595947cf1e119e79a844defcbf",
-  "testedCommit": "f77f10c414d2d3dfa733147546a67495e3b23e0d",
-  "testCount": 264,
+  "capability": "owner-ack-recovery-development-v0",
+  "verifiedAt": "2026-07-21T15:27:53.000Z",
+  "repairCommit": "16f696a4c6b16bd10f06b0decbf8c3110ee7bb11",
+  "testedCommit": "16f696a4c6b16bd10f06b0decbf8c3110ee7bb11",
+  "testCount": 1,
   "evidence": {
-    "path": "docs/test-results/2026-07-21-owner-comments-pushed.md",
-    "sha256": "f02c4025643341a32c3848cc198a23c34c1c90f8566a19437e0c27653dbfa0a9"
+    "path": "docs/test-results/2026-07-21-owner-ack-recovery-bootstrap.md",
+    "sha256": "35514233f5f2ac9dc9b8b508ae4296616abb59799e1cb34b0cd8cbf292869b9e"
   },
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "7be0427782e79bff60200ab4b9c1878624fecf703bc49c82e5dea9d57b37828e"
+      "sha256": "beda187efce4f52ba7272787d08a76d6aa7201489a66c852ebd3d9608f653108"
     },
     {
       "path": "src/role-launchers.ts",
@@ -24,7 +24,7 @@
     },
     {
       "path": "src/guide-runtime.ts",
-      "sha256": "4bb2b3ad2ef41ceed1e67dfb2f8c9d78516e1b732b46ccb3623b065efc524657"
+      "sha256": "bab3b0b4b5374b9f4665407806adecc2ce5fcecbe069a2d6961c019588862be2"
     },
     {
       "path": "scripts/execute-relay-run.ts",
@@ -32,7 +32,7 @@
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "b86a94f9d5468e6efad895acf0d13b59b6503e0c60b3ed92bfae26099a81f578"
+      "sha256": "334d732ca7de0e86125462e4c69fc72153935b56820459b94e89e7b9f5f291a7"
     },
     {
       "path": "scripts/execute-reviewer-run.ts",
@@ -48,7 +48,7 @@
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "2f68530c267ca40ab4b5e06d3bf25f3eba23cea3a0c5018c3dcbdf57f8f85a5d"
+      "sha256": "11719a9c591085f737982dc61f3e9076b4c6672eb81ea4ae07df91b432d7e8a2"
     },
     {
       "path": "dist/role-launchers.js",
@@ -60,7 +60,15 @@
     },
     {
       "path": "dist/guide-runtime.js",
-      "sha256": "ed6ecfdf1146623102ca46c77357f9e3051f025b138a0b6cc12528d1c1cd9ebb"
+      "sha256": "56d8be0fdee94ff47de9d913d6fae53c7cc30ef6e5c87d127785506e3c576647"
+    },
+    {
+      "path": "src/owner-ack-recovery.ts",
+      "sha256": "e2f5b0ffd16382936a56fc0827ac239c6ac2e7f1f7a63be971871d71218fe2a3"
+    },
+    {
+      "path": "dist/owner-ack-recovery.js",
+      "sha256": "99b1d65b94013df0b0ce4d046a5b28f8e2c31bb8cb40693bd4b5bc0a2d6e185e"
     },
     {
       "path": "src/toolkit-integrity.ts",

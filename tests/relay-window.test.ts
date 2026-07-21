@@ -674,6 +674,71 @@ test("TWO-WINDOW RECEIPT RECOVERY: the live legacy acknowledgement failure reope
   assert.equal((await readApprovalEntries(result.session.directory)).length, 1);
 });
 
+test("TWO-WINDOW MULTI-PART ACKNOWLEDGEMENT RECOVERY: the exact pre-fix comments failure resumes the same review", async (t) => {
+  const result = await preparedAcknowledgementRun("wrong", {
+    verdict: "APPROVE WITH COMMENTS",
+    approvalComments: "Preserve the reviewer's non-blocking comment.",
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  const error = `Koda-C refused owner acknowledgement after the exact receipt matched: Warning: Detected unsettled top-level await at ${path.resolve("src/cli.ts")}:5\nawait main();\n^`;
+  const runFile = path.join(result.runRoot, "RUN.json");
+  const run = JSON.parse(await readFile(runFile, "utf8"));
+  run.version = 2;
+  run.status = "PAUSED_REVIEWER_FAILURE";
+  run.sessionId = result.session.id;
+  run.ownerAcknowledgements = 0;
+  run.producer.threadId = "019f0000-0000-7000-8000-000000000002";
+  run.reviewer.threadId = "019f0000-0000-7000-8000-000000000001";
+  run.lastAction = "formal review of brief in Window B";
+  run.lastError = error;
+  await writeJsonAtomic(runFile, run);
+  await writeJsonAtomic(path.join(result.session.directory, "guide-launch.json"), {
+    version: 1,
+    launchId: run.launchId,
+    sessionId: result.session.id,
+    boundAt: new Date().toISOString(),
+  });
+  const job = await readReviewerJob(result.runRoot);
+  assert.ok(job);
+  job.kind = "formal";
+  job.purpose = "formal review of brief";
+  job.status = "FAILED";
+  job.error = error;
+  job.completion = null;
+  await writeReviewerJob(result.runRoot, job);
+  await writeJsonAtomic(path.join(result.runRoot, "REVIEWER-STATE.json"), {
+    version: 1,
+    status: "FAILED",
+    sessionId: result.session.id,
+    model: run.reviewer.model,
+    effort: run.reviewer.effort,
+    threadId: run.reviewer.threadId,
+    turns: run.reviewer.turns,
+    currentJobId: job.id,
+    updatedAt: new Date().toISOString(),
+    lastError: error,
+  });
+
+  const recovered = spawnSync(process.execPath, ["scripts/run-relay-reviewer-window.ts", result.runRoot], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot),
+      KODA_RELAY_REVIEWER_ONCE: "1",
+      KODA_RELAY_TEST_CONFIRM_READ: "1",
+      KODA_RELAY_TEST_RECEIPT_INPUT: result.review.metadata.receipt,
+      KODA_RELAY_TEST_APPROVAL_COMMENTS: "Preserve the reviewer's non-blocking comment.",
+    },
+  });
+  assert.equal(recovered.status, 0, recovered.stderr);
+  assert.match(recovered.stdout, /REVIEWER RECOVERY[\s\S]*same bound review/);
+  assert.equal((await readReviewerJob(result.runRoot))?.completion, "ACKNOWLEDGED");
+  const approvals = await readApprovalEntries(result.session.directory);
+  assert.equal(approvals.length, 1);
+  assert.equal(approvals[0]!.comments, "Preserve the reviewer's non-blocking comment.");
+});
+
 test("TWO-WINDOW PRODUCER RECOVERY: an awaiting formal review is rejoined instead of replaced", async (t) => {
   const result = await preparedAcknowledgementRun("wrong");
   t.after(() => rm(result.temporary, { recursive: true, force: true }));

@@ -160,6 +160,11 @@ video upload, final repository freeze, and Devpost submission—not new product 
     receipt/comments and receipt/ruling input without exposing it in arguments or
     environment, and promote capability `multi-part-owner-ack-v26` only after the
     exact pushed **264/264** suite passes.
+42. [ ] Recover the preserved pre-fix Produce acknowledgement without inventing
+    state. Bind the exact failure to the same launch, session, phase, review job,
+    artifact/review hash, absent ledger entry, and both persistent role contexts;
+    mutation-test every binding, promote unchanged pushed proof, then resume only
+    through Guide's numbered recovery choice.
 
 ## Submission cut
 

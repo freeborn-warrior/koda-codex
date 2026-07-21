@@ -2775,3 +2775,38 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   passed **264/264** again in the
   [release transcript](test-results/2026-07-21-owner-comments-release.md), SHA-256
   `2d00456b3788880b1a62c0729a91de45bc5ee62ef5af50d2730dd0c3a859ea2f`.
+
+## 2026-07-21 — Exact preserved-session acknowledgement recovery
+
+- **Why another mechanism was required:** The v26 input repair made future
+  multi-part acknowledgements work, but it correctly did not reinterpret the
+  already-failed runtime. Guide therefore continued to withhold recovery for
+  launch `1c2a5c0f-d578-4d64-822b-ee99fa184133` rather than guessing from an
+  error string.
+- **Red proof:** Before the recovery classifier existed, the exact Guide fixture
+  returned no recovery roles and the Reviewer refused the saved unsettled-await
+  job. The three new focused cases failed **0/3**.
+- **Recovery contract:** Eligibility requires the exact old warning in runtime,
+  job, and Reviewer state; the same launch/session/phase/job/review path; unchanged
+  Producer and Reviewer context IDs; matching `guide-launch.json`; prior
+  advancement and acknowledgement counts ending at the active phase; unchanged
+  artifact and review evidence; and no current receipt entry in the ledger.
+- **Mutation result:** Changing only the error signature yields ordinary Guide
+  attention rather than recovery. Changing the artifact, job identity, Reviewer
+  context, or approval ledger refuses with the named violated condition.
+- **Surface result:** The valid fixture reports `SESSION RECOVERY READY`, restores
+  Reviewer before Producer for either automatic Ghostty or manually opened
+  terminals, and records a distinct `multi-part-owner-ack-input-retry` recovery
+  reason. The same Reviewer process reopens the bound review and preserves the
+  supplied comments.
+- **Focused results:** Exact valid recovery plus mutations pass **3/3**; the entire
+  Guide and Reviewer controller slice passes **84/84**.
+- **Complete development result:** The complete durable suite passes **267/267**
+  in [the recorded transcript](test-results/2026-07-21-owner-ack-recovery-bootstrap-refusal.md),
+  SHA-256
+  `6e21f2ef4033316569ca0397265e216fc3643f811f77e6eee54c8ee0039d9509`.
+  The run name anticipated an integrity refusal, but the already-installed
+  development manifest allowed the complete suite to execute; the file truthfully
+  records PASS and the name is retained rather than rewritten after the result.
+- **State:** DEVELOPMENT PASS. Pushed unchanged proof, capability promotion,
+  security audit 29, and owner-observed continuation remain required.

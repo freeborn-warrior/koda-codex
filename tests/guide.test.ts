@@ -16,9 +16,10 @@ import {
   verifyGuideLaunch,
 } from "../src/guide.ts";
 import { currentGuideRuntime, listGuideRuntimes, prepareGuideRuntime } from "../src/guide-runtime.ts";
-import { ghosttyWindowRequests, requestGhosttyRecoveryWindows, requestGhosttyWindows, visibleSessionStartupReady } from "../src/ghostty.ts";
+import { ghosttyWindowRequests, partialRecoveryRoles, requestGhosttyRecoveryWindows, requestGhosttyWindows, visibleSessionStartupReady } from "../src/ghostty.ts";
 import { prepareHaltArtifact } from "../src/halt.ts";
-import { createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
+import { artifactPath, createSession, loadSessionState, reviewPath, writeJsonAtomic } from "../src/project.ts";
+import { createFreshReview, recordApproval, reviewSha256 } from "../src/receipt.ts";
 import { temporaryRoot } from "./helpers.ts";
 import { verifyToolkitIntegrity } from "../src/toolkit-integrity.ts";
 
@@ -1223,6 +1224,171 @@ test("GUIDE GHOSTTY OWNER-ERROR RECOVERY: one action reopens Reviewer first and 
       return true;
     },
   );
+});
+
+const MULTI_PART_ACK_ERROR = `Koda-C refused owner acknowledgement after the exact receipt matched: Warning: Detected unsettled top-level await at ${path.resolve("src/cli.ts")}:5\nawait main();\n^`;
+
+async function multiPartOwnerAcknowledgementRecovery(t: Parameters<typeof guideHarness>[0]) {
+  const h = await guideHarness(t, true);
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm multi-part acknowledgement recovery fixture"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  const session = await createSession(h.root, DEFAULT_CONFIG, prompt);
+  const phase = session.state.phases[0]!;
+  await writeJsonAtomic(path.join(session.directory, "guide-launch.json"), {
+    version: 1,
+    launchId: confirmed.launch.id,
+    sessionId: session.id,
+    boundAt: new Date().toISOString(),
+  });
+  await writeFile(artifactPath(session.directory, phase, 0), "# Brief\n\nOne bounded, cited outcome.\n", "utf8");
+  const review = await createFreshReview(session.directory, phase, 0, {
+    verdict: "APPROVE WITH COMMENTS",
+    body: "# Peer review — brief\n\n## Findings\n\n- The result may advance with one preserved comment.",
+  });
+  const reviewerThreadId = "019f0000-0000-7000-8000-000000000701";
+  const producerThreadId = "019f0000-0000-7000-8000-000000000702";
+  const job = {
+    version: 1,
+    id: "77777777-7777-4777-8777-777777777777",
+    kind: "formal",
+    phase: phase.name,
+    purpose: `formal review of ${phase.name}`,
+    prompt: "Use the shared reviewer skill.",
+    expectedPath: path.relative(h.root, reviewPath(session.directory, phase, 0)),
+    status: "FAILED",
+    createdAt: new Date(0).toISOString(),
+    updatedAt: new Date().toISOString(),
+    error: MULTI_PART_ACK_ERROR,
+    completion: null,
+  };
+  prepared.run.status = "PAUSED_REVIEWER_FAILURE";
+  prepared.run.sessionId = session.id;
+  prepared.run.producer.threadId = producerThreadId;
+  prepared.run.reviewer.threadId = reviewerThreadId;
+  prepared.run.lastAction = job.purpose + " in Window B";
+  prepared.run.lastError = MULTI_PART_ACK_ERROR;
+  (prepared.run as typeof prepared.run & { ownerAcknowledgements: number }).ownerAcknowledgements = 0;
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+  await writeJsonAtomic(path.join(prepared.runRoot, "REVIEWER-JOB.json"), job);
+  await writeJsonAtomic(path.join(prepared.runRoot, "REVIEWER-STATE.json"), {
+    version: 1,
+    status: "FAILED",
+    sessionId: session.id,
+    model: prepared.run.reviewer.model,
+    effort: prepared.run.reviewer.effort,
+    threadId: reviewerThreadId,
+    turns: 1,
+    currentJobId: job.id,
+    updatedAt: new Date().toISOString(),
+    lastError: MULTI_PART_ACK_ERROR,
+  });
+  return { h, prepared, session, phase, review, job };
+}
+
+test("GUIDE MULTI-PART ACKNOWLEDGEMENT RECOVERY: exact unchanged failure restores both saved contexts", async (t) => {
+  const { h, prepared } = await multiPartOwnerAcknowledgementRecovery(t);
+  assert.deepEqual(await partialRecoveryRoles((await currentGuideRuntime(h.root))!), ["reviewer", "producer"]);
+
+  const output: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { output.push(message); } });
+  const ownerView = output.join("\n");
+  assert.match(ownerView, /SESSION RECOVERY READY/);
+  assert.match(ownerView, /restore the Reviewer first and open the Producer only after that decision is ready/);
+  assert.doesNotMatch(ownerView, /SESSION NEEDS GUIDE ATTENTION/);
+
+  let recoveredRoles: string[] = [];
+  const choice = await performGuideRecoveryChoice(h.root, "1", {
+    async recoverGhostty() { throw new Error("manual fixture must not request Ghostty"); },
+    async recoverManual(_root, runtime, roles) {
+      assert.equal(runtime.run.launchId, prepared.run.launchId);
+      recoveredRoles = roles;
+      return "MANUAL TERMINAL RECOVERY READY";
+    },
+  });
+  assert.equal(choice.handled, true);
+  assert.equal(choice.message, "MANUAL TERMINAL RECOVERY READY");
+  assert.deepEqual(recoveredRoles, ["reviewer", "producer"]);
+
+  const opened: string[] = [];
+  await requestGhosttyRecoveryWindows(h.root, (await currentGuideRuntime(h.root))!, await verifyToolkitIntegrity(), {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open(args) {
+      opened.push(args.find((item) => item.startsWith("--title=")) ?? "missing title");
+      return { status: 0, stderr: "" };
+    },
+    async waitForRecoveredReviewer() {
+      assert.equal(opened.length, 1, "Producer must stay closed until the restored Reviewer is ready");
+      return true;
+    },
+    async waitForRecoveredProducer() {
+      assert.equal(opened.length, 2);
+      return true;
+    },
+  });
+  assert.match(opened[0]!, /Reviewer/);
+  assert.match(opened[1]!, /Producer/);
+  const recovery = JSON.parse(await readFile(path.join(prepared.runRoot, "RECOVERY.json"), "utf8"));
+  assert.equal(recovery.reason, "multi-part-owner-ack-input-retry");
+  assert.equal(recovery.priorError, MULTI_PART_ACK_ERROR);
+  assert.deepEqual(recovery.reviewerJob, {
+    id: "77777777-7777-4777-8777-777777777777",
+    kind: "formal",
+    phase: "brief",
+    expectedPath: "docs/sessions/2026-07-21-01/reviews/01-brief-review.md",
+  });
+});
+
+test("GUIDE MULTI-PART ACKNOWLEDGEMENT MUTATIONS: changed evidence never inherits recovery", async (t) => {
+  const { h, prepared, session, phase, review, job } = await multiPartOwnerAcknowledgementRecovery(t);
+  const runFile = path.join(prepared.runRoot, "RUN.json");
+  const jobFile = path.join(prepared.runRoot, "REVIEWER-JOB.json");
+  const reviewerStateFile = path.join(prepared.runRoot, "REVIEWER-STATE.json");
+  const artifactFile = artifactPath(session.directory, phase, 0);
+  const originalArtifact = await readFile(artifactFile, "utf8");
+  const originalReviewerState = JSON.parse(await readFile(reviewerStateFile, "utf8"));
+
+  const changedError = { ...prepared.run, lastError: `${MULTI_PART_ACK_ERROR} changed` };
+  await writeJsonAtomic(runFile, changedError);
+  const wrongSignature: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { wrongSignature.push(message); } });
+  assert.match(wrongSignature.join("\n"), /SESSION NEEDS GUIDE ATTENTION/);
+  assert.doesNotMatch(wrongSignature.join("\n"), /SESSION RECOVERY READY/);
+  await writeJsonAtomic(runFile, prepared.run);
+
+  await writeFile(artifactFile, `${originalArtifact}\nchanged after review\n`, "utf8");
+  await assert.rejects(runGuideCli(["status"], h.root, { out() {} }), /artifact changed after review/);
+  await writeFile(artifactFile, originalArtifact, "utf8");
+
+  await writeJsonAtomic(jobFile, { ...job, id: "88888888-8888-4888-8888-888888888888" });
+  await assert.rejects(runGuideCli(["status"], h.root, { out() {} }), /Reviewer job identity no longer matches Reviewer state/);
+  await writeJsonAtomic(jobFile, job);
+
+  await writeJsonAtomic(reviewerStateFile, { ...originalReviewerState, threadId: "019f0000-0000-7000-8000-000000000799" });
+  await assert.rejects(runGuideCli(["status"], h.root, { out() {} }), /Reviewer context identity changed/);
+  await writeJsonAtomic(reviewerStateFile, originalReviewerState);
+
+  await recordApproval(session.directory, {
+    version: 1,
+    phase: phase.name,
+    reviewId: review.metadata.id,
+    reviewSha256: await reviewSha256(session.directory, phase, 0),
+    verdict: "APPROVE WITH COMMENTS",
+    receipt: review.metadata.receipt,
+    approver: "Kristian",
+    comments: "Preserved comment.",
+    ruling: null,
+    recordedAt: new Date().toISOString(),
+  });
+  await assert.rejects(runGuideCli(["status"], h.root, { out() {} }), /receipt is no longer unacknowledged/);
 });
 
 async function stableOwnerHandover(t: Parameters<typeof guideHarness>[0], withJob = true) {

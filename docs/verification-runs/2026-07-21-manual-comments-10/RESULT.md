@@ -81,3 +81,31 @@ After the promoted manifest, security audit, and public links were pushed at
 [`release transcript`](../../test-results/2026-07-21-owner-comments-release.md),
 SHA-256
 `2d00456b3788880b1a62c0729a91de45bc5ee62ef5af50d2730dd0c3a859ea2f`.
+
+## Preserved-session recovery follow-up
+
+The input repair did not by itself authorize the pre-fix failed runtime to
+resume. Guide correctly continued to report `SESSION NEEDS GUIDE ATTENTION`
+instead of interpreting a similar-looking failure. The recovery classifier is
+now deliberately narrower than the original defect:
+
+- the exact pre-fix unsettled-await signature must match in `RUN.json`, the
+  failed Reviewer job, and Reviewer state;
+- the original launch, session, Producer context, Reviewer context, current
+  phase, job identity, and review path must still agree;
+- `guide-launch.json` must still bind the same launch and session;
+- the artifact and review must still pass every gate check except the expected
+  missing acknowledgement (and the expected blocking `DISCUSS` condition where
+  applicable);
+- the approval ledger must still contain no entry for the current receipt; and
+- the prior advancement and acknowledgement counts must still end immediately
+  before the failed phase.
+
+The valid recovery and five one-condition mutations pass **3/3** in the focused
+Guide/Reviewer slice. The complete development suite passes **267/267** in
+[`../../test-results/2026-07-21-owner-ack-recovery-bootstrap-refusal.md`](../../test-results/2026-07-21-owner-ack-recovery-bootstrap-refusal.md),
+SHA-256
+`6e21f2ef4033316569ca0397265e216fc3643f811f77e6eee54c8ee0039d9509`.
+The misleading historical `bootstrap-refusal` label is retained as the immutable
+run name; the recorded result itself is PASS. Pushed capability promotion and the
+owner-observed continuation remain pending.

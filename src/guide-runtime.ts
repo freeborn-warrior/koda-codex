@@ -47,6 +47,7 @@ export interface GuideRuntimeRecord {
   launchMode?: "independent" | "dependent" | "continuation";
   dependencySessionIds?: string[];
   sessionId?: string;
+  ownerAcknowledgements?: number;
   archive: string;
   guideReturn: string;
   initialCommit: string;
@@ -201,6 +202,7 @@ function runtimeRecord(value: unknown, source: string): GuideRuntimeRecord {
     !(item.launchMode === undefined || item.launchMode === "independent" || item.launchMode === "dependent" || item.launchMode === "continuation") ||
     !(item.dependencySessionIds === undefined || (Array.isArray(item.dependencySessionIds) && item.dependencySessionIds.every((id) => typeof id === "string"))) ||
     !(item.sessionId === undefined || /^\d{4}-\d{2}-\d{2}-\d{2}$/.test(item.sessionId)) ||
+    !(item.ownerAcknowledgements === undefined || (Number.isInteger(item.ownerAcknowledgements) && item.ownerAcknowledgements >= 0)) ||
     typeof item.archive !== "string" || typeof item.guideReturn !== "string" ||
     typeof item.initialCommit !== "string" || !/^[a-f0-9]{40,64}$/.test(item.initialCommit) ||
     !validTerminalLaunch ||

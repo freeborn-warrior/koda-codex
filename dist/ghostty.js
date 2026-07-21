@@ -1,8 +1,13 @@
 import { spawnSync } from "node:child_process";
 import { lstat, readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 
+import {
+  assertLegacyMultiPartOwnerAcknowledgementRecovery,
+  isLegacyMultiPartOwnerAcknowledgementError,
+} from "./owner-ack-recovery.js";
 import { nowIso, writeJsonAtomic } from "./project.js";
 import { prepareRoleLaunchers } from "./role-launchers.js";
 
@@ -60,6 +65,7 @@ export function visibleSessionStartupReady(
 
 
 const ROLE_START_ATTEMPTS = 900;
+const PACKAGE_ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
 function windowRequest(options
 
@@ -150,7 +156,10 @@ async function receiptRecoveryJob(runRoot        )                              
   }
   if (!value || typeof value !== "object") throw new Error("Receipt recovery found invalid reviewer-job data.");
   const job = value                               ;
-  const retryableLegacyFailure = job.status === "FAILED" && job.error === "Owner acknowledgement exited 1.";
+  const retryableLegacyFailure = job.status === "FAILED" && (
+    job.error === "Owner acknowledgement exited 1." ||
+    isLegacyMultiPartOwnerAcknowledgementError(job.error, PACKAGE_ROOT)
+  );
   const retryableCurrentState = job.status === "AWAITING_OWNER" && job.error === null;
   if (
     job.version !== 1 ||
@@ -321,7 +330,7 @@ async function readRecoveryRecord(file        )                                 
   const record = value                           ;
   if (
     record.version !== 1 ||
-    !["owner-receipt-input-retry", "stable-owner-handover-role-recovery"].includes(String(record.reason)) ||
+    !["owner-receipt-input-retry", "stable-owner-handover-role-recovery", "multi-part-owner-ack-input-retry"].includes(String(record.reason)) ||
     typeof record.requestedAt !== "string"
   ) {
     throw new Error("Visible recovery evidence does not match the session-recovery contract.");
@@ -354,6 +363,23 @@ export async function partialRecoveryRoles(
   const recoveryFile = path.join(runtime.runRoot, "RECOVERY.json");
   const recoveryExists = await lstat(recoveryFile).then(() => true).catch(() => false);
   const recovery = recoveryExists ? await readRecoveryRecord(recoveryFile) : null;
+  const multiPartFailure = runtime.run.status === "PAUSED_REVIEWER_FAILURE" &&
+    isLegacyMultiPartOwnerAcknowledgementError(runtime.run.lastError, PACKAGE_ROOT);
+  if (multiPartFailure) {
+    const job = await receiptRecoveryJob(runtime.runRoot);
+    await assertLegacyMultiPartOwnerAcknowledgementRecovery({
+      packageRoot: PACKAGE_ROOT,
+      project: path.resolve(runtime.runRoot, runtime.run.project),
+      runRoot: runtime.runRoot,
+      run: runtime.run,
+      job,
+    });
+    const health = await visibleRoleHealth(runtime.runRoot);
+    const missing                                      = [];
+    if (!health.reviewerRunning) missing.push("reviewer");
+    if (!health.producerRunning) missing.push("producer");
+    return missing.length > 0 ? missing : null;
+  }
   const stableOwnerHandover = runtime.run.status === "AWAITING_REVIEWER_WINDOW" && runtime.run.lastError === undefined;
   const possibleFailedRejoin = recoveryExists &&
     runtime.run.status === "PAUSED_ERROR" &&
@@ -398,11 +424,14 @@ export async function requestGhosttyRecoveryWindows(
   const partialRoles = await partialRecoveryRoles(runtime);
   if (partialRoles) {
     const job = await receiptRecoveryJob(runtime.runRoot);
+    const multiPartFailure = runtime.run.status === "PAUSED_REVIEWER_FAILURE" &&
+      isLegacyMultiPartOwnerAcknowledgementError(runtime.run.lastError, PACKAGE_ROOT);
     const recovery = priorRecovery
       ? await readRecoveryRecord(recoveryFile)
       : {
           version: 1,
-          reason: "stable-owner-handover-role-recovery",
+          reason: multiPartFailure ? "multi-part-owner-ack-input-retry" : "stable-owner-handover-role-recovery",
+          ...(multiPartFailure ? { priorError: runtime.run.lastError } : {}),
           requestedAt: nowIso(),
           toolkit,
           reviewerJob: { id: job.id, kind: job.kind, phase: job.phase, expectedPath: job.expectedPath },
@@ -415,9 +444,11 @@ export async function requestGhosttyRecoveryWindows(
     }                        ;
     const allRequests = await ghosttyWindowRequests(project, prepared, dependencies);
     const requests = allRequests.filter((request) => partialRoles.includes(request.role));
-    runtime.run.lastAction = `reopen missing ${partialRoles.join(" and ")} after partial recovery`;
-    runtime.run.lastError = undefined;
-    await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+    if (!multiPartFailure) {
+      runtime.run.lastAction = `reopen missing ${partialRoles.join(" and ")} after partial recovery`;
+      runtime.run.lastError = undefined;
+      await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
+    }
     const open = dependencies.open ?? defaultOpen;
     for (const request of requests) {
       const result = open(request.args, project);
@@ -437,6 +468,11 @@ export async function requestGhosttyRecoveryWindows(
           : "Recovered Producer did not rejoin the existing Reviewer decision point.");
         await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
         throw new Error(runtime.run.lastError);
+      }
+      if (multiPartFailure && request.role === "reviewer") {
+        runtime.run.lastAction = `reopen missing ${partialRoles.join(" and ")} after partial recovery`;
+        runtime.run.lastError = undefined;
+        await writeJsonAtomic(path.join(runtime.runRoot, "RUN.json"), runtime.run);
       }
     }
     const completedAt = nowIso();
