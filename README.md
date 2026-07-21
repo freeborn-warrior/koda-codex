@@ -172,7 +172,7 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The latest [267-check post-push transcript from `main`](docs/test-results/2026-07-21-owner-ack-recovery-pushed.md)
+- The latest [267-check post-push transcript from `main`](docs/test-results/2026-07-21-manual-terminal-recovery-pushed.md)
   validates both Ghostty and manual-terminal launch over the same runtime together
   with the complete gate, receipt, stale-review, status-truth, package, security,
   recovery, multi-part owner acknowledgement, and full-session regression. The

@@ -79,6 +79,11 @@ After this public evidence was assembled, the complete Koda-C suite passed
 [per-test transcript](../../test-results/2026-07-21-manual-terminal-recovery-complete.md)
 has SHA-256
 `63d6f52d97685b656152eb98fdf23bb0ba1fef4a682932cb04638af46e501987`.
+After evidence commit `ddb0728` exactly matched `origin/main`, the unchanged
+suite passed **267/267** again in the
+[post-push transcript](../../test-results/2026-07-21-manual-terminal-recovery-pushed.md),
+SHA-256
+`ffd8608918aa5794a06ad380741ff3d3537ea8eae7deb0559afac1900e5e63d3`.
 
 ## Restorable history and security check
 

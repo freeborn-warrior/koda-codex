@@ -2854,6 +2854,11 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [per-test transcript](test-results/2026-07-21-manual-terminal-recovery-complete.md)
   passed **267/267** with zero failures or skips. Transcript SHA-256:
   `63d6f52d97685b656152eb98fdf23bb0ba1fef4a682932cb04638af46e501987`.
+- **Post-push confirmation:** Evidence commit `ddb0728` exactly matched
+  `origin/main` before the unchanged complete suite passed **267/267** again in
+  the [post-push transcript](test-results/2026-07-21-manual-terminal-recovery-pushed.md),
+  SHA-256
+  `ffd8608918aa5794a06ad380741ff3d3537ea8eae7deb0559afac1900e5e63d3`.
 - **Honest boundary:** This was a repaired continuation of a real pre-repair
   failure, not a fresh uninterrupted post-repair run. It proves exact saved-state
   recovery and completion; it does not relabel the failed first attempt as clean.
