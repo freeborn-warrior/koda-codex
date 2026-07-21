@@ -36,6 +36,7 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - Forward-only Koda-C self-hosting is deferred until after submission. The first complete Guide-launched owner test uses an isolated representative project, with every durable result archived in this repository and no retrofitted Koda-C state added to the root build.
 - The owner is never an evidence courier between contexts. Guide discovers technical prerequisites from disk, reports a plain verified capability, and binds the toolkit integrity snapshot into the launch request. Only genuine intent or product judgment may remain an owner question.
 - The core remains headless and interface-free by design. Every human interface is a replaceable local or remote client over the stable workflow contract; it may display state and submit requests, but the core revalidates every action and remains the sole mechanical authority.
+- Ghostty automation and manually opened terminals are two supported launch surfaces over the same verified Guide runtime. Selecting a surface must never create a different session contract, role identity, evidence path, or gate.
 - The TypeScript/Node.js engine is the current competition implementation, not the permanent production core. After submission, the intended implementation direction is a compiled headless Rust engine that preserves the plain-file evidence contract, deterministic gates, and separate-interface boundary.
 
 ## Lifecycle
@@ -133,7 +134,7 @@ owner contract
 - Guide status now serves as the session-prompter preflight: it lists every active session's ID, kind, phase, and terminal condition; distinguishes dependency-blocked successors from explicit independent siblings; and names a prepared launch that must bind or be cancelled before another confirmation.
 - `koda guide launch` prepares one real-project runtime from that pushed binding. Ignored `.koda/runs/` holds recoverable rendezvous state; producer, reviewer, and status share one hardened path resolver; immutable close remains an ordinary pushed project commit; and tracked `docs/guide/runs/` plus `docs/guide/returns/` return the result to Guide without deleting or replacing the real repository's `.git` directory.
 - A deterministic two-process integration proves active Produce sibling → owner-confirmed independent Explore prompt → exact session binding → separate context identities → Brief gate and owner receipt → pushed close → injected return-stage interruption → exact resume → pushed Guide return, while the Produce sibling remains untouched. A second four-process integration runs two independent Producer/Reviewer pairs to separate pushed closes and Guide returns in one project. Session and Guide write claims reserve exact paths, session claims bind before/after hashes, overlap and unclaimed mutation refuse, exact staging excludes unrelated dirt, and a short recoverable Git lock serializes the commit ceremony. Immutable close separately revalidates every claimed external output and refuses if its observed bytes were not committed and pushed. This was deterministic evidence before the later live-model run fulfilled the separate human proof.
-- The macOS terminal adapter exposes explicit `--open ghostty`, preserves Guide as the existing conversation, records intent before GUI mutation, and refuses duplicate automatic opening after success or partial failure. After the first live adapter opened unsafe extra tabs, the repaired design gives Ghostty exactly one project-contained, mode-700 launcher token per role. A later real launch proved that token must be absolute because Ghostty's `/usr/bin/login` wrapper changes directory before execution; the Reviewer therefore failed before startup while Producer was correctly withheld. Both role commands are now absolute. Each launcher clears ambient state before the role process; every model child receives an allowlist that excludes credentials and parent context identity. Changed or linked launcher files refuse before GUI mutation.
+- The macOS terminal adapter exposes explicit `--open ghostty`, preserves Guide as the existing conversation, records intent before GUI mutation, and refuses duplicate automatic opening after success or partial failure. The manual surface prepares the same bound runtime and prints the same clean-environment, project-contained launchers in Reviewer-first order for terminals the owner opens. After the first live adapter opened unsafe extra tabs, the repaired design gives each surface exactly one mode-700 launcher token per role. A later real launch proved that token must be absolute because Ghostty's `/usr/bin/login` wrapper changes directory before execution; the Reviewer therefore failed before startup while Producer was correctly withheld. Both role commands are now absolute. Each launcher clears ambient state before the role process; every model child receives an allowlist that excludes credentials and parent context identity. Changed or linked launcher files refuse before either surface uses them.
 - The bundled full-session prompt and its Guide launch are now one mechanically
   checked contract before any window opens. Explicit `Session kind`, `Launch
   relationship`, and `Dependencies` handover lines must agree with the launch
@@ -480,14 +481,18 @@ The later adoption layer must turn an owner's project purpose into project-local
 
 Between sessions, the owner-facing Guide is the path-maker whose continuity is reconstructed from a project-specific manifest, steering files, prior pushed close, carry-forward artifact, and selectively cited history rather than trusted to chat memory alone. The repository-local `koda-c-session-prompt` skill drafts one bounded prompt with Kristian. `koda guide confirm` binds the exact prompt and project snapshot; `koda session new` refuses an unconfirmed or stale Guide prompt and binds a verified request to the resulting session. The Guide remains separate from the launched producer and reviewer contexts and resumes from their pushed evidence.
 
-The current runtime removes the earlier multi-command terminal start. After
+The current runtime removes the earlier owner-as-transport terminal setup. After
 `koda-c-session-prompt` records explicit owner confirmation in the managed Guide,
-the trusted controller revalidates the pushed handoff and can arrange one
-input-closed Producer plus one owner-facing Reviewer beside Guide through the
-optional Ghostty adapter. Prompt confirmation, real-project preparation,
-separate-context execution, recovery, six-phase owner acknowledgement, pushed
-close, and Guide return have now completed in one owner-observed run. Other terminal
-adapters and a future graphical interface remain later layers over the same workflow.
+the trusted controller revalidates the pushed handoff and prepares one input-closed
+Producer plus one owner-facing Reviewer beside Guide. The owner may let the optional
+macOS Ghostty adapter open those two role windows or open terminals personally and
+run Koda-C's exact Reviewer-first and Producer-second launchers. Both interfaces use
+the same bound runtime, clean role environment, disk relay, review ceremony, gate,
+and recovery truth. Prompt confirmation, real-project preparation, separate-context
+execution, recovery, six-phase owner acknowledgement, pushed close, and Guide return
+have completed through Ghostty in one owner-observed run; the manual interface is
+under isolated branch verification before release. A future graphical interface
+remains another layer over the same headless workflow.
 
 ## Open owner decision
 

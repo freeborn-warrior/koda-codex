@@ -9,9 +9,10 @@ import { fileURLToPath } from "node:url";
 import { codexGuidePermissionArgs } from "./codex-role-permissions.js";
 import { findProjectRoot, pathExists, readProjectConfig } from "./config.js";
 import { runGuideCli } from "./guide-commands.js";
-import { currentGuideRuntime, guideRuntimeTruth, listGuideRuntimes } from "./guide-runtime.js";
+import { currentGuideRuntime, guideRuntimeTruth, listGuideRuntimes,                                                  } from "./guide-runtime.js";
 import { guideRoot, hasGuideManifest, loadGuideManifest, pendingGuideLaunches } from "./guide.js";
 import { partialRecoveryRoles, requestGhosttyRecoveryWindows, requestGhosttyWindows,                           } from "./ghostty.js";
+import { prepareRoleLaunchers } from "./role-launchers.js";
 import {
   relayCodexEnvironment,
   relayGitToolchainReadRoots,
@@ -60,6 +61,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 
 
 
+
+
+
 const defaultRecoveryDependencies                            = {
   recoverGhostty: requestGhosttyRecoveryWindows,
 };
@@ -74,7 +78,7 @@ const defaultRecoveryDependencies                            = {
 
 
 const defaultLaunchDependencies                          = {
-  async launch(root, staffing) {
+  async launch(root, staffing, surface) {
     const lines           = [];
     let requests                         = [];
     await runGuideCli([
@@ -83,7 +87,7 @@ const defaultLaunchDependencies                          = {
       "--producer-effort", staffing.producerEffort,
       "--reviewer-model", staffing.reviewerModel,
       "--reviewer-effort", staffing.reviewerEffort,
-      "--open", "ghostty",
+      ...(surface === "ghostty" ? ["--open", "ghostty"] : []),
     ], root, { out(message) { lines.push(message); } }, {
       async openGhostty(project, prepared) {
         requests = await requestGhosttyWindows(project, prepared);
@@ -96,6 +100,35 @@ const defaultLaunchDependencies                          = {
 
 function now()         {
   return new Date().toISOString();
+}
+
+function shellQuote(value        )         {
+  return `'${value.replaceAll("'", `'"'"'`)}'`;
+}
+
+async function manualRecoveryInstructions(
+  root        ,
+  runtime                  ,
+  roles                                ,
+)                  {
+  const prepared = {
+    ...runtime,
+    launch: { id: runtime.run.launchId },
+    reused: true,
+  }                        ;
+  const launchers = await prepareRoleLaunchers(root, prepared);
+  const lines = [
+    "MANUAL TERMINAL RECOVERY READY",
+    "Nothing was acknowledged or advanced. Start only the missing role or roles shown below.",
+  ];
+  if (roles.includes("reviewer")) {
+    lines.push("", "REVIEWER / OWNER — start this first:", shellQuote(launchers.reviewer));
+  }
+  if (roles.includes("producer")) {
+    lines.push("", "PRODUCER — start this after Reviewer is open:", shellQuote(launchers.producer));
+  }
+  lines.push("", "These commands are bound to the existing run. They do not create another session or review job.");
+  return lines.join("\n");
 }
 
 function processIsAlive(pid        )          {
@@ -459,24 +492,33 @@ export async function performGuideRecoveryChoice(
   choice        ,
   dependencies                            = defaultRecoveryDependencies,
 )                                                                                     {
-  const recoverable                                                                      = [];
+  const recoverable
+
+
+     = [];
   for (const runtime of await listGuideRuntimes(root)) {
     const truth = await guideRuntimeTruth(root, runtime);
     if (truth.effectiveStatus === "COMPLETE" || truth.effectiveStatus === "HALTED") continue;
-    if (await partialRecoveryRoles(runtime)) recoverable.push(runtime);
+    const roles = await partialRecoveryRoles(runtime);
+    if (roles) recoverable.push({ runtime, roles });
   }
   if (recoverable.length === 0) return { handled: false };
   if (recoverable.length > 1 && (choice === "1" || choice === "2")) {
     return {
       handled: true,
-      message: `Koda-C found ${recoverable.length} recoverable sessions (${recoverable.map(({ run }) => run.launchId).join(", ")}). A bare number is ambiguous, so nothing changed. Ask Guide which exact session to recover.`,
+      message: `Koda-C found ${recoverable.length} recoverable sessions (${recoverable.map(({ runtime }) => runtime.run.launchId).join(", ")}). A bare number is ambiguous, so nothing changed. Ask Guide which exact session to recover.`,
     };
   }
-  const runtime = recoverable[0] ;
+  const { runtime, roles } = recoverable[0] ;
   if (choice === "2") return { handled: true, message: "Nothing changed. The saved session remains safely paused." };
   if (choice !== "1") return { handled: false };
   let requests                        ;
   try {
+    if (!runtime.run.terminalLaunch) {
+      await verifyToolkitIntegrity();
+      const message = await (dependencies.recoverManual ?? manualRecoveryInstructions)(root, runtime, roles);
+      return { handled: true, message };
+    }
     const toolkit = await verifyToolkitIntegrity();
     requests = await dependencies.recoverGhostty(root, runtime, toolkit);
   } catch (error) {
@@ -504,16 +546,17 @@ export async function performGuideLaunchChoice(
   const config = await readProjectConfig(root);
   const pending = await pendingGuideLaunches(root, config);
   if (pending.length === 0) return { handled: false };
-  if (pending.length > 1 && (choice === "1" || choice === "2")) {
+  if (pending.length > 1 && (choice === "1" || choice === "2" || choice === "3")) {
     return {
       handled: true,
       message: `Koda-C found ${pending.length} ready launches. A bare number is ambiguous, so nothing changed.`,
     };
   }
-  if (choice === "2") {
+  if (choice === "3") {
     return { handled: true, message: "Nothing changed. The verified launch remains ready for later." };
   }
-  if (choice !== "1") return { handled: false };
+  if (choice !== "1" && choice !== "2") return { handled: false };
+  const surface                     = choice === "1" ? "ghostty" : "manual";
 
   const assignments = [
     validateAssignment(staffing.producerModel, "Producer model"),
@@ -534,7 +577,7 @@ export async function performGuideLaunchChoice(
       producerEffort: assignments[1] ,
       reviewerModel: assignments[2] ,
       reviewerEffort: assignments[3] ,
-    });
+    }, surface);
     return { handled: true, message: launched.message, requests: launched.requests };
   } catch (error) {
     return {

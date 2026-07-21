@@ -83,6 +83,9 @@ test("FULL-SESSION QUICK START: one command creates a pushed project and numbere
   const verification: string[] = [];
   await runGuideCli(["verify"], project, { out(message) { verification.push(message); } });
   assert.match(verification.join("\n"), /READY TO LAUNCH/);
+  assert.match(verification.join("\n"), /1\. Launch automatically in Ghostty/);
+  assert.match(verification.join("\n"), /2\. Launch in terminals I open myself/);
+  assert.match(verification.join("\n"), /3\. Not now/);
 
   const staffing = {
     producerModel: "gpt-5.6-sol",

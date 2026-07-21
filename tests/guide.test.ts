@@ -305,9 +305,10 @@ test("GUIDE VERIFIED HANDOVER: the owner receives a complete numbered launch cho
   await runGuideCli(["verify"], h.root, { out(message) { output.push(message); } });
   const rendered = output.join("\n");
   assert.match(rendered, /READY TO LAUNCH — OWNER CHOICE/);
-  assert.match(rendered, /1\. Launch this session now.*one local launcher command.*one Reviewer and one Producer window/);
-  assert.match(rendered, /2\. Not now — keep this launch ready without opening windows/);
-  assert.match(rendered, /do not paste or reconstruct a technical command/);
+  assert.match(rendered, /1\. Launch automatically in Ghostty.*one Reviewer and one Producer window/);
+  assert.match(rendered, /2\. Launch in terminals I open myself.*Reviewer first.*Producer second/);
+  assert.match(rendered, /3\. Not now — keep this launch ready without opening windows/);
+  assert.match(rendered, /Choose in the Guide conversation/);
 });
 
 test("GUIDE MUTATION: changing only a continuity file makes confirmation stale", async (t) => {
@@ -469,9 +470,19 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
     "--reviewer-effort", "medium",
   ], h.root, { out(message) { output.push(message); } });
   assert.match(output.join("\n"), new RegExp(`GUIDE SESSION PREPARED — ${confirmed.launch.id}`));
-  assert.match(output.join("\n"), /WINDOW B — REVIEWER \/ OWNER \(start this first\)/);
-  assert.match(output.join("\n"), /WINDOW A — PRODUCER \(then start this\)/);
+  assert.match(output.join("\n"), /MANUAL TERMINAL START READY/);
+  assert.match(output.join("\n"), /Open a second terminal.*REVIEWER \/ OWNER first/);
+  assert.match(output.join("\n"), /Open a third terminal.*PRODUCER second/);
   const runRoot = path.join(h.root, ".koda", "runs", confirmed.launch.id);
+  const reviewerLauncher = path.join(runRoot, "launch-reviewer.sh");
+  const producerLauncher = path.join(runRoot, "launch-producer.sh");
+  assert.match(output.join("\n"), new RegExp(reviewerLauncher.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.match(output.join("\n"), new RegExp(producerLauncher.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.equal((await stat(reviewerLauncher)).mode & 0o777, 0o700);
+  assert.equal((await stat(producerLauncher)).mode & 0o777, 0o700);
+  const launcherBytes = `${await readFile(reviewerLauncher, "utf8")}\n${await readFile(producerLauncher, "utf8")}`;
+  assert.match(launcherBytes, /'\/usr\/bin\/env' \\\n  '-i'/);
+  assert.doesNotMatch(launcherBytes, /FIREWORKS_API_KEY|OPENAI_API_KEY|CODEX_THREAD_ID/);
   const run = JSON.parse(await readFile(path.join(runRoot, "RUN.json"), "utf8"));
   assert.equal(run.version, 2);
   assert.equal(run.owner, "Alex Morgan");
@@ -496,6 +507,22 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   assert.equal(again.reused, true);
   assert.equal(again.runRoot, runRoot);
 
+  const preparedStatus: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { preparedStatus.push(message); } });
+  assert.match(preparedStatus.join("\n"), /Visible roles: Reviewer not running; Producer not running/);
+  assert.match(preparedStatus.join("\n"), /SESSION IS PREPARED — choose automatic Ghostty or manual terminals in Guide/);
+
+  await writeJsonAtomic(path.join(runRoot, ".reviewer-window.lock"), {
+    version: 1,
+    pid: process.pid,
+    startedAt: new Date().toISOString(),
+  });
+  const reviewerFirstStatus: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { reviewerFirstStatus.push(message); } });
+  assert.match(reviewerFirstStatus.join("\n"), /Visible roles: Reviewer running; Producer not running/);
+  assert.match(reviewerFirstStatus.join("\n"), /MANUAL START IN PROGRESS — Reviewer is open and Producer has not started yet/);
+  await rm(path.join(runRoot, ".reviewer-window.lock"));
+
   await writeJsonAtomic(path.join(runRoot, "RUN.json"), { ...run, status: "PAUSED_BY_OWNER" });
   const guideStatus: string[] = [];
   await runGuideCli(["status"], h.root, { out(message) { guideStatus.push(message); } });
@@ -510,6 +537,81 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   assert.match(guideStatus.join("\n"), /SESSION IS PAUSED SAFELY/);
   assert.match(guideStatus.join("\n"), /1\. Ask Guide to inspect this exact pause/);
   assert.doesNotMatch(guideStatus.join("\n"), /run-relay-reviewer-window|execute-relay-run/);
+});
+
+test("GUIDE LAUNCH SURFACE COEXISTENCE: a prepared manual path may still choose Ghostty before either role starts", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm launch surface fixture"]);
+  h.git(h.root, ["push"]);
+
+  await runGuideCli([
+    "launch",
+    "--producer-model", "gpt-5.6-sol",
+    "--producer-effort", "medium",
+    "--reviewer-model", "gpt-5.6-terra",
+    "--reviewer-effort", "medium",
+  ], h.root, { out() {} });
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  assert.equal(prepared.reused, true);
+  const opened: string[] = [];
+  await requestGhosttyWindows(h.root, prepared, {
+    platform: "darwin",
+    codexExecutable: process.execPath,
+    open(args) {
+      opened.push(args.find((item) => item.startsWith("--title=")) ?? "missing title");
+      return { status: 0, stderr: "" };
+    },
+    async waitForStartedReviewer() { return true; },
+    async waitForStartedProducer() { return true; },
+  });
+  assert.deepEqual(opened.map((title) => title.includes("Reviewer") ? "reviewer" : "producer"), ["reviewer", "producer"]);
+});
+
+test("GUIDE MANUAL LAUNCH MUTATION: a running role refuses duplicate manual start instructions", async (t) => {
+  const h = await guideHarness(t, true);
+  const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm manual duplicate fixture"]);
+  h.git(h.root, ["push"]);
+  const args = [
+    "launch",
+    "--producer-model", "gpt-5.6-sol",
+    "--producer-effort", "medium",
+    "--reviewer-model", "gpt-5.6-terra",
+    "--reviewer-effort", "medium",
+  ];
+  await runGuideCli([...args], h.root, { out() {} });
+  const runRoot = path.join(h.root, ".koda", "runs", confirmed.launch.id);
+  await writeJsonAtomic(path.join(runRoot, ".reviewer-window.lock"), {
+    version: 1,
+    pid: process.pid,
+    startedAt: new Date().toISOString(),
+  });
+  await assert.rejects(
+    runGuideCli([...args], h.root, { out() {} }),
+    /running Reviewer or Producer; manual terminal start refuses duplicate role processes/,
+  );
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  await assert.rejects(
+    requestGhosttyWindows(h.root, prepared, {
+      platform: "darwin",
+      codexExecutable: process.execPath,
+      open() { throw new Error("No Ghostty request should occur."); },
+    }),
+    /already has a running Reviewer or Producer; automatic Ghostty opening refuses a duplicate/,
+  );
 });
 
 test("GUIDE RUNTIME OWNER MUTATION: removing the bound owner refuses by name", async (t) => {
@@ -851,7 +953,7 @@ test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Review
   await writeFile(path.join(runRoot, "launch-producer.sh"), "tampered launcher\n", "utf8");
   await assert.rejects(
     ghosttyWindowRequests(h.root, reused, { platform: "darwin", codexExecutable: process.execPath }),
-    /Existing Ghostty role launcher is unsafe or changed/,
+    /Existing Koda-C role launcher is unsafe or changed/,
   );
   assert.equal(await readFile(path.join(runRoot, "launch-reviewer.sh"), "utf8"), compatibleReviewer);
 
@@ -859,7 +961,7 @@ test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Review
   await writeFile(path.join(runRoot, "launch-reviewer.sh"), "tampered launcher\n", "utf8");
   await assert.rejects(
     ghosttyWindowRequests(h.root, reused, { platform: "darwin", codexExecutable: process.execPath }),
-    /Existing Ghostty role launcher is unsafe or changed/,
+    /Existing Koda-C role launcher is unsafe or changed/,
   );
 });
 
@@ -1562,6 +1664,47 @@ test("GUIDE CONSOLE RECOVERY: displayed choices are handled outside the model wi
     async recoverGhostty() { throw new Error("Conversation must go to the Guide model."); },
   });
   assert.equal(discussion.handled, false);
+});
+
+test("GUIDE MANUAL RECOVERY: the existing run routes only missing roles to terminal instructions", async (t) => {
+  const { h, prepared } = await bothWindowsMissingAfterPartialRecovery(t);
+  const run = JSON.parse(await readFile(path.join(prepared.runRoot, "RUN.json"), "utf8"));
+  delete run.terminalLaunch;
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), run);
+  let ghosttyCalled = false;
+  let manualRoles: string[] = [];
+  const recovery = await performGuideRecoveryChoice(h.root, "1", {
+    async recoverGhostty() {
+      ghosttyCalled = true;
+      return [];
+    },
+    async recoverManual(_root, runtime, roles) {
+      assert.equal(runtime.run.launchId, prepared.run.launchId);
+      manualRoles = roles;
+      return "MANUAL TERMINAL RECOVERY READY\nReviewer first; Producer second.";
+    },
+  });
+  assert.equal(recovery.handled, true);
+  assert.equal(ghosttyCalled, false);
+  assert.deepEqual(manualRoles, ["reviewer", "producer"]);
+  assert.match(recovery.message ?? "", /MANUAL TERMINAL RECOVERY READY/);
+  assert.equal(recovery.requests, undefined);
+});
+
+test("GUIDE MANUAL RECOVERY COMMANDS: default recovery reprints only existing run-bound launchers", async (t) => {
+  const { h, prepared } = await bothWindowsMissingAfterPartialRecovery(t);
+  const run = JSON.parse(await readFile(path.join(prepared.runRoot, "RUN.json"), "utf8"));
+  delete run.terminalLaunch;
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), run);
+
+  const recovery = await performGuideRecoveryChoice(h.root, "1");
+  assert.equal(recovery.handled, true);
+  assert.match(recovery.message ?? "", /MANUAL TERMINAL RECOVERY READY/);
+  assert.match(recovery.message ?? "", /REVIEWER \/ OWNER — start this first/);
+  assert.match(recovery.message ?? "", /PRODUCER — start this after Reviewer is open/);
+  assert.match(recovery.message ?? "", new RegExp(path.join(prepared.runRoot, "launch-reviewer.sh").replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.match(recovery.message ?? "", new RegExp(path.join(prepared.runRoot, "launch-producer.sh").replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.doesNotMatch(recovery.message ?? "", /run-relay-reviewer-window|execute-relay-run/);
 });
 
 test("GUIDE CONSOLE RECOVERY MUTATION: a bare number never guesses between two recoverable sessions", async (t) => {

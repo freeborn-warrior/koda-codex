@@ -260,7 +260,7 @@ async function main(): Promise<void> {
     console.log("");
     console.log(`Project: ${target}`);
     console.log("The prompt is confirmed, committed, pushed, and mechanically verified.");
-    console.log("Guide will show the launch choice. Choose 1 there to open Reviewer and Producer.");
+    console.log("Guide will offer automatic Ghostty windows or manual terminal commands for the same session.");
     console.log("────────────────────────────────────────────────────────");
     console.log("");
 

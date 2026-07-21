@@ -42,12 +42,16 @@ Guide stays open
   → the result returns to Guide
 ```
 
-Additional requirements:
+Requirements for both launch choices:
 
-- macOS with Ghostty installed;
 - Codex CLI installed and signed in;
-- permission for Ghostty to open the two role windows;
 - enough model time for a real six-phase session.
+
+For automatic windows, also use macOS with Ghostty installed and allow Ghostty to
+open the two role windows. For manual windows, use any terminal application in
+which you can keep Guide, Reviewer, and Producer visible separately. The manual
+surface is terminal-independent, but this release's full model workflow has still
+been personally exercised only on macOS 26.5.1 arm64.
 
 macOS is required here only because this packaged demonstration uses the optional
 macOS Ghostty window adapter. It is not a requirement of Koda-C's files, gate, or
@@ -71,8 +75,16 @@ Koda-C then owns the instructions:
    scratch space and runs the exact first `session new` command through the
    installed restricted Producer profile. No model or window opens during this
    check, and the prepared human-demo project remains session-empty.
-6. Koda-C opens Guide. Guide reconstructs the project from disk. When it displays `READY TO LAUNCH`,
-   choose `1`. The trusted controller opens exactly one Reviewer and one Producer.
+6. Koda-C opens Guide. Guide reconstructs the project from disk. When it displays
+   `READY TO LAUNCH`, choose one launch surface:
+   - `1` — Koda-C opens exactly one Reviewer and one Producer in Ghostty.
+   - `2` — Koda-C prepares the same session and prints two exact commands.
+   - `3` — open nothing and keep the verified launch ready.
+7. For manual launch, leave Guide open. Open a second terminal in the displayed
+   project and run the Reviewer command first. Leave it open, then open a third
+   terminal in that same project and run the Producer command. Do not edit either
+   command. Both are short project-contained launcher files with a clean
+   environment and the same run ID.
 
 Reviewer may appear first with `STARTING SESSION — NO ACTION NEEDED`. It does not
 accept active-session conversation yet. Producer then creates the disk-backed
@@ -80,7 +92,7 @@ session. Only when Reviewer displays `SESSION READY` and `reviewer>` is the owne
 conversation open. If a line is typed during the short startup interval, the same
 Reviewer window waits and processes it after the session binds instead of exiting.
 
-After launch:
+After either launch:
 
 - **Guide:** type normally for project-level conversation. It may remain open
   during the session.
@@ -99,6 +111,11 @@ is a local bare repository inside that disposable project. All model, runtime,
 review, receipt, Git, and transcript evidence stays under the Koda-C repository's
 ignored `.koda/` directory.
 
+The Ghostty and manual choices are two interfaces over one workflow. They do not
+create different kinds of sessions, and the manual choice does not weaken owner
+acknowledgement or make the owner carry reviews, receipts, paths, hashes, or state
+between roles.
+
 ## If you make a mistake
 
 - Follow the numbered choice shown in the window that accepts input.
@@ -107,7 +124,8 @@ ignored `.koda/` directory.
 - `HALT PERMANENTLY` ends that attempt and requires a fresh Brief; use it only
   when you intend to void the current phase.
 - If a role window disappears, return to Guide and ask: `What is the current
-  session state?` Guide derives the safe recovery from disk.
+  session state?` Guide derives the safe recovery from disk. Ghostty mode reopens
+  only the missing role; manual mode reprints only the missing bound launcher.
 - Never paste a receipt, filesystem path, hash, commit, or recovery command
   between windows. Koda-C owns that transport.
 

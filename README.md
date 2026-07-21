@@ -74,17 +74,21 @@ The one-minute path proves the mechanical gate. The complete human workflow uses
 one persistent Guide, one visible watch-only Producer, and one separate
 owner-facing Reviewer across all six phases and pushed close.
 
-On macOS with Ghostty and a signed-in Codex CLI, one repository command prepares
-an isolated project, shows the exact prompt for confirmation, creates its own
-local Git upstream, and opens Guide:
+On the personally tested macOS setup, one repository command prepares an isolated
+project, shows the exact prompt for confirmation, creates its own local Git
+upstream, and opens Guide:
 
 ```bash
 npm run demo:session
 ```
 
-From that point Koda-C presents the choices. This chat or a separate command sheet
-is not part of the operating loop. See the [nontechnical Quick Start](docs/QUICKSTART.md)
-and the consequence-oriented [Command Manual](docs/COMMAND-MANUAL.md).
+From that point Koda-C presents both supported launch surfaces: it can open the
+Reviewer and Producer automatically in Ghostty, or prepare the same bound session
+and show two clean commands for terminals the owner opens. Ghostty remains the
+recorded competition demonstration; the manual route changes only who opens the
+windows, not the session, roles, evidence, review, or gate. See the
+[nontechnical Quick Start](docs/QUICKSTART.md) and the consequence-oriented
+[Command Manual](docs/COMMAND-MANUAL.md).
 
 ## What ships
 

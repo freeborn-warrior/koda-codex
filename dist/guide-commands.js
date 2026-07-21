@@ -22,6 +22,7 @@ import {
   visibleRoleHealth,
 
 } from "./ghostty.js";
+import { prepareRoleLaunchers } from "./role-launchers.js";
 import { evaluateSessionClosure } from "./close.js";
 import { evaluateSessionHalt } from "./halt.js";
 import { relayOwnerName } from "./owner.js";
@@ -68,6 +69,10 @@ const defaultDependencies                       = {
     return result.status ?? 1;
   },
 };
+
+function shellQuote(value        )         {
+  return `'${value.replaceAll("'", `'"'"'`)}'`;
+}
 
 function option(args          , name        )                {
   const index = args.indexOf(name);
@@ -315,31 +320,32 @@ export async function runGuideCli(
           io.out("Choose in the Guide conversation. Do not paste or reconstruct a technical command.");
           continue;
         }
-        const roles = runtime.run.terminalLaunch ? await visibleRoleHealth(runtime.runRoot) : null;
-        if (roles) {
-          io.out(`Visible roles: Reviewer ${roles.reviewerRunning ? "running" : "not running"}; Producer ${roles.producerRunning ? "running" : "not running"}.`);
-        }
+        const roles = await visibleRoleHealth(runtime.runRoot);
+        io.out(`Visible roles: Reviewer ${roles.reviewerRunning ? "running" : "not running"}; Producer ${roles.producerRunning ? "running" : "not running"}.`);
         if (runtime.run.lastError) {
           io.out("SESSION NEEDS GUIDE ATTENTION — nothing advances while this saved error is unresolved.");
           io.out("1. Ask Guide to diagnose this exact saved session and name the safe recovery.");
           io.out("2. Not now — leave the session safely unchanged.");
-        } else if (roles && (!roles.reviewerRunning || !roles.producerRunning)) {
-          io.out("SESSION WINDOW RECOVERY NEEDED — Koda-C will not pretend a requested window is still running.");
-          io.out("1. Ask Guide to inspect this exact state and reopen only the missing role or roles when safe.");
-          io.out("2. Not now — preserve the session without opening anything.");
-        } else if (runtime.run.status === "PREPARED" && !runtime.run.terminalLaunch) {
-          io.out("SESSION IS PREPARED — its role windows have not been requested yet.");
-          io.out("1. Ask Guide to launch this verified session.");
-          io.out("2. Not now — keep the prepared session unchanged.");
         } else if (runtime.run.status.startsWith("PAUSED")) {
           io.out("SESSION IS PAUSED SAFELY — its disk state is preserved and nothing is advancing.");
           io.out("1. Ask Guide to inspect this exact pause and resume only if it is safe.");
           io.out("2. Not now — keep the session paused.");
+        } else if (runtime.run.status === "PREPARED" && !runtime.run.terminalLaunch && !roles.reviewerRunning && !roles.producerRunning) {
+          io.out("SESSION IS PREPARED — choose automatic Ghostty or manual terminals in Guide.");
+          io.out("1. Ask Guide to show the verified launch choices.");
+          io.out("2. Not now — keep the prepared session unchanged.");
+        } else if (runtime.run.status === "PREPARED" && !runtime.run.terminalLaunch && roles.reviewerRunning && !roles.producerRunning) {
+          io.out("MANUAL START IN PROGRESS — Reviewer is open and Producer has not started yet.");
+          io.out("Start only the already displayed Producer command in the third terminal, or leave this prepared state unchanged.");
+        } else if (!roles.reviewerRunning || !roles.producerRunning) {
+          io.out("SESSION WINDOW RECOVERY NEEDED — Koda-C will not pretend a requested window is still running.");
+          io.out("1. Ask Guide to inspect this exact state and reopen only the missing role or roles when safe.");
+          io.out("2. Not now — preserve the session without opening anything.");
         } else {
           io.out("SESSION IS ACTIVE — watch Producer and speak only in Reviewer for session work.");
           io.out("If a role window disappears, return to Guide. Do not reconstruct or rerun a role command yourself.");
         }
-        io.out("Choose in the Guide conversation; technical role commands stay behind Guide.");
+        io.out("Choose in the Guide conversation. Never reconstruct a role command from memory.");
       }
     }
     return;
@@ -407,9 +413,10 @@ export async function runGuideCli(
     io.out("✓ Prompt, project continuity, and prior-session evidence still match owner confirmation.");
     io.out("");
     io.out("READY TO LAUNCH — OWNER CHOICE");
-    io.out("1. Launch this session now — Codex may ask permission for one local launcher command; approving it opens exactly one Reviewer and one Producer window.");
-    io.out("2. Not now — keep this launch ready without opening windows.");
-    io.out("Choose in the Guide conversation; do not paste or reconstruct a technical command.");
+    io.out("1. Launch automatically in Ghostty — Codex may ask permission for one local launcher command; approving it opens exactly one Reviewer and one Producer window.");
+    io.out("2. Launch in terminals I open myself — Koda-C prepares this same session and shows one Reviewer-first command, then one Producer-second command.");
+    io.out("3. Not now — keep this launch ready without opening windows.");
+    io.out("Choose in the Guide conversation.");
     return;
   }
 
@@ -465,15 +472,28 @@ export async function runGuideCli(
     io.out(`${prepared.reused ? "GUIDE SESSION RECOVERED" : "GUIDE SESSION PREPARED"} — ${prepared.launch.id}`);
     io.out("The confirmed prompt and both role assignments are bound on disk.");
     if (openTerminal === null) {
+      if (prepared.run.terminalLaunch) {
+        throw new Error("This runtime already used automatic Ghostty opening; manual terminal start refuses duplicate role processes.");
+      }
+      const health = await visibleRoleHealth(prepared.runRoot);
+      if (health.reviewerRunning || health.producerRunning) {
+        throw new Error("This runtime already has a running Reviewer or Producer; manual terminal start refuses duplicate role processes.");
+      }
+      const launchers = await prepareRoleLaunchers(root, prepared);
       io.out("");
-      io.out("WINDOW B — REVIEWER / OWNER (start this first)");
-      io.out(prepared.reviewerCommand);
+      io.out("MANUAL TERMINAL START READY");
+      io.out("This is the same Koda-C session and the same gate as the Ghostty path. Koda-C will not open or control your terminal application.");
       io.out("");
-      io.out("WINDOW A — PRODUCER (then start this)");
-      io.out(prepared.producerCommand);
+      io.out("1. Open a second terminal in this project. Start REVIEWER / OWNER first:");
+      io.out(shellQuote(launchers.reviewer));
       io.out("");
-      io.out("READ-ONLY STATUS");
+      io.out("2. Leave Reviewer open. Open a third terminal in this project. Start PRODUCER second:");
+      io.out(shellQuote(launchers.producer));
+      io.out("");
+      io.out("3. Keep this Guide open. To inspect disk-derived status without changing anything:");
       io.out(prepared.statusCommand);
+      io.out("");
+      io.out("Speak in Reviewer, watch Producer, and use Guide only for project-level conversation.");
     } else {
       const requests = await dependencies.openGhostty(root, prepared);
       io.out("");

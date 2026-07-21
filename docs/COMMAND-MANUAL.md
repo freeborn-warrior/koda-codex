@@ -18,8 +18,9 @@ Creates and opens the complete three-context demonstration described in the
 - **Writes:** one isolated ignored project under `.koda/full-session-demos/`.
 - **Git:** initializes a repository and a separate local bare upstream, then
   commits and pushes the confirmed sample prompt.
-- **Models:** opens a persistent Sol Guide; after Guide choice `1`, opens a Sol
-  Producer and separate Terra Reviewer.
+- **Models:** opens a persistent Sol Guide. Guide choice `1` opens a Sol Producer
+  and separate Terra Reviewer automatically in Ghostty; choice `2` prepares the
+  same roles for terminals the owner opens.
 - **Does not:** install dependencies, use GitHub, modify the Koda-C worktree, or
   preselect review verdicts.
 
@@ -52,9 +53,10 @@ Opens the persistent owner-facing project Guide.
 
 - **Reads:** bounded Guide continuity and exact controller-supplied status.
 - **Writes:** Guide conversation evidence and only Guide-claimed project files.
-- **Numbered launch:** when exactly one pushed request is ready, choice `1` uses
-  the supplied Producer/Reviewer staffing to open the two roles; choice `2`
-  changes nothing.
+- **Numbered launch:** when exactly one pushed request is ready, choice `1` opens
+  the supplied Producer/Reviewer staffing automatically in Ghostty; choice `2`
+  prints Reviewer-first and Producer-second launcher commands for manually opened
+  terminals; choice `3` changes nothing.
 - **Refuses:** partial staffing, duplicate Guide consoles, stale/corrupt state,
   unverified toolkit evidence, or ambiguous ready launches.
 
@@ -176,14 +178,23 @@ committed and pushed before another prompt is confirmed.
 ### `koda guide launch ... [--open ghostty]`
 
 Revalidates the pushed request, snapshots role staffing, and prepares one runtime.
-With the optional Ghostty adapter, Reviewer opens first and Producer opens only
-after Reviewer readiness is proven.
+Without `--open`, it creates two project-contained mode-700 launchers, clears
+ambient state, and prints the Reviewer-first and Producer-second commands for
+manually opened terminals. With the optional Ghostty adapter, those same launchers
+open automatically; Reviewer opens first and Producer opens only after Reviewer
+readiness is proven. Repeating either route while a role is already running
+refuses instead of creating a duplicate.
 
 ### `koda guide recover --open ghostty`
 
 Restores only the missing role or roles for the mechanically selected unchanged
 session. It preserves context IDs, current review, receipt state, and phase. It
 never blindly duplicates an already-running role.
+
+Manual-terminal recovery remains a numbered Guide action rather than a separate
+low-level command. Koda-C inspects the same role locks and prints only the missing
+run-bound launcher or launchers, in Reviewer-first order. The owner never has to
+reconstruct a runtime path.
 
 ### `koda guide bind <launch-id> <session-id>`
 

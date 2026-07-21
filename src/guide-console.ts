@@ -9,9 +9,10 @@ import { fileURLToPath } from "node:url";
 import { codexGuidePermissionArgs } from "./codex-role-permissions.ts";
 import { findProjectRoot, pathExists, readProjectConfig } from "./config.ts";
 import { runGuideCli } from "./guide-commands.ts";
-import { currentGuideRuntime, guideRuntimeTruth, listGuideRuntimes } from "./guide-runtime.ts";
+import { currentGuideRuntime, guideRuntimeTruth, listGuideRuntimes, type GuideRuntimeView, type PreparedGuideRuntime } from "./guide-runtime.ts";
 import { guideRoot, hasGuideManifest, loadGuideManifest, pendingGuideLaunches } from "./guide.ts";
 import { partialRecoveryRoles, requestGhosttyRecoveryWindows, requestGhosttyWindows, type GhosttyWindowRequest } from "./ghostty.ts";
+import { prepareRoleLaunchers } from "./role-launchers.ts";
 import {
   relayCodexEnvironment,
   relayGitToolchainReadRoots,
@@ -56,8 +57,11 @@ export type GuideLaunchStaffing = {
   reviewerEffort: string | null;
 };
 
+export type GuideLaunchSurface = "ghostty" | "manual";
+
 type GuideRecoveryDependencies = {
   recoverGhostty: typeof requestGhosttyRecoveryWindows;
+  recoverManual?: (root: string, runtime: GuideRuntimeView, roles: GhosttyWindowRequest["role"][]) => Promise<string>;
 };
 
 const defaultRecoveryDependencies: GuideRecoveryDependencies = {
@@ -70,11 +74,11 @@ type GuideLaunchDependencies = {
     producerEffort: string;
     reviewerModel: string;
     reviewerEffort: string;
-  }): Promise<{ message: string; requests: GhosttyWindowRequest[] }>;
+  }, surface: GuideLaunchSurface): Promise<{ message: string; requests: GhosttyWindowRequest[] }>;
 };
 
 const defaultLaunchDependencies: GuideLaunchDependencies = {
-  async launch(root, staffing) {
+  async launch(root, staffing, surface) {
     const lines: string[] = [];
     let requests: GhosttyWindowRequest[] = [];
     await runGuideCli([
@@ -83,7 +87,7 @@ const defaultLaunchDependencies: GuideLaunchDependencies = {
       "--producer-effort", staffing.producerEffort,
       "--reviewer-model", staffing.reviewerModel,
       "--reviewer-effort", staffing.reviewerEffort,
-      "--open", "ghostty",
+      ...(surface === "ghostty" ? ["--open", "ghostty"] : []),
     ], root, { out(message) { lines.push(message); } }, {
       async openGhostty(project, prepared) {
         requests = await requestGhosttyWindows(project, prepared);
@@ -96,6 +100,35 @@ const defaultLaunchDependencies: GuideLaunchDependencies = {
 
 function now(): string {
   return new Date().toISOString();
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replaceAll("'", `'"'"'`)}'`;
+}
+
+async function manualRecoveryInstructions(
+  root: string,
+  runtime: GuideRuntimeView,
+  roles: GhosttyWindowRequest["role"][],
+): Promise<string> {
+  const prepared = {
+    ...runtime,
+    launch: { id: runtime.run.launchId },
+    reused: true,
+  } as PreparedGuideRuntime;
+  const launchers = await prepareRoleLaunchers(root, prepared);
+  const lines = [
+    "MANUAL TERMINAL RECOVERY READY",
+    "Nothing was acknowledged or advanced. Start only the missing role or roles shown below.",
+  ];
+  if (roles.includes("reviewer")) {
+    lines.push("", "REVIEWER / OWNER — start this first:", shellQuote(launchers.reviewer));
+  }
+  if (roles.includes("producer")) {
+    lines.push("", "PRODUCER — start this after Reviewer is open:", shellQuote(launchers.producer));
+  }
+  lines.push("", "These commands are bound to the existing run. They do not create another session or review job.");
+  return lines.join("\n");
 }
 
 function processIsAlive(pid: number): boolean {
@@ -459,24 +492,33 @@ export async function performGuideRecoveryChoice(
   choice: string,
   dependencies: GuideRecoveryDependencies = defaultRecoveryDependencies,
 ): Promise<{ handled: boolean; message?: string; requests?: GhosttyWindowRequest[] }> {
-  const recoverable: Array<NonNullable<Awaited<ReturnType<typeof currentGuideRuntime>>>> = [];
+  const recoverable: Array<{
+    runtime: NonNullable<Awaited<ReturnType<typeof currentGuideRuntime>>>;
+    roles: GhosttyWindowRequest["role"][];
+  }> = [];
   for (const runtime of await listGuideRuntimes(root)) {
     const truth = await guideRuntimeTruth(root, runtime);
     if (truth.effectiveStatus === "COMPLETE" || truth.effectiveStatus === "HALTED") continue;
-    if (await partialRecoveryRoles(runtime)) recoverable.push(runtime);
+    const roles = await partialRecoveryRoles(runtime);
+    if (roles) recoverable.push({ runtime, roles });
   }
   if (recoverable.length === 0) return { handled: false };
   if (recoverable.length > 1 && (choice === "1" || choice === "2")) {
     return {
       handled: true,
-      message: `Koda-C found ${recoverable.length} recoverable sessions (${recoverable.map(({ run }) => run.launchId).join(", ")}). A bare number is ambiguous, so nothing changed. Ask Guide which exact session to recover.`,
+      message: `Koda-C found ${recoverable.length} recoverable sessions (${recoverable.map(({ runtime }) => runtime.run.launchId).join(", ")}). A bare number is ambiguous, so nothing changed. Ask Guide which exact session to recover.`,
     };
   }
-  const runtime = recoverable[0]!;
+  const { runtime, roles } = recoverable[0]!;
   if (choice === "2") return { handled: true, message: "Nothing changed. The saved session remains safely paused." };
   if (choice !== "1") return { handled: false };
   let requests: GhosttyWindowRequest[];
   try {
+    if (!runtime.run.terminalLaunch) {
+      await verifyToolkitIntegrity();
+      const message = await (dependencies.recoverManual ?? manualRecoveryInstructions)(root, runtime, roles);
+      return { handled: true, message };
+    }
     const toolkit = await verifyToolkitIntegrity();
     requests = await dependencies.recoverGhostty(root, runtime, toolkit);
   } catch (error) {
@@ -504,16 +546,17 @@ export async function performGuideLaunchChoice(
   const config = await readProjectConfig(root);
   const pending = await pendingGuideLaunches(root, config);
   if (pending.length === 0) return { handled: false };
-  if (pending.length > 1 && (choice === "1" || choice === "2")) {
+  if (pending.length > 1 && (choice === "1" || choice === "2" || choice === "3")) {
     return {
       handled: true,
       message: `Koda-C found ${pending.length} ready launches. A bare number is ambiguous, so nothing changed.`,
     };
   }
-  if (choice === "2") {
+  if (choice === "3") {
     return { handled: true, message: "Nothing changed. The verified launch remains ready for later." };
   }
-  if (choice !== "1") return { handled: false };
+  if (choice !== "1" && choice !== "2") return { handled: false };
+  const surface: GuideLaunchSurface = choice === "1" ? "ghostty" : "manual";
 
   const assignments = [
     validateAssignment(staffing.producerModel, "Producer model"),
@@ -534,7 +577,7 @@ export async function performGuideLaunchChoice(
       producerEffort: assignments[1]!,
       reviewerModel: assignments[2]!,
       reviewerEffort: assignments[3]!,
-    });
+    }, surface);
     return { handled: true, message: launched.message, requests: launched.requests };
   } catch (error) {
     return {

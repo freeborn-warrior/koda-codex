@@ -128,6 +128,9 @@ test("PUBLIC GUIDE CONTRACT: current entry docs use the product name and describ
   assert.match(landing, /The reference process—and what belongs to each project/);
   assert.match(quickStart, /npm run demo:session/);
   assert.equal(packageManifest.scripts["demo:session"], "node scripts/prepare-full-session-demo.ts --open");
+  assert.match(quickStart, /1.*Ghostty[\s\S]*2.*same session.*two exact commands[\s\S]*3.*open nothing/);
+  assert.match(quickStart, /manual choice does not weaken owner[\s\S]*acknowledgement/);
+  assert.match(quickStart, /manual\s+surface is terminal-independent[\s\S]*personally exercised only on macOS 26\.5\.1 arm64/);
   assert.match(quickStart, /macOS is required here only because this packaged demonstration uses the optional[\s\S]*Ghostty window adapter/);
   assert.match(quickStart, /not a requirement of Koda-C's files, gate, or[\s\S]*core CLI/);
   assert.match(process, /The gates are the product/);

@@ -236,7 +236,7 @@ test("GUIDE OPEN UX: partial launch staffing refuses before the Guide opens", as
   assert.equal(opened, false);
 });
 
-test("GUIDE NUMBERED LAUNCH: 2 preserves a pushed launch and 1 opens the two staffed roles", async (t) => {
+test("GUIDE NUMBERED LAUNCH: Ghostty and manual terminals coexist while not-now preserves the launch", async (t) => {
   const root = await temporaryRoot(t, "koda-guide-numbered-launch-");
   await writeJsonAtomic(path.join(root, "koda.config.json"), DEFAULT_CONFIG);
   await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
@@ -265,17 +265,20 @@ test("GUIDE NUMBERED LAUNCH: 2 preserves a pushed launch and 1 opens the two sta
     reviewerModel: "gpt-5.6-terra",
     reviewerEffort: "medium",
   };
-  let opened = 0;
-  const later = await performGuideLaunchChoice(root, "2", staffing, {
-    async launch() { opened += 1; return { message: "should not run", requests: [] }; },
+  const modes: string[] = [];
+  const later = await performGuideLaunchChoice(root, "3", staffing, {
+    async launch(_project, _assignments, mode) {
+      modes.push(mode);
+      return { message: "should not run", requests: [] };
+    },
   });
   assert.equal(later.handled, true);
   assert.match(later.message!, /remains ready for later/);
-  assert.equal(opened, 0);
+  assert.deepEqual(modes, []);
 
   const launched = await performGuideLaunchChoice(root, "1", staffing, {
-    async launch() {
-      opened += 1;
+    async launch(_project, _assignments, mode) {
+      modes.push(mode);
       return {
         message: "THREE-CONTEXT START REQUESTED",
         requests: [
@@ -286,9 +289,23 @@ test("GUIDE NUMBERED LAUNCH: 2 preserves a pushed launch and 1 opens the two sta
     },
   });
   assert.equal(launched.handled, true);
-  assert.equal(opened, 1);
+  assert.deepEqual(modes, ["ghostty"]);
   assert.equal(launched.requests?.map((item) => item.role).join(","), "reviewer,producer");
   assert.match(launched.message!, /THREE-CONTEXT START REQUESTED/);
+
+  const manual = await performGuideLaunchChoice(root, "2", staffing, {
+    async launch(_project, _assignments, mode) {
+      modes.push(mode);
+      return {
+        message: "MANUAL TERMINAL START READY\n1. Reviewer first\n2. Producer second",
+        requests: [],
+      };
+    },
+  });
+  assert.equal(manual.handled, true);
+  assert.deepEqual(modes, ["ghostty", "manual"]);
+  assert.deepEqual(manual.requests, []);
+  assert.match(manual.message!, /MANUAL TERMINAL START READY/);
 });
 
 async function runConsoleProcess(root: string, fakeCodex: string): Promise<{ status: number; output: string }> {

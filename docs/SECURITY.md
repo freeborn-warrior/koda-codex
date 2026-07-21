@@ -263,9 +263,13 @@ Koda-C's lock. Stronger hostile-writer isolation would require separate worktree
 OS identities, or a service boundary.
 
 The Ghostty adapter is deliberately opt-in and is not required by the gate or
-relay. Without `--open ghostty`, Guide prepares the same bound runtime and prints
-the exact Reviewer-first and Producer-second terminal commands for manually opened
-windows. Automatic Ghostty opening records launch intent before the
+relay. Without `--open ghostty`, Guide prepares the same bound runtime and creates
+the same project-contained, mode-700, clean-environment role launchers used by the
+Ghostty adapter. It prints the exact Reviewer-first and Producer-second commands
+for manually opened terminals. The launchers contain fixed absolute paths and
+shell quoting; changed, linked, or structurally invalid existing launchers refuse
+before either interface uses them. A running role makes both interfaces refuse a
+duplicate. Automatic Ghostty opening records launch intent before the
 first GUI request and refuses automatic opening for an existing runtime, even if
 only one prior request appeared to succeed. The first live implementation proved
 that a mocked argument vector was insufficient: loose tokens created extra tabs
@@ -282,6 +286,11 @@ prepared and returns the owner to Guide, which derives the safe numbered recover
 choice without asking the owner to reconstruct a role command. Same-user replacement
 between the final content check and external execution remains a local TOCTOU
 boundary, not hostile-writer isolation.
+
+Manual recovery is surface-aware. It does not call Ghostty and does not invent a
+new command: Guide revalidates toolkit integrity, derives missing live roles from
+the same atomic lock files, and reprints only the existing run's launcher path or
+paths. A number is refused when more than one run is recoverable.
 
 Visible recovery remains narrower than general process restart. It accepts the exact
 legacy empty-receipt failure or any stable formal, repair, or fresh

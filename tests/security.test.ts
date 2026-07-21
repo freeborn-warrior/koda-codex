@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { compatibleGhosttyRoleLauncherSource, ghosttyRoleLauncherSource } from "../src/ghostty.ts";
+import { compatibleRoleLauncherSource, roleLauncherSource } from "../src/role-launchers.ts";
 import {
   codexGuidePermissionArgs,
   codexProjectPermissionArgs,
@@ -242,33 +242,33 @@ test("SECURITY INTEGRITY SUITE: relay roles and model children never inherit amb
   );
 });
 
-test("SECURITY INTEGRITY SUITE: role launcher bytes ignore ambient terminal locale and color", () => {
+test("SECURITY INTEGRITY SUITE: shared role launcher bytes ignore ambient terminal locale and color", () => {
   const base = {
     executable: "/safe/codex",
     project: "/safe/project",
     script: "/safe/koda/scripts/producer.ts",
     scriptArgs: ["/safe/project/.koda/runs/11111111-1111-4111-8111-111111111111"],
   };
-  const fromGhostty = ghosttyRoleLauncherSource({
+  const fromGhosttyTerminal = roleLauncherSource({
     ...base,
     environmentSource: { HOME: "/safe/home", LANG: "en_US.UTF-8", TERM: "xterm-ghostty", COLORTERM: "truecolor" },
   });
-  const fromDesktop = ghosttyRoleLauncherSource({
+  const fromDesktop = roleLauncherSource({
     ...base,
     environmentSource: { HOME: "/safe/home", LANG: "C.UTF-8", TERM: "dumb" },
   });
-  assert.equal(fromGhostty, fromDesktop);
-  assert.match(fromGhostty, /LANG=C\.UTF-8/);
-  assert.match(fromGhostty, /TERM=xterm-256color/);
-  assert.doesNotMatch(fromGhostty, /COLORTERM/);
+  assert.equal(fromGhosttyTerminal, fromDesktop);
+  assert.match(fromGhosttyTerminal, /LANG=C\.UTF-8/);
+  assert.match(fromGhosttyTerminal, /TERM=xterm-256color/);
+  assert.doesNotMatch(fromGhosttyTerminal, /COLORTERM/);
 
-  const legacy = fromGhostty
+  const legacy = fromGhosttyTerminal
     .replace("'LANG=C.UTF-8'", "'LANG=en_US.UTF-8'")
     .replace("'TERM=xterm-256color'", "'TERM=xterm-ghostty'")
     .replace("  'NO_COLOR=1' \\", "  'COLORTERM=truecolor' \\\n  'NO_COLOR=1' \\");
-  assert.equal(compatibleGhosttyRoleLauncherSource(legacy, base), true);
-  assert.equal(compatibleGhosttyRoleLauncherSource("#!/bin/sh\necho injected\n", base), false);
-  assert.equal(compatibleGhosttyRoleLauncherSource(legacy.replace("/safe/koda/scripts/producer.ts", "/tmp/evil.ts"), base), false);
+  assert.equal(compatibleRoleLauncherSource(legacy, base), true);
+  assert.equal(compatibleRoleLauncherSource("#!/bin/sh\necho injected\n", base), false);
+  assert.equal(compatibleRoleLauncherSource(legacy.replace("/safe/koda/scripts/producer.ts", "/tmp/evil.ts"), base), false);
 });
 
 test("SECURITY INTEGRITY SUITE: owner receipt and ruling data never enter child-process arguments or environment", async () => {
@@ -320,7 +320,7 @@ test("SECURITY INTEGRITY SUITE: both live session roles bind verified toolkit, G
   }
 });
 
-test("SECURITY INTEGRITY SUITE: the executable Ghostty role launcher starts one child with a clean environment", async () => {
+test("SECURITY INTEGRITY SUITE: the executable shared role launcher starts one child with a clean environment", async () => {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-clean-launcher-"));
   try {
     const project = path.join(temporary, "project with ' quoted path");
@@ -333,7 +333,7 @@ test("SECURITY INTEGRITY SUITE: the executable Ghostty role launcher starts one 
       `writeFileSync(${JSON.stringify(observed)}, JSON.stringify(process.env));`,
       "",
     ].join("\n"), "utf8");
-    await writeFile(launcher, ghosttyRoleLauncherSource({
+    await writeFile(launcher, roleLauncherSource({
       executable: process.execPath,
       project,
       script: child,

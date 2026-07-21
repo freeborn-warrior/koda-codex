@@ -6,9 +6,12 @@ This file records the current engineering direction above individual implementat
 
 ## Current objective
 
-Freeze a truthful, safe, reproducible competition release: finish narration and
-final playback, publish the video, and submit without adding another product
-feature. The observed Reviewer-halt repair is promoted and the repository is public.
+Freeze a truthful, safe, reproducible competition release. The owner authorized
+one isolated pre-submission exploration: make automatic Ghostty and manually
+opened terminals coexist over the same runtime. Keep the recorded video and
+Ghostty path unchanged, merge only after complete proof, then finish narration,
+playback, publication, and submission. The promoted `main` release remains the
+rollback point while this branch is unverified.
 
 ## Active sequence
 
@@ -145,6 +148,11 @@ feature. The observed Reviewer-halt repair is promoted and the repository is pub
     pushed halt must outrank a stale local runtime label in Guide, relay status,
     and recovery. Local and exact pushed proof pass 258/258; toolkit capability
     `reviewer-halt-status-v24` binds repair commit `53bebfc` and its transcript.
+40. [ ] On isolated branch `codex/manual-terminal-launch`, expose the existing
+    manual Reviewer-first/Producer-second runtime as a first-class Guide choice
+    beside Ghostty. Reuse the same clean launchers and gate, reject duplicates and
+    unsafe mixing, test printed commands and recovery consequences, update current
+    guides, and merge only after focused security plus complete durable proof.
 
 ## Submission cut
 
@@ -153,10 +161,10 @@ an isolated pushed project and enters Guide, while the preserved representative
 Produce session proves the two-context relay, all six gates, pushed close, and Guide
 return with Guide, Producer, and Reviewer visible. The fresh human rehearsal passes;
 its source recording and silent branded picture lock exist. The remaining submission
-work is narration, audio mux and full playback, video publication, form completion,
-and freezing the exact pushed commit—not another product feature or a retrofitted
-self-hosting run. Halt/status promotion, repository publication, and fresh-clone
-verification are complete.
+work is the explicitly isolated dual-surface proof, then narration, audio mux and
+full playback, video publication, form completion, and freezing the exact pushed
+commit—not a video replacement or retrofitted self-hosting run. Halt/status
+promotion, repository publication, and fresh-clone verification are complete.
 
 ## Current constraints
 

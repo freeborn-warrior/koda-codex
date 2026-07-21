@@ -2607,3 +2607,28 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **State:** POST-PUSH PASS. A fresh Linux rerun remains welcome external
   confirmation; Koda-C does not broaden its supported-platform claim from this
   one reported run alone.
+
+## 2026-07-21 — Dual Ghostty and manual-terminal launch exploration
+
+- **Owner ruling:** Preserve the automatic Ghostty path and recorded video. Explore
+  a second path on branch `codex/manual-terminal-launch` where the owner opens the
+  terminals personally; merge only if both interfaces are proven over the same
+  session, evidence, review, and gate.
+- **Architecture:** Shared clean-environment role launchers now live outside the
+  Ghostty adapter. Ghostty only requests macOS windows; manual mode prints the exact
+  Reviewer-first and Producer-second launcher paths. Both paths use mode-700 files,
+  absolute bound paths, a cleared environment, tamper checks, role locks, and the
+  same runtime ID.
+- **Focused pre-bootstrap result:** Four unaffected checks passed **4/4**: Guide's
+  three-way launch choice, shared launcher determinism, executable clean-environment
+  behavior, and the updated session-prompt skill contract.
+- **Honest bootstrap refusal:** The first durable full run is preserved in
+  [the bootstrap transcript](test-results/2026-07-21-manual-terminal-bootstrap-refusal.md).
+  Toolkit-backed checks refused because protected launch files no longer matched
+  capability `reviewer-halt-status-v24`; the integrity guard was not bypassed or
+  weakened. The run also caught one new public-guide assertion whose wording did
+  not permit a line break between “manual” and “surface”; that assertion was
+  corrected to match the exact visible sentence without changing the requirement.
+- **State:** DEVELOPMENT. Human Ghostty testing from this checkout remains paused
+  until a new branch capability is mechanically sealed and the complete suite,
+  security audit, and both-surface coexistence checks pass.
