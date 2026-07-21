@@ -110,14 +110,17 @@ Add the public YouTube URL as another link only after the final upload exists.
 
 ## Project media
 
-Four 3:2, sub-5 MB images are ready in `.koda/video/devpost-gallery/`:
+Three 3:2, sub-5 MB images are ready in `.koda/video/devpost-gallery/`:
 
-1. `01-koda-c-hero.png` — branded first image;
-2. `02-three-context-session.png` — unaltered Guide, Producer, and Reviewer view;
-3. `03-unstaged-revise.png` — the real blocking verdict;
-4. `04-corrected-approve.png` — the corrected review and reopened gate.
+1. `01-koda-c-hero.png` — Koda-C's abstract evidence gate, with no third-party interface;
+2. `03-unstaged-revise.png` — the real blocking verdict in Koda-C's designed video frame;
+3. `04-corrected-approve.png` — the corrected review and reopened gate in the matching frame.
 
 Upload them in that order.
+
+Do not upload anything under `.koda/video/devpost-gallery/rejected/`. Those raw
+recording derivatives are preserved locally only; one exposed the macOS menu bar,
+Ghostty's name, and unrelated application icons. None belongs in submission media.
 
 ## Private judge-testing field
 
