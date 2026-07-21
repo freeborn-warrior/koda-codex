@@ -2357,3 +2357,56 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [the post-fix transcript](test-results/2026-07-20-build-week-picture-lock-postfix-pushed.md).
 - **Evidence:** [picture-lock result](verification-runs/2026-07-20-build-week-picture-lock-06/RESULT.md)
   and [timed video script](VIDEO-SCRIPT.md).
+
+## 2026-07-20 — Branded picture lock and official-rule audit
+
+- **Result:** PASS for the final silent picture; audible English narration, final
+  sound playback, and public upload remain deliberately open.
+- **Design binding:** The overlay pass now uses the project-specific dark surface
+  ramp, Schibsted Grotesk plus JetBrains Mono, and one saffron accent throughout.
+  Copy is sentence case, uses the exact `Koda-C` name, and caps corners at two
+  pixels. `REVISE` and `APPROVE` share the same visual language rather than
+  introducing a competing red/green semantic palette.
+- **Rule binding:** [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md) now contains an explicit
+  official-rule coverage table for duration, clear live demo, mandatory audio,
+  what was built, how Codex and GPT-5.6 were used, borrowed material, and the
+  requirement that the product function as depicted. The narration says directly
+  that Codex engineered the CLI/skills/relay/security/tests, that this real run
+  used Sol Producer and Terra Reviewer, and that Sol/Terra/Luna were exercised as
+  sealed-fixture reviewers.
+- **Live rule and rights check:** The OpenAI Build Week page and Devpost rules
+  were re-read live on 2026-07-20. The picture contains no unrelated third-party
+  brand or logo, music, stock imagery, or borrowed artwork. Official sources for
+  Schibsted Grotesk and JetBrains Mono confirm both rendered typefaces are
+  permitted under the SIL Open Font License 1.1.
+- **Script precision:** The lived origin is now first person. The unstaged Orient
+  defect is stated exactly: the artifact asserted that no test suite existed,
+  while its evidence proved only that no implementation existed. The moving exact
+  test count became the still-evidenced, recording-safe phrase “over two hundred
+  and fifty checks.” The complete timed narration is 316 words, about 132 words
+  per minute over the 2:24 picture.
+- **Visual QA failure retained:** Branded candidate v03 decoded and sampled
+  cleanly, but the return-to-Guide frame exposed a narrow desktop-wallpaper strip.
+  It was not accepted as final. The mask was corrected and a new v04 was rendered.
+- **Final media checks:** v04 is 2:23.967, H.264 High at 2560×1440/30 fps,
+  `yuv420p`, BT.709, one silent video stream, and 21,345,511 bytes. Full-file
+  decode passed. An 18-frame contact sheet plus launch, `REVISE`, fresh `APPROVE`,
+  Guide-return, and ending frames passed visual inspection. The final SHA-256 is
+  `12383dab0b780d3d9e8c82d2f75a7b1b970bd17b67835269e8af3ff9d2e880f4`.
+- **Focused judge-test failures retained:** The first two reruns each passed 2/3.
+  The revised narration wrapped “no advance” across a Markdown blockquote line,
+  and the initial whitespace correction still failed to account for the repeated
+  `>` marker. The assertion now tolerates Markdown blockquote syntax while still
+  requiring the exact spoken sequence “No approval, no receipt, no advance.”
+  The corrected suite passed 3/3. After the live-rule wording was made exact, one
+  more 2/3 run caught the stale capitalized literal `No music`; the replacement
+  requires the stronger sentence `contains no music`. The final focused
+  judge-document/link suite passed 3/3, and `git diff --check` passed.
+- **Complete verification:** The unrecorded full suite passed **252/252**. The
+  required durable rerun also passed **252/252** and is preserved in the
+  [named transcript](test-results/2026-07-20-build-week-branded-picture-lock.md).
+  After the exact live-rule and font-permission wording was added, a second full
+  suite passed **252/252** and its final durable rerun passed **252/252** in the
+  [rule-audit transcript](test-results/2026-07-20-build-week-branded-rule-audit.md).
+- **Evidence:** [branded picture-lock result](verification-runs/2026-07-20-build-week-picture-lock-07/RESULT.md)
+  and [timed video script](VIDEO-SCRIPT.md).

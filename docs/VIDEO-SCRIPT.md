@@ -4,8 +4,9 @@
 
 **Hard maximum:** under 3:00
 
-**Format:** one silent, real 30:39 Ghostty session; speed-ramped rather than
-uniformly accelerated; Kristian's English voiceover added afterward; no music
+**Format:** one real 30:39 Koda-C session; speed-ramped rather than uniformly
+accelerated; the picture lock remains silent until Kristian's English voiceover
+is added; no music
 
 ## Source truth
 
@@ -31,6 +32,18 @@ Orient artifact claimed no test suite existed even though its cited evidence
 proved only that no implementation existed. The corrected artifact narrowed the
 claim to what the files supported and received a fresh review.
 
+## Official-rule coverage
+
+| Requirement | Where this video satisfies it |
+|---|---|
+| Under three minutes | The verified picture duration is 2:23.967. Narration must fit the existing picture; the export may not add time. |
+| Clear demo | The visible material is one genuine `npm run demo:session` execution, including live role windows, a blocking verdict, owner acknowledgement, phase advancement, Git close, and Guide return. It is not a slide presentation. |
+| Audio | The timed English narration below is mandatory. This checkbox remains open until the audio is recorded, muxed, and verified in a full playback. |
+| What was built | 0:16–1:31 explains the plain-file workflow, Guide/Producer/Reviewer roles, evidence, verdict, receipt, gate, correction, and example Markdown heading reporter. |
+| How Codex and GPT-5.6 were used | 1:31–1:59 explicitly explains Kristian's role, GPT-5.6 Codex's engineering work, the Sol Producer/Terra Reviewer pairing, and the sealed Sol/Terra/Luna reviewer tests. |
+| No third-party trademarks or unlicensed copyrighted material | No unrelated third-party brand or logo is presented. The edit contains no music, stock imagery, or borrowed artwork. Its two typefaces are permitted under the SIL Open Font License 1.1, and the unrelated macOS menu/status bar is masked. |
+| Functions as depicted | The recording is bound to launch `e974b805-fac5-4648-a9e2-b66348effa47` and its pushed evidence. No runtime source file changed after that successful run; subsequent repository changes are tests, evidence, documentation, and this edit. |
+
 ## Edit contract
 
 - Say plainly that this is one real 30-minute session compressed.
@@ -46,8 +59,8 @@ claim to what the files supported and received a fresh review.
   evidence.
 - Strip source metadata from the public export and use standard H.264/BT.709 for
   broad playback compatibility.
-- Add only Kristian's narration. No music, stock imagery, or third-party visual
-  asset is needed.
+- Add only Kristian's narration. No unrelated third-party trademark, music,
+  stock imagery, or borrowed visual asset is needed.
 
 ## Picture timeline
 
@@ -72,40 +85,44 @@ claim to what the files supported and received a fresh review.
 
 ## Timed voiceover
 
-The text below is approximately 320 words. Read naturally rather than racing to
-hit every visual cut. Short overlaps across adjacent phase captions are expected.
+The text below is written to leave breathing room inside the 2:24 picture at a
+calm conversational pace. Read naturally rather than racing to hit every visual
+cut.
 
-### 0:00–0:08 — the lived problem
+### 0:00–0:08 — establish the real demo
 
-> I'm Kristian Bengtsson. My real failure wasn't that an AI review was missing.
+> You're watching Koda-C actually run: one real thirty-minute session,
+> compressed to two minutes twenty-four.
 
-### 0:08–0:16 — why Koda-C exists
+### 0:08–0:16 — the lived problem
 
-> A review existed, but the work moved on without it entering my decision. So I
-> built Koda-C.
+> I'm Kristian. I built it after I once approved work whose review I never read.
+> The review existed; it just never entered the decision.
 
 ### 0:16–0:32 — the product
 
-> Koda-C is a plain-file relay. Guide holds the project; Producer works; Reviewer
-> is the owner conversation. Each phase writes evidence to disk. The verdict
-> controls movement, while a receipt proves the review entered the decision loop.
+> Koda-C is a plain-file workflow—a relay between three roles. Guide holds the
+> project; Producer works; Reviewer is the owner conversation. Each phase writes
+> evidence to disk. The verdict controls movement, while a receipt proves the
+> review entered the decision loop.
 
 ### 0:32–0:50 — the unstaged refusal
 
-> This wasn't staged. During Orient, the reviewer caught a confident claim the
-> files did not support: that no test suite existed. It returned REVISE. The
-> producer stayed blocked. No approval, no receipt, no advance.
+> This wasn't staged. During Orient, the artifact said no test suite existed,
+> but its evidence proved only that no implementation existed. The reviewer
+> returned REVISE. The producer stayed blocked. No approval, no receipt, no
+> advance.
 
 ### 0:50–0:58 — correction
 
 > The producer corrected the claim against cited evidence and handed back a
-> fresh artifact. Koda required a fresh review.
+> fresh artifact. Koda-C required a fresh review.
 
 ### 0:58–1:23 — acknowledgement and gate
 
 > Now the reviewer approves the corrected work. I read the review and type its
 > eight-character code. The code is not a secret, and it cannot prove
-> comprehension. It resolves to the full receipt on disk. Koda then rechecks the
+> comprehension. It resolves to the full receipt on disk. Koda-C then rechecks the
 > artifact, review hash, verdict, and receipt before the gate opens.
 
 ### 1:23–1:31 — the complete session
@@ -117,8 +134,8 @@ hit every visual cut. Short overlaps across adjacent phase captions are expected
 
 > This was my first Codex project, built during OpenAI Build Week in roughly
 > fifty-one elapsed hours—not a benchmark. I brought the method and product
-> decisions. GPT-5.6 Codex built the CLI, ten skills, relay, security boundaries,
-> and two hundred and fifty-two checks.
+> decisions. I used GPT-5.6 Codex as the engineer for the CLI, ten skills, relay,
+> security boundaries, and over two hundred and fifty checks.
 
 ### 1:51–1:59 — models as test subjects
 
@@ -128,7 +145,7 @@ hit every visual cut. Short overlaps across adjacent phase captions are expected
 ### 1:59–2:09 — immutable close
 
 > At close, session evidence and output are committed, pushed, and reverified
-> against Git before Koda will call the work done.
+> against Git before Koda-C will call the work done.
 
 ### 2:09–2:14 — project continuity
 
@@ -155,11 +172,13 @@ hit every visual cut. Short overlaps across adjacent phase captions are expected
 
 - Duration is below 3:00.
 - English narration is intelligible on phone speakers.
+- The opening explicitly identifies the footage as Koda-C actually running.
 - `REVISE`, the unsupported claim, corrected `APPROVE`, and the gate behavior are
   readable at 1080p.
 - The narration explicitly says Koda-C, Codex, GPT-5.6, Sol, Terra, and Luna.
 - The source acceleration is disclosed and the real-session timestamps remain
   visible.
 - The file contains no credential, notification, unrelated terminal history,
-  hidden receipt metadata, source author metadata, or unintended audio.
+  hidden receipt metadata, source author metadata, unrelated third-party
+  trademark, copyrighted music, borrowed graphic asset, or unintended audio.
 - The public YouTube URL plays while signed out.

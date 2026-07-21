@@ -27,8 +27,9 @@ These are the submission actions in the order that avoids rework:
    contains the stronger unstaged refusal and recovery.
 3. **Silent picture lock completed:** the real 30:39 session is speed-ramped to
    2:24 with its unstaged Orient `REVISE` and corrected acknowledgement preserved
-   at readable speed. The [verification result](verification-runs/2026-07-20-build-week-picture-lock-06/RESULT.md)
-   binds the source and output hashes. Record Kristian's English voiceover from
+   at readable speed. The [branded verification result](verification-runs/2026-07-20-build-week-picture-lock-07/RESULT.md)
+   binds the source and v04 output hashes, visual system, full decode, privacy
+   masks, and official-rule audit. Record Kristian's English voiceover from
    [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md), mux it without music, and perform the final
    full playback check.
 4. **Completed here:** Let Codex record the successful human rehearsal in this
@@ -121,17 +122,20 @@ neither visibility nor submission state has been changed by Codex.
 
 ## Video
 
-- [x] Silent 2:24 picture lock is rendered from the genuine full-session capture,
-  labels every phase and real-session time, preserves the unstaged `REVISE`, and
-  strips inherited source metadata.
+- [x] Silent 2:24 branded picture lock v04 is rendered from the genuine
+  full-session capture, labels every phase and real-session time, preserves the
+  unstaged `REVISE`, masks unrelated desktop material, strips inherited source
+  metadata, and passes the
+  [official-rule picture audit](verification-runs/2026-07-20-build-week-picture-lock-07/RESULT.md).
 - [ ] Record in English with audible narration.
 - [ ] Keep the finished video below 3:00; the verified silent picture lock is
   2:24 and the voiceover must fit that existing duration.
 - [ ] Show a real refusal and a real successful advancement.
 - [ ] Explain what was built and how Codex plus GPT-5.6 were used.
 - [ ] Name Kristian's product/design decisions and Codex's engineering work.
-- [ ] Use no music, stock imagery, or third-party visual asset. Crop terminal
-  chrome where practical and show only material needed for the demo.
+- [ ] Include no unrelated third-party trademark or unlicensed copyrighted
+  material. Use no music, stock imagery, or borrowed artwork. Show only the
+  terminal evidence and repository-generated graphics needed for the demo.
 - [ ] Export, watch from beginning to end with sound, and verify text legibility.
 - [ ] Upload publicly to YouTube.
 - [ ] Open the public URL in a signed-out/private browser window.

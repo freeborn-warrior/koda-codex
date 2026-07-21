@@ -45,19 +45,25 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
     /\[fresh plural-session Guide preflight\]\(guide-preflight-runs\/2026-07-19-sol-medium-05\/RESULT\.md\)/,
   );
   assert.match(video, /Hard maximum:\*\* under 3:00/);
-  assert.match(video, /one silent, real 30:39 Ghostty session/);
+  assert.match(video, /one real 30:39 Koda-C session/);
+  assert.match(video, /## Official-rule coverage/);
   assert.match(video, /Entry command:[\s\S]*npm run demo:session/);
   assert.match(video, /unplanned Orient[\s\S]*`REVISE`/);
-  assert.match(video, /No approval, no receipt, no advance\./);
+  assert.match(video, /No approval, no receipt, no\s+(?:>\s*)?advance\./);
   assert.match(video, /corrected work[\s\S]*eight-character code/);
   assert.match(video, /receipt[\s\S]*before the gate opens/);
   assert.match(video, /source-session time/);
   assert.match(video, /Sol \/ medium/);
   assert.match(video, /Terra \/ medium/);
-  assert.match(video, /two hundred and fifty-two checks/);
-  assert.match(video, /GPT-5\.6 Codex built the CLI/);
+  assert.match(video, /You're watching Koda-C actually run/);
+  assert.match(video, /over two hundred and fifty checks/);
+  assert.match(video, /used GPT-5\.6 Codex as the engineer for the CLI/);
   assert.match(video, /Sol, Terra, and Luna as reviewers against sealed fixtures/);
-  assert.match(video, /No music/);
+  assert.match(video, /contains no music/);
+  assert.match(video, /No third-party trademarks or unlicensed copyrighted material/);
+  assert.match(video, /SIL Open Font License 1\.1/);
+  assert.match(video, /Functions as depicted/);
+  assert.match(video, /checkbox remains open until the audio is recorded, muxed, and verified/);
   assert.match(checklist, /2026-07-21 at 5:00 pm Pacific/);
   assert.match(checklist, /## Owner handoff order/);
   assert.match(checklist, /Record one fresh complete source run[\s\S]*npm run demo:session/);
@@ -71,6 +77,8 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /passes 250\/250 unchanged after push/);
   assert.match(checklist, /unchanged pushed commit passes a second[\s\S]*252\/252/);
   assert.match(checklist, /Fresh Terra\/medium independently ran the full suite[\s\S]*APPROVE/);
+  assert.match(checklist, /branded picture lock v04/);
+  assert.match(checklist, /official-rule picture audit/);
 });
 
 test("JUDGE JOURNEY SUITE: local links in the judge documents resolve", async () => {
