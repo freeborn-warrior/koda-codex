@@ -164,11 +164,12 @@ direct final answer instead of flooding the owner with procedural inspection.
 
 ## Evidence, not promises
 
-- The latest [258-check post-push transcript](docs/test-results/2026-07-21-reviewer-halt-status-pushed.md)
-  validates the exact pushed halt/status repair together with the complete gate,
-  receipt, stale-review, status-truth, package, security, recovery, and full-session
-  regression. The launcher-critical surface is hash-bound by toolkit capability
-  `reviewer-halt-status-v24`.
+- The latest [262-check post-push transcript](docs/test-results/2026-07-21-manual-terminal-pushed.md)
+  validates both Ghostty and manual-terminal launch over the same runtime together
+  with the complete gate, receipt, stale-review, status-truth, package, security,
+  recovery, and full-session regression. The launcher-critical surface is hash-bound
+  by toolkit capability `dual-launch-surface-v25`; its focused threat review is
+  preserved in [security audit 27](docs/security-runs/2026-07-21-manual-terminal-audit-27/RESULT.md).
 - A [genuine six-phase relay](docs/relay-runs/2026-07-18-software-clean-sol-medium-terra-medium-01/RESULT.md)
   used one persistent Sol producer and a separate persistent Terra reviewer. It
   encountered an unplanned Summary `REVISE`, recovered through a fresh review,

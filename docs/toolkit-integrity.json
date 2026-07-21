@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "capability": "manual-terminal-development-v0",
-  "verifiedAt": "2026-07-21T12:33:30.700Z",
+  "capability": "dual-launch-surface-v25",
+  "verifiedAt": "2026-07-21T12:35:49.766Z",
   "repairCommit": "4a134f0180e2689492dc2e4535cf6d07e2930c23",
-  "testedCommit": "4a134f0180e2689492dc2e4535cf6d07e2930c23",
-  "testCount": 5,
+  "testedCommit": "f3b93fa4bfcb1dee758042404bdf8b77e2157722",
+  "testCount": 262,
   "evidence": {
-    "path": "docs/test-results/2026-07-21-manual-terminal-corrected-bootstrap.md",
-    "sha256": "8d1d79fe673d90f0552d11f098a9b3f43370b8fc97cfd13ce28be4c9adf7fa04"
+    "path": "docs/test-results/2026-07-21-manual-terminal-pushed.md",
+    "sha256": "672e3cb0dcc51d8ab9e96f506909121505d35f40b027aa55c961448d9d8ec7ec"
   },
   "files": [
     {

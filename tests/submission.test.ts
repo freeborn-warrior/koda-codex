@@ -27,7 +27,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(landing, /No `npm install` or build is required/);
   assert.match(landing, /node dist\/cli\.js init/);
   assert.match(landing, /npm test/);
-  assert.match(landing, /258-check post-push transcript/);
+  assert.match(landing, /262-check post-push transcript/);
   assert.match(landing, /How Kristian, Codex, and GPT-5\.6 built it/);
   assert.match(landing, /\*\*Key owner decisions\.\*\*/);
   assert.match(landing, /\*\*Where Codex accelerated the work\.\*\*/);
@@ -38,7 +38,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(readme, /node dist\/cli\.js --help/);
   assert.match(
     readme,
-    /\[bound 258-check post-push transcript\]\(test-results\/2026-07-21-reviewer-halt-status-pushed\.md\)/,
+    /\[bound 262-check post-push transcript\]\(test-results\/2026-07-21-manual-terminal-pushed\.md\)/,
   );
   assert.match(
     readme,

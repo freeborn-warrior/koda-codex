@@ -2637,6 +2637,18 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   launcher tamper protection. The status command is final again; the wording check
   matches the visible hyphenation; and both coexistence tests now hold one configured
   executable across surfaces. The exact correction slice passes **4/4**.
-- **State:** DEVELOPMENT. Human Ghostty testing from this checkout remains paused
-  until a new branch capability is mechanically sealed and the complete suite,
-  security audit, and both-surface coexistence checks pass.
+- **Corrected local result:** The complete durable
+  [local transcript](test-results/2026-07-21-manual-terminal-local.md) passes
+  **262/262**.
+- **Unchanged pushed result:** Branch commit `f3b93fa` exactly matched
+  `origin/codex/manual-terminal-launch` before the durable
+  [post-push transcript](test-results/2026-07-21-manual-terminal-pushed.md) passed
+  **262/262**. Transcript SHA-256:
+  `672e3cb0dcc51d8ab9e96f506909121505d35f40b027aa55c961448d9d8ec7ec`.
+- **Security:** [Audit 27](security-runs/2026-07-21-manual-terminal-audit-27/RESULT.md)
+  records a post-push pass for shared clean launchers, path quoting, environment
+  isolation, tamper and duplicate refusal, surface switching, recovery, status
+  truth, and the unchanged same-user threat boundary.
+- **State:** POST-PUSH PASS; release capability promotion and final regression are
+  next. Human Ghostty/manual testing from this checkout remains paused until that
+  promotion is complete.
