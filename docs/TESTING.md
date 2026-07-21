@@ -2493,5 +2493,17 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Final local result:** License plus judge-document checks passed **5/5**;
   `git diff --check` passed; the complete durable
   [repository-contract suite](test-results/2026-07-20-build-week-repository-contract-local.md)
-  passed **253/253**. Public visibility and GitHub's post-push license detection
-  remain external owner/verifier checks.
+  passed **253/253**.
+- **Post-push result:** Commit `e0282a2` exactly matched `origin/main` before the
+  unchanged complete suite ran. The durable
+  [post-push repository-contract transcript](test-results/2026-07-20-build-week-repository-contract-pushed.md)
+  passed **253/253** and has SHA-256
+  `ef0cc2e7e61297813c27f4c99ee18a19a16f0fa8ef115701a992662836e5d33a`.
+  GitHub then reported the license as `GNU General Public License v3.0`; repository
+  visibility remained `PRIVATE`. Kristian also generated the required `/feedback`
+  ID from the primary build task; only confirmation of that action is recorded
+  publicly, not the identifier.
+- **Submission-state regression:** After the README evidence pointer and private
+  `/feedback` handling were updated, the complete durable
+  [submission-state suite](test-results/2026-07-20-build-week-submission-state-local.md)
+  passed **253/253**.

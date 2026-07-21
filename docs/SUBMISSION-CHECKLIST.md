@@ -17,11 +17,11 @@ truth for the exact submission requirements.
 | Official requirement | Koda-C evidence or action | Status |
 | --- | --- | --- |
 | Repository URL and judge access | `https://github.com/freeborn-warrior/koda-codex`; make public, or share with both judge addresses | **Owner action open** |
-| Relevant license | Root `LICENSE` contains the unmodified standard GPLv3 text; README carries Kristian's sole copyright line; package declares `GPL-3.0-only` | Ready; recheck GitHub detection after push |
+| Relevant license | Root `LICENSE` contains the unmodified standard GPLv3 text; README carries Kristian's sole copyright line; package declares `GPL-3.0-only`; GitHub now detects GNU GPLv3 | Complete |
 | Setup, sample data, and run guidance | Root README and Quick Start; `init --demo` generates every sample file | Complete |
 | Codex acceleration and key decisions | README section “How Kristian, Codex, and GPT-5.6 built it” explicitly separates Kristian's decisions from Codex engineering | Complete |
 | GPT-5.6 and Codex use | README, dated Git/test evidence, real Sol/Terra relay, and sealed Sol/Terra/Luna fixture runs | Complete |
-| `/feedback` Session ID | Run `/feedback` in this primary build task and paste the generated ID into Devpost—not into the repository and not from a relay task | **Owner action open** |
+| `/feedback` Session ID | Run `/feedback` in this primary build task—completed; paste the generated ID into Devpost, not this public repository and not from a relay task | **ID obtained; form entry open** |
 | Developer-tool installation and supported platforms | Root README and Quick Start name Node.js 22.18+, Git, tested macOS 26.5.1 arm64, and optional Ghostty requirements | Complete |
 | Test without rebuilding | Committed `dist/` CLI, generated one-minute fixture, `npm test`, and preserved full-session evidence; no package install or build required | Complete |
 
@@ -51,9 +51,9 @@ These are the submission actions in the order that avoids rework:
 5. Make GitHub public and verify the clone/README path while signed out. If the
    repository instead stays private, share it with both required judge addresses.
 6. Upload the final video publicly to YouTube and verify it while signed out.
-7. Complete the Devpost fields, run `/feedback` in the primary build task, freeze
-   and tag the exact commit, save the dated submission receipt, and submit before
-   the buffer expires.
+7. Complete the Devpost fields, paste the already obtained primary-task
+   `/feedback` ID, freeze and tag the exact commit, save the dated submission
+   receipt, and submit before the buffer expires.
 
 The completed demo's Producer and Reviewer are closed. Guide is safely between
 sessions and may remain open for project conversation. GitHub is still `PRIVATE`;
@@ -130,10 +130,10 @@ neither visibility nor submission state has been changed by Codex.
   instructions: `node dist/cli.js --help`, then the `node dist/cli.js init ...`
   one-minute fixture. Keep `npx --yes . --help` as separate package evidence,
   not a prerequisite for seeing the gate.
-- [ ] In this primary Codex build task, Kristian runs `/feedback` and records the
-  returned Codex Session ID in the form. Do not substitute the relay's producer
-  or reviewer thread IDs; the rules ask for the project thread where most core
-  functionality was built.
+- [x] Kristian ran `/feedback` in this primary Codex build task and obtained the
+  generated Feedback ID. The exact value is deliberately kept out of the public
+  repository. Do not substitute relay Producer or Reviewer thread IDs.
+- [ ] Paste that exact primary-task Feedback ID into the Devpost form.
 - [ ] Re-check every Devpost preview field before submitting.
 
 ## Video
@@ -184,8 +184,9 @@ The exact shot order, narration, fallback lines, and recording checks are in
 - [ ] All Markdown links needed by judges resolve from `docs/README.md`.
 - [ ] Create and push a submission tag only after the video/form references the
   exact commit. Suggested tag: `build-week-2026-submission`.
-- [ ] Record the submission commit, tag, YouTube URL, `/feedback` Session ID,
-  category, and Devpost URL in a dated `docs/submission/` receipt.
+- [ ] Record the submission commit, tag, YouTube URL, confirmation that the
+  `/feedback` ID was entered, category, and Devpost URL in a dated
+  `docs/submission/` receipt. Do not publish the identifier itself.
 - [ ] Submit before the buffer target and confirm Devpost shows the entry as
   submitted, not merely saved as a draft.
 

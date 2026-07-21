@@ -27,7 +27,7 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(landing, /No `npm install` or build is required/);
   assert.match(landing, /node dist\/cli\.js init/);
   assert.match(landing, /npm test/);
-  assert.match(landing, /253-check post-push public-guide truth transcript/);
+  assert.match(landing, /253-check post-push repository-contract transcript/);
   assert.match(landing, /How Kristian, Codex, and GPT-5\.6 built it/);
   assert.match(landing, /\*\*Key owner decisions\.\*\*/);
   assert.match(landing, /\*\*Where Codex accelerated the work\.\*\*/);
@@ -83,6 +83,8 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /build-week-event@openai\.com/);
   assert.match(checklist, /## Official repository requirement map/);
   assert.match(checklist, /Run `\/feedback` in this primary build task/);
+  assert.match(checklist, /\*\*ID obtained; form entry open\*\*/);
+  assert.match(checklist, /Do not publish the identifier itself/);
   assert.match(checklist, /Test without rebuilding/);
   assert.match(checklist, /https:\/\/openai\.devpost\.com\/rules/);
   assert.match(checklist, /passes 250\/250 unchanged after push/);
