@@ -109,4 +109,6 @@ SHA-256
 The misleading historical `bootstrap-refusal` label is retained as the immutable
 run name; the recorded result itself is PASS. Repair commit `894a747` then passed
 the unchanged **267/267** post-push suite and is bound as toolkit capability
-`bound-owner-ack-recovery-v27`. The owner-observed continuation remains pending.
+`bound-owner-ack-recovery-v27`. Promoted manifest commit `a496742` passed the
+unchanged **267/267** release suite once more. The owner-observed continuation
+remains pending.

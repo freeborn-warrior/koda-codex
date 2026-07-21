@@ -7,6 +7,7 @@
 - Preserved launch: `1c2a5c0f-d578-4d64-822b-ee99fa184133`
 - Complete local regression: [267/267](../../test-results/2026-07-21-owner-ack-recovery-bootstrap-refusal.md)
 - Unchanged pushed regression: [267/267](../../test-results/2026-07-21-owner-ack-recovery-pushed.md)
+- Promoted release regression: [267/267](../../test-results/2026-07-21-owner-ack-recovery-release.md)
 
 ## Finding
 
@@ -54,3 +55,7 @@ Toolkit capability `bound-owner-ack-recovery-v27` binds repair/test commit
 `894a747`, the exact 267-check post-push transcript, and every changed source and
 compiled runtime file. Owner observation is still reported separately; it is not
 inferred from deterministic tests.
+
+The promoted manifest commit `a496742` then passed the unchanged **267/267**
+release suite, transcript SHA-256
+`68d0df3f3167566f41ae54b56824bb181bb388bef14f1e04f54e373d8b083269`.

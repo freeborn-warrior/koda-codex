@@ -2816,3 +2816,9 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **State:** POST-PUSH PASS. Capability `bound-owner-ack-recovery-v27` binds the
   exact repair/test commit, transcript, count, and protected runtime files.
   Owner-observed continuation of the preserved session remains required.
+- **Promoted release confirmation:** After the v27 manifest and public evidence
+  were pushed at `a496742`, the unchanged complete suite passed **267/267** again
+  in the
+  [release transcript](test-results/2026-07-21-owner-ack-recovery-release.md),
+  SHA-256
+  `68d0df3f3167566f41ae54b56824bb181bb388bef14f1e04f54e373d8b083269`.
