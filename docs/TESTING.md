@@ -2770,3 +2770,8 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   commit `4dc31b5`, pushed tested commit `f77f10c`, all 264 named checks, the exact
   transcript hash, and every protected runtime file. The interrupted owner session
   is not called a clean post-repair completion.
+- **Promoted release confirmation:** After the v26 manifest, security audit, and
+  public evidence links were pushed at `bf204f7`, the unchanged complete suite
+  passed **264/264** again in the
+  [release transcript](test-results/2026-07-21-owner-comments-release.md), SHA-256
+  `2d00456b3788880b1a62c0729a91de45bc5ee62ef5af50d2730dd0c3a859ea2f`.

@@ -8,6 +8,7 @@
 - Owner-observed failed run: launch `1c2a5c0f-d578-4d64-822b-ee99fa184133`
 - Corrected local regression: [264/264](../../test-results/2026-07-21-owner-comments-local.md)
 - Unchanged pushed regression: [264/264](../../test-results/2026-07-21-owner-comments-pushed.md)
+- Promoted release regression: [264/264](../../test-results/2026-07-21-owner-comments-release.md)
 
 ## Finding
 

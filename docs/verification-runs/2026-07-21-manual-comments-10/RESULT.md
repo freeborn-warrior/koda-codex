@@ -75,3 +75,9 @@ whose SHA-256 is
 Toolkit capability `multi-part-owner-ack-v26` binds that exact commit, count,
 transcript, and every protected runtime file. The interrupted owner run predates
 the repair and is not represented as a clean completed post-repair session.
+
+After the promoted manifest, security audit, and public links were pushed at
+`bf204f7`, the unchanged complete suite passed **264/264** once more in the
+[`release transcript`](../../test-results/2026-07-21-owner-comments-release.md),
+SHA-256
+`2d00456b3788880b1a62c0729a91de45bc5ee62ef5af50d2730dd0c3a859ea2f`.
