@@ -9,6 +9,7 @@
 - Corrected local regression: [262/262](../../test-results/2026-07-21-manual-terminal-local.md)
 - Unchanged pushed regression: [262/262](../../test-results/2026-07-21-manual-terminal-pushed.md)
 - Promoted release regression: [262/262](../../test-results/2026-07-21-dual-launch-release.md)
+- Merged pushed-main regression: [262/262](../../test-results/2026-07-21-dual-launch-main.md)
 
 ## Architecture finding
 
@@ -51,7 +52,8 @@ environment, or session implementations.
 The unchanged pushed branch commit `f3b93fa` passed all **262/262** tests. Toolkit
 capability `dual-launch-surface-v25` binds that commit, its transcript, count, and
 every protected launch file. Promoted commit `c7c7cb0` then passed the complete
-**262/262** suite again without changing the protected implementation. This
+**262/262** suite again without changing the protected implementation. Fast-forwarded
+pushed main commit `519fb4d` passed **262/262** once more. This
 includes gate and receipt mutations, stale-review and status truth, printed-command
 execution, Guide/runtime integration, two-process session closure, clean launcher
 execution, credential scanning, symlink refusal, sandbox permissions, duplicate

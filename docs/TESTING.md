@@ -2656,6 +2656,11 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   before the complete [release transcript](test-results/2026-07-21-dual-launch-release.md)
   passed **262/262** again. Transcript SHA-256:
   `69b9d66c3d9df69b4a7364fda4065d6400709668a0c03f5214c130c7780b5734`.
+- **Merged-main result:** `main` fast-forwarded without a merge commit or history
+  rewrite. Pushed main commit `519fb4d` matched `origin/main` before the complete
+  [main transcript](test-results/2026-07-21-dual-launch-main.md) passed **262/262**.
+  Transcript SHA-256:
+  `b582663d8924dd481644d347db9768e41394d030e8e33a1a73d7ca4773d0c48b`.
 - **State:** RELEASE PASS. The branch satisfies the mechanical and security merge
   condition. A later owner-observed manual-terminal model session is welcome UX
   proof, not a hidden requirement for the gate or recorded Ghostty demonstration.
