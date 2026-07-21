@@ -34,11 +34,14 @@ function acknowledgementCode(receipt: string): string {
 async function preparedAcknowledgementRun(
   receiptInput: "correct" | "wrong",
   options: {
+    approvalComments?: string;
     discussionResponse?: string;
     haltDirection?: string;
     ownerName?: string;
+    ownerRuling?: string;
     reviewCodeInput?: string;
     reviewFinding?: string;
+    verdict?: "APPROVE" | "APPROVE WITH COMMENTS" | "DISCUSS";
   } = {},
 ) {
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-reviewer-window-"));
@@ -63,7 +66,7 @@ async function preparedAcknowledgementRun(
   const phase = session.state.phases[0];
   await writeFile(artifactPath(session.directory, phase, 0), "# Brief\n\nOne bounded, cited outcome.\n", "utf8");
   const review = await createFreshReview(session.directory, phase, 0, {
-    verdict: "APPROVE",
+    verdict: options.verdict ?? "APPROVE",
     body: `# Peer review — brief\n\n## Findings\n\n- ${options.reviewFinding ?? "The artifact is bounded and supported."}`,
   });
   const runPath = path.join(runRoot, "RUN.json");
@@ -104,6 +107,8 @@ async function preparedAcknowledgementRun(
       KODA_RELAY_TEST_CONFIRM_READ: "1",
       KODA_RELAY_TEST_RECEIPT_INPUT: options.reviewCodeInput
         ?? (receiptInput === "correct" ? review.metadata.receipt : "RECEIPT: Review read — wrong"),
+      ...(options.approvalComments ? { KODA_RELAY_TEST_APPROVAL_COMMENTS: options.approvalComments } : {}),
+      ...(options.ownerRuling ? { KODA_RELAY_TEST_OWNER_RULING: options.ownerRuling } : {}),
       ...(options.haltDirection ? { KODA_RELAY_TEST_HALT_DIRECTION: options.haltDirection } : {}),
       ...(fakeCodex
         ? {
@@ -743,6 +748,40 @@ test("TWO-WINDOW PRODUCER RECOVERY: an awaiting formal review is rejoined instea
   assert.equal(exit.signal, null);
   assert.match(stderr, /Window A was stopped while a disk-backed reviewer job remained pending/);
   assert.equal(await producerWindowLockStatus(result.runRoot), null);
+});
+
+test("OWNER ACKNOWLEDGEMENT PIPE: APPROVE WITH COMMENTS preserves the receipt and comments without a stranded prompt", async (t) => {
+  const comments = "Preserve the review's non-blocking correction in the ledger.";
+  const result = await preparedAcknowledgementRun("correct", {
+    verdict: "APPROVE WITH COMMENTS",
+    approvalComments: comments,
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+
+  assert.equal(result.executed.status, 0, `${result.executed.stdout}\n${result.executed.stderr}`);
+  assert.doesNotMatch(result.executed.stderr, /unsettled top-level await/);
+  assert.match(result.executed.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
+  const entries = await readApprovalEntries(result.session.directory);
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0]?.verdict, "APPROVE WITH COMMENTS");
+  assert.equal(entries[0]?.comments, comments);
+});
+
+test("OWNER ACKNOWLEDGEMENT PIPE: DISCUSS preserves the receipt and owner ruling without a stranded prompt", async (t) => {
+  const ruling = "Return the artifact for a fresh review after clarifying the product boundary.";
+  const result = await preparedAcknowledgementRun("correct", {
+    verdict: "DISCUSS",
+    ownerRuling: ruling,
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+
+  assert.equal(result.executed.status, 0, `${result.executed.stdout}\n${result.executed.stderr}`);
+  assert.doesNotMatch(result.executed.stderr, /unsettled top-level await/);
+  assert.match(result.executed.stdout, /ACKNOWLEDGED — Window A will now derive the route from disk/);
+  const entries = await readApprovalEntries(result.session.directory);
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0]?.verdict, "DISCUSS");
+  assert.equal(entries[0]?.ruling, ruling);
 });
 
 test("TWO-WINDOW OWNER CEREMONY TTY: inline review and numbered choices disclose the code step", {

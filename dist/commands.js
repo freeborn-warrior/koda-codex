@@ -70,10 +70,24 @@ const packageRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
 
 function defaultIo()        {
+  let pipedInput                           = null;
+  const nextPipedLine = async ()                  => {
+    pipedInput ??= (async () => {
+      let content = "";
+      for await (const chunk of process.stdin) content += chunk.toString();
+      return content.split(/\r?\n/);
+    })();
+    const lines = await pipedInput;
+    return lines.shift() ?? "";
+  };
   return {
     out: (message) => console.log(message),
     error: (message) => console.error(message),
     prompt: async (message) => {
+      if (!process.stdin.isTTY) {
+        process.stdout.write(message);
+        return nextPipedLine();
+      }
       const terminal = createInterface({ input: process.stdin, output: process.stdout });
       try {
         return await terminal.question(message);
