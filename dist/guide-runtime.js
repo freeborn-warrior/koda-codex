@@ -181,7 +181,7 @@ function runtimeRecord(value         , source        )                     {
 async function assertRuntimeAreaSafe(root        )                  {
   const top = git(root, ["rev-parse", "--show-toplevel"]);
   if (!top.ok || await realpath(top.stdout) !== await realpath(root)) {
-    throw new Error("Guide runtime requires the Koda project root to be the Git repository root.");
+    throw new Error("Guide runtime requires the Koda-C project root to be the Git repository root.");
   }
   const ignored = git(root, ["check-ignore", "-q", "--", `${GUIDE_RUNTIME_DIR}/.ignore-proof`]);
   if (!ignored.ok) {

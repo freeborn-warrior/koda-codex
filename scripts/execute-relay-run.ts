@@ -150,7 +150,7 @@ async function discoverExecutableRun(): Promise<string> {
     if ((record?.version === 1 || record?.version === 2) && record.status !== "COMPLETE" && record.status !== "HALTED") candidates.push(candidate);
   }
   if (candidates.length === 0) throw new Error("No prepared or paused relay run exists. Prepare one first.");
-  if (candidates.length > 1) throw new Error("More than one relay run is active. Koda will not guess which session you mean.");
+  if (candidates.length > 1) throw new Error("More than one relay run is active. Koda-C will not guess which session you mean.");
   return candidates[0];
 }
 
@@ -430,7 +430,7 @@ async function recoverInterruptedModelTurn(): Promise<void> {
   const roleRecord = run[interrupted.role];
   if (!interrupted.threadId || !roleRecord.threadId) {
     run.status = "PAUSED_INTERRUPTED_CONTEXT_MISSING";
-    run.lastError = `${interrupted.role} turn ${interrupted.turn} has no persistent context identifier. Koda will not replace that context automatically.`;
+    run.lastError = `${interrupted.role} turn ${interrupted.turn} has no persistent context identifier. Koda-C will not replace that context automatically.`;
     await saveRun();
     throw new PausedRun(run.lastError);
   }
@@ -698,11 +698,11 @@ async function waitForReviewerWindowJob(job: ReviewerJob, expectedFile: string):
           ? "- Consultation response was written before the producer resumed."
           : current.completion === "HALTED"
             ? `- ${ownerName} invoked the sole interrupt; pushed halt evidence voided the phase without acknowledging its review.`
-            : `- Owner acknowledgement was recorded through Koda in Window B; ${ownerName}'s quote entered neither model chat.`,
+            : `- Owner acknowledgement was recorded through Koda-C in Window B; ${ownerName}'s quote entered neither model chat.`,
       ]);
       await removeReviewerJob(runRoot);
       console.log(terminalPanel("REVIEWER HANDOVER RECEIVED", [
-        "Koda is deriving the next route from disk.",
+        "Koda-C is deriving the next route from disk.",
         "NO ACTION NEEDED — watch only.",
       ]));
       return;
@@ -791,7 +791,7 @@ async function reviewPhase(phaseName: string, mode: "formal" | "repair" | "fresh
     `Use node ${run.cli} wherever the skill says koda.`,
     modeInstruction,
     "Judge the artifact against its frozen phase-entry inputs. Verify every direction ID released into that entry and refuse any waiting direction used before its gate boundary.",
-    "Remain independent from the producer context. Use only the artifact and files it cites, write the complete review to disk, run Koda status, and stop.",
+    "Remain independent from the producer context. Use only the artifact and files it cites, write the complete review to disk, run Koda-C status, and stop.",
     "Never approve, advance, modify the producer artifact, or quote the receipt in your response.",
   ].join(" ");
   if (twoWindow) {
@@ -856,7 +856,7 @@ async function ownerAcknowledge(phaseName: string, reviewFile: string): Promise<
   await saveRun();
   console.log(terminalPanel("OWNER ACKNOWLEDGEMENT REQUIRED", [
     `Read the complete review through its final receipt: ${reviewFile}`,
-    "Koda will ask you to paste that exact final line.",
+    "Koda-C will ask you to paste that exact final line.",
   ]));
   const result = koda(["approve", phaseName, "--approver", ownerName], true);
   if (result.status !== 0) {
@@ -871,22 +871,22 @@ async function ownerAcknowledge(phaseName: string, reviewFile: string): Promise<
   await note(`owner acknowledged ${phaseName} review`, [
     `- Review: \`${path.relative(project, reviewFile)}\``,
     "- Exact receipt: entered interactively and not copied into this transcript",
-    `- Approver recorded by Koda: ${ownerName}`,
+    `- Approver recorded by Koda-C: ${ownerName}`,
   ]);
 }
 
 async function advance(phaseName: string, previousIndex: number): Promise<void> {
   const result = koda(["advance"]);
   if (result.status !== 0) {
-    throw new Error(`Koda refused expected advancement for ${phaseName}: ${result.stdout}${result.stderr}`);
+    throw new Error(`Koda-C refused expected advancement for ${phaseName}: ${result.stdout}${result.stderr}`);
   }
   const session = await latest();
   if (!session || session.state.currentPhaseIndex !== previousIndex + 1) {
-    throw new Error(`Koda did not persist the expected advancement after ${phaseName}.`);
+    throw new Error(`Koda-C did not persist the expected advancement after ${phaseName}.`);
   }
   await note(`gate advanced ${phaseName}`, [
     `- State index: ${previousIndex} → ${session.state.currentPhaseIndex}`,
-    "- Authority: Koda re-read artifact, review, verdict, receipt acknowledgement, and prior history from disk",
+    "- Authority: Koda-C re-read artifact, review, verdict, receipt acknowledgement, and prior history from disk",
     `- Waiting directions released: ${session.state.advances.at(-1)?.directions?.join(", ") || "none"}`,
   ]);
   const released = session.state.advances.at(-1)?.directions ?? [];
@@ -990,11 +990,11 @@ async function closeSession(): Promise<void> {
 
   const closeResult = koda(["session", "close"]);
   if (closeResult.status !== 0 || !closeResult.stdout.includes("SESSION CLOSED")) {
-    throw new Error(`Koda did not verify the supervisor close commit: ${closeResult.stdout}${closeResult.stderr}`);
+    throw new Error(`Koda-C did not verify the supervisor close commit: ${closeResult.stdout}${closeResult.stderr}`);
   }
   const statusResult = koda(["status"]);
   if (statusResult.status !== 0 || !statusResult.stdout.includes("SESSION CLOSED")) {
-    throw new Error(`Koda status did not derive the supervisor close: ${statusResult.stdout}${statusResult.stderr}`);
+    throw new Error(`Koda-C status did not derive the supervisor close: ${statusResult.stdout}${statusResult.stderr}`);
   }
 
   await modelTurn("producer", "verify immutable session close", [
@@ -1234,7 +1234,7 @@ async function finalize(): Promise<void> {
   const log = git(["log", "--oneline", "--decorate", "--all"]).stdout;
   const kodaStatus = koda(["status"]);
   if (kodaStatus.status !== 0 || !kodaStatus.stdout.includes("SESSION CLOSED")) {
-    throw new Error(`Final Koda status did not derive SESSION CLOSED: ${kodaStatus.stdout}${kodaStatus.stderr}`);
+    throw new Error(`Final Koda-C status did not derive SESSION CLOSED: ${kodaStatus.stdout}${kodaStatus.stderr}`);
   }
 
   if (resolved.mode === "guide-project") {

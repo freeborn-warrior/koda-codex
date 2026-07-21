@@ -7,7 +7,7 @@ import test from "node:test";
 test("JUDGE JOURNEY SUITE: the committed binary runs without rebuilding", () => {
   const result = spawnSync(process.execPath, ["dist/cli.js", "--help"], { encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Koda — a disk-backed workflow where review proof controls advancement/);
+  assert.match(result.stdout, /Koda-C — a disk-backed workflow where review proof controls advancement/);
   assert.match(result.stdout, /koda session close/);
   assert.match(result.stdout, /--open ghostty/);
 });
@@ -81,11 +81,63 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /official-rule picture audit/);
 });
 
+test("PUBLIC GUIDE CONTRACT: current entry docs use the product name and describe the shipped workflow", async () => {
+  const paths = [
+    "README.md",
+    "docs/README.md",
+    "docs/QUICKSTART.md",
+    "docs/COMMAND-MANUAL.md",
+    "docs/PROCESS.md",
+    "docs/SECURITY.md",
+    "docs/DEMO.md",
+    "docs/GHOSTTY-TEST-GUIDE.md",
+  ];
+  const documents = await Promise.all(paths.map(async (document) => ({
+    document,
+    content: await readFile(document, "utf8"),
+  })));
+  const bareProductName = /(^|[^A-Za-z0-9-])Koda(?![-A-Za-z0-9])/m;
+  for (const { document, content } of documents) {
+    assert.doesNotMatch(content, bareProductName, `${document} uses bare Koda as the product name`);
+  }
+
+  const landing = documents.find(({ document }) => document === "README.md")!.content;
+  const quickStart = documents.find(({ document }) => document === "docs/QUICKSTART.md")!.content;
+  const process = documents.find(({ document }) => document === "docs/PROCESS.md")!.content;
+  const security = documents.find(({ document }) => document === "docs/SECURITY.md")!.content;
+  const demo = documents.find(({ document }) => document === "docs/DEMO.md")!.content;
+  const ghostty = documents.find(({ document }) => document === "docs/GHOSTTY-TEST-GUIDE.md")!.content;
+  const packageManifest = JSON.parse(await readFile("package.json", "utf8"));
+
+  assert.match(landing, /\[Quick Start\]\(docs\/QUICKSTART\.md\).*\[Process\]\(docs\/PROCESS\.md\).*\[Commands\]\(docs\/COMMAND-MANUAL\.md\).*\[Security\]\(docs\/SECURITY\.md\).*\[License\]\(LICENSE\)/);
+  assert.match(landing, /The reference process—and what belongs to each project/);
+  assert.match(quickStart, /npm run demo:session/);
+  assert.equal(packageManifest.scripts["demo:session"], "node scripts/prepare-full-session-demo.ts --open");
+  assert.match(quickStart, /macOS is required here only because this packaged demonstration uses the optional[\s\S]*Ghostty window adapter/);
+  assert.match(quickStart, /not a requirement of Koda-C's files, gate, or[\s\S]*core CLI/);
+  assert.match(process, /The gates are the product/);
+  assert.match(process, /the \*\*project method\*\* that should change/);
+  assert.match(process, /Phase order belongs in `koda\.config\.json`/);
+  assert.match(process, /Creating tailored writing, research, design, or other project profiles remains a[\s\S]*future adoption layer/);
+  assert.match(security, /one human owner working with Codex, not a[\s\S]*company or security team/);
+  assert.match(security, /not designed[\s\S]*around a macOS-only format/);
+  assert.match(demo, /owner-visible result.*2026-07-20-owner-full-session-05/s);
+  assert.doesNotMatch(demo, /still needs its final owner-observed completion/);
+  assert.match(ghostty, /## Current supported path/);
+  assert.match(ghostty, /It is not the current onboarding guide/);
+  assert.match(ghostty, /a first-time user or judge should not follow it instead of[\s\S]*the Quick Start/);
+});
+
 test("JUDGE JOURNEY SUITE: local links in the judge documents resolve", async () => {
   const documents = [
     "README.md",
     "docs/README.md",
+    "docs/QUICKSTART.md",
+    "docs/COMMAND-MANUAL.md",
+    "docs/PROCESS.md",
+    "docs/SECURITY.md",
     "docs/DEMO.md",
+    "docs/GHOSTTY-TEST-GUIDE.md",
     "docs/VIDEO-SCRIPT.md",
     "docs/SUBMISSION-CHECKLIST.md",
   ];

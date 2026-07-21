@@ -2,6 +2,11 @@
 
 This page has two paths. Choose the one that matches what you want to see.
 
+Koda-C is an independent project by one human owner working with Codex, not a
+company or team. macOS 26.5.1 arm64 is the only personally tested operating
+system. The core is not tied to the macOS filesystem; other platforms are simply
+not certified by this release.
+
 ## Path A — see the gate in about one minute
 
 Use this when you want the smallest proof and do not want to launch a model.
@@ -15,9 +20,9 @@ KODA_DEMO_DIR=$(mktemp -d /tmp/koda-c-demo.XXXXXX)
 node dist/cli.js init "$KODA_DEMO_DIR" --demo
 ```
 
-Koda prints the next command. Run it. The gate refuses because an approving
+Koda-C prints the next command. Run it. The gate refuses because an approving
 review exists but its receipt has not entered the approval ledger. Continue with
-the exact commands Koda prints. The complete annotated version is in
+the exact commands Koda-C prints. The complete annotated version is in
 [DEMO.md](DEMO.md#one-minute-mechanical-proof).
 
 This path tests the headless gate only. It does not open Guide, Producer, or
@@ -44,24 +49,29 @@ Additional requirements:
 - permission for Ghostty to open the two role windows;
 - enough model time for a real six-phase session.
 
+macOS is required here only because this packaged demonstration uses the optional
+macOS Ghostty window adapter. It is not a requirement of Koda-C's files, gate, or
+core CLI. The one-minute Path A works without Ghostty or Codex; platforms beyond
+the tested macOS release environment are not yet claimed as certified.
+
 No `npm install` is required. From the Koda-C repository, run one command:
 
 ```bash
 npm run demo:session
 ```
 
-Koda then owns the instructions:
+Koda-C then owns the instructions:
 
 1. It shows the exact sample session prompt.
 2. Type the name you want in durable review and approval records.
 3. Choose `1` to confirm or `2` to create nothing.
-4. Koda creates an isolated project under `.koda/full-session-demos/`, gives it
+4. Koda-C creates an isolated project under `.koda/full-session-demos/`, gives it
    a separate local Git remote, and confirms and pushes the prompt.
-5. Before printing `READY`, Koda clones that prepared project into temporary
+5. Before printing `READY`, Koda-C clones that prepared project into temporary
    scratch space and runs the exact first `session new` command through the
    installed restricted Producer profile. No model or window opens during this
    check, and the prepared human-demo project remains session-empty.
-6. Koda opens Guide. Guide reconstructs the project from disk. When it displays `READY TO LAUNCH`,
+6. Koda-C opens Guide. Guide reconstructs the project from disk. When it displays `READY TO LAUNCH`,
    choose `1`. The trusted controller opens exactly one Reviewer and one Producer.
 
 Reviewer may appear first with `STARTING SESSION — NO ACTION NEEDED`. It does not
@@ -99,7 +109,7 @@ ignored `.koda/` directory.
 - If a role window disappears, return to Guide and ask: `What is the current
   session state?` Guide derives the safe recovery from disk.
 - Never paste a receipt, filesystem path, hash, commit, or recovery command
-  between windows. Koda owns that transport.
+  between windows. Koda-C owns that transport.
 
 ## What the full-session demo does not claim
 

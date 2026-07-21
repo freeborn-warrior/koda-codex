@@ -165,7 +165,7 @@ function decodeGeneratedShellWord(value: string): string | null {
 }
 
 /**
- * A prior Koda launcher may differ in terminal-derived environment values after
+ * A prior Koda-C launcher may differ in terminal-derived environment values after
  * an upgrade. It is safe to replace only when its complete shell structure,
  * allowlisted environment keys, and executable/script/argument tail still match
  * this exact runtime. The legacy file is never executed during validation.
@@ -362,7 +362,7 @@ async function receiptRecoveryJob(runRoot: string): Promise<ReceiptRecoveryJob> 
     job.completion !== null ||
     (!retryableLegacyFailure && !retryableCurrentState)
   ) {
-    throw new Error("This Reviewer state is not a retryable owner-receipt attempt. Koda refuses to guess.");
+    throw new Error("This Reviewer state is not a retryable owner-receipt attempt. Koda-C refuses to guess.");
   }
   return job as ReceiptRecoveryJob;
 }
@@ -570,7 +570,7 @@ export async function partialRecoveryRoles(
     boundJob.id !== job.id || boundJob.kind !== job.kind ||
     boundJob.phase !== job.phase || boundJob.expectedPath !== job.expectedPath
   )) {
-    throw new Error("Visible recovery evidence is bound to a different Reviewer job. Koda refuses to guess.");
+    throw new Error("Visible recovery evidence is bound to a different Reviewer job. Koda-C refuses to guess.");
   }
   const expectedError = `A different reviewer job is already active: ${job.kind} ${job.phase} (${job.status}).`;
   const failedRejoin = possibleFailedRejoin && runtime.run.lastError === expectedError;

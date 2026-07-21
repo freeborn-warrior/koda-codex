@@ -85,7 +85,7 @@ await writeFile(path.join(project, "AGENTS.md"), [
   "",
   "This is a bounded software-project fixture executed through Koda-C.",
   "",
-  "- Treat the active Koda session and cited files as truth.",
+  "- Treat the active Koda-C session and cited files as truth.",
   "- Use dependency-free Node.js and keep the deliverable inside this project.",
   "- The command must stay offline and never modify its input.",
   "- Producer and reviewer responsibilities remain separate.",

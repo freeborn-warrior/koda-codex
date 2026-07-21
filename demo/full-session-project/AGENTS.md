@@ -16,10 +16,10 @@ path is predetermined.
 - Treat setext headings, recursive traversal, standard input, network access,
   publishing, and performance claims as out of scope.
 
-## Koda runtime
+## Koda-C runtime
 
 - Use the explicit `KODA_SESSION_ID`; never infer the latest session.
-- Invoke the matching repository-local Koda skill at every handoff.
+- Invoke the matching repository-local Koda-C skill at every handoff.
 - Producer never approves, advances, writes a review, quotes a receipt, or speaks
   directly to the owner after session start.
 - Reviewer remains the only owner-facing session context and records every

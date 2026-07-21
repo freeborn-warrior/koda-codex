@@ -247,9 +247,9 @@ async function main(): Promise<void> {
     console.log("────────────────────────────────────────────────────────");
     console.log("CHECKING THE REAL SESSION PATH");
     console.log("");
-    console.log("Koda is validating Guide and opening one disposable session through");
+    console.log("Koda-C is validating Guide and opening one disposable session through");
     console.log("the exact restricted Producer profile. No model or window opens here.");
-    console.log("NO ACTION NEEDED — Koda will show READY or a named refusal.");
+    console.log("NO ACTION NEEDED — Koda-C will show READY or a named refusal.");
     console.log("────────────────────────────────────────────────────────");
     console.log("");
     await preflightCodexPermissionProfiles();

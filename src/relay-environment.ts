@@ -32,7 +32,7 @@ export function resolveRelayCodexExecutable(
   });
   const candidate = (found.stdout ?? "").trim();
   if (found.status !== 0 || !candidate) {
-    throw new Error(`Koda cannot find the Codex executable named ${configured}.`);
+    throw new Error(`Koda-C cannot find the Codex executable named ${configured}.`);
   }
   return realpathSync(candidate);
 }
@@ -70,7 +70,7 @@ export function resolveRelayGitExecutable(
   });
   const candidate = (found.stdout ?? "").trim();
   if (found.status !== 0 || !candidate) {
-    throw new Error(`Koda cannot find the Git executable named ${configured}.`);
+    throw new Error(`Koda-C cannot find the Git executable named ${configured}.`);
   }
   return realpathSync(candidate);
 }

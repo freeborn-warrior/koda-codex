@@ -168,7 +168,7 @@ test("FULL RELAY RUNNER: execution preserves two contexts and binds owner acknow
   assert.match(execute, /resolveRelayRunPaths/);
   assert.match(location, /const \[project, runtime\] = await Promise\.all\(\[realpath\(projectCandidate\), realpath\(runtimeCandidate\)\]\)/);
   assert.match(location, /Guide run paths resolve through a symbolic link or outside their containing project/);
-  assert.match(location, /trusted Koda CLI/);
+  assert.match(location, /trusted Koda-C CLI/);
   assert.match(reviewHelper, /run\.status !== "AWAITING_OWNER_RECEIPT"/);
   assert.match(reviewHelper, /candidates\.length > 1/);
   assert.match(reviewHelper, /after\.hash !== before\.hash/);

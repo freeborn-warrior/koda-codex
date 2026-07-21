@@ -4,7 +4,7 @@
 
 **Hard deadline:** 2026-07-21 at 5:00 pm Pacific
 
-**Koda buffer target:** submit on 2026-07-20, not during the final-day window
+**Koda-C buffer target:** submit on 2026-07-20, not during the final-day window
 
 The [official OpenAI page](https://openai.com/build-week/) says strong entries
 should show thoughtful Codex/GPT-5.6 use and clearly explain the problem,
@@ -88,7 +88,7 @@ neither visibility nor submission state has been changed by Codex.
   The pushed review record and strengthened judge assertions pass a final
   [252/252](test-results/2026-07-20-reviewer-session-binding-review-release.md).
 - [x] A first-time user has one documented command for a complete session;
-  confirmation, launch, owner choices, and safe recovery remain inside Koda.
+  confirmation, launch, owner choices, and safe recovery remain inside Koda-C.
 - [x] A fresh Terra/medium task independently reviewed the complete integrated
   Producer-role preflight under its precommitted contract and returned
   [APPROVE](quality-runs/2026-07-20-integrated-role-preflight-18/REVIEW.md).

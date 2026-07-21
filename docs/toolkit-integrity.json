@@ -12,23 +12,23 @@
   "files": [
     {
       "path": "src/ghostty.ts",
-      "sha256": "007e7e61018a264dd63510fa814cd51add77afc34f4875440955f45e8c5ff3b8"
+      "sha256": "4e8731cc739c18ddcd59c12f0d6363e592027ac4bbc2f45cc586dd85c2ccb216"
     },
     {
       "path": "src/relay-environment.ts",
-      "sha256": "89d56a21acf631ad1007e3c9424c830005dcdf02baa48e0b9a8f079f93cf00b3"
+      "sha256": "facf5e80d1f4a466bb52a59c08c911f7e1f69feebe7752a415525474a40dd8c3"
     },
     {
       "path": "src/guide-runtime.ts",
-      "sha256": "e15b59b1f68d7de9c0b0a3cb4ab385c4bae2eda6f05abe0590a73d4d07f3e553"
+      "sha256": "e912b8d9f53618d5dde6f17bf0e9c65586c97ea0d659c690864bad439d15e501"
     },
     {
       "path": "scripts/execute-relay-run.ts",
-      "sha256": "06e9b878eb33dc8290c5c474c3450ad2d5337b55e6433bddc71bbf994f9b0d3e"
+      "sha256": "9253a04e62f66939cca2ce64c46066e85c31a876a33231971410cb3bcf893f95"
     },
     {
       "path": "scripts/run-relay-reviewer-window.ts",
-      "sha256": "d2977e39bcdafb7bad243b4f30b6d842e29599b198e81330d974de2bbb38f1dc"
+      "sha256": "0603a31107b3ceb8d44688c5bb71ca7c0cadc35a0f0e4a21cd19643f02a87191"
     },
     {
       "path": "scripts/execute-reviewer-run.ts",
@@ -36,7 +36,7 @@
     },
     {
       "path": "scripts/run-guide-preflight-model-test.ts",
-      "sha256": "cad2d9fbc1978bfb0381bd6259420560eb0ff637323503efe8311a3a5f7c1da8"
+      "sha256": "009a896445bee58247ae77fab5932457f0bc27b9e08542acee1dd1804a2fb152"
     },
     {
       "path": "scripts/relay-window-protocol.ts",
@@ -44,15 +44,15 @@
     },
     {
       "path": "dist/ghostty.js",
-      "sha256": "1f998613923b87b26a99c5fa49245c6838ec7ee4fdc673e2b5d864246f38fc2e"
+      "sha256": "eb6e26fba5460ceb6efef48d914db1dc0d9817245d6985a6345baaf539a3ef0c"
     },
     {
       "path": "dist/relay-environment.js",
-      "sha256": "14fba85ca64af4ba027b91f6700b0bbd635db1f87617f807e42ce2ec9ee11409"
+      "sha256": "97907095eed13dd0b912642b093a54431ab97270921e04a5ebc838d193eb6881"
     },
     {
       "path": "dist/guide-runtime.js",
-      "sha256": "3b89eddc61b095e436c3a4a8fe876eb5823266df5140a56259d24431a8ae59c5"
+      "sha256": "c39d63e2d9fedeb78da51e8f4fd82b312caca39f70ba49e6b90e932610b191bf"
     },
     {
       "path": "src/toolkit-integrity.ts",
@@ -72,19 +72,19 @@
     },
     {
       "path": "src/guide-commands.ts",
-      "sha256": "fc3c103a4d685ea3a51f7689c9a1aff75c9cac28922413855d3e99da4c27320f"
+      "sha256": "cb51de16adff9ed610110154e8fe0e33c1306dffbab282cc26f7cbd8add8025e"
     },
     {
       "path": "dist/guide-commands.js",
-      "sha256": "5d727240c78a208be9a63344fd5cb57c5ddd7b6ae80a9de6986c03a61e12b56d"
+      "sha256": "eaa6c16085bbbe97eafa510a4a862bc95e115dd829d9aa73e4b1de2ccd43cb07"
     },
     {
       "path": "src/guide-console.ts",
-      "sha256": "6a5098e7910b9a9a38fb232864d6b392c3121a00f8ecfaf6ea5c15118919cd90"
+      "sha256": "819b2dfd2a1a863140172b8425da973071c7e03464cee2b9ee120a4d88b55aeb"
     },
     {
       "path": "dist/guide-console.js",
-      "sha256": "87923464f57a8f108bba191009b578d4b7f32a2740bcd92c74e5749de9ac7159"
+      "sha256": "fce460a47846e14a17d34a5fc8ff02f8565ec052d12320fc9c477bf803f589b8"
     },
     {
       "path": "src/terminal-ui.ts",
@@ -112,23 +112,23 @@
     },
     {
       "path": "src/commands.ts",
-      "sha256": "9f5d530b3d56254f955eeacf4d9bb47b32ca5d632018ee2aab3e4879d51483f6"
+      "sha256": "6563e8aedf674a2c4da18d318b84aed9e3d49bdb261c272a787ec044cd930ba9"
     },
     {
       "path": "dist/commands.js",
-      "sha256": "d8e3a6d078b18a5787d3c609dc0afa7cd39f8cb030263c220e280af057b9e628"
+      "sha256": "5c53e48ea761a8dcbae42bfdfe2e307636c73e491e7a348b17709e9a7fe2349a"
     },
     {
       "path": "scripts/show-relay-status.ts",
-      "sha256": "df04fc586fd54d010002562066ebba8ecbfa6111b7b08bc06b858d414992af37"
+      "sha256": "73816d8d430051e38f73f3119bac05b8f2b6031a25bb7e531b12fda2f49efa5c"
     },
     {
       "path": "src/direction.ts",
-      "sha256": "e885351f34bd7ea3a1fd69a228426d05cce719998cd45d112ef473686b558040"
+      "sha256": "7eb8e793942e933fe7d1a50a43edc3ceee684e244bd9d149c58d0e28e563ea9a"
     },
     {
       "path": "dist/direction.js",
-      "sha256": "0ff20580f1c3c82c0d7336e21428f7b9bce191e65d88f6d7a3b7f2a1c744773d"
+      "sha256": "ed1905fd9ccc36a90be4d2122d1ed74e639adb919c1028db29c37fe73f268273"
     },
     {
       "path": "src/git-operation-lock.ts",
@@ -148,11 +148,11 @@
     },
     {
       "path": "src/codex-role-permissions.ts",
-      "sha256": "03ad22a49413d3364f3e86ff3257f85a7b9bfd84a4292c747975ece904d7d470"
+      "sha256": "d3c1da47cb744eb47898aaaf6556e9c6486d5013ff8b8b7004005fec14e8fc17"
     },
     {
       "path": "dist/codex-role-permissions.js",
-      "sha256": "4c4c64026354fb076385677a1adee775d5eaf5a0c829a493690bc48481bfce86"
+      "sha256": "cbdd665dabbf0cb25ad99520f5cc758482e3406d7ccc9c76ec1d9a2148ca713c"
     },
     {
       "path": "src/workset.ts",
@@ -164,7 +164,7 @@
     },
     {
       "path": "scripts/prepare-full-session-demo.ts",
-      "sha256": "0a8bb1aca72102e3b879eb6a8967c271783bedda3b3d9ca16a3fbfc6dde11e9d"
+      "sha256": "f678b73874f638f44e47bdddb8f2ee14be69aa67e56eacbe8557a594c90e3de8"
     },
     {
       "path": "package.json",
@@ -172,15 +172,15 @@
     },
     {
       "path": "docs/QUICKSTART.md",
-      "sha256": "57966b13b1d070fdf5792caccdfd8418fa4eaf261310f3d5597959f4a71696e6"
+      "sha256": "5e7b6e0bdbd5a01d91e2472c096a657b5ffc6ed4f6a4f38c78286f4cd2e4e1c7"
     },
     {
       "path": "docs/COMMAND-MANUAL.md",
-      "sha256": "72df7f819117d1db140555e540206197c7d25bbdb091a19ed9a41b5bc1db706a"
+      "sha256": "96b69a361d1a0712b216cab616a3fdf3602255a5863ad12155d900e96ba1b32c"
     },
     {
       "path": "demo/full-session-project/AGENTS.md",
-      "sha256": "4522d73f718630904141de08e4647fb2bd5d4d5f3d0591a1616a8dd8ee022187"
+      "sha256": "df4d7bbc31e38d5622baa5c6ff34fcbe021adfe3500c15a36dbb91fdf7709148"
     },
     {
       "path": "demo/full-session-project/koda.config.json",
@@ -188,7 +188,7 @@
     },
     {
       "path": "demo/full-session-project/docs/guide/prompts/first-session.md",
-      "sha256": "1e64b78b723501a78778f79ce182dee1135d50b5e4c93654cd1ea1ac2e5d3d01"
+      "sha256": "4c9d31200b800693883e5a6df55ba246ac50c632905e4a2c7c432d41e0845c7e"
     }
   ]
 }

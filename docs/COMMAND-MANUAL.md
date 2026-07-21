@@ -5,7 +5,7 @@ uses it. Syntax alone is not enough for a workflow whose central behavior is
 refusal.
 
 Examples below use `koda`. From a repository checkout, replace it with
-`node /path/to/koda-codex/dist/cli.js`. Koda prints exact state-bound commands
+`node /path/to/koda-codex/dist/cli.js`. Koda-C prints exact state-bound commands
 whenever a human is expected to run one.
 
 ## Human entry commands
@@ -195,4 +195,4 @@ occurred between session creation and automatic binding.
 The owner supplies intent and product decisions, not technical transport. During
 a session, speak in Reviewer; between sessions, speak in Guide; watch Producer.
 Do not carry commands, paths, hashes, commits, receipts, or evidence locations
-between them. If Koda asks for that transport, treat it as a product defect.
+between them. If Koda-C asks for that transport, treat it as a product defect.

@@ -26,4 +26,4 @@ dependencies, network access, publishing, or performance promises.
 
 ## Current state
 
-No implementation exists. The first Koda session will create and exercise it.
+No implementation exists. The first Koda-C session will create and exercise it.

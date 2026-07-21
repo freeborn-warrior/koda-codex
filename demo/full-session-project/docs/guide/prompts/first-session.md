@@ -3,7 +3,7 @@
 ## Owner intent
 
 Build and exercise the project's bounded Markdown heading reporter through one
-complete Koda Produce session. This is the first session and exists to make the
+complete Koda-C Produce session. This is the first session and exists to make the
 full Guide, Producer, Reviewer, receipt-gate, and immutable-close workflow visible.
 
 ## In scope
@@ -11,7 +11,7 @@ full Guide, Producer, Reviewer, receipt-gate, and immutable-close workflow visib
 - One offline dependency-free Node.js command that accepts one Markdown path.
 - Ordered ATX heading records with level, text, and one-based line number.
 - Backtick- and tilde-fenced code exclusion.
-- Deterministic tests, raw live evidence, and a pushed immutable Koda close.
+- Deterministic tests, raw live evidence, and a pushed immutable Koda-C close.
 
 ## Out of scope
 
@@ -45,5 +45,5 @@ full Guide, Producer, Reviewer, receipt-gate, and immutable-close workflow visib
 - Launch relationship: independent first session (no predecessor or active sibling)
 - Dependencies: none
 - Configured receiver: brief
-- Ground prepared: AGENTS.md, docs/PROJECT.md, docs/BACKLOG.md, docs/WORKING-PLAN.md, docs/IN-PHASE-CONSULTATION.md, and the verified Koda toolkit capability
+- Ground prepared: AGENTS.md, docs/PROJECT.md, docs/BACKLOG.md, docs/WORKING-PLAN.md, docs/IN-PHASE-CONSULTATION.md, and the verified Koda-C toolkit capability
 - Open items: none

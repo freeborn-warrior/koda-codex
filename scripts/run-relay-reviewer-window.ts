@@ -134,7 +134,7 @@ async function discoverRun(): Promise<string> {
     ) candidates.push(candidate);
   }
   if (candidates.length === 0) refuse("No prepared or active relay run exists. Start Window A first.");
-  if (candidates.length > 1) refuse("More than one relay run is active. Koda will not guess which session you mean.");
+  if (candidates.length > 1) refuse("More than one relay run is active. Koda-C will not guess which session you mean.");
   return candidates[0];
 }
 
@@ -380,7 +380,7 @@ async function modelTurn(
     });
     await writeReviewerWindowState(runRoot, state);
     if (!state.threadId) {
-      throw new Error(`${state.lastError} Koda will not replace the reviewer context automatically.`);
+      throw new Error(`${state.lastError} Koda-C will not replace the reviewer context automatically.`);
     }
     throw new ReviewerTurnInterrupted(state.lastError ?? "Reviewer turn interrupted.");
   }
@@ -508,7 +508,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
       `The active review is ${review}.`,
       `The owner's exact question is ${JSON.stringify(question)}.`,
       "Lead with a direct, natural answer. Do not narrate skill selection, file inspection, entry checks, or commands.",
-      "Explain only from the review and evidence it cites. Do not edit any file, run Koda, approve, advance, or quote the receipt.",
+      "Explain only from the review and evidence it cites. Do not edit any file, run Koda-C, approve, advance, or quote the receipt.",
       "If this introduces new product direction, follow the skill's exact WAIT FOR GATE marker. Direction must be recorded now but cannot enter the current phase contract.",
     ].join(" "), question, "conversation", job.phase);
     await requireUnchangedReview();
@@ -568,7 +568,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
           : "";
       beginScreen("WHAT WOULD YOU LIKE TO DO?");
       console.log("1. ACKNOWLEDGE");
-      console.log(`   Type the 8-character REVIEW CODE.${followUp} ${permitted ? "Koda then rechecks every gate condition." : `${parsed.verdict} keeps the gate closed and returns the work.`}`);
+      console.log(`   Type the 8-character REVIEW CODE.${followUp} ${permitted ? "Koda-C then rechecks every gate condition." : `${parsed.verdict} keeps the gate closed and returns the work.`}`);
       console.log("");
       console.log("2. DISCUSS");
       console.log("   Ask the Reviewer a question. Nothing advances.");
@@ -642,7 +642,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     if (!testMode) {
       beginScreen("FINAL ACKNOWLEDGEMENT");
       console.log("Type the 8-character REVIEW CODE shown beneath the complete review.");
-      console.log("Koda will translate that code to this review's exact receipt, then recheck the gate from disk.");
+      console.log("Koda-C will translate that code to this review's exact receipt, then recheck the gate from disk.");
       console.log("Type 0 to go back. A wrong code changes nothing.");
       console.log("");
     }
@@ -728,7 +728,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
       },
     ));
     if (approved.status !== 0) {
-      throw new Error(`Koda refused owner acknowledgement after the exact receipt matched: ${(approved.stderr || approved.stdout || `exit ${approved.status ?? -1}`).trim()}`);
+      throw new Error(`Koda-C refused owner acknowledgement after the exact receipt matched: ${(approved.stderr || approved.stdout || `exit ${approved.status ?? -1}`).trim()}`);
     }
     break;
   }
@@ -867,7 +867,7 @@ function ownerConversationPrompt(question: string): string {
     `The owner's exact message is ${JSON.stringify(question)}.`,
     "Answer at the owner's altitude from the active session files and cited evidence. Distinguish disk fact from inference.",
     "Lead with the answer and speak as an ongoing conversation partner. Do not narrate skill selection, entry checks, file inspection, or commands.",
-    "Do not edit any file, create a review or handback, run Koda, approve, advance, quote a receipt, or claim the Producer received this conversation.",
+    "Do not edit any file, create a review or handback, run Koda-C, approve, advance, quote a receipt, or claim the Producer received this conversation.",
     "Use the skill's exact boundary marker if the message is project-level Guide scope or actionable direction for the active session.",
   ].join(" ");
 }
@@ -879,7 +879,7 @@ async function recoverInterruptedOwnerConversation(): Promise<void> {
     throw new Error("The interrupted reviewer conversation has no persistent context identifier; automatic context replacement is refused.");
   }
   if (!interrupted.ownerMessage) {
-    throw new Error("The interrupted reviewer conversation has no bound owner message; Koda cannot reconstruct it safely.");
+    throw new Error("The interrupted reviewer conversation has no bound owner message; Koda-C cannot reconstruct it safely.");
   }
   console.log(terminalPanel("REVIEWER RECOVERY", [
     `Resuming interrupted conversation turn ${interrupted.turn} in the same context.`,

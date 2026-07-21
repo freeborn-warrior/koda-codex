@@ -97,7 +97,7 @@ function rejectUnknownOptions(args: string[]): void {
 }
 
 function help(io: GuideCliIo): void {
-  io.out("Koda Guide — disk-backed continuity between Koda sessions");
+  io.out("Koda-C Guide — disk-backed continuity between Koda-C sessions");
   io.out("");
   io.out("Commands:");
   io.out("  koda guide open [--model <model>] [--effort <effort>] [--producer-model <model>] [--producer-effort <effort>] [--reviewer-model <model>] [--reviewer-effort <effort>]");
@@ -277,19 +277,19 @@ export async function runGuideCli(
             io.out("The Producer window failed to rejoin that decision and may be closed.");
           } else if (reviewerMissing && producerMissing) {
             io.out("SESSION WINDOWS CLOSED — the saved owner decision is still open and nothing advanced.");
-            io.out("Both visible role windows are gone. Koda can restore the Reviewer first, then the Producer, from the same disk state.");
+            io.out("Both visible role windows are gone. Koda-C can restore the Reviewer first, then the Producer, from the same disk state.");
           } else {
             io.out("REVIEWER WINDOW CLOSED — the saved owner decision is still open and nothing advanced.");
-            io.out("The Producer remains present. Koda can restore only the missing Reviewer at that same decision.");
+            io.out("The Producer remains present. Koda-C can restore only the missing Reviewer at that same decision.");
           }
           io.out("");
           io.out("SESSION RECOVERY READY");
           if (!reviewerMissing && producerMissing) {
-            io.out("1. Reopen only the missing Producer — Koda will make it wait on the existing Reviewer decision without creating another job.");
+            io.out("1. Reopen only the missing Producer — Koda-C will make it wait on the existing Reviewer decision without creating another job.");
           } else if (reviewerMissing && producerMissing) {
-            io.out("1. Reopen this session — Koda will restore the Reviewer first and open the Producer only after that decision is ready.");
+            io.out("1. Reopen this session — Koda-C will restore the Reviewer first and open the Producer only after that decision is ready.");
           } else {
-            io.out("1. Reopen only the missing Reviewer — Koda will restore the same owner decision without creating another job.");
+            io.out("1. Reopen only the missing Reviewer — Koda-C will restore the same owner decision without creating another job.");
           }
           io.out("2. Not now — keep the session safely paused without changing the saved decision.");
           io.out("Choose in the Guide conversation. Do not paste or reconstruct a technical command.");
@@ -299,7 +299,7 @@ export async function runGuideCli(
           io.out("OWNER INPUT WAS NOT RECORDED — the receipt did not match. Nothing advanced and the gate remains closed.");
           io.out("");
           io.out("SESSION RECOVERY READY");
-          io.out("1. Reopen this session — Koda will restore the same Reviewer and Producer contexts at the same unacknowledged review. Codex may ask permission for one local launcher command.");
+          io.out("1. Reopen this session — Koda-C will restore the same Reviewer and Producer contexts at the same unacknowledged review. Codex may ask permission for one local launcher command.");
           io.out("2. Not now — keep the session safely paused. Nothing will advance.");
           io.out("Choose in the Guide conversation. Do not paste or reconstruct a technical command.");
           continue;
@@ -313,7 +313,7 @@ export async function runGuideCli(
           io.out("1. Ask Guide to diagnose this exact saved session and name the safe recovery.");
           io.out("2. Not now — leave the session safely unchanged.");
         } else if (roles && (!roles.reviewerRunning || !roles.producerRunning)) {
-          io.out("SESSION WINDOW RECOVERY NEEDED — Koda will not pretend a requested window is still running.");
+          io.out("SESSION WINDOW RECOVERY NEEDED — Koda-C will not pretend a requested window is still running.");
           io.out("1. Ask Guide to inspect this exact state and reopen only the missing role or roles when safe.");
           io.out("2. Not now — preserve the session without opening anything.");
         } else if (runtime.run.status === "PREPARED" && !runtime.run.terminalLaunch) {

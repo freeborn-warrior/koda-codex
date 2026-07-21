@@ -7,9 +7,9 @@ function tomlString(value: string): string {
 }
 
 /**
- * Codex permission-profile arguments for a Koda Producer or Reviewer turn.
+ * Codex permission-profile arguments for a Koda-C Producer or Reviewer turn.
  *
- * The model may read and write its project, read the trusted compiled Koda CLI
+ * The model may read and write its project, read the trusted compiled Koda-C CLI
  * plus its exact verified integrity evidence, and read only the minimal
  * operating-system paths Codex needs for local tools.
  * It cannot read sibling projects or ordinary home-directory files, mutate Git
@@ -88,7 +88,7 @@ export function codexGuidePermissionArgs(
   toolkitVerificationPaths: string[] = [],
 ): string[] {
   if (!path.isAbsolute(trustedCli) || !path.isAbsolute(codexExecutable)) {
-    throw new Error("The trusted Koda CLI and Codex executable paths must be absolute before Guide permissions are built.");
+    throw new Error("The trusted Koda-C CLI and Codex executable paths must be absolute before Guide permissions are built.");
   }
   const toolkitRuntime = path.dirname(path.resolve(trustedCli));
   const toolkitPackage = path.join(path.dirname(toolkitRuntime), "package.json");
@@ -114,7 +114,7 @@ export function codexRolePermissionArgs(
   toolkitVerificationPaths: string[],
 ): string[] {
   if (!path.isAbsolute(trustedCli) || !path.isAbsolute(codexExecutable)) {
-    throw new Error("The trusted Koda CLI and Codex executable paths must be absolute before role permissions are built.");
+    throw new Error("The trusted Koda-C CLI and Codex executable paths must be absolute before role permissions are built.");
   }
   const toolkitRuntime = path.dirname(path.resolve(trustedCli));
   const toolkitPackage = path.join(path.dirname(toolkitRuntime), "package.json");

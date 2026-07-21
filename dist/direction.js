@@ -220,7 +220,7 @@ export async function createWaitingDirection(input
     "",
     "## Boundary obligation",
     "",
-    "Do not use this direction in the active phase. Koda releases its ID through the next successful advancement record; the receiving phase must read and cite this file.",
+    "Do not use this direction in the active phase. Koda-C releases its ID through the next successful advancement record; the receiving phase must read and cite this file.",
     "",
   ].join("\n");
   await writeTextAtomic(file, content);

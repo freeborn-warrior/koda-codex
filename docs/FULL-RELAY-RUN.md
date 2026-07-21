@@ -7,7 +7,7 @@ For the exact first-time Ghostty procedure, follow the [step-by-step Ghostty tes
 ```text
 persistent producer → phase artifact → persistent reviewer → review file
        ↑                                                   ↓
-       └──────── disk handback ← Koda gate ← Kristian receipt
+       └──────── disk handback ← Koda-C gate ← Kristian receipt
 ```
 
 The producer context opens the session, explicitly invokes the producer skill for every current phase, revises acknowledged blocking findings, and performs the separate close ceremony. The reviewer context explicitly invokes the one shared reviewer skill for every formal review and any in-phase consultation. Neither model approves a review or advances a gate.
@@ -18,15 +18,15 @@ The producer context opens the session, explicitly invokes the producer skill fo
 - each role is resumed rather than replaced at phase boundaries;
 - model subprocesses receive closed conversational stdin;
 - every phase is derived from current `state.json`, not a cached supervisor counter;
-- each owner receipt is entered through Koda's interactive `approve` command;
+- each owner receipt is entered through Koda-C's interactive `approve` command;
 - blocking verdicts return to the same producer and require a changed artifact plus fresh review;
 - all produced project output is committed and pushed before close preparation;
 - the persistent producer prepares and validates immutable `close.md`;
 - the trusted supervisor performs the exact session-specific Git commit and push because Codex's least-privilege workspace sandbox protects `.git` metadata;
-- the same producer context resumes to verify the unchanged binding and both Koda close commands before `SESSION CLOSED` is accepted;
+- the same producer context resumes to verify the unchanged binding and both Koda-C close commands before `SESSION CLOSED` is accepted;
 - event streams, stderr, transcript, final project snapshot, and a restorable Git bundle remain in this repository.
 
-The original executor still preserves the completed backend proof exactly as run. A new two-window mode moves reviewer execution and owner acknowledgement into Window B: Window A posts one atomic reviewer job and waits; Window B resumes one persistent reviewer context, streams its emitted progress, prints the human-facing review inline, and accepts the deterministic short code bound to that review. The controller supplies the complete exact receipt to Koda over stdin only after the code matches. An in-phase `AWAITING OWNER` response is resolved through Window B and written to the response artifact. New owner direction is recorded immediately but cannot enter the current phase; advancement releases it to the receiving phase. Explicit pushed halt is the sole interrupt.
+The original executor still preserves the completed backend proof exactly as run. A new two-window mode moves reviewer execution and owner acknowledgement into Window B: Window A posts one atomic reviewer job and waits; Window B resumes one persistent reviewer context, streams its emitted progress, prints the human-facing review inline, and accepts the deterministic short code bound to that review. The controller supplies the complete exact receipt to Koda-C over stdin only after the code matches. An in-phase `AWAITING OWNER` response is resolved through Window B and written to the response artifact. New owner direction is recorded immediately but cannot enter the current phase; advancement releases it to the receiving phase. Explicit pushed halt is the sole interrupt.
 
 This began as the first owner-facing slice rather than the mature interface. Window B now exposes an always-open `reviewer> ` prompt between formal handoffs and resumes the same persistent Reviewer for active-session conversation. Ordinary explanation is non-mutating; direction creates bound waiting evidence. The original prepared scenario remains the bounded software fixture, while the newer Guide-launched runtime supports real projects. A process stopped during a model turn leaves named interruption evidence and requires a same-context reconciliation before partial work can be trusted; missing context identity refuses automatic replacement. Notification delivery also remains product work, and the harness does not claim an unattended production daemon.
 
@@ -49,7 +49,7 @@ Preparation writes one run under `docs/relay-runs/`. Its copied software project
 - a clean initial Git commit pushed to a local bare remote inside ignored runtime storage;
 - `RUN.json`, `RESULT.md`, and `TRANSCRIPT.md` marked `PREPARED — NOT RUN`.
 
-Preparation does not call a model and does not create a Koda session.
+Preparation does not call a model and does not create a Koda-C session.
 
 ## Execute and acknowledge — current two-window mode
 
@@ -63,7 +63,7 @@ npm run relay:reviewer
 npm run relay:producer
 ```
 
-Each command discovers the only unfinished run and refuses ambiguity. Window B stays open and receives formal review or consultation jobs automatically. At `REVIEW READY`, Kristian may discuss, reread, acknowledge, explicitly halt, or stop the relay. A newly classified direction is recorded immediately and waits for the next gate; there is no send-now path. The review prints inline without machine metadata, an external pager, or clipboard mutation. Kristian types the eight-character code shown beneath it; a match causes the controller to send the current exact receipt to Koda over stdin. The readable model-progress renderer still removes receipt lines, and Kristian's acknowledgement input is not submitted as a model message. Raw reviewer events may contain the generated receipt because the reviewer creates the review that contains it. Window A consumes only completed jobs plus disk evidence and then derives the route.
+Each command discovers the only unfinished run and refuses ambiguity. Window B stays open and receives formal review or consultation jobs automatically. At `REVIEW READY`, Kristian may discuss, reread, acknowledge, explicitly halt, or stop the relay. A newly classified direction is recorded immediately and waits for the next gate; there is no send-now path. The review prints inline without machine metadata, an external pager, or clipboard mutation. Kristian types the eight-character code shown beneath it; a match causes the controller to send the current exact receipt to Koda-C over stdin. The readable model-progress renderer still removes receipt lines, and Kristian's acknowledgement input is not submitted as a model message. Raw reviewer events may contain the generated receipt because the reviewer creates the review that contains it. Window A consumes only completed jobs plus disk evidence and then derives the route.
 
 Between jobs, Window B shows `reviewer> `. An owner line resumes the same Reviewer in owner-conversation mode. Safe explanation returns to the prompt, project-level scope returns to Guide, and direction is recorded as waiting evidence without current-phase release. No chat line by itself becomes producer evidence.
 
@@ -88,7 +88,7 @@ current product route. The present helper is read-only, and current owner
 acknowledgement happens only inside the persistent Reviewer window through the
 inline-review/short-code ceremony above.
 
-If execution is interrupted or a model turn fails, `RUN.json` keeps the last action, role thread IDs, named pause status, and interruption binding. Ctrl-C terminates the active child, saves partial events and stderr, and marks possible output untrusted. Rerun the same command; when the persistent context ID exists, the supervisor resumes that exact context for a skill-backed reconciliation before it derives normal routing from disk. A Reviewer job returns to `PENDING`, never `COMPLETE`; an interrupted owner conversation resumes from the exact saved owner message. If identity was never observed, Koda refuses automatic replacement. Initial and resumed model turns both receive the same strict project permission profile so a continuation cannot silently broaden its filesystem or network access. `COMPLETE` runs refuse re-execution.
+If execution is interrupted or a model turn fails, `RUN.json` keeps the last action, role thread IDs, named pause status, and interruption binding. Ctrl-C terminates the active child, saves partial events and stderr, and marks possible output untrusted. Rerun the same command; when the persistent context ID exists, the supervisor resumes that exact context for a skill-backed reconciliation before it derives normal routing from disk. A Reviewer job returns to `PENDING`, never `COMPLETE`; an interrupted owner conversation resumes from the exact saved owner message. If identity was never observed, Koda-C refuses automatic replacement. Initial and resumed model turns both receive the same strict project permission profile so a continuation cannot silently broaden its filesystem or network access. `COMPLETE` runs refuse re-execution.
 
 ## Close evidence
 
@@ -96,7 +96,7 @@ Before immutable close, the supervisor stages, commits, and pushes all non-ignor
 
 After successful verification, the harness captures:
 
-- `GIT-EVIDENCE.json` with branch, upstream, local/remote commit IDs, clean status, and final Koda status;
+- `GIT-EVIDENCE.json` with branch, upstream, local/remote commit IDs, clean status, and final Koda-C status;
 - `GIT-LOG.txt`;
 - `PROJECT-HISTORY.bundle`, verified by `git bundle verify`;
 - all producer and reviewer event/stderr files;

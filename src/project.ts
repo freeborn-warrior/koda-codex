@@ -181,7 +181,7 @@ export async function createSession(
   await writeTextAtomic(path.join(directory, "session-prompt.md"), prompt.endsWith("\n") ? prompt : `${prompt}\n`);
   await writeTextAtomic(
     ledgerPath(directory),
-    `# Approval ledger — ${id}\n\nEntries are appended by Koda after the approver quotes a review receipt.\n`,
+    `# Approval ledger — ${id}\n\nEntries are appended by Koda-C after the approver quotes a review receipt.\n`,
   );
   await writeJsonAtomic(statePath(directory), state);
 

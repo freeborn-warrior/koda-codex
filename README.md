@@ -1,5 +1,7 @@
 # Koda-C
 
+[Quick Start](docs/QUICKSTART.md) · [Process](docs/PROCESS.md) · [Commands](docs/COMMAND-MANUAL.md) · [Security](docs/SECURITY.md) · [License](LICENSE)
+
 **The verdict controls movement. The receipt proves the review entered the loop.**
 
 Koda-C is a dependency-free, plain-file workflow for AI-produced work. It refuses
@@ -10,6 +12,11 @@ and the review's unique receipt appears in the owner's approval ledger.
 It was built for a specific failure. A review can exist, be delivered, and still
 never enter the decision that moves the work forward. Koda-C separates those two
 proofs instead of treating review delivery as acknowledgement.
+
+Koda-C is an independent project by one human owner working with Codex, not a
+company or team. Kristian owns and tests on one Mac, so macOS 26.5.1 arm64 is the
+only operating system personally tested for this release. The core has no macOS
+filesystem dependency, but no other platform is claimed as certified yet.
 
 ## Try the refusal in one minute
 
@@ -28,7 +35,7 @@ node dist/cli.js init "$KODA_DEMO_DIR" --demo
 cd "$KODA_DEMO_DIR"
 ```
 
-Run the exact `advance` command printed by Koda. The approving review already
+Run the exact `advance` command printed by Koda-C. The approving review already
 exists, but its receipt has not entered the ledger, so the gate says:
 
 ```text
@@ -37,7 +44,7 @@ GATE CLOSED — BRIEF
 Nothing advanced.
 ```
 
-Read the review, use the exact `approve` command Koda printed, paste its complete
+Read the review, use the exact `approve` command Koda-C printed, paste its complete
 final `RECEIPT:` line when prompted, and run the printed `advance` command again.
 The same gate opens and activates `orient`. The complete copy-and-paste path is in
 the [one-minute demo](docs/DEMO.md#one-minute-mechanical-proof).
@@ -60,7 +67,7 @@ local Git upstream, and opens Guide:
 npm run demo:session
 ```
 
-From that point Koda presents the choices. This chat or a separate command sheet
+From that point Koda-C presents the choices. This chat or a separate command sheet
 is not part of the operating loop. See the [nontechnical Quick Start](docs/QUICKSTART.md)
 and the consequence-oriented [Command Manual](docs/COMMAND-MANUAL.md).
 
@@ -77,6 +84,37 @@ and the consequence-oriented [Command Manual](docs/COMMAND-MANUAL.md).
 - Sealed reviewer fixtures used to compare GPT-5.6 Sol, Terra, and Luna without
   changing the scoring contract after a run.
 
+## The reference process—and what belongs to each project
+
+Koda-C ships with Kristian's practiced reference chain:
+
+`session prompt → brief → orient → plan → produce → live → summary → pushed close`
+
+The chain demonstrates a complete relay, but it is not the universal product.
+The stable product is the structure around it: frozen phase inputs, a durable
+artifact, review from an independent context, a binding verdict, explicit owner
+acknowledgement, a fail-closed gate, and immutable session closure.
+
+The reference phases each have a distinct purpose:
+
+- **Brief** defines what this session is doing, why, its limits, and success evidence.
+- **Orient** inspects the actual ground and separates observations, inferences, and unknowns.
+- **Plan** turns approved evidence into ordered, checkable work without producing it.
+- **Produce** creates the declared output and records evidence for independent review.
+- **Live** exercises the real output and saves what actually happened.
+- **Summary** reports what the session established without claiming more than the files prove.
+- **Review** is one shared independent role applied at every gate, with criteria appropriate to the current phase.
+
+Phase order lives in project configuration, not inside a skill. Producer skills
+perform one relay leg: verify their entry evidence, do their own bounded job, and
+prepare a named handover. They do not prescribe the rest of the project.
+
+A writing, software, research, or design project may therefore use different phase
+names, counts, artifacts, skills, and review criteria while retaining the same
+mechanical discipline. Koda-C currently ships the reference skill set; it does not
+yet generate a purpose-specific one automatically. See [Process](docs/PROCESS.md)
+for the complete separation between the invariant workflow and adaptable project method.
+
 The core does not require Ghostty or a model. Ghostty is an optional macOS adapter
 that makes the Guide, Producer, and Reviewer visible in separate windows. The
 same disk relay can be started from manually opened terminals.
@@ -90,7 +128,7 @@ becomes gate truth or owns the workflow.
 
 In the managed Reviewer window, the complete human-facing review prints inline.
 Its final eight-character `REVIEW CODE` is the only acknowledgement text the owner
-types. Koda binds that code to the current review's complete receipt and still sends
+types. Koda-C binds that code to the current review's complete receipt and still sends
 the exact receipt—not the short code—to the unchanged mechanical gate. No pager,
 clipboard, or terminal paste is involved.
 
@@ -208,6 +246,7 @@ recovery, and review quality before Koda-C trusts it.
 ## Judge and contributor map
 
 - [Quick Start: one-minute gate or complete session](docs/QUICKSTART.md)
+- [Process: invariant gates and adaptable project phases](docs/PROCESS.md)
 - [Command Manual](docs/COMMAND-MANUAL.md)
 - [Full product README](docs/README.md)
 - [Demo and camera path](docs/DEMO.md)

@@ -19,7 +19,7 @@ async function readProjectFiles(directory: string): Promise<string[]> {
   return contents;
 }
 
-test("REVIEWER FIXTURES: five sealed fixtures ship as blind Koda projects", async () => {
+test("REVIEWER FIXTURES: five sealed fixtures ship as blind Koda-C projects", async () => {
   const names = (await readdir(root)).sort();
   assert.deepEqual(names, [
     "honest-control",

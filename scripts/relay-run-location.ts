@@ -37,7 +37,7 @@ async function resolveTrustedCli(packageRoot: string, recorded: string): Promise
   for (const candidate of candidates) {
     if (await pathExists(candidate)) trusted.push(await realpath(candidate));
   }
-  if (!trusted.includes(actual)) throw new Error("Relay RUN.json does not name this checkout's trusted Koda CLI.");
+  if (!trusted.includes(actual)) throw new Error("Relay RUN.json does not name this checkout's trusted Koda-C CLI.");
   return actual;
 }
 
@@ -74,7 +74,7 @@ export async function resolveRelayRunPaths(options: {
   const projectCandidate = path.resolve(runRoot, run.project);
   const runtimeCandidate = path.resolve(runRoot, run.runtime);
   if (projectCandidate !== derivedProject || runtimeCandidate !== runRoot) {
-    throw new Error("Guide run paths do not resolve to their containing Koda project and runtime.");
+    throw new Error("Guide run paths do not resolve to their containing Koda-C project and runtime.");
   }
   const [project, runtime] = await Promise.all([realpath(projectCandidate), realpath(runtimeCandidate)]);
   if (project !== derivedProject || runtime !== runRoot) {

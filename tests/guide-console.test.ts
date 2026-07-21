@@ -135,7 +135,7 @@ test("GUIDE CONSOLE STARTUP: reconstruction is explicitly bounded to compact con
   assert.match(prompt, /Do not read raw event logs/i);
   assert.match(prompt, /Do not draft a session prompt/i);
   assert.match(prompt, /resumed Guide context/i);
-  assert.match(prompt, /trusted Koda controller ran `koda guide status`/i);
+  assert.match(prompt, /trusted Koda-C controller ran `koda guide status`/i);
   assert.match(prompt, /KODA GUIDE — fixture\\nBETWEEN SESSIONS/);
   assert.match(prompt, /do not rerun the command/i);
 });

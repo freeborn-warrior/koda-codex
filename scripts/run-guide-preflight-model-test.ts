@@ -204,7 +204,7 @@ async function activePreflightRun(): Promise<void> {
         "# Guide preflight fixture",
         "",
         "- Use repository-local skills from `.agents/skills/`.",
-        "- Invoke this fixture's Koda CLI as `node dist/cli.js`.",
+        "- Invoke this fixture's Koda-C CLI as `node dist/cli.js`.",
         "- Derive session truth from disk and never invent a terminal state.",
         "",
       ].join("\n"), "utf8"),

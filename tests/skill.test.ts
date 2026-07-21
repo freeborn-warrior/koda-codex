@@ -67,7 +67,7 @@ test("concurrent relay skills require bound session identity instead of latest-s
     const skill = await readFile(path.join(".agents", "skills", name, "SKILL.md"), "utf8");
     assert.match(skill, /KODA_SESSION_ID/, `${name} must require the supervisor-bound identity`);
     assert.match(skill, /never infer the latest session/i, `${name} must refuse recency-based selection`);
-    assert.match(skill, /--session <session-id>/, `${name} must pass explicit identity to Koda commands`);
+    assert.match(skill, /--session <session-id>/, `${name} must pass explicit identity to Koda-C commands`);
   }
   const session = await readFile(".agents/skills/koda-c-session/SKILL.md", "utf8");
   assert.match(session, /owner-confirmed Guide launch.*session kind, launch mode, and dependency IDs/is);

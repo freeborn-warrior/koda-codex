@@ -50,7 +50,7 @@ Projects may use different steering documents. The list is project-specific, mus
 
 ## The continuity cycle
 
-1. A Koda session reaches one pushed terminal state: normal immutable close after every phase, or explicit immutable halt while one phase is in flight.
+1. A Koda-C session reaches one pushed terminal state: normal immutable close after every phase, or explicit immutable halt while one phase is in flight.
 2. Control returns to the Guide. After close, Guide reads the prompt, Summary or final artifact, material review evidence, and `close.md`. After halt, it reads the prompt, `halt.md`, state, and waiting directions; partial phase work never counts as approved.
 3. The Guide reconciles the project document, backlog, working plan, decisions, risks, and any other configured steering files. A checked backlog item requires cited disk evidence.
 4. Between sessions, Kristian and the Guide may explore or change direction. Settled changes move into the steering files; conversation alone is not truth.

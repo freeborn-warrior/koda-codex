@@ -43,7 +43,7 @@ async function discoverWaitingRun(): Promise<string> {
     if (record?.status === "AWAITING_OWNER_RECEIPT") candidates.push(candidate);
   }
   if (candidates.length === 0) refuse("No relay run is waiting for your review. Look at Window A first.");
-  if (candidates.length > 1) refuse("More than one relay run is waiting. Koda will not guess which one you mean.");
+  if (candidates.length > 1) refuse("More than one relay run is waiting. Koda-C will not guess which one you mean.");
   return candidates[0];
 }
 

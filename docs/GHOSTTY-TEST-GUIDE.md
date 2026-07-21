@@ -1,4 +1,4 @@
-# Koda-C terminal testing in Ghostty
+# Historical Koda-C terminal testing record
 
 Ghostty is the optional macOS window-opening adapter used for this human test, not a
 Koda-C requirement. The gate, disk relay, and separate contexts also work when a
@@ -6,9 +6,35 @@ user opens terminal windows manually. This guide focuses on Ghostty because the
 competition demonstration uses it and because its convenience path must be safe;
 other terminal applications are not excluded by the workflow.
 
-## Current status — clean retry preserved at its Brief decision
+## Current supported path
 
-This is the route Kristian will use. It is written for someone who should not
+This file preserves the development and recovery instructions that exposed and
+repaired the Ghostty experience. It is not the current onboarding guide.
+
+For a fresh run, follow [Quick Start Path B](QUICKSTART.md#path-b--run-a-complete-three-context-session):
+
+```bash
+npm run demo:session
+```
+
+That one command prepares an isolated project and opens Guide. Guide presents the
+numbered launch choice; Koda-C then opens one Reviewer and one watch-only Producer.
+The owner speaks with Reviewer during the session and may keep Guide open for the
+project-level conversation. No receipt, command, path, hash, or launch ID is copied
+between windows.
+
+This current route passed a fresh owner-visible six-phase session on July 20, 2026,
+including an unplanned Orient `REVISE`, seven owner acknowledgements, pushed close,
+and Guide return. See the
+[owner-visible result](verification-runs/2026-07-20-owner-full-session-05/RESULT.md).
+
+Everything below is an explicitly historical record. It explains failures and the
+lower-level test harness; a first-time user or judge should not follow it instead of
+the Quick Start.
+
+## Historical status — July 19 clean retry at its Brief decision
+
+This was the route Kristian used during development. It was written for someone who should not
 need to understand shell state, environment variables, run directories, or
 process locks.
 
@@ -20,14 +46,14 @@ pager-and-clipboard ceremony was also unusable: terminal warnings, hidden `q`
 controls, an overwritten clipboard, and a paste-safety dialog. Every attempt left
 the gate shut: zero ledger entries and zero advanced phases.
 
-Session `2026-07-19-02` remains safely recoverable with the same review and context
-identities. Do not create another session or manually start either role. The pushed
+At that point, session `2026-07-19-02` remained safely recoverable with the same review and context
+identities. The pushed
 232-check capability `owner-review-ceremony-v13` covers the exact recovery and
 owner-interaction
 shapes that the live attempt exposed:
 
-- if Reviewer is still running, Koda opens only the missing Producer;
-- if Reviewer also disappeared, Koda restores Reviewer first and opens Producer only
+- if Reviewer is still running, Koda-C opens only the missing Producer;
+- if Reviewer also disappeared, Koda-C restores Reviewer first and opens Producer only
   after Reviewer reaches the saved owner decision;
 - if either readiness check fails, the later role stays closed and Guide names the
   unchanged pause, and the same Guide recovery choice remains available; and
@@ -35,7 +61,7 @@ shapes that the live attempt exposed:
   disk-bound recovery remains available instead of becoming a one-shot dead end.
 
 The first secure-Guide recovery then exposed that legacy launcher bytes still
-captured the terminal which created them. Koda refused safely and left Guide open.
+captured the terminal which created them. Koda-C refused safely and left Guide open.
 The repair uses deterministic launcher bytes and migrates an older file only after
 validating its complete generated structure and exact role command; arbitrary or
 changed launchers remain refusals. See the
@@ -66,13 +92,13 @@ names the missing evidence first.
 
 - **Window G — Guide:** already open. Kristian talks here about the project,
   future direction, and future sessions.
-- **Window B — Reviewer:** opened by Koda. Kristian talks here about the active
+- **Window B — Reviewer:** opened by Koda-C. Kristian talks here about the active
   bounded session, reviews, questions, and product decisions.
-- **Window A — Producer:** opened by Koda. Kristian watches but never types here.
+- **Window A — Producer:** opened by Koda-C. Kristian watches but never types here.
 
 ### The one launch or recovery action
 
-Window G is a real persistent Codex Guide behind Koda's plain secure console, not
+Window G is a real persistent Codex Guide behind Koda-C's plain secure console, not
 a shell window pretending to be Guide. Open it from the target project with:
 
 ```bash
@@ -81,7 +107,7 @@ node /Users/freeborn/Dev/koda-codex/dist/cli.js guide open --model gpt-5.6-sol -
 
 It opens or resumes Guide only; it does not launch Producer or Reviewer. For an
 installed package, the equivalent command is `koda guide open ...`. Do not replace
-it with raw `codex -C`: that route does not establish Koda's Guide permission
+it with raw `codex -C`: that route does not establish Koda-C's Guide permission
 boundary or trusted numeric recovery controller. Once `guide>` appears, speak in
 ordinary language or type a displayed number. Kristian should never paste a shell
 command into the Guide conversation.
@@ -92,7 +118,7 @@ window or windows are missing. Kristian presses or types only the number. Guide
 invokes the bound technical action; Kristian never pastes a command, path, launch
 ID, receipt, commit, or test count.
 
-Codex may display one host permission asking whether to run Koda's local launcher.
+Codex may display one host permission asking whether to run Koda-C's local launcher.
 Choosing yes should leave Guide open, request one labeled Reviewer first, wait for its
 decision point, and then request one labeled Producer.
 
@@ -145,7 +171,7 @@ cd /Users/freeborn/Dev/koda-codex
 npm run relay:prepare -- software-clean gpt-5.6-sol medium gpt-5.6-terra medium
 ```
 
-Preparation creates exactly one new run. It does not call either model and does not open a Koda session.
+Preparation creates exactly one new run. It does not call either model and does not open a Koda-C session.
 
 Start order is intentionally simple:
 
@@ -196,11 +222,11 @@ reader to enter or leave.
    and says `DIRECTION RECORDED — WAITING FOR GATE`. Acknowledging the review still
    judges the unchanged artifact against its frozen entry contract. There is no
    send-now or same-phase revision choice.
-7. If Koda asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
+7. If Koda-C asks for comments or a `DISCUSS` ruling, type that answer in Window B too.
 
 The machine-only protected review metadata remains on disk but is omitted from the
 human display. The complete receipt is visible as part of the review and is not a
-secret, but the owner never copies or pastes it. Koda derives the displayed short
+secret, but the owner never copies or pastes it. Koda-C derives the displayed short
 code from that exact receipt, rejects a wrong or old code, rechecks that the review
 did not change, and passes the current complete receipt to the deterministic CLI over
 stdin. Neither acknowledgement nor code is sent as a model message or child-process
@@ -225,7 +251,7 @@ predecessor's pushed close or halt; an explicitly independent sibling may run.
 
 ## Stopping and resuming
 
-Ctrl-C preserves the run, reviewer job, context IDs, last action, and partial event evidence. If a model turn was active, Koda terminates that child, marks any possible handback untrusted, and records the exact interruption. On restart it resumes the same context for a reconciliation turn before normal routing. Window B returns an interrupted job to `PENDING`; owner conversation resumes from the saved owner message. If no context ID was observed, Koda refuses to invent a replacement. A completed Window B job is still consumed idempotently on Window A resume, with acknowledgement count re-derived from the ledger.
+Ctrl-C preserves the run, reviewer job, context IDs, last action, and partial event evidence. If a model turn was active, Koda-C terminates that child, marks any possible handback untrusted, and records the exact interruption. On restart it resumes the same context for a reconciliation turn before normal routing. Window B returns an interrupted job to `PENDING`; owner conversation resumes from the saved owner message. If no context ID was observed, Koda-C refuses to invent a replacement. A completed Window B job is still consumed idempotently on Window A resume, with acknowledgement count re-derived from the ledger.
 
 To resume Window A:
 
@@ -272,7 +298,7 @@ Ordinary explanation between handoffs is deliberately non-mutating. Product deci
 
 - Never paste a review receipt into Codex chat or documentation.
 - Do not manually edit artifacts or reviews while either role is working.
-- Use the Koda prompt in Window B for acknowledgement; do not edit the ledger.
+- Use the Koda-C prompt in Window B for acknowledgement; do not edit the ledger.
 - During the first owner-observed test, do not start a second run; plural runtime
   is already mechanically proved and would add human complexity without helping
   this usability test.

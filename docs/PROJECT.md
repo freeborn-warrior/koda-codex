@@ -22,7 +22,7 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - The initial Phase 01 build attempt and unused REVISE receipt remain only in pushed Git history, not in the live `docs/sessions/` namespace.
 - Every gate condition receives a deliberate mutation test proving refusal.
 - Reviewer experiments score the specific evidence-backed CATCH separately from the chosen VERDICT; operational recovery notes never inflate either score.
-- Producer work and independent review are separate Codex tasks sharing one Koda session folder.
+- Producer work and independent review are separate Codex tasks sharing one Koda-C session folder.
 - One persistent producer context and one separate persistent reviewer context span the full session. Both are visible side by side; the named owner may watch but not type into the producer and speaks only with the reviewer. Phase boundaries never create a fresh reviewer.
 - There is one producer skill per declared native phase and one shared reviewer skill with per-phase criteria.
 - A producer hands its artifact to the reviewer. Only an allowed verdict, owner receipt, and `advance` activate the next phase from config.
@@ -33,7 +33,7 @@ Koda-C is a **meta-harness**, not a claim that one generic prompt set fits every
 - The competition entry is licensed under GPLv3 only, with `Copyright (C) 2026 Kristian Bengtsson` as the sole project copyright line.
 - The product name remains **Koda-C**. The CLI command is `koda`; `koda-codex` is the lowercase repository and package slug for this Codex-built competition implementation.
 - New reviewer fixtures are scored only by contracts committed before their first model run. The final model program stopped at its declared cap: two Luna baseline repeats and nine medium runs across the three new fixtures and models. All inference-chain cells passed, so no unique winner existed and the conditional low-effort confirmation was not run.
-- Forward-only Koda-C self-hosting is deferred until after submission. The first complete Guide-launched owner test uses an isolated representative project, with every durable result archived in this repository and no retrofitted Koda state added to the root build.
+- Forward-only Koda-C self-hosting is deferred until after submission. The first complete Guide-launched owner test uses an isolated representative project, with every durable result archived in this repository and no retrofitted Koda-C state added to the root build.
 - The owner is never an evidence courier between contexts. Guide discovers technical prerequisites from disk, reports a plain verified capability, and binds the toolkit integrity snapshot into the launch request. Only genuine intent or product judgment may remain an owner question.
 - The core remains headless and interface-free by design. Every human interface is a replaceable local or remote client over the stable workflow contract; it may display state and submit requests, but the core revalidates every action and remains the sole mechanical authority.
 - The TypeScript/Node.js engine is the current competition implementation, not the permanent production core. After submission, the intended implementation direction is a compiled headless Rust engine that preserves the plain-file evidence contract, deterministic gates, and separate-interface boundary.
@@ -61,8 +61,8 @@ owner contract
 
 ## Context model
 
-- A **Koda project** is the Guide-held parent context, dependency graph, steering documents, and Git history shared by many bounded sessions.
-- A **Koda session** is one identified, typed, disk-backed child workstream under that project. Produce is one session kind; Explore, Research, Architecture, Triage, and later kinds may use different phase configs while retaining the same gate/receipt/close discipline.
+- A **Koda-C project** is the Guide-held parent context, dependency graph, steering documents, and Git history shared by many bounded sessions.
+- A **Koda-C session** is one identified, typed, disk-backed child workstream under that project. Produce is one session kind; Explore, Research, Architecture, Triage, and later kinds may use different phase configs while retaining the same gate/receipt/close discipline.
 - A **Codex task** is one agent context/window. The producer and reviewer should use separate tasks so the review does not inherit producer reasoning.
 - Runtime continuity is session-scoped: the same producer task and the same reviewer task traverse every configured phase. Fresh reviewer tasks remain fixture/testing tools, not the intended owner session experience.
 - Context handover happens through artifacts, cited evidence, reviews, receipts, and state—not through copied chat summaries.
@@ -80,14 +80,21 @@ owner contract
 - Fail-closed checks for missing, empty, stale, malformed, duplicated, or mismatched evidence.
 - Immutable close-artifact hashing plus Git-derived commit/push verification.
 - Repository-local Koda-C skills: seven producer relay legs, one shared reviewer, and one close ceremony.
-- A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda session.
+- A concise root `AGENTS.md` preserves repository rules without turning the build itself into a gated Koda-C session.
+- Public entry documentation now separates Koda-C's invariant gate from its
+  adaptable project method. The root README maps Quick Start, Process, Commands,
+  Security, and License; the shipped six-phase skills are explicitly a reference
+  process rather than a universal project prescription. Current onboarding is
+  distinguished from historical Ghostty development records, and the release
+  states its one-person/macOS-only test boundary without implying a macOS
+  filesystem dependency.
 - A preserved historical fresh ephemeral Codex startup proves the original nine session-runtime skills and root guidance were injected before any tool call or repository read.
 - A second fresh ephemeral startup proof covers the current ten-skill set, including `koda-c-session-prompt`, with zero tools or repository reads. A separate sealed Sol/medium task exercised that skill against an active Brief and refused before drafting without changing fixture bytes.
 - A preserved full native-chain session and normalized transcript under `docs/dogfood/`.
 - Five sealed reviewer fixtures: the original hard-number capability check and honest control, plus an inference-chain plant, an imperfect-but-correct temperament control, and a missing-evidence trap.
 - A completed seventeen-run model ledger: six original comparable runs, two Luna baseline repetitions, and nine new-fixture medium runs. All sealed score cells passed; Sol was operationally most consistent, while Terra recovered from path errors and Luna more often needed gate repair or skipped safe checks.
-- A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its first genuine run completed all six phases with distinct persistent contexts, an unplanned Summary REVISE recovery, seven owner acknowledgements, and a pushed immutable close.
-- In supervised close, the persistent producer prepares and later verifies immutable `close.md`, while the trusted relay supervisor performs the exact intervening session commit and push. This keeps `.git` protected from model sandboxes without moving closure authority out of Koda's disk checks.
+- A resumable full-relay test harness prepares a project-specific software session, persists separate producer/reviewer Codex thread IDs, re-derives every step from Koda-C files, pauses for Kristian's genuine receipt, and preserves a restorable Git proof bundle. Its first genuine run completed all six phases with distinct persistent contexts, an unplanned Summary REVISE recovery, seven owner acknowledgements, and a pushed immutable close.
+- In supervised close, the persistent producer prepares and later verifies immutable `close.md`, while the trusted relay supervisor performs the exact intervening session commit and push. This keeps `.git` protected from model sandboxes without moving closure authority out of Koda-C's disk checks.
 - The historical owner reader reduced Window B to `npm run relay:review`. The first real two-window slice now uses `npm run relay:producer` and `npm run relay:reviewer`: Window A posts an atomic disk job and waits; Window B owns a single persistent reviewer context, automatically receives formal reviews and consultations, streams readable activity with receipts redacted, opens the complete review, and keeps exact owner receipt acknowledgement in that same window.
 - The current owner ceremony no longer uses a pager or clipboard. Reviewer prints the
   human-facing review inline, omits machine-only metadata, and displays a
@@ -101,7 +108,7 @@ owner contract
   `c1d55ea`, the unchanged 232/232 transcript, and every critical renderer and
   relay file. That pushed implementation enabled the later successful recovery.
 - The reviewer-window lock prevents two Window B processes from claiming the same run. Unsafe job paths, ambiguous unfinished runs, wrong receipts, changed reviews, and missing persistent context identity all refuse with named disk state.
-- Managed Producer and Reviewer model commands now use a strict Codex permission profile rather than broad-read `workspace-write`: active-project read/write, read-only Git/instructions/config, denied project `.env`, no sibling or ordinary home reads, no network/web search/login shell/user config/approval escape, and only the exact Koda/Codex executables plus Node toolchain added read-only. A live probe records two incomplete policies before the final five-condition pass. The separately started Guide remains governed by its own interactive Codex permissions and is not falsely claimed as contained by Koda.
+- Managed Producer and Reviewer model commands now use a strict Codex permission profile rather than broad-read `workspace-write`: active-project read/write, read-only Git/instructions/config, denied project `.env`, no sibling or ordinary home reads, no network/web search/login shell/user config/approval escape, and only the exact Koda-C and Codex executables plus Node toolchain added read-only. A live probe records two incomplete policies before the final five-condition pass. The separately started Guide remains governed by its own interactive Codex permissions and is not falsely claimed as contained by Koda-C.
 - `npm run relay:status` is a read-only owner view derived from current run, session, job, reviewer state, and process lock files. It names Guide, Producer, Reviewer, and their owner-input scopes, then prints exactly one safe start/recovery action: Reviewer first, Producer only after Reviewer is alive. It refuses corrupt/ambiguous runs and offers stale-lock recovery only after the recorded reviewer process is no longer alive.
 - `koda guide` now provides the first deterministic project-level continuity slice. A project manifest indexes its steering files; explicit owner confirmation binds their hashes, the exact session prompt, prior pushed session evidence, and the verified toolkit integrity snapshot. Unconfirmed, technically unverified, or stale prompts refuse, cancellation is immutable evidence, and successful session open records the launch-to-session binding.
 - Guide status now serves as the session-prompter preflight: it lists every active session's ID, kind, phase, and terminal condition; distinguishes dependency-blocked successors from explicit independent siblings; and names a prepared launch that must bind or be cancelled before another confirmation.
@@ -201,7 +208,7 @@ owner contract
   `01e8055` passes the unchanged pushed 229/229 transcript under toolkit capability
   `secure-persistent-guide-v10`.
 - Guide startup now distinguishes ordinary project conversation from actual session
-  intent. Koda computes status in its trusted controller, supplies it to the model
+  intent. Koda-C computes status in its trusted controller, supplies it to the model
   as untrusted data, limits startup to named continuity and exact returned-session
   evidence, shows a 30-second heartbeat, and persists mode-600 raw events while the
   turn is active. Closed terminal input preserves the completed turn and same Guide
@@ -222,7 +229,7 @@ owner contract
   serialization defect before the Guide model started. The first repair then made
   a second, documented mistake: `codex --version` did not instantiate the profile,
   so 242 green tests still missed quoted dotted keys that failed in Kristian's next
-  Guide run. Koda now submits the exact Guide and role profiles to installed Codex
+  Guide run. Koda-C now submits the exact Guide and role profiles to installed Codex
   CLI 0.144.6 through its offline `sandbox -P` execution path before creating a
   demo project. Both profiles deserialize and apply with exit 0; toolkit capability
   `codex-permission-instantiation-v18` binds the unchanged **244/244** post-push
@@ -232,7 +239,7 @@ owner contract
 - A real secure-Guide recovery then proved that the saved role launcher still
   depended on the terminal which created it. Guide refused safely twice with zero
   gate movement. Role launchers now use deterministic presentation/environment
-  bytes, and Koda migrates only the strictly parsed exact historical command shape
+  bytes, and Koda-C migrates only the strictly parsed exact historical command shape
   after prevalidating both roles. Commit `461824b` passes the unchanged pushed
   230/230 transcript under toolkit capability `deterministic-role-launchers-v11`.
 - A later full regression run exposed the old role-lock directory between its

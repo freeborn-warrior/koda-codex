@@ -13,7 +13,7 @@
 - Keep repository-local skills only under `.agents/skills/`; never install Koda-C skills globally while developing this project.
 - Invoke the current Koda-C relay skill explicitly at each phase/task handoff; do not assume a prior skill remains active across later work.
 - Keep the CLI small and domain-general. Phase and role behavior belongs in skills; gate truth belongs in plain files and deterministic code.
-- The construction history is intentionally not retrofitted into Koda phase gates. Self-hosting Koda-C development is optional later validation, not a current build requirement.
+- The construction history is intentionally not retrofitted into Koda-C phase gates. Self-hosting Koda-C development is optional later validation, not a current build requirement.
 
 ## Verification and evidence
 
@@ -34,4 +34,4 @@
 
 - Preserve unrelated owner changes.
 - Commit and push coherent milestones often with honest messages; the dated history is build evidence.
-- A Koda session is closed only when its immutable close artifact and bound evidence are committed and pushed.
+- A Koda-C session is closed only when its immutable close artifact and bound evidence are committed and pushed.

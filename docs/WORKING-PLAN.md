@@ -6,7 +6,9 @@ This file records the current engineering direction above individual implementat
 
 ## Current objective
 
-Turn the proved two-context session relay into a project-level experience that can hold dozens of sessions together without relying on one chat's memory.
+Freeze a truthful, safe, reproducible competition release: finish narration and
+final playback, make the repository public, publish the video, and submit without
+adding another product feature.
 
 ## Active sequence
 
@@ -133,16 +135,22 @@ Turn the proved two-context session relay into a project-level experience that c
     traversed all six phases. Its unplanned Orient `REVISE` required a changed
     artifact, fresh review, and seventh owner acknowledgement before pushed close
     and Guide return ([result](verification-runs/2026-07-20-owner-full-session-05/RESULT.md)).
+38. [x] Make the public documentation describe the release that actually ships:
+    exact Koda-C naming, a top-level Quick Start / Process / Commands / Security /
+    License map, a clear reference-process-versus-project-method boundary, an
+    honest one-person macOS test boundary, and no historical Ghostty recovery text
+    presented as current onboarding.
 
 ## Submission cut
 
 The submission demonstration and its first-use entry now exist: one command creates
 an isolated pushed project and enters Guide, while the preserved representative
 Produce session proves the two-context relay, all six gates, pushed close, and Guide
-return with Guide, Producer, and Reviewer visible. The fresh human rehearsal now
-passes and its source recording exists. The remaining submission work is editing
-that capture, repository publication, form completion, and freezing the exact
-pushed commit—not another product feature or a retrofitted self-hosting run.
+return with Guide, Producer, and Reviewer visible. The fresh human rehearsal passes;
+its source recording and silent branded picture lock exist. The remaining submission
+work is narration, audio mux and full playback, repository/video publication, form
+completion, and freezing the exact pushed commit—not another product feature or a
+retrofitted self-hosting run.
 
 ## Current constraints
 

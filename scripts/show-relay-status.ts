@@ -92,7 +92,7 @@ async function discoverRun(): Promise<string> {
     if (run) all.push({ root: candidate, run });
     else unsafe.push(`${entry.name}/RUN.json`);
   }
-  if (unsafe.length > 0) refuse(`Corrupt or unsafe relay state exists at ${unsafe.join(", ")}. Koda will not treat it as absent.`);
+  if (unsafe.length > 0) refuse(`Corrupt or unsafe relay state exists at ${unsafe.join(", ")}. Koda-C will not treat it as absent.`);
   const active = all.filter((item) => item.run.status !== "COMPLETE" && item.run.status !== "HALTED");
   if (active.length > 1) refuse("More than one unfinished run exists. Name the run path explicitly.");
   if (active.length === 1) return active[0].root;
@@ -199,7 +199,7 @@ if (run.status === "COMPLETE" || run.status === "HALTED") {
     ? "None. This relay session is complete."
     : "Return to Guide and start a new session from the pushed halt through a fresh Brief.");
 } else if (run.status === "PAUSED_INTERRUPTED_CONTEXT_MISSING" || run.status === "PAUSED_INTERRUPTED_STATE_MISSING") {
-  console.log("No automatic resume is safe. The interrupted worker or its bound session identity is missing; Koda refuses to replace it by guessing.");
+  console.log("No automatic resume is safe. The interrupted worker or its bound session identity is missing; Koda-C refuses to replace it by guessing.");
 } else if (retryableReceiptAttempt) {
   console.log("The last receipt entry did not match. Nothing advanced and no ledger entry was written.");
   console.log("Return to Guide and say: Recover this session.");

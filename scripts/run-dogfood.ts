@@ -272,7 +272,7 @@ try {
     "",
     "- **Date:** 2026-07-18",
     "- **Model variant / effort:** Not applicable; this is a deterministic CLI lifecycle proof.",
-    "- **Project:** Disposable six-phase Koda project, preserved below without its temporary `.git` directory.",
+    "- **Project:** Disposable six-phase Koda-C project, preserved below without its temporary `.git` directory.",
     "- **Git proof:** A local bare remote proves the required commit/push boundary without relying on network state.",
     `- **Pushed close commit:** \`${commit}\``,
     "- **Scenario:** Clean approval through brief → orient → plan → produce → live → summary.",

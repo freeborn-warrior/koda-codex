@@ -45,7 +45,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
   passes **241/241** under `self-guided-full-session-v16`; the final fresh human run is
   deliberately still listed as submission rehearsal, not automated proof.
 - [x] Replace the superficial Codex permission preflight exposed by the owner's
-  second real startup refusal. Koda now makes installed Codex CLI 0.144.6
+  second real startup refusal. Koda-C now makes installed Codex CLI 0.144.6
   instantiate and apply both exact profiles through its offline sandbox path before
   creating a project. The unchanged post-push suite passes **244/244** under
   `codex-permission-instantiation-v18`.
@@ -57,7 +57,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
   The complete local and unchanged post-push suites pass **245/245**.
 - [x] Prevent the full-session demo from reintroducing a known prompt/launch
   relationship contradiction. The bundled first-session prompt now declares the
-  independent mode Koda actually confirms. Guide confirmation and verification
+  independent mode Koda-C actually confirms. Guide confirmation and verification
   mechanically compare every explicit prompt kind, relationship, and dependency
   field with the launch request before windows can open. The Quick Start test now
   consumes the bundled prompt through real session creation and Guide binding;
@@ -71,12 +71,18 @@ This is the on-disk working queue for the build. A checked item means its eviden
   acknowledgement existed. Seven acknowledgements, pushed close `f8b6511`, and
   Guide return `edaf46a` are preserved in the
   [owner-visible result](verification-runs/2026-07-20-owner-full-session-05/RESULT.md).
+- [x] Reconcile every public entry guide with the shipped release. Current docs use
+  Koda-C consistently, distinguish the invariant gate from adaptable project
+  skills, state the one-person/macOS test boundary, expose one README document map,
+  and route first-time users to Quick Start instead of the historical Ghostty
+  recovery record. A strengthened public-guide contract checks those claims.
 
 ## Next
 
-- [ ] Finish submission-critical proof and polish only: edit the captured recording,
-  run final hygiene, publish the repository and video, and complete the external
-  submission. The product runtime and fresh owner rehearsal are now proved.
+- [ ] Finish submission-critical proof and polish only: record and mux narration,
+  perform final full playback and hygiene, publish the repository and video, and
+  complete the external submission. The product runtime, fresh owner rehearsal,
+  and silent picture lock are now proved.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Add project staffing config after proving cross-model thread continuation: Guide assignment, session-kind reviewer/defaults, and per-phase producer model/effort must resolve independently and snapshot into the session. Use sealed matrix evidence, not skill frontmatter, for recommendations.
@@ -113,7 +119,7 @@ This is the on-disk working queue for the build. A checked item means its eviden
   `atomic-role-ownership-v12`.
 
 - [x] Make saved role launchers deterministic across terminal contexts and migrate
-  the exact historical Koda shape without weakening tamper refusal. Both role files
+  the exact historical Koda-C shape without weakening tamper refusal. Both role files
   are inspected before either changes; valid migration records old/new hashes, and
   arbitrary text, changed commands, links, malformed quoting, or concurrent changes
   still refuse. Repair commit `461824b` passes the unchanged pushed **230/230**

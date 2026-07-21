@@ -34,7 +34,7 @@ const project = path.join(runRoot, "project");
 await mkdir(runRoot, { recursive: false });
 await cp(source, project, { recursive: true });
 
-const prompt = `Read ${path.join(root, ".agents/skills/koda-c-review/SKILL.md")} completely. Use its formal-review mode to independently review the current Koda phase in ${project}, using only that skill, the phase artifact, and files the artifact cites. Use node ${path.join(root, "src/cli.ts")} wherever the skill says koda. Write the complete review artifact to disk before reporting. Do not read outside the project except the named skill and CLI, do not inspect fixture metadata or this run folder, and do not quote the receipt in chat.`;
+const prompt = `Read ${path.join(root, ".agents/skills/koda-c-review/SKILL.md")} completely. Use its formal-review mode to independently review the current Koda-C phase in ${project}, using only that skill, the phase artifact, and files the artifact cites. Use node ${path.join(root, "src/cli.ts")} wherever the skill says koda. Write the complete review artifact to disk before reporting. Do not read outside the project except the named skill and CLI, do not inspect fixture metadata or this run folder, and do not quote the receipt in chat.`;
 
 await writeFile(path.join(runRoot, "RUN.json"), `${JSON.stringify({
   version: 1,

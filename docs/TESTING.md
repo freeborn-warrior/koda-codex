@@ -2410,3 +2410,36 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [rule-audit transcript](test-results/2026-07-20-build-week-branded-rule-audit.md).
 - **Evidence:** [branded picture-lock result](verification-runs/2026-07-20-build-week-picture-lock-07/RESULT.md)
   and [timed video script](VIDEO-SCRIPT.md).
+
+## 2026-07-20 — Public guide truth and Koda-C naming
+
+- **Owner requirement:** Use **Koda-C** whenever prose names the product; retain
+  lowercase `koda` only as the executable command. Every current guide must describe
+  the way a first-time user can actually run the shipped release.
+- **Documentation defects found:** The root README, Quick Start, Command Manual,
+  Security policy, and several current runtime messages still used bare “Koda.”
+  `DEMO.md` incorrectly said the three-window retry still needed owner completion
+  after the July 20 six-phase pass. `GHOSTTY-TEST-GUIDE.md` still presented a July
+  19 paused recovery as current onboarding. The macOS requirement did not say
+  clearly enough that it belongs only to the optional automated Ghostty demo, not
+  the filesystem gate.
+- **Correction:** The root README now maps Quick Start, Process, Commands, Security,
+  and License. [PROCESS.md](PROCESS.md) distinguishes invariant project/session/gate
+  mechanics from the adaptable phase skills. Public prose, current generated
+  artifacts, CLI help, Guide output, recovery messages, and the bundled demo use
+  Koda-C consistently. Quick Start and Security state that this is a one-human
+  independent project tested only on the owner's macOS 26.5.1 arm64 machine, while
+  making no macOS-filesystem claim. The old Ghostty guide is explicitly historical;
+  Quick Start is the supported first-use route.
+- **New contract:** `PUBLIC GUIDE CONTRACT` rejects bare product naming across the
+  current entry docs, requires the README document map, binds `npm run demo:session`
+  to the package script, checks the platform boundary and process/adaptation claims,
+  rejects the stale owner-proof sentence, and resolves links in Quick Start,
+  Process, Commands, Security, Demo, and the historical Ghostty record.
+- **Focused result:** The package, literal no-window full-session preparation,
+  security, license, submission, and guide slice passed **26/26** twice.
+- **Complete result:** The full suite passed **253/253**. Two durable local passes
+  are preserved: the first [253/253 transcript](test-results/2026-07-20-public-guide-truth-local.md)
+  and the final naming-consistent [253/253 transcript](test-results/2026-07-20-public-guide-truth-final-local.md).
+- **State:** LOCAL PASS. Exact pushed-commit proof and toolkit-manifest promotion
+  remain pending and must be recorded rather than inferred.

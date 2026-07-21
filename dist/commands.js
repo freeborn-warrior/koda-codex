@@ -207,7 +207,7 @@ async function initCommand(args          , cwd        , io       )              
 
   await writeJsonAtomic(configPath, DEFAULT_CONFIG);
   await mkdir(path.join(root, DEFAULT_CONFIG.sessionsDir), { recursive: true });
-  io.out(`✓ Initialized Koda in ${root}`);
+  io.out(`✓ Initialized Koda-C in ${root}`);
 
   if (!demo) {
     io.out("Create a non-empty session prompt, then pass its path to `koda session new`.");
@@ -754,7 +754,7 @@ async function sessionHaltCommand(args          , cwd        , io       )       
 }
 
 function help(io       )       {
-  io.out("Koda — a disk-backed workflow where review proof controls advancement");
+  io.out("Koda-C — a disk-backed workflow where review proof controls advancement");
   io.out("");
   io.out("Commands:");
   io.out("  koda init [directory] [--demo]");

@@ -152,7 +152,7 @@ test("WAIT DIRECTION MUTATION: changed prose and symbolic-link evidence refuse b
   await assert.rejects(readWaitingDirections(h.session.directory), /must be a regular file/);
 });
 
-test("WAIT DIRECTION ATOMIC READ: Koda retries its transient file but persistent or unknown entries still refuse", async (t) => {
+test("WAIT DIRECTION ATOMIC READ: Koda-C retries its transient file but persistent or unknown entries still refuse", async (t) => {
   const h = await projectHarness(t, 1);
   const direction = await createWaitingDirection({
     sessionDir: h.session.directory,
@@ -175,7 +175,7 @@ test("WAIT DIRECTION ATOMIC READ: Koda retries its transient file but persistent
     /Atomic waiting direction write did not settle: 01-wait\.md\.tmp-99999-deadbeef/,
   );
   await rm(temporary);
-  await writeFile(path.join(h.session.directory, "directions", "unexpected.txt"), "not Koda evidence\n", "utf8");
+  await writeFile(path.join(h.session.directory, "directions", "unexpected.txt"), "not Koda-C evidence\n", "utf8");
   await assert.rejects(readWaitingDirections(h.session.directory), /Unexpected waiting direction entry: unexpected\.txt/);
 });
 

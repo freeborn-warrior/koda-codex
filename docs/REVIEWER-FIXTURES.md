@@ -26,7 +26,7 @@ npm run reviewer:prepare -- tempting-honest gpt-5.6-sol medium
 npm run reviewer:prepare -- missing-evidence gpt-5.6-sol medium
 ```
 
-The command copies a clean Koda project under `docs/reviewer-runs/`, writes pinned run metadata, creates a `RESULT.md` marked `PREPARED — NOT RUN`, and prints one exact `reviewer:execute` command. It does not run a model or infer its variant.
+The command copies a clean Koda-C project under `docs/reviewer-runs/`, writes pinned run metadata, creates a `RESULT.md` marked `PREPARED — NOT RUN`, and prints one exact `reviewer:execute` command. It does not run a model or infer its variant.
 
 Run that printed command in Ghostty. The executor launches a fresh ephemeral `codex exec` task with user configuration ignored, the selected model and effort pinned, workspace writes confined to that copied project, and the identical blind formal-review prompt. It stores the complete JSON event stream and stderr beside `RESULT.md`; relevant test output therefore remains inside this Git project instead of existing only in terminal scrollback or Codex task storage.
 

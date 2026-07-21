@@ -8,9 +8,15 @@ The close and halt commands print the exact Git commands for the repository owne
 This document distinguishes that core from the model-testing relay scripts that
 also ship in the competition repository.
 
+This is an independent project by one human owner working with Codex, not a
+company or security team. macOS 26.5.1 arm64 is the only personally tested
+operating system. The filesystem contract uses ordinary files and is not designed
+around a macOS-only format, but this release does not claim security validation or
+operational certification on other platforms.
+
 ## What installation and core commands do
 
-`npx --yes . --help` in a source checkout invokes npm's `prepack` step. Koda's
+`npx --yes . --help` in a source checkout invokes npm's `prepack` step. Koda-C's
 build script deletes and recreates only the checkout's own validated `dist/`
 directory, then makes the CLI binary executable. The public-checkout proof shows
 that the final tracked and untracked state remains clean. A packed installation
@@ -49,7 +55,7 @@ parent, and ignored project-local runtime under `.koda/`:
   directory before executing it; loose role-command arguments are never passed
   through `open --args`.
 
-Koda refuses a configured sessions directory that resolves outside the project.
+Koda-C refuses a configured sessions directory that resolves outside the project.
 Session state must retain valid configured phase names. Artifacts, reviews,
 ledgers, state, directions, halt/close evidence, and all other bound files must be
 ordinary files inside the session; symbolic links and special files refuse.
@@ -61,7 +67,7 @@ a branch with an upstream, and its exact session tree plus every claimed externa
 output must match that upstream. Unrelated sibling commits may be locally ahead
 without falsifying this session's pushed evidence.
 
-## What Koda protects against
+## What Koda-C protects against
 
 - accidental advancement without an artifact, review, allowed verdict, exact
   receipt acknowledgement, or intact earlier gate;
@@ -77,11 +83,11 @@ without falsifying this session's pushed evidence.
 All of those conditions are re-derived from disk. They are covered by deliberate
 mutation tests rather than trusted cached status.
 
-## What Koda does not prove
+## What Koda-C does not prove
 
 The hashes are integrity bindings, not signatures. Anyone who can rewrite the
 repository as the same operating-system user can fabricate a new internally
-consistent artifact, review, ledger, state, and Git history. Koda does not
+consistent artifact, review, ledger, state, and Git history. Koda-C does not
 authenticate a human identity or defend against a malicious repository owner.
 
 The toolkit integrity manifest has the same boundary. It catches accidental,
@@ -106,7 +112,7 @@ rewrite the core verifier; the code is a usability token, not authentication or 
 cryptographic signature.
 
 Inline terminal display creates a separate untrusted-output boundary. Before any
-managed Guide, Reviewer, or Producer panel reaches the terminal, Koda removes C0
+managed Guide, Reviewer, or Producer panel reaches the terminal, Koda-C removes C0
 and C1 controls other than line breaks and tabs, plus Unicode bidirectional
 override/isolate characters. A review containing escape, bell, or bidirectional
 control bytes therefore cannot rename a window, conceal or reorder visible text,
@@ -114,7 +120,7 @@ or execute terminal control sequences through the managed renderer. Sanitization
 is display-only: the original review remains byte-for-byte intact on disk, its hash
 and receipt binding do not change, and the core gate continues to validate those
 original bytes. This does not make arbitrary terminal emulators or model output
-outside Koda's managed renderer safe.
+outside Koda-C's managed renderer safe.
 
 `SKILL.md` narrows role behavior but is not a permission boundary. Markdown,
 source files, and prompts can contain prompt-injection instructions. Use Codex's
@@ -124,7 +130,7 @@ loop complete.
 
 ## Codex role containment
 
-Koda-launched Producer and Reviewer turns now use a named Codex permission
+Koda-C-launched Producer and Reviewer turns now use a named Codex permission
 profile instead of the legacy `workspace-write` preset. Model-generated commands
 may read and write the active project, but `.git`, `.agents`, and `.codex` remain
 read-only and project `.env` files are denied. Ordinary home files and sibling
@@ -133,22 +139,22 @@ disabled, user configuration is ignored, approval is `never`, and strict config
 makes an older Codex client refuse rather than silently discard the profile.
 
 The allowlist also contains the exact installed Codex executable, the compiled
-Koda runtime and its one package manifest, the exact verified toolkit manifest
+Koda-C runtime and its one package manifest, the exact verified toolkit manifest
 and bound test evidence, and the current Node and Git toolchain roots.
 On the tested Homebrew macOS installation that toolchain root is `/opt/homebrew`,
-read-only. Those are execution dependencies, not project workspaces; Koda grants
+read-only. Those are execution dependencies, not project workspaces; Koda-C grants
 no write access to them. The permission-profile mechanism is currently marked
 beta by OpenAI, so the release must keep a real boundary probe alongside the
 deterministic argument tests and must never fall back silently to broad-read
 `workspace-write`.
 
 A live ephemeral Sol/low probe proved project write, sibling/parent read denial,
-`.git` write denial, project `.env` read denial, and trusted Koda CLI execution.
+`.git` write denial, project `.env` read denial, and trusted Koda-C CLI execution.
 A no-model network mutation failed DNS resolution under the same profile. A
 planted required project-local MCP server did not load when the role used
 `--ignore-user-config`. The failed intermediate probes are preserved too: the
-first strict profile omitted Koda's package manifest and Codex executable; the
-second still omitted the Homebrew toolchain and could not execute Koda. See the
+first strict profile omitted Koda-C's package manifest and Codex executable; the
+second still omitted the Homebrew toolchain and could not execute Koda-C. See the
 [dated boundary result](security-runs/2026-07-19-project-boundary-probe-13/RESULT.md).
 
 `koda guide open` applies a separate named profile to the persistent Guide. The
@@ -156,16 +162,16 @@ Guide reads the project but may write only the configured `docs/guide` directory
 manifest continuity files, and explicit Guide claims. Active session folders,
 `.git`, `.agents`, and `.codex` remain read-only; `.env`, ordinary sibling/home
 files, network, web search, login shells, user config, ambient command rules, and
-approval escape are denied. Koda's controller—not the Guide model—writes ignored
+approval escape are denied. Koda-C's controller—not the Guide model—writes ignored
 `.koda/guide` identity/event state and performs an exact eligible numeric recovery.
 The controller refuses a duplicate Guide and refuses to guess when several
 sessions are recoverable.
 
-The Guide's trusted Koda CLI must revalidate toolkit integrity. Its profile grants
+The Guide's trusted Koda-C CLI must revalidate toolkit integrity. Its profile grants
 only the exact manifest, bound test transcript, and critical files returned by a
 successful controller-side verification—not the whole Koda-C development checkout.
 Model-child Git reads use repository-local `.git/config` while global/system config,
-terminal credential prompting, and optional locks are disabled. Koda resolves the
+terminal credential prompting, and optional locks are disabled. Koda-C resolves the
 native Git executable before entering the sandbox so macOS's xcrun shim cannot
 probe blocked developer caches. Each role receives a private `<run>/.xdg`
 configuration directory; Guide-return archival omits it only when it is a real,
@@ -175,15 +181,15 @@ normal configured Git behavior.
 
 A persistent live Sol/low probe proved Guide-owned write, active-session write
 denial, parent read denial despite a planted `allow` command rule, project `.env`
-read denial, Git write denial, network denial, trusted Koda execution, and same-ID
+read denial, Git write denial, network denial, trusted Koda-C execution, and same-ID
 resume. An end-to-end console run used the local skill, revalidated toolkit status,
 reached `guide>`, and closed without opening either session role. See the
 [dated Guide boundary result](security-runs/2026-07-19-secure-guide-console-boundary-14/RESULT.md).
 
 A manually started raw interactive Codex task remains governed by its own launch
-permissions and is not the managed Koda Guide entry. Codex itself still uses its
+permissions and is not the managed Koda-C Guide entry. Codex itself still uses its
 home directory for authentication and persistent thread storage; those client-
-internal reads and writes sit outside the model command sandbox. Koda binds the
+internal reads and writes sit outside the model command sandbox. Koda-C binds the
 context ID and turn evidence inside the project but does not claim that Codex
 stores nothing elsewhere.
 
@@ -245,11 +251,11 @@ return uses the same lock and exact-path staging. Unrelated claimed, unstaged, o
 untracked work remains excluded and does not falsify session close.
 
 This is provenance discipline, not operating-system isolation. A process running
-as the same user can ignore Koda and edit a claimed file. Mutation after the
+as the same user can ignore Koda-C and edit a claimed file. Mutation after the
 Producer's recorded handoff is caught by the post-work hash; mutation during the
 model turn may be observed as that turn's output because the filesystem does not
 identify the author. Manual Git commands and third-party tools also do not honor
-Koda's lock. Stronger hostile-writer isolation would require separate worktrees,
+Koda-C's lock. Stronger hostile-writer isolation would require separate worktrees,
 OS identities, or a service boundary.
 
 The Ghostty adapter is deliberately opt-in and is not required by the gate or
@@ -279,7 +285,7 @@ legacy empty-receipt failure or any stable formal, repair, or fresh
 its ID, kind, phase, and expected path beside the current verified toolkit. Changed,
 missing, linked, corrupt, unsafe, or unrelated job evidence refuses. Live role locks
 derive the missing set: Reviewer opens first when absent, and Producer opens only
-after Reviewer reaches the same owner decision. Exact Koda window/readiness failures
+after Reviewer reaches the same owner decision. Exact Koda-C window/readiness failures
 remain retryable, successful attempts append to the recovery history, and a live role
 is never deliberately duplicated. Recovery cannot record a receipt or advance a gate.
 New role ownership is published as complete mode-600 JSON through a same-filesystem

@@ -3,7 +3,7 @@
 ## Current
 
 - [ ] Build and verify the bounded Markdown heading reporter through one complete
-  Koda Produce session.
+  Koda-C Produce session.
 
 ## Later
 

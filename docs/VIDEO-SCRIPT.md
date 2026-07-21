@@ -18,7 +18,7 @@ is added; no music
 - Source audio: none
 - Entry command: `npm run demo:session`
 - Guide launch: `e974b805-fac5-4648-a9e2-b66348effa47`
-- Koda session: `2026-07-20-01`
+- Koda-C session: `2026-07-20-01`
 - Producer: GPT-5.6 Sol / medium
 - Reviewer: GPT-5.6 Terra / medium
 - Outcome: six phases, seven owner acknowledgements, one unplanned Orient
