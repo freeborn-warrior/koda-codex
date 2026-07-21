@@ -2599,7 +2599,11 @@ The first staged diff check found 149 trailing-space lines where Node's type str
 - **Focused result:** The exact Guide runtime test passed **1/1** through `/bin/sh`.
 - **Complete local result:** The complete current suite passed **258/258** in the
   [durable transcript](test-results/2026-07-21-posix-test-shell-local.md).
-- **State:** LOCAL PASS. Commit and push the test-only portability repair, then run
-  the unchanged complete suite once from that pushed commit. A fresh Linux rerun
-  remains welcome external confirmation; Koda-C does not broaden its supported-
-  platform claim from this one reported run alone.
+- **Post-push result:** Commit `dc905ce` exactly matched `origin/main` before the
+  unchanged complete suite ran. The suite passed **258/258** in the
+  [post-push transcript](test-results/2026-07-21-posix-test-shell-pushed.md),
+  whose SHA-256 is
+  `864fcaf3ed6f97d644872f0b7be28a7810aaba5320f49541dfac7b27a62f81a9`.
+- **State:** POST-PUSH PASS. A fresh Linux rerun remains welcome external
+  confirmation; Koda-C does not broaden its supported-platform claim from this
+  one reported run alone.
