@@ -9,7 +9,7 @@ import test from "node:test";
 import { prepareCloseArtifact } from "../src/close.ts";
 import { DEFAULT_CONFIG } from "../src/config.ts";
 import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
-import { evaluateSessionHalt, haltPath, parseHaltArtifact, prepareHaltArtifact } from "../src/halt.ts";
+import { evaluateSessionHalt, haltPath, isExplicitOwnerHaltRequest, parseHaltArtifact, prepareHaltArtifact } from "../src/halt.ts";
 import { artifactPath, createSession, loadSessionState, writeJsonAtomic } from "../src/project.ts";
 import { projectHarness } from "./helpers.ts";
 
@@ -22,6 +22,14 @@ function git(cwd: string, args: string[]): void {
 function runPrintedCommand(cwd: string, command: string) {
   return spawnSync(command, { cwd, encoding: "utf8", shell: true });
 }
+
+test("HALT OWNER INTENT: explicit console forms are recognized without treating ordinary conversation as halt", () => {
+  assert.equal(isExplicitOwnerHaltRequest("/halt"), true);
+  assert.equal(isExplicitOwnerHaltRequest("/halt Preserve this exact reason."), true);
+  assert.equal(isExplicitOwnerHaltRequest("Halt this session. Preserve the launcher mismatch."), true);
+  assert.equal(isExplicitOwnerHaltRequest("Could you explain what halt means?"), false);
+  assert.equal(isExplicitOwnerHaltRequest("Wait until the next gate."), false);
+});
 
 test("HALT CEREMONY: void the in-flight phase, require pushed evidence, then return through a fresh Brief", async (t) => {
   const parent = await mkdtemp(path.join(tmpdir(), "koda-halt-test-"));

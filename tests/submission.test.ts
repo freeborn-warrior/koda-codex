@@ -75,7 +75,9 @@ test("JUDGE JOURNEY SUITE: video and submission documents preserve every live ru
   assert.match(checklist, /2026-07-21 at 5:00 pm Pacific/);
   assert.match(checklist, /## Owner handoff order/);
   assert.match(checklist, /Record one fresh complete source run[\s\S]*npm run demo:session/);
-  assert.match(checklist, /GitHub is[\s\S]*`PRIVATE`/);
+  assert.match(checklist, /Repository URL and judge access[\s\S]*\*\*PUBLIC AND VERIFIED\*\*/);
+  assert.match(checklist, /fresh unauthenticated clone[\s\S]*c918bc0/);
+  assert.doesNotMatch(checklist, /GitHub is still `PRIVATE`/);
   assert.match(checklist, /\*\*Developer Tools\*\*/);
   assert.match(checklist, /\/feedback/);
   assert.match(checklist, /publicly to YouTube/);

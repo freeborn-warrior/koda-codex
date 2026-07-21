@@ -675,6 +675,60 @@ test("GUIDE RUNTIME STATUS TRUTH: a forged HALTED label refuses without pushed h
   );
 });
 
+test("GUIDE RUNTIME STATUS TRUTH: pushed halt evidence supersedes a stale PAUSED_ERROR window label", async (t) => {
+  const h = await guideHarness(t, true);
+  await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "guide: confirm disk-terminal truth fixture"]);
+  h.git(h.root, ["push"]);
+  const prepared = await prepareGuideRuntime(h.root, DEFAULT_CONFIG, {
+    producerModel: "gpt-5.6-sol",
+    producerEffort: "medium",
+    reviewerModel: "gpt-5.6-terra",
+    reviewerEffort: "medium",
+  });
+  const session = await createSession(h.root, DEFAULT_CONFIG, prompt);
+  await runGuideCli(["bind", prepared.run.launchId, session.id], h.root, { out() {} });
+  prepared.run.sessionId = session.id;
+  prepared.run.status = "PAUSED_ERROR";
+  prepared.run.lastError = "Toolkit integrity file changed after verification.";
+  await writeJsonAtomic(path.join(prepared.runRoot, "RUN.json"), prepared.run);
+  await prepareHaltArtifact(session.directory, session.state, "End this attempt after the toolkit changed.");
+  h.git(h.root, ["add", "-A"]);
+  h.git(h.root, ["commit", "-m", "halt session after toolkit change"]);
+  h.git(h.root, ["push"]);
+
+  const output: string[] = [];
+  await runGuideCli(["status"], h.root, { out(message) { output.push(message); } });
+  const status = output.join("\n");
+  assert.match(status, /BETWEEN SESSIONS/);
+  assert.match(status, /State: HALTED/);
+  assert.match(status, /Saved window label: PAUSED_ERROR — superseded by pushed halt evidence on disk/);
+  assert.doesNotMatch(status, /SESSION NEEDS GUIDE ATTENTION|ACTIVE PROJECT WORK/);
+
+  let recoveryCalled = false;
+  const choice = await performGuideRecoveryChoice(h.root, "1", {
+    async recoverGhostty() {
+      recoveryCalled = true;
+      return [];
+    },
+  });
+  assert.deepEqual(choice, { handled: false });
+  assert.equal(recoveryCalled, false);
+
+  await assert.rejects(
+    runGuideCli(["recover", "--open", "ghostty"], h.root, { out() {} }, {
+      async openGhostty() { throw new Error("launch must not run"); },
+      async recoverGhostty() {
+        recoveryCalled = true;
+        return [];
+      },
+    }),
+    /No active session needs recovery.*halted on disk/,
+  );
+  assert.equal(recoveryCalled, false);
+});
+
 test("GUIDE GHOSTTY START: one explicit action requests exactly one clean Reviewer and Producer launcher", async (t) => {
   const h = await guideHarness(t, true);
   const confirmed = await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");

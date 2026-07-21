@@ -14,7 +14,7 @@ import {
   snapshotContinuity,
   verifyGuideLaunch,
 } from "./guide.ts";
-import { currentGuideRuntime, listGuideRuntimes, prepareGuideRuntime } from "./guide-runtime.ts";
+import { currentGuideRuntime, guideRuntimeTruth, listGuideRuntimes, prepareGuideRuntime } from "./guide-runtime.ts";
 import {
   partialRecoveryRoles,
   requestGhosttyRecoveryWindows,
@@ -176,6 +176,14 @@ export async function runGuideCli(
     await requireGuideCancellationsPushed(root, config);
     const pending = await pendingGuideLaunches(root, config);
     const runtimes = await listGuideRuntimes(root);
+    const truthfulRuntimes = await Promise.all(runtimes.map(async (runtime) => {
+      const truth = await guideRuntimeTruth(root, runtime);
+      return {
+        ...runtime,
+        run: { ...runtime.run, status: truth.effectiveStatus },
+        savedStatus: truth.savedStatus,
+      };
+    }));
     const latestId = await latestSessionId(root, config);
     const activeSessions: Array<{
       id: string;
@@ -205,7 +213,7 @@ export async function runGuideCli(
       }
     }
     if (pending.length > 1) throw new Error(`${pending.length} prompts claim READY_TO_LAUNCH; Guide state is ambiguous.`);
-    const activeRuntimes = runtimes.filter(({ run }) => run.status !== "COMPLETE" && run.status !== "HALTED");
+    const activeRuntimes = truthfulRuntimes.filter(({ run }) => run.status !== "COMPLETE" && run.status !== "HALTED");
     const runtimeActive = activeRuntimes.length > 0;
     io.out(`KODA GUIDE — ${latestId ?? "no sessions yet"}`);
     io.out("Owner input: OPEN — project-level conversation belongs in this Guide context.");
@@ -240,7 +248,7 @@ export async function runGuideCli(
     } else if (pending.length === 1) {
       io.out(`READY TO LAUNCH — ${pending[0]!.id}`);
     }
-    const displayedRuntimes = activeRuntimes.length > 0 ? activeRuntimes : runtimes.slice(-1);
+    const displayedRuntimes = activeRuntimes.length > 0 ? activeRuntimes : truthfulRuntimes.slice(-1);
     for (const runtime of displayedRuntimes) {
       if (runtime.run.status === "HALTED") {
         const sessionId = runtime.run.sessionId;
@@ -256,6 +264,9 @@ export async function runGuideCli(
       io.out(`Owner: ${relayOwnerName(runtime.run)}`);
       io.out(`Session: ${runtime.run.sessionId ?? "not opened"}`);
       io.out(`State: ${runtime.run.status}`);
+      if (runtime.savedStatus !== runtime.run.status) {
+        io.out(`Saved window label: ${runtime.savedStatus} — superseded by pushed ${runtime.run.status === "HALTED" ? "halt" : "close"} evidence on disk.`);
+      }
       if (runtime.run.terminalLaunch) {
         io.out(`Visible launch: ${runtime.run.terminalLaunch.adapter} requested at ${runtime.run.terminalLaunch.requestedAt}`);
       }
@@ -408,6 +419,9 @@ export async function runGuideCli(
     if (rest.length || openTerminal !== "ghostty") throw new Error("Usage: koda guide recover --open ghostty");
     const runtime = await currentGuideRuntime(root);
     if (!runtime) throw new Error("No Guide runtime exists to recover.");
+    if (runtime.run.status === "COMPLETE" || runtime.run.status === "HALTED") {
+      throw new Error(`No active session needs recovery. The last bound session is ${runtime.run.status.toLowerCase()} on disk.`);
+    }
     const toolkit = await verifyToolkitIntegrity();
     const requests = await (dependencies.recoverGhostty ?? requestGhosttyRecoveryWindows)(root, runtime, toolkit);
     io.out(`SESSION RECOVERY REQUESTED — ${runtime.run.launchId}`);

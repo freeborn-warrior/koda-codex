@@ -2507,3 +2507,64 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   `/feedback` handling were updated, the complete durable
   [submission-state suite](test-results/2026-07-20-build-week-submission-state-local.md)
   passed **253/253**.
+
+## 2026-07-21 — Public repository proof
+
+- **Scope:** Judge access and the exact no-build mechanical path from outside the
+  development checkout.
+- **How:** A fresh unauthenticated clone of
+  `https://github.com/freeborn-warrior/koda-codex` resolved commit `c918bc0`. The
+  committed CLI printed help; a generated demo refused advancement without its
+  receipt, accepted the exact receipt through the printed route, opened the Brief
+  gate, and activated Orient. The clone remained clean.
+- **Result:** PASS. GitHub public access and the README's mechanical judge path are
+  now observed facts, not pending owner intent. Evidence is preserved in the
+  [public submission clone result](package-runs/2026-07-21-public-submission-clone-02/RESULT.md).
+- **Documentation-test correction:** The first updated submission check passed
+  **3/4**. Its only failure expected the shortened phrase `Repository access`,
+  while the checklist's actual table label is `Repository URL and judge access`.
+  The assertion was corrected to the exact visible label; no product, security,
+  access, or gate requirement changed.
+
+## 2026-07-21 — Reviewer conversational halt and terminal status truth
+
+- **Live defect:** In launch `17a3d86f-25d0-4b3e-887a-68f52ce059f7`, the owner
+  explicitly told Reviewer to halt because the toolkit changed after launch. The
+  Reviewer explanation was semantically correct but emitted `WAIT FOR GATE`; the
+  controller wrote direction `59916d43-d0c4-4da3-a078-ce24dc2d24aa` instead of
+  opening halt. No later gate released it.
+- **Live preservation:** The existing verified halt engine was compared with the
+  launch-version implementation before use. It immutably halted session
+  `2026-07-20-01`, pushed commit `cb8d372`, preserved the exact owner reason in
+  halt `6cbb0460-a7fb-4308-a12f-e5a33df469ea`, and left Summary void.
+- **Repair:** Exact `/halt` and `Halt this session...` forms now route before any
+  model turn to a numbered confirmation. The shared Reviewer skill has one exact
+  `OWNER DIRECTION — HALT REQUESTED` boundary for other explicit language.
+  Confirmation reuses the established exact-path Git halt; cancellation changes
+  nothing, and neither route may create waiting direction. Guide and relay status
+  derive terminal halt from pushed session evidence, so stale `PAUSED_ERROR` no
+  longer invites recovery; forged terminal labels still refuse.
+- **Honest bootstrap refusal:** Before the provisional development integrity
+  hashes were assembled, the first targeted run passed **36/95** and failed 59
+  toolkit-backed checks because changed protected files correctly refused. This
+  was the expected integrity bootstrap, not a weakened verifier.
+- **Development correction:** The next targeted run passed **95/96**. Its one
+  failure caught an over-broad inference that pushed normal close should become
+  `COMPLETE` before Guide return. The implementation was corrected so only pushed
+  halt directly supersedes a stale runtime label; close remains in its required
+  finalization ceremony. The focused correction passed **6/6**.
+- **Complete result:** The durable local suite passed **258/258** in the
+  [initial transcript](test-results/2026-07-20-reviewer-halt-status-local.md).
+  After the public, incident, security, backlog, and plan records were added, the
+  final documented tree passed the unchanged **258/258** suite again in the
+  [final local transcript](test-results/2026-07-21-reviewer-halt-status-final-local.md).
+  The focused security, toolkit-integrity, status-truth, and halt slice passed
+  **33/33**. The current security judgment is recorded in
+  [audit 26](security-runs/2026-07-21-reviewer-halt-status-audit-26/RESULT.md).
+- **Actual-run status check:** Against the halted live project, Guide reports
+  `BETWEEN SESSIONS`, `State: HALTED`, and that the saved `PAUSED_ERROR` label is
+  superseded by pushed halt evidence. Relay status agrees. `guide recover` refuses
+  with `No active session needs recovery`.
+- **State:** LOCAL PASS. The fail-closed repair must now be committed and pushed,
+  rerun unchanged from that code commit, and promoted into the toolkit integrity
+  manifest before release freeze.

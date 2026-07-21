@@ -1,15 +1,19 @@
 # Koda-C visible backlog
 
-**Last updated:** 2026-07-20
+**Last updated:** 2026-07-21
 
 This is the on-disk working queue for the build. A checked item means its evidence exists in committed project files; conversation-only completion does not count.
 
 ## In progress
 
-- [ ] **Submission access blocker:** GitHub reports `freeborn-warrior/koda-codex`
-  as private and an unauthenticated request returns 404. Kristian must choose the
-  intended public release or explicitly share the private repository with both
-  judging addresses before the entry is testable.
+- [x] **Submission access:** GitHub is public. A fresh unauthenticated clone at
+  `c918bc0` ran the committed help and refusal → receipt → advancement path and
+  remained clean. The public-clone evidence is preserved under `docs/package-runs/`.
+- [ ] Promote the Reviewer conversational-halt repair exposed by the July 20
+  submission rehearsal. The exact owner request was incorrectly classified as a
+  waiting direction; the live attempt is now immutably pushed-halted, deterministic
+  routing and disk-derived terminal status pass 258/258 locally, and the unchanged
+  pushed repair still needs to be integrity-bound before release freeze.
 - [x] Owner-test the new one-command `koda guide open` experience. Its
   persistent context, narrow Guide-owned write surface, ignored ambient config and
   rules, numbered recovery controller, duplicate/ambiguity refusal, real Codex
@@ -79,10 +83,11 @@ This is the on-disk working queue for the build. A checked item means its eviden
 
 ## Next
 
-- [ ] Finish submission-critical proof and polish only: record and mux narration,
-  perform final full playback and hygiene, publish the repository and video, and
-  complete the external submission. The product runtime, fresh owner rehearsal,
-  and silent picture lock are now proved.
+- [ ] Finish submission-critical proof and polish only: promote the halt/status
+  repair, record and mux narration, perform final full playback and hygiene,
+  publish the video, and complete the external submission. The repository is
+  public; the product runtime, fresh owner rehearsal, and silent picture lock are
+  proved.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Add project staffing config after proving cross-model thread continuation: Guide assignment, session-kind reviewer/defaults, and per-phase producer model/effort must resolve independently and snapshot into the session. Use sealed matrix evidence, not skill frontmatter, for recommendations.

@@ -9,6 +9,12 @@ import { sha256 } from "./receipt.ts";
 import type { HaltMetadata, SessionState } from "./types.ts";
 
 const HALT_MARKER = "KODA_HALT";
+export const HALT_REQUEST_PREFIX = "OWNER DIRECTION — HALT REQUESTED";
+
+export function isExplicitOwnerHaltRequest(input: string): boolean {
+  const value = input.trim();
+  return /^\/halt(?:\s|$)/i.test(value) || /^halt this session(?:[.!?:]|\s|$)/i.test(value);
+}
 
 export function haltPath(sessionDir: string): string {
   return path.join(sessionDir, "halt.md");

@@ -13,7 +13,12 @@ import { verifiedCodexRolePermissionArgs } from "../src/codex-role-permissions.t
 import { createWaitingDirection, WAITING_DIRECTION_PREFIX } from "../src/direction.ts";
 import { acquireGitOperationLock } from "../src/git-operation-lock.ts";
 import { pushCommandArgs } from "../src/git.ts";
-import { evaluateSessionHalt, prepareHaltArtifact } from "../src/halt.ts";
+import {
+  evaluateSessionHalt,
+  HALT_REQUEST_PREFIX,
+  isExplicitOwnerHaltRequest,
+  prepareHaltArtifact,
+} from "../src/halt.ts";
 import { relayOwnerName } from "../src/owner.ts";
 import { currentPhase, displayPath, loadSession, writeTextAtomic } from "../src/project.ts";
 import { parseReview } from "../src/receipt.ts";
@@ -49,6 +54,8 @@ type RunRecord = {
   runtime: string;
   cli: string;
   sessionId?: string;
+  lastAction?: string;
+  lastError?: string;
   reviewer: { model: string; effort: string; threadId: string | null; turns: number };
 };
 
@@ -188,6 +195,68 @@ async function activeSession() {
   if (!run.sessionId) throw new Error("The relay has not bound a session ID yet.");
   const config = await readProjectConfig(project);
   return loadSession(project, config, run.sessionId);
+}
+
+async function haltSession(ownerDirectionInput: string): Promise<void> {
+  const ownerDirection = ownerDirectionInput.trim();
+  if (!ownerDirection) throw new Error("A halt needs the owner's exact direction for the fresh Brief.");
+  const session = await activeSession();
+  const pushArgs = pushCommandArgs(project);
+  if (!pushArgs) throw new Error("Configure a Git remote and named branch before halting this session.");
+  const gitEnvironment = { ...process.env, GIT_OPTIONAL_LOCKS: "0" };
+  const prepared = await prepareHaltArtifact(session.directory, session.state, ownerDirection);
+  const relativeSession = displayPath(project, session.directory);
+  const lease = await acquireGitOperationLock(project, session.id, "immutable halt exact-path commit and push", {
+    stagedPaths: () => stagedProjectPaths(project),
+    waitMs: 30_000,
+  });
+  try {
+    if (stagedProjectPaths(project).length > 0) throw new Error("Halt refused because unrelated staged changes already exist.");
+    const aheadBefore = spawnSync("git", ["rev-list", "--count", "@{u}..HEAD"], { cwd: project, encoding: "utf8", env: gitEnvironment });
+    if (aheadBefore.status !== 0 || aheadBefore.stdout.trim() !== "0") {
+      throw new Error("Halt refused because the current branch already has unpushed commits.");
+    }
+    const addResult = withOwnerConsolePaused(() => spawnSync("git", ["add", "--", relativeSession], { cwd: project, encoding: "utf8", env: gitEnvironment }));
+    if (addResult.status !== 0) throw new Error(`Halt Git step failed: git add -- ${relativeSession}\n${addResult.stderr}`);
+    const stagedPaths = stagedProjectPaths(project);
+    if (stagedPaths.length === 0 || stagedPaths.some((file) => file !== relativeSession && !file.startsWith(`${relativeSession}/`))) {
+      throw new Error("Halt refused because Git staging contains missing or unrelated paths.");
+    }
+    for (const args of [["commit", "-m", `halt session ${session.id}`], pushArgs]) {
+      const result = withOwnerConsolePaused(() => spawnSync("git", args, { cwd: project, encoding: "utf8", env: gitEnvironment }));
+      if (result.status !== 0) throw new Error(`Halt Git step failed: git ${args.join(" ")}\n${result.stderr}`);
+    }
+  } finally {
+    await lease.release();
+  }
+  const halt = await evaluateSessionHalt(project, session.directory, session.state);
+  if (!halt.halted) throw new Error(`Halt verification failed: ${halt.reasons.join("; ")}`);
+  console.log(terminalPanel(`SESSION HALTED — ${session.id}`, [
+    `Disk evidence: ${displayPath(project, prepared)}`,
+    `Halt ID: ${halt.metadata?.id}`,
+    "The in-flight phase is void. Producer will stop; later work must begin through a fresh Brief.",
+  ]));
+}
+
+async function confirmHaltRequest(ownerDirection: string): Promise<boolean> {
+  beginScreen("PERMANENT HALT REQUEST");
+  console.log("This ends the current session attempt. The active phase will not count.");
+  console.log("The exact owner message below will be preserved in pushed halt evidence:");
+  console.log("");
+  console.log(sanitizeTerminalText(ownerDirection.trim()));
+  console.log("");
+  console.log("1. CONFIRM PERMANENT HALT");
+  console.log("2. CANCEL — NOTHING CHANGES");
+  console.log("");
+  const testChoice = process.env.KODA_RELAY_TEST_HALT_CONFIRMATION;
+  const choice = testChoice ?? (await promptOwner("Choose 1 or 2: ")).trim();
+  endScreen();
+  if (choice !== "1") {
+    console.log(terminalPanel("NOTHING CHANGED", ["The halt request was cancelled."]));
+    return false;
+  }
+  await haltSession(ownerDirection);
+  return true;
 }
 
 const releaseLock = await acquireReviewerWindow(runRoot, { recoverStale: recoverStaleLock })
@@ -461,47 +530,6 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
     endScreen();
     await requireUnchangedReview();
   };
-  const haltSession = async (ownerDirectionInput: string) => {
-    const ownerDirection = ownerDirectionInput.trim();
-    if (!ownerDirection) throw new Error("A halt needs the owner's exact direction for the fresh Brief.");
-    const session = await activeSession();
-    const pushArgs = pushCommandArgs(project);
-    if (!pushArgs) throw new Error("Configure a Git remote and named branch before halting this session.");
-    const gitEnvironment = { ...process.env, GIT_OPTIONAL_LOCKS: "0" };
-    const prepared = await prepareHaltArtifact(session.directory, session.state, ownerDirection);
-    const relativeSession = displayPath(project, session.directory);
-    const lease = await acquireGitOperationLock(project, session.id, "immutable halt exact-path commit and push", {
-      stagedPaths: () => stagedProjectPaths(project),
-      waitMs: 30_000,
-    });
-    try {
-      if (stagedProjectPaths(project).length > 0) throw new Error("Halt refused because unrelated staged changes already exist.");
-      const aheadBefore = spawnSync("git", ["rev-list", "--count", "@{u}..HEAD"], { cwd: project, encoding: "utf8", env: gitEnvironment });
-      if (aheadBefore.status !== 0 || aheadBefore.stdout.trim() !== "0") {
-        throw new Error("Halt refused because the current branch already has unpushed commits.");
-      }
-      const addResult = withOwnerConsolePaused(() => spawnSync("git", ["add", "--", relativeSession], { cwd: project, encoding: "utf8", env: gitEnvironment }));
-      if (addResult.status !== 0) throw new Error(`Halt Git step failed: git add -- ${relativeSession}\n${addResult.stderr}`);
-      const stagedPaths = stagedProjectPaths(project);
-      if (stagedPaths.length === 0 || stagedPaths.some((file) => file !== relativeSession && !file.startsWith(`${relativeSession}/`))) {
-        throw new Error("Halt refused because Git staging contains missing or unrelated paths.");
-      }
-      for (const args of [["commit", "-m", `halt session ${session.id}`], pushArgs]) {
-        const result = withOwnerConsolePaused(() => spawnSync("git", args, { cwd: project, encoding: "utf8", env: gitEnvironment }));
-        if (result.status !== 0) throw new Error(`Halt Git step failed: git ${args.join(" ")}\n${result.stderr}`);
-      }
-    } finally {
-      await lease.release();
-    }
-    const halt = await evaluateSessionHalt(project, session.directory, session.state);
-    if (!halt.halted) throw new Error(`Halt verification failed: ${halt.reasons.join("; ")}`);
-    job.completion = "HALTED";
-    console.log(terminalPanel(`SESSION HALTED — ${session.id}`, [
-      `Disk evidence: ${displayPath(project, prepared)}`,
-      `Halt ID: ${halt.metadata?.id}`,
-      "The in-flight phase is void. Producer will stop; later work must begin through a fresh Brief.",
-    ]));
-  };
   const discuss = async (question: string) => {
     const response = await modelTurn(`explain ${job.phase} review`, [
       `Read ${path.join(project, ".agents", "skills", "koda-c-review", "SKILL.md")} completely and explicitly use koda-c-review in owner-explanation mode.`,
@@ -555,6 +583,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
   const testHaltDirection = testMode ? process.env.KODA_RELAY_TEST_HALT_DIRECTION?.trim() : undefined;
   if (testHaltDirection) {
     await haltSession(testHaltDirection);
+    job.completion = "HALTED";
     return;
   }
   let acknowledgementSelected = testMode;
@@ -630,6 +659,7 @@ async function ownerAcknowledge(job: ReviewerJob, review: string): Promise<void>
           continue;
         }
         await haltSession(ownerDirection);
+        job.completion = "HALTED";
         return;
       }
       if (choice !== "1") {
@@ -826,7 +856,10 @@ async function processJob(job: ReviewerJob): Promise<void> {
   await writeReviewerWindowState(runRoot, state);
 }
 
-async function recordOwnerConversationResponse(question: string, response: string): Promise<void> {
+async function recordOwnerConversationResponse(question: string, response: string): Promise<boolean> {
+  if (response.trimStart().startsWith(HALT_REQUEST_PREFIX)) {
+    return confirmHaltRequest(question);
+  }
   if (response.trimStart().startsWith(WAITING_DIRECTION_PREFIX)) {
     const session = await activeSession();
     const created = await createWaitingDirection({
@@ -852,13 +885,14 @@ async function recordOwnerConversationResponse(question: string, response: strin
   } else {
     console.log(terminalBlock("KODA NOTE\nThis conversation did not change the Producer's inputs."));
   }
+  return false;
 }
 
-async function holdOwnerConversation(question: string): Promise<void> {
+async function holdOwnerConversation(question: string): Promise<boolean> {
   const session = await activeSession();
   const stage = currentPhase(session.state)?.phase.name;
   const response = await modelTurn("owner conversation while Producer works", ownerConversationPrompt(question), question, "conversation", stage);
-  await recordOwnerConversationResponse(question, response);
+  return recordOwnerConversationResponse(question, response);
 }
 
 function ownerConversationPrompt(question: string): string {
@@ -868,13 +902,13 @@ function ownerConversationPrompt(question: string): string {
     "Answer at the owner's altitude from the active session files and cited evidence. Distinguish disk fact from inference.",
     "Lead with the answer and speak as an ongoing conversation partner. Do not narrate skill selection, entry checks, file inspection, or commands.",
     "Do not edit any file, create a review or handback, run Koda-C, approve, advance, quote a receipt, or claim the Producer received this conversation.",
-    "Use the skill's exact boundary marker if the message is project-level Guide scope or actionable direction for the active session.",
+    "Use the skill's exact boundary marker if the message is project-level Guide scope, waiting direction, or an explicit request to halt this session.",
   ].join(" ");
 }
 
-async function recoverInterruptedOwnerConversation(): Promise<void> {
+async function recoverInterruptedOwnerConversation(): Promise<boolean> {
   const interrupted = state.interruption;
-  if (!interrupted || interrupted.jobId !== null) return;
+  if (!interrupted || interrupted.jobId !== null) return false;
   if (!interrupted.threadId || !state.threadId) {
     throw new Error("The interrupted reviewer conversation has no persistent context identifier; automatic context replacement is refused.");
   }
@@ -897,7 +931,7 @@ async function recoverInterruptedOwnerConversation(): Promise<void> {
   );
   state = reviewerWindowState({ ...state, status: "READY", lastError: null, interruption: null });
   await writeReviewerWindowState(runRoot, state);
-  await recordOwnerConversationResponse(interrupted.ownerMessage, response);
+  return recordOwnerConversationResponse(interrupted.ownerMessage, response);
 }
 
 console.log(terminalPanel("KODA-C REVIEWER — STARTING SESSION", [
@@ -947,13 +981,15 @@ try {
         "This context remains the Reviewer for the complete session. Leave it open.",
         "",
         "You may type while Producer works. New direction is recorded now and waits for the next gate.",
+        "Type /halt to request a permanent end to this session attempt.",
       ]));
       if (ownerConsole) process.stdout.write("reviewer> ");
       announcedWaiting = true;
     }
     if (!recoveredOwnerConversation) {
-      await recoverInterruptedOwnerConversation();
+      const halted = await recoverInterruptedOwnerConversation();
       recoveredOwnerConversation = true;
+      if (halted) break;
     }
     const job = await readReviewerJob(runRoot);
     if (!job || job.status === "COMPLETE") {
@@ -964,7 +1000,10 @@ try {
       if (ownerQuestion) {
         testIdleConversationConsumed = Boolean(configuredTestQuestion) || testIdleConversationConsumed;
         announcedWaiting = false;
-        await holdOwnerConversation(ownerQuestion);
+        const halted = isExplicitOwnerHaltRequest(ownerQuestion)
+          ? await confirmHaltRequest(ownerQuestion)
+          : await holdOwnerConversation(ownerQuestion);
+        if (halted) break;
         if (process.env.KODA_RELAY_REVIEWER_ONCE === "1") break;
         console.log(terminalPanel("REVIEWER READY", ["Waiting for the next Producer handover."]));
         if (ownerConsole) process.stdout.write("reviewer> ");

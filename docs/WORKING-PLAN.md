@@ -1,14 +1,14 @@
 # Koda-C working plan
 
-**Last updated:** 2026-07-20
+**Last updated:** 2026-07-21
 
 This file records the current engineering direction above individual implementation steps. `PROJECT.md` explains what Koda-C is, `BACKLOG.md` tracks the visible work/evidence queue, and this plan states the sequence currently being pursued. Conversation may change the plan, but the change is not durable until this file moves with it.
 
 ## Current objective
 
-Freeze a truthful, safe, reproducible competition release: finish narration and
-final playback, make the repository public, publish the video, and submit without
-adding another product feature.
+Freeze a truthful, safe, reproducible competition release: promote the observed
+Reviewer-halt repair, finish narration and final playback, publish the video, and
+submit without adding another product feature. The repository is already public.
 
 ## Active sequence
 
@@ -140,6 +140,11 @@ adding another product feature.
     License map, a clear reference-process-versus-project-method boundary, an
     honest one-person macOS test boundary, and no historical Ghostty recovery text
     presented as current onboarding.
+39. [ ] Promote the live conversational-halt repair. An explicit owner request to
+    halt must open one confirmed halt ceremony, never become waiting direction;
+    pushed halt must outrank a stale local runtime label in Guide, relay status,
+    and recovery. Local durable proof is 258/258; exact pushed proof and toolkit
+    integrity promotion remain.
 
 ## Submission cut
 
@@ -148,9 +153,10 @@ an isolated pushed project and enters Guide, while the preserved representative
 Produce session proves the two-context relay, all six gates, pushed close, and Guide
 return with Guide, Producer, and Reviewer visible. The fresh human rehearsal passes;
 its source recording and silent branded picture lock exist. The remaining submission
-work is narration, audio mux and full playback, repository/video publication, form
-completion, and freezing the exact pushed commit—not another product feature or a
-retrofitted self-hosting run.
+work is the observed halt/status repair promotion, narration, audio mux and full
+playback, video publication, form completion, and freezing the exact pushed
+commit—not another product feature or a retrofitted self-hosting run. Repository
+publication and fresh-clone verification are complete.
 
 ## Current constraints
 

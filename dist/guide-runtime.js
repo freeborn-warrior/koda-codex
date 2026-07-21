@@ -3,10 +3,12 @@ import { fileURLToPath } from "node:url";
 import { lstat, mkdir, readFile, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 
-import { pathExists } from "./config.js";
+import { pathExists, readProjectConfig } from "./config.js";
+import { evaluateSessionClosure } from "./close.js";
 import { guideReturnsDir, guideRunsDir, verifyGuideLaunch,                         } from "./guide.js";
+import { evaluateSessionHalt } from "./halt.js";
 import { normalizeOwnerName, relayOwnerName } from "./owner.js";
-import { nowIso, writeJsonAtomic, writeTextAtomic } from "./project.js";
+import { loadSessionState, nowIso, sessionRoot, writeJsonAtomic, writeTextAtomic } from "./project.js";
 
 
 export const GUIDE_RUNTIME_DIR = ".koda";
@@ -73,6 +75,37 @@ const SAFE_ROLE_VALUE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 
 
+
+
+
+
+
+
+
+export async function guideRuntimeTruth(root        , runtime                  )                             {
+  const savedStatus = runtime.run.status;
+  if (!runtime.run.sessionId) {
+    if (savedStatus === "COMPLETE" || savedStatus === "HALTED") {
+      throw new Error(`Guide runtime ${runtime.run.launchId} claims ${savedStatus} but no bound session exists.`);
+    }
+    return { savedStatus, effectiveStatus: savedStatus, terminalFromDisk: false };
+  }
+  const config = await readProjectConfig(root);
+  const directory = sessionRoot(root, config, runtime.run.sessionId);
+  const state = await loadSessionState(directory, runtime.run.sessionId);
+  const closure = await evaluateSessionClosure(root, directory, state);
+  const halt = await evaluateSessionHalt(root, directory, state);
+  if (halt.halted) {
+    return { savedStatus, effectiveStatus: "HALTED", terminalFromDisk: true };
+  }
+  if (savedStatus === "COMPLETE" && !closure.closed) {
+    throw new Error(`Guide runtime ${runtime.run.launchId} claims COMPLETE without pushed close evidence:\n- ${closure.reasons.join("\n- ")}`);
+  }
+  if (savedStatus === "HALTED") {
+    throw new Error(`Guide runtime ${runtime.run.launchId} claims HALTED without pushed halt evidence:\n- ${halt.reasons.join("\n- ")}`);
+  }
+  return { savedStatus, effectiveStatus: savedStatus, terminalFromDisk: savedStatus === "COMPLETE" };
+}
 
 function git(root        , args          )                                                  {
   const result = spawnSync("git", args, { cwd: root, encoding: "utf8", env: { ...process.env, GIT_OPTIONAL_LOCKS: "0" } });
@@ -243,10 +276,16 @@ export async function listGuideRuntimes(root        )                           
 
 export async function currentGuideRuntime(root        , launchId         )                                   {
   const records = await listGuideRuntimes(root);
-  if (launchId) return records.find(({ run }) => run.launchId === launchId) ?? null;
-  const active = records.filter(({ run }) => run.status !== "COMPLETE" && run.status !== "HALTED");
+  const withTruth = await Promise.all(records.map(async (runtime) => {
+    const truth = await guideRuntimeTruth(root, runtime);
+    return truth.effectiveStatus === runtime.run.status
+      ? runtime
+      : { ...runtime, run: { ...runtime.run, status: truth.effectiveStatus } };
+  }));
+  if (launchId) return withTruth.find(({ run }) => run.launchId === launchId) ?? null;
+  const active = withTruth.filter(({ run }) => run.status !== "COMPLETE" && run.status !== "HALTED");
   if (active.length > 1) throw new Error("More than one Guide runtime is unfinished; select one by launch ID instead of guessing.");
-  return active[0] ?? records.at(-1) ?? null;
+  return active[0] ?? withTruth.at(-1) ?? null;
 }
 
 export async function prepareGuideRuntime(

@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { codexGuidePermissionArgs } from "./codex-role-permissions.ts";
 import { findProjectRoot, pathExists, readProjectConfig } from "./config.ts";
 import { runGuideCli } from "./guide-commands.ts";
-import { currentGuideRuntime, listGuideRuntimes } from "./guide-runtime.ts";
+import { currentGuideRuntime, guideRuntimeTruth, listGuideRuntimes } from "./guide-runtime.ts";
 import { guideRoot, hasGuideManifest, loadGuideManifest, pendingGuideLaunches } from "./guide.ts";
 import { partialRecoveryRoles, requestGhosttyRecoveryWindows, requestGhosttyWindows, type GhosttyWindowRequest } from "./ghostty.ts";
 import {
@@ -461,7 +461,8 @@ export async function performGuideRecoveryChoice(
 ): Promise<{ handled: boolean; message?: string; requests?: GhosttyWindowRequest[] }> {
   const recoverable: Array<NonNullable<Awaited<ReturnType<typeof currentGuideRuntime>>>> = [];
   for (const runtime of await listGuideRuntimes(root)) {
-    if (runtime.run.status === "COMPLETE" || runtime.run.status === "HALTED") continue;
+    const truth = await guideRuntimeTruth(root, runtime);
+    if (truth.effectiveStatus === "COMPLETE" || truth.effectiveStatus === "HALTED") continue;
     if (await partialRecoveryRoles(runtime)) recoverable.push(runtime);
   }
   if (recoverable.length === 0) return { handled: false };

@@ -1,6 +1,6 @@
 # Koda-C project working document
 
-**Last updated:** 2026-07-20
+**Last updated:** 2026-07-21
 
 ## Product
 
@@ -76,6 +76,12 @@ owner contract
 - Commands for init, session open/status/close, review generation, receipt approval, and advancement.
 - Bound waiting-direction evidence, atomic gate release, required receiving-phase citation, and early-use refusal.
 - Immutable pushed halt that voids the in-flight phase and requires a Guide-confirmed fresh Brief carrying the halt and waiting direction IDs.
+- Reviewer conversation now separates waiting direction from explicit halt at the
+  controller boundary. Exact `/halt` and `Halt this session...` forms open a
+  confirmed halt ceremony without a model turn; the shared Reviewer skill exposes
+  one exact halt marker for other unambiguous language. Pushed halt evidence
+  supersedes stale local window labels in Guide and relay status, while forged
+  terminal labels still refuse.
 - Artifact hashing, generated review metadata, unique receipts, structured Markdown approval entries, and verdict routing.
 - Fail-closed checks for missing, empty, stale, malformed, duplicated, or mismatched evidence.
 - Immutable close-artifact hashing plus Git-derived commit/push verification.
@@ -267,6 +273,16 @@ owner contract
   totals, and passes a fresh unauthenticated clone through help, refusal, exact
   receipt, advancement, real tarball install, security/license/judge checks, and
   clean-checkout verification. No active verification-session state was touched.
+- The repository is now public. A fresh unauthenticated clone of `c918bc0` ran the
+  committed no-build CLI, exercised the refusal → exact receipt → advancement
+  path, and remained clean. Private judge invitations are no longer required.
+- A later submission rehearsal exposed a distinct halt-routing defect: the owner
+  explicitly requested permanent halt in Reviewer, but the model's ordinary wait
+  marker caused the trusted runtime to record a waiting direction. No gate released
+  it. The attempt is honestly pushed-halted at `cb8d372`; the exact owner reason is
+  preserved in halt `6cbb0460-a7fb-4308-a12f-e5a33df469ea`. The controller repair,
+  disk-derived terminal status, and recovery refusal pass 258/258 locally; pushed
+  toolkit promotion remains the release step.
 - Window B keeps a real `reviewer> ` prompt open between producer handoffs. An owner message resumes the same persistent Reviewer in `owner conversation` mode; a project-level thought is redirected to Guide, ordinary explanation is non-mutating, and actionable direction is written immediately as bound waiting evidence without entering the current phase.
 - At a formal decision point, Window B resumes the same reviewer context in `owner explanation` mode and presents numbered choices to acknowledge, ask, reread, stop safely, or halt. New direction waits for the next gate and does not rewrite reviewed work. Halt requires an explicit `HALT` confirmation before it prepares, commits, pushes, and verifies immutable evidence. A wrong or empty receipt stays at the same decision point with zero ledger mutation; no receipt or current-phase advancement is allowed to count.
 - Window A and Window B now open with permanent role and owner-input labels. Window A announces frozen phase entry, disk-derived artifact handover, revalidated gate passage, released direction IDs, phase count, and the next phase or close ceremony. Window B names phase position and the exact owner choices. These are exposed facts, never hidden model reasoning.

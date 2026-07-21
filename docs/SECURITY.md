@@ -217,10 +217,14 @@ The persistent Reviewer accepts owner conversation between formal handoffs.
 Ordinary explanation remains read-only, while a `WAIT FOR GATE` classification
 causes the trusted runtime to write the exact owner words and model classification
 as waiting evidence. Classification does not steer Producer: the current phase
-entry remains frozen and only advancement releases direction. Explicit `h` is a
-separate owner action that makes the Reviewer runtime prepare, session-stage,
-commit, push, and verify `halt.md`; it refuses unrelated pre-staged changes. The
-historical same-phase owner-handback route was removed.
+entry remains frozen and only advancement releases direction. An unambiguous
+`/halt` or `Halt this session...` request bypasses model classification and opens a
+separate two-choice confirmation ceremony; the shared Reviewer skill may reach the
+same ceremony only through its exact `OWNER DIRECTION — HALT REQUESTED` boundary.
+Cancellation changes no evidence. Confirmation makes the trusted runtime prepare,
+session-stage, commit, push, and verify `halt.md`; it refuses unrelated staged
+changes and existing unpushed commits. No halt request may also become waiting
+direction. The historical same-phase owner-handback route was removed.
 
 Run those scripts only against a run folder created by `relay:prepare` or a
 pushed `koda guide launch` in a trusted project. Do not execute a modified
@@ -355,6 +359,8 @@ and the whole-product repair delta is audited in
 The Guide/toolkit handover delta and its remaining local-trust boundary are
 audited in
 [`security-runs/2026-07-19-guide-toolkit-binding-audit-06/RESULT.md`](security-runs/2026-07-19-guide-toolkit-binding-audit-06/RESULT.md).
+The Reviewer halt-routing and disk-terminal-status repair is audited in
+[`security-runs/2026-07-21-reviewer-halt-status-audit-26/RESULT.md`](security-runs/2026-07-21-reviewer-halt-status-audit-26/RESULT.md).
 The numbered owner ceremony, stdin-only receipt transport, and exact visible recovery
 are audited in
 [`security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md`](security-runs/2026-07-19-owner-ceremony-recovery-audit-07/RESULT.md).

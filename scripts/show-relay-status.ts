@@ -5,7 +5,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { pathExists, readProjectConfig } from "../src/config.ts";
+import { evaluateSessionClosure } from "../src/close.ts";
 import { pendingDirectionsForActivePhase, readWaitingDirections } from "../src/direction.ts";
+import { evaluateSessionHalt } from "../src/halt.ts";
 import { currentPhase, loadSessionState, sessionRoot } from "../src/project.ts";
 import { relayOwnerName } from "../src/owner.ts";
 import { formatRelayCommand, resolveRelayRunPaths } from "./relay-run-location.ts";
@@ -130,10 +132,19 @@ const retryableReceiptAttempt = job?.status === "FAILED" &&
 let phase = "Session not opened";
 let directionCount = 0;
 let waitingDirectionCount = 0;
+let effectiveRunStatus = run.status;
 if (run.sessionId) {
   const config = await readProjectConfig(project);
   const directory = sessionRoot(project, config, run.sessionId);
   const state = await loadSessionState(directory, run.sessionId);
+  const closure = await evaluateSessionClosure(project, directory, state);
+  const halt = await evaluateSessionHalt(project, directory, state);
+  if (halt.halted) effectiveRunStatus = "HALTED";
+  else if (run.status === "COMPLETE" && !closure.closed) {
+    refuse(`RUN.json claims COMPLETE, but its pushed close evidence is invalid: ${closure.reasons.join("; ")}`);
+  } else if (run.status === "HALTED") {
+    refuse(`RUN.json claims HALTED, but its pushed halt evidence is invalid: ${halt.reasons.join("; ")}`);
+  }
   const active = currentPhase(state);
   phase = active
     ? `${active.index + 1}/${state.phases.length} — ${active.phase.name}`
@@ -149,7 +160,10 @@ if (run.sessionId) {
 }
 
 console.log(`KODA-C RELAY — ${path.basename(runRoot)}`);
-console.log(`Run state: ${run.status}`);
+console.log(`Run state: ${effectiveRunStatus}`);
+if (effectiveRunStatus !== run.status) {
+  console.log(`Saved window label: ${run.status} — superseded by pushed ${effectiveRunStatus === "HALTED" ? "halt" : "close"} evidence on disk.`);
+}
 console.log(`Scenario: ${run.scenario}`);
 console.log(`Owner: ${ownerName}`);
 console.log(`Session: ${run.sessionId ?? "not opened"}`);
@@ -194,11 +208,11 @@ else {
 }
 
 console.log("\nNEXT SAFE ACTION");
-if (run.status === "COMPLETE" || run.status === "HALTED") {
-  console.log(run.status === "COMPLETE"
+if (effectiveRunStatus === "COMPLETE" || effectiveRunStatus === "HALTED") {
+  console.log(effectiveRunStatus === "COMPLETE"
     ? "None. This relay session is complete."
     : "Return to Guide and start a new session from the pushed halt through a fresh Brief.");
-} else if (run.status === "PAUSED_INTERRUPTED_CONTEXT_MISSING" || run.status === "PAUSED_INTERRUPTED_STATE_MISSING") {
+} else if (effectiveRunStatus === "PAUSED_INTERRUPTED_CONTEXT_MISSING" || effectiveRunStatus === "PAUSED_INTERRUPTED_STATE_MISSING") {
   console.log("No automatic resume is safe. The interrupted worker or its bound session identity is missing; Koda-C refuses to replace it by guessing.");
 } else if (retryableReceiptAttempt) {
   console.log("The last receipt entry did not match. Nothing advanced and no ledger entry was written.");
@@ -212,17 +226,17 @@ if (run.status === "COMPLETE" || run.status === "HALTED") {
 } else if (!lock) {
   console.log("First, start or resume Window B. Then run status again:");
   console.log(`  ${reviewerCommand}`);
-  if (run.status !== "PREPARED" && !run.status.startsWith("PAUSED")) {
-    console.log(`Window A is recorded as ${run.status}. Check that pane; do not start a second producer blindly.`);
+  if (effectiveRunStatus !== "PREPARED" && !effectiveRunStatus.startsWith("PAUSED")) {
+    console.log(`Window A is recorded as ${effectiveRunStatus}. Check that pane; do not start a second producer blindly.`);
   }
 } else if (job?.status === "AWAITING_OWNER") {
   console.log(`Return to Window B. The reviewer is waiting for ${ownerName}.`);
-} else if (run.status === "FINALIZING_GUIDE_RETURN" && run.lastError) {
+} else if (effectiveRunStatus === "FINALIZING_GUIDE_RETURN" && run.lastError) {
   console.log("Window B is preserving the closed session. Resume Window A to finish the Guide return:");
   console.log(`  ${producerCommand}`);
-} else if (run.status === "FINALIZING_GUIDE_RETURN") {
+} else if (effectiveRunStatus === "FINALIZING_GUIDE_RETURN") {
   console.log("Window A is returning the closed session to Guide. Do not start another producer.");
-} else if (run.status === "PREPARED" || run.status.startsWith("PAUSED")) {
+} else if (effectiveRunStatus === "PREPARED" || effectiveRunStatus.startsWith("PAUSED")) {
   console.log("Window B is ready. Start or resume Window A:");
   console.log(`  ${producerCommand}`);
 } else {

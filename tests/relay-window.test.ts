@@ -116,7 +116,10 @@ async function preparedAcknowledgementRun(
   return { temporary, runRoot, project, phase, session, review, executed, clipboard };
 }
 
-async function preparedIdleConversationRun(response: string, options: { throughTty?: boolean; question?: string } = {}) {
+async function preparedIdleConversationRun(
+  response: string,
+  options: { throughTty?: boolean; question?: string; haltConfirmation?: "1" | "2" } = {},
+) {
   const reviewerThreadId = "019f0000-0000-7000-8000-000000000099";
   const question = options.question ?? "What should I understand about the active Brief?";
   const temporary = await mkdtemp(path.join(tmpdir(), "koda-reviewer-conversation-"));
@@ -168,6 +171,7 @@ async function preparedIdleConversationRun(response: string, options: { throughT
       ? { KODA_RELAY_TEST_IDLE_CONVERSATION: question }
       : {}),
     KODA_CODEX_BIN: fakeCodex,
+    ...(options.haltConfirmation ? { KODA_RELAY_TEST_HALT_CONFIRMATION: options.haltConfirmation } : {}),
     ...(options.throughTty
       ? {
           KODA_TEST_NODE: process.execPath,
@@ -360,6 +364,51 @@ test("REVIEWER OPEN CONVERSATION WAIT: active direction is recorded but cannot b
   assert.equal(directions[0].metadata.artifactState, "ABSENT");
   assert.equal(directions[0].metadata.ownerStatement, "Change the output format at the next boundary.");
   assert.equal(await pathExists(path.join(result.session.directory, "owner-handbacks")), false);
+});
+
+test("REVIEWER OPEN CONVERSATION HALT: an explicit owner halt cannot be filed as a waiting direction", async (t) => {
+  const ownerDirection = "Halt this session. The toolkit changed after launch; preserve that reason in the halt evidence.";
+  const result = await preparedIdleConversationRun("The model must not be asked to reinterpret this command.", {
+    question: ownerDirection,
+    haltConfirmation: "1",
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  assert.match(result.executed.stdout, /PERMANENT HALT REQUEST/);
+  assert.match(result.executed.stdout, /SESSION HALTED/);
+  assert.equal((await readWaitingDirections(result.session.directory)).length, 0);
+  const halt = await evaluateSessionHalt(result.project, result.session.directory, result.session.state);
+  assert.equal(halt.halted, true, halt.reasons.join("; "));
+  assert.equal(halt.metadata?.ownerDirection, ownerDirection);
+  assert.equal((await readReviewerWindowState(result.runRoot))?.turns, 2, "deterministic halt routing must not spend a model turn");
+});
+
+test("REVIEWER OPEN CONVERSATION HALT CANCEL: cancellation changes no session evidence", async (t) => {
+  const result = await preparedIdleConversationRun("The model must not run.", {
+    question: "/halt",
+    haltConfirmation: "2",
+  });
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  assert.match(result.executed.stdout, /NOTHING CHANGED[\s\S]*halt request was cancelled/);
+  assert.equal(await pathExists(path.join(result.session.directory, "halt.md")), false);
+  assert.equal((await readWaitingDirections(result.session.directory)).length, 0);
+  assert.equal((await readReviewerWindowState(result.runRoot))?.turns, 2);
+});
+
+test("REVIEWER OPEN CONVERSATION HALT MARKER: an explicit model boundary opens the same confirmed ceremony", async (t) => {
+  const ownerDirection = "Please permanently stop this attempt because its verified toolkit changed.";
+  const result = await preparedIdleConversationRun(
+    "OWNER DIRECTION — HALT REQUESTED\nPreserve the toolkit-change reason in immutable halt evidence.",
+    { question: ownerDirection, haltConfirmation: "1" },
+  );
+  t.after(() => rm(result.temporary, { recursive: true, force: true }));
+  assert.equal(result.executed.status, 0, result.executed.stderr);
+  assert.match(result.executed.stdout, /SESSION HALTED/);
+  assert.equal((await readWaitingDirections(result.session.directory)).length, 0);
+  const halt = await evaluateSessionHalt(result.project, result.session.directory, result.session.state);
+  assert.equal(halt.halted, true, halt.reasons.join("; "));
+  assert.equal(halt.metadata?.ownerDirection, ownerDirection);
 });
 
 test("REVIEWER OPEN CONVERSATION TTY: a real terminal line reaches the idle Reviewer prompt", {
@@ -929,6 +978,20 @@ test("REVIEWER HALT: the sole interrupt voids the phase and pushes immutable evi
   assert.equal(halt.metadata?.ownerDirection, "Restart from a fresh Brief with the newly settled product direction.");
   assert.equal(result.session.state.currentPhaseIndex, 0);
   assert.equal(result.session.state.advances.length, 0);
+
+  const statusBeforeProducerReconciliation = spawnSync(process.execPath, [
+    "scripts/show-relay-status.ts",
+    result.runRoot,
+  ], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 5_000,
+    env: { ...process.env, KODA_RELAY_RUNS_ROOT: path.dirname(result.runRoot) },
+  });
+  assert.equal(statusBeforeProducerReconciliation.status, 0, statusBeforeProducerReconciliation.stderr);
+  assert.match(statusBeforeProducerReconciliation.stdout, /Run state: HALTED/);
+  assert.match(statusBeforeProducerReconciliation.stdout, /Saved window label: AWAITING_REVIEWER_WINDOW — superseded by pushed halt evidence on disk/);
+  assert.match(statusBeforeProducerReconciliation.stdout, /Return to Guide and start a new session from the pushed halt/);
 
   const reconciled = spawnSync(process.execPath, [
     "scripts/execute-relay-run.ts",

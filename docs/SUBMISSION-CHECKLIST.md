@@ -16,7 +16,7 @@ truth for the exact submission requirements.
 
 | Official requirement | Koda-C evidence or action | Status |
 | --- | --- | --- |
-| Repository URL and judge access | `https://github.com/freeborn-warrior/koda-codex`; make public, or share with both judge addresses | **Owner action open** |
+| Repository URL and judge access | `https://github.com/freeborn-warrior/koda-codex`; public access and the no-build path were verified from a fresh unauthenticated clone | **PUBLIC AND VERIFIED** |
 | Relevant license | Root `LICENSE` contains the unmodified standard GPLv3 text; README carries Kristian's sole copyright line; package declares `GPL-3.0-only`; GitHub now detects GNU GPLv3 | Complete |
 | Setup, sample data, and run guidance | Root README and Quick Start; `init --demo` generates every sample file | Complete |
 | Codex acceleration and key decisions | README section “How Kristian, Codex, and GPT-5.6 built it” explicitly separates Kristian's decisions from Codex engineering | Complete |
@@ -48,30 +48,32 @@ These are the submission actions in the order that avoids rework:
 4. **Completed here:** Let Codex record the successful human rehearsal in this
    repository and rerun final checks. Push the resulting evidence commit before
    freezing the exact intended submission commit.
-5. Make GitHub public and verify the clone/README path while signed out. If the
-   repository instead stays private, share it with both required judge addresses.
+5. **Completed:** GitHub is public. A fresh unauthenticated clone at `c918bc0`
+   opened the committed CLI, demonstrated receipt-gate refusal and advancement,
+   and remained clean. The [public-clone result](package-runs/2026-07-21-public-submission-clone-02/RESULT.md)
+   preserves the evidence.
 6. Upload the final video publicly to YouTube and verify it while signed out.
 7. Complete the Devpost fields, paste the already obtained primary-task
    `/feedback` ID, freeze and tag the exact commit, save the dated submission
    receipt, and submit before the buffer expires.
 
 The completed demo's Producer and Reviewer are closed. Guide is safely between
-sessions and may remain open for project conversation. GitHub is still `PRIVATE`;
-neither visibility nor submission state has been changed by Codex.
+sessions and may remain open for project conversation. GitHub is public and the
+repository test path is independently cloneable; Devpost submission remains an
+owner action.
 
 ## Repository and runnable product
 
-- [ ] **Repository access blocker:** `https://github.com/freeborn-warrior/koda-codex`
-  exists and receives authenticated pushes, but GitHub reports it as `PRIVATE` and
-  an unauthenticated request returned 404 on 2026-07-20. Before submission, either
-  make it public (the intended README path) or keep it private and share it with
-  both `testing@devpost.com` and `build-week-event@openai.com`, then verify access.
+- [x] **Repository access:** `https://github.com/freeborn-warrior/koda-codex` is
+  public. A fresh unauthenticated clone resolved commit `c918bc0`, ran the
+  committed no-build CLI and exact refusal → receipt → advancement path, and
+  remained clean ([evidence](package-runs/2026-07-21-public-submission-clone-02/RESULT.md)).
 - [x] The repository and npm package open on a root `README.md` with the problem,
   one-minute test, supported platform, safety boundary, Codex collaboration, and
   current evidence.
-- [ ] If the repository remains private, share it with `testing@devpost.com` and
-  `build-week-event@openai.com` and verify both invitations. The recommended path
-  is to make it public so the documented clone command works for every judge.
+- [x] Private-repository invitations to `testing@devpost.com` and
+  `build-week-event@openai.com` are not required because the public route was
+  selected and verified.
 - [x] GPLv3-only license and sole owner copyright are present.
 - [x] Product name, repository/package slug, and CLI command are distinguished:
   Koda-C / `koda-codex` / `koda`.

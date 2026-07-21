@@ -9,6 +9,12 @@ import { sha256 } from "./receipt.js";
 
 
 const HALT_MARKER = "KODA_HALT";
+export const HALT_REQUEST_PREFIX = "OWNER DIRECTION — HALT REQUESTED";
+
+export function isExplicitOwnerHaltRequest(input        )          {
+  const value = input.trim();
+  return /^\/halt(?:\s|$)/i.test(value) || /^halt this session(?:[.!?:]|\s|$)/i.test(value);
+}
 
 export function haltPath(sessionDir        )         {
   return path.join(sessionDir, "halt.md");

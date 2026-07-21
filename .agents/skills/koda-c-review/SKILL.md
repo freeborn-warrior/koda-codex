@@ -21,7 +21,8 @@ conversation partner who also understands the gate—not like a gate terminal.
 - Invite or answer follow-up naturally. Do not replace judgment with a generic
   status report.
 - Keep the exact `GUIDE CONVERSATION — PROJECT SCOPE` and
-  `OWNER DIRECTION — WAIT FOR GATE` prefixes when their routing condition applies;
+  `OWNER DIRECTION — WAIT FOR GATE`, and
+  `OWNER DIRECTION — HALT REQUESTED` prefixes when their routing condition applies;
   natural voice never weakens those machine-readable boundaries.
 
 ## ENTRY CHECK
@@ -68,7 +69,7 @@ If the message concerns the wider project path, future sessions, or ideas beyond
 
 If the owner states direction that would change work, begin exactly `OWNER DIRECTION — WAIT FOR GATE`. State it plainly. The runtime must record the exact owner statement and this classification immediately. Make clear that recording is not steering: Producer cannot read or apply it during the active phase, and Koda releases it only in the next successful advancement record.
 
-Never suggest pause-inject-resume. If the owner explicitly wants to stop the in-flight phase rather than wait, explain the separate halt ceremony: no current-phase artifact, review, or approval may count; immutable halt evidence must be committed and pushed; work returns through a new session and fresh Brief. Do not infer or execute halt from ordinary direction.
+Never suggest pause-inject-resume. If the owner explicitly wants to stop the in-flight phase rather than wait, begin exactly `OWNER DIRECTION — HALT REQUESTED`. State the exact reason to preserve and explain the separate halt ceremony: no current-phase artifact, review, or approval may count; immutable halt evidence must be committed and pushed; work returns through a new session and fresh Brief. The trusted controller must ask the owner to confirm before executing it. Do not infer halt from ambiguous direction, and never misclassify an explicit halt as `WAIT FOR GATE`.
 
 ### Verdict rules
 
@@ -118,6 +119,6 @@ For formal-review mode, write the complete review to disk before reporting anyth
 
 For owner-explanation mode, alter no file and return control to the owner-facing reviewer window. The preserved reviewer event is owner conversation, not a producer handback. If the answer begins `OWNER DIRECTION — WAIT FOR GATE`, the runtime must write the waiting record immediately; it neither blocks acknowledgement nor changes the artifact under review. A `DISCUSS` ruling remains safe because Koda records it in the approval ledger before the producer can resume.
 
-For owner-conversation mode, alter no file and return to the open Reviewer prompt. Preserve the model event as conversation evidence. Project-level thoughts return to Guide. When the answer begins `OWNER DIRECTION — WAIT FOR GATE`, the runtime must create the bound waiting-direction artifact immediately. Conversation never pauses or steers Producer; the advancement record is the only release into a later phase.
+For owner-conversation mode, alter no file and return to the open Reviewer prompt. Preserve the model event as conversation evidence. Project-level thoughts return to Guide. When the answer begins `OWNER DIRECTION — WAIT FOR GATE`, the runtime must create the bound waiting-direction artifact immediately. When it begins `OWNER DIRECTION — HALT REQUESTED`, the runtime must open the separate confirmed halt ceremony and must not create waiting-direction evidence. Conversation never pauses or steers Producer; the advancement record is the only release into a later phase.
 
 Do not quote the receipt in chat. In any mode, do not approve evidence, run `koda advance`, modify the producer artifact, or begin another phase. In formal-review mode, the complete formal review is the handback artifact; report only its path and verdict so the owner must read the file. Leave routing to the receipt gate.
