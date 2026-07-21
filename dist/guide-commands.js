@@ -490,10 +490,10 @@ export async function runGuideCli(
       io.out("2. Leave Reviewer open. Open a third terminal in this project. Start PRODUCER second:");
       io.out(shellQuote(launchers.producer));
       io.out("");
+      io.out("Speak in Reviewer, watch Producer, and use Guide only for project-level conversation.");
+      io.out("");
       io.out("3. Keep this Guide open. To inspect disk-derived status without changing anything:");
       io.out(prepared.statusCommand);
-      io.out("");
-      io.out("Speak in Reviewer, watch Producer, and use Guide only for project-level conversation.");
     } else {
       const requests = await dependencies.openGhostty(root, prepared);
       io.out("");

@@ -306,7 +306,7 @@ test("GUIDE VERIFIED HANDOVER: the owner receives a complete numbered launch cho
   const rendered = output.join("\n");
   assert.match(rendered, /READY TO LAUNCH — OWNER CHOICE/);
   assert.match(rendered, /1\. Launch automatically in Ghostty.*one Reviewer and one Producer window/);
-  assert.match(rendered, /2\. Launch in terminals I open myself.*Reviewer first.*Producer second/);
+  assert.match(rendered, /2\. Launch in terminals I open myself.*Reviewer-first.*Producer-second/);
   assert.match(rendered, /3\. Not now — keep this launch ready without opening windows/);
   assert.match(rendered, /Choose in the Guide conversation/);
 });
@@ -540,6 +540,12 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
 });
 
 test("GUIDE LAUNCH SURFACE COEXISTENCE: a prepared manual path may still choose Ghostty before either role starts", async (t) => {
+  const priorCodex = process.env.KODA_CODEX_BIN;
+  process.env.KODA_CODEX_BIN = process.execPath;
+  t.after(() => {
+    if (priorCodex === undefined) delete process.env.KODA_CODEX_BIN;
+    else process.env.KODA_CODEX_BIN = priorCodex;
+  });
   const h = await guideHarness(t, true);
   await confirmGuideLaunch(h.root, DEFAULT_CONFIG, h.promptFile, "Kristian");
   h.git(h.root, ["add", "-A"]);
@@ -1692,6 +1698,12 @@ test("GUIDE MANUAL RECOVERY: the existing run routes only missing roles to termi
 });
 
 test("GUIDE MANUAL RECOVERY COMMANDS: default recovery reprints only existing run-bound launchers", async (t) => {
+  const priorCodex = process.env.KODA_CODEX_BIN;
+  process.env.KODA_CODEX_BIN = process.execPath;
+  t.after(() => {
+    if (priorCodex === undefined) delete process.env.KODA_CODEX_BIN;
+    else process.env.KODA_CODEX_BIN = priorCodex;
+  });
   const { h, prepared } = await bothWindowsMissingAfterPartialRecovery(t);
   const run = JSON.parse(await readFile(path.join(prepared.runRoot, "RUN.json"), "utf8"));
   delete run.terminalLaunch;

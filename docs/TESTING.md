@@ -2629,6 +2629,14 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   weakened. The run also caught one new public-guide assertion whose wording did
   not permit a line break between “manual” and “surface”; that assertion was
   corrected to match the exact visible sentence without changing the requirement.
+- **First integrity-enabled full result:** The durable
+  [first full transcript](test-results/2026-07-21-manual-terminal-first-full.md)
+  passed **258/262** and exposed four exact defects: one hyphenated UI assertion,
+  explanatory prose after a supposedly executable final status line, and two tests
+  that changed `KODA_CODEX_BIN` between interfaces and therefore correctly tripped
+  launcher tamper protection. The status command is final again; the wording check
+  matches the visible hyphenation; and both coexistence tests now hold one configured
+  executable across surfaces. The exact correction slice passes **4/4**.
 - **State:** DEVELOPMENT. Human Ghostty testing from this checkout remains paused
   until a new branch capability is mechanically sealed and the complete suite,
   security audit, and both-surface coexistence checks pass.
