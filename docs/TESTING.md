@@ -2579,3 +2579,27 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [release transcript](test-results/2026-07-21-reviewer-halt-status-release.md).
   Its SHA-256 is
   `b3323064b31953e25e2ae1b4ebfc497c8807fa2296a41473a610c49ff0d3042b`.
+
+## 2026-07-21 — POSIX test-shell portability
+
+- **External observation:** An outside fresh-clone Linux run was reported against
+  the earlier 253-test public state: 246 passed, six skipped, and one failed. The
+  failure was `tests/guide.test.ts` executing a shell-agnostic printed status
+  command through macOS-specific `/bin/zsh`, which did not exist on that Linux
+  system. The exact Linux distribution, Node version, commit, and raw transcript
+  were not supplied, so this remains attributed external evidence rather than a
+  repository-reproduced Linux certification.
+- **Inspection:** Current code contained one active `/bin/zsh` execution, in that
+  test helper. The only other current test occurrence asserts that a generated
+  Ghostty role request does **not** contain `/bin/zsh`. Historical model-event
+  archives retain their observed commands and were correctly left unchanged.
+- **Correction:** The helper now invokes `/bin/sh -c`. The printed command uses
+  POSIX shell quoting and requires no zsh feature. Product runtime, gate behavior,
+  optional Ghostty integration, and platform claims are unchanged.
+- **Focused result:** The exact Guide runtime test passed **1/1** through `/bin/sh`.
+- **Complete local result:** The complete current suite passed **258/258** in the
+  [durable transcript](test-results/2026-07-21-posix-test-shell-local.md).
+- **State:** LOCAL PASS. Commit and push the test-only portability repair, then run
+  the unchanged complete suite once from that pushed commit. A fresh Linux rerun
+  remains welcome external confirmation; Koda-C does not broaden its supported-
+  platform claim from this one reported run alone.

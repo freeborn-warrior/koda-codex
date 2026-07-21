@@ -481,7 +481,7 @@ test("GUIDE RUNTIME: one command binds a pushed launch and prints executable ses
   assert.equal(spawnSync("git", ["status", "--porcelain", "--untracked-files=all"], { cwd: h.root, encoding: "utf8" }).stdout, "");
 
   const statusLine = output.at(-1)!;
-  const status = spawnSync("/bin/zsh", ["-c", statusLine], { cwd: h.root, encoding: "utf8" });
+  const status = spawnSync("/bin/sh", ["-c", statusLine], { cwd: h.root, encoding: "utf8" });
   assert.equal(status.status, 0, status.stderr);
   assert.match(status.stdout, /Run state: PREPARED/);
   assert.match(status.stdout, /Owner: Alex Morgan/);
