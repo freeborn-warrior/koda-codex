@@ -2696,6 +2696,11 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   [audio-master transcript](test-results/2026-07-21-ghostty-readme-audio-master.md)
   passed **262/262**. Transcript SHA-256:
   `3c4224207e943acea883b6f3bc563536554e063a309eb341615cbbf90f5eda48`.
-- **State:** MECHANICAL PASS. Repository behavior and judge documents agree. Final
-  listening approval, YouTube publication, and Devpost submission remain owner
-  actions.
+- **Post-push result:** Commit `d1faab3` exactly matched `origin/main` before the
+  unchanged complete
+  [post-push transcript](test-results/2026-07-21-ghostty-readme-audio-master-pushed.md)
+  passed **262/262**. Transcript SHA-256:
+  `14495d3e076caac651883a6b00fd1b1f2afd600c5c025ef0c9c27d7430fd34a6`.
+- **State:** POST-PUSH MECHANICAL PASS. Repository behavior and judge documents
+  agree. Final listening approval, YouTube publication, and Devpost submission
+  remain owner actions.

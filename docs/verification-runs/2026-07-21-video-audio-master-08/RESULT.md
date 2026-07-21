@@ -49,6 +49,8 @@ synthetic voice, or aggressive noise reduction was added.
 - Decoded-frame comparison between picture-lock v04 and the candidate: **IDENTICAL**.
 - Final metadata contains standard MP4 container and FFmpeg encoder tags only;
   no Voice Memos UUID, source creation time, author, title, or comment survived.
+- The exact pushed documentation and candidate contract at commit `d1faab3` passed
+  the complete [262/262 regression suite](../../test-results/2026-07-21-ghostty-readme-audio-master-pushed.md).
 
 ## Failures retained
 
