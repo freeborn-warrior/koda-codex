@@ -153,7 +153,10 @@ direct final answer instead of flooding the owner with procedural inspection.
   and [security audit](docs/security-runs/2026-07-20-reviewer-session-binding-audit-25/RESULT.md)
   preserve the later false-ready prompt, the exact owner question that exposed it,
   and the 252-check local plus unchanged post-push repair. Terra/medium returned
-  `APPROVE`; fresh human proof remains separate until it actually exists.
+  `APPROVE`. The subsequent [fresh owner-visible result](docs/verification-runs/2026-07-20-owner-full-session-05/RESULT.md)
+  completed all six phases, encountered an unplanned Orient `REVISE`, required a
+  corrected artifact and fresh review, recorded seven owner acknowledgements, and
+  returned a pushed immutable close to Guide.
 - Failed first-use attempts and their repairs remain in dated files and Git
   history. The same optional three-window launch later recovered its persistent
   contexts, completed all six phases with six owner acknowledgements, pushed

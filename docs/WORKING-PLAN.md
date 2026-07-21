@@ -127,24 +127,22 @@ Turn the proved two-context session relay into a project-level experience that c
     bundled prompt instead of stopping at requested windows. The expanded Guide,
     Quick Start, plural-runtime, security, and integrity slice passes **68/68**;
     the complete local and unchanged post-push suites pass **246/246**.
-37. [ ] Complete the owner-visible rehearsal only after the Reviewer/session
-    startup boundary is promoted. Integrated role preflight passed **250/250** and
-    fresh Terra/medium review, but the next launch exposed owner input before the
-    Reviewer had a session ID. The repaired transition is explicit `STARTING` →
-    exact session binding → `SESSION READY`; Producer and Guide require the same
-    live binding. Local and unchanged post-push regressions pass **252/252** under
-    promoted capability `reviewer-session-binding-v22`. Fresh Terra/medium review
-    returned `APPROVE`; perform one clean owner-visible six-phase run.
+37. [x] Complete the owner-visible rehearsal after promoting the Reviewer/session
+    startup boundary. Launch `e974b805-fac5-4648-a9e2-b66348effa47` proved the
+    explicit `STARTING` → exact session binding → `SESSION READY` transition, then
+    traversed all six phases. Its unplanned Orient `REVISE` required a changed
+    artifact, fresh review, and seventh owner acknowledgement before pushed close
+    and Guide return ([result](verification-runs/2026-07-20-owner-full-session-05/RESULT.md)).
 
 ## Submission cut
 
 The submission demonstration and its first-use entry now exist: one command creates
 an isolated pushed project and enters Guide, while the preserved representative
 Produce session proves the two-context relay, all six gates, pushed close, and Guide
-return with Guide, Producer, and Reviewer visible. The remaining submission work is
-a fresh human rehearsal, recording, repository publication, form completion, and
-freezing the exact pushed commit—not another product feature or a retrofitted
-self-hosting run.
+return with Guide, Producer, and Reviewer visible. The fresh human rehearsal now
+passes and its source recording exists. The remaining submission work is editing
+that capture, repository publication, form completion, and freezing the exact
+pushed commit—not another product feature or a retrofitted self-hosting run.
 
 ## Current constraints
 

@@ -2244,3 +2244,55 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   assertions, pushed commit `ca198d3` passed a final
   [252/252 review-record release suite](test-results/2026-07-20-reviewer-session-binding-review-release.md),
   SHA-256 `734abc4fac9fb215e779a95e3e1ff8e46a93810c66ddb91d3fae3724d7227e3e`.
+
+## 2026-07-20 — Fresh owner-visible full session
+
+- **Human result:** PASS. Kristian ran the shipped `npm run demo:session` path with
+  persistent Guide, input-closed Sol/medium Producer, and separate owner-facing
+  Terra/medium Reviewer visible in Ghostty.
+- **Identity:** Launch `e974b805-fac5-4648-a9e2-b66348effa47`; session
+  `2026-07-20-01`; Producer context `019f81fe-1bfe-7720-a801-aa66e6bdeb6b`;
+  Reviewer context `019f81ff-910f-79e2-b772-07e7fd34a902`; Guide context
+  `019f81fd-8198-7302-9020-b91a057e3d46`.
+- **Chain:** Brief, Orient, Plan, Produce, Live, and Summary all advanced. Seven
+  owner acknowledgements were required because the first Orient review returned
+  `REVISE`. The blocking review found an unsupported inference that no test suite
+  existed; the cited files proved only that no implementation existed. Producer
+  narrowed the claim, the changed artifact received a fresh `APPROVE`, and only
+  then did Orient advance.
+- **Not staged:** Both the committed owner prompt and project guidance explicitly
+  prohibit a predetermined verdict or revision path. Production-source and demo-
+  input inspection found no Orient-specific forced verdict. The first review was
+  bound to artifact SHA-256 `63543b14…`; the corrected artifact and fresh review
+  were bound to `7a1cb232…`.
+- **Product evidence:** Corrected Produce checks passed 9/9 on Node.js 26.0.0.
+  The first Produce harness failure and first Live capture-harness failure remain
+  recorded; neither assertion was weakened. Node.js 22.18.0 itself was not
+  separately exercised.
+- **Close:** The supervisor committed the session output, Producer prepared and
+  verified immutable close, and pushed close commit `f8b6511`. Guide return commit
+  `edaf46a` archives the complete runtime and records 10 Producer turns, 11
+  Reviewer turns, seven acknowledgements, and distinct context identities.
+- **Guide follow-up:** Kristian's dictation reached Guide as a declarative close
+  statement. Guide verified the close, correctly reported all three stale
+  continuity files, made no inferred mutation, and waited. Reconciliation remains
+  required before that demo project prepares another dependent session.
+- **Evidence:** [owner-visible result](verification-runs/2026-07-20-owner-full-session-05/RESULT.md),
+  [compact transcript](verification-runs/2026-07-20-owner-full-session-05/TRANSCRIPT.md),
+  [blocking Orient review](verification-runs/2026-07-20-owner-full-session-05/ORIENT-REVISE.md),
+  and restorable Git bundle in the same evidence directory.
+- **First evidence-assembly run:** The complete product suite passed **251/252**.
+  Every mechanic passed; the one judge-document check refused because adding the
+  `Completed` marker had changed its protected instruction from capitalized
+  `Record one fresh complete source run` to lowercase `record`. The checklist was
+  corrected to preserve the exact first-use instruction. No test or product
+  condition was removed or weakened.
+- **Corrected durable result:** Every one of the **252** named tests passed in the
+  [recorded evidence suite](test-results/2026-07-20-owner-full-session-evidence.md).
+  Bundle verification confirmed complete history at `edaf46a`; `git fsck`, link
+  containment, and a common credential/private-key signature scan passed for the
+  preserved evidence directory.
+- **Staged evidence result:** After every new evidence file entered the Git index,
+  the exact security, submission, and toolkit-integrity slice passed **26/26**.
+  This made the repository's own tracked-file scan inspect the preserved transcript,
+  Guide event, reviews, approvals, close, and bundle before commit.

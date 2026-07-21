@@ -63,21 +63,20 @@ This is the on-disk working queue for the build. A checked item means its eviden
   consumes the bundled prompt through real session creation and Guide binding;
   the expanded Guide, plural-runtime, security, and integrity slice passes
   **68/68** and the complete local and unchanged post-push suites pass **246/246**.
-- [ ] Complete the fresh owner-visible full-session rehearsal. Integrated role
-  preflight is promoted and independently approved, but launch
-  `115c716e-1c9c-43c5-8e5d-edead043b29a` exposed the Reviewer prompt before a
-  session ID existed. The owner did nothing wrong; the interface announced a false
-  readiness state. Reviewer now starts visibly but input-closed, binds the exact
-  Producer-created session, then opens conversation; Producer and Guide refuse
-  until that same live identity is present. The complete local and unchanged
-  post-push suites pass **252/252** under promoted capability
-  `reviewer-session-binding-v22`. Fresh Terra/medium independently returned
-  `APPROVE`; Kristian's next clean owner-visible run is now the sole remaining
-  proof for this repair.
+- [x] Complete the fresh owner-visible full-session rehearsal. After the earlier
+  false-ready failure and the promoted **252/252** startup repair, launch
+  `e974b805-fac5-4648-a9e2-b66348effa47` kept distinct persistent Sol Producer
+  and Terra Reviewer contexts through all six phases. An unplanned Orient
+  `REVISE` held the gate until a corrected artifact, fresh review, and fresh owner
+  acknowledgement existed. Seven acknowledgements, pushed close `f8b6511`, and
+  Guide return `edaf46a` are preserved in the
+  [owner-visible result](verification-runs/2026-07-20-owner-full-session-05/RESULT.md).
 
 ## Next
 
-- [ ] Finish submission-critical proof and polish only after the product runtime above is honest: final hygiene, owner recording, and external submission.
+- [ ] Finish submission-critical proof and polish only: edit the captured recording,
+  run final hygiene, publish the repository and video, and complete the external
+  submission. The product runtime and fresh owner rehearsal are now proved.
 - [ ] Design the project-adaptation layer: turn a real owner/project contract into project-local `AGENTS.md`, producer skills, and one shared reviewer without changing the invariant gate. Start with writing and software profiles, but adapt beyond profile defaults.
 - [ ] After the current relay is proved, decide with Kristian whether owner attention stays `every_gate` or adds a `decisions_only` setting; first define authorized routine acknowledgers and the owner-attention marker.
 - [ ] Add project staffing config after proving cross-model thread continuation: Guide assignment, session-kind reviewer/defaults, and per-phase producer model/effort must resolve independently and snapshot into the session. Use sealed matrix evidence, not skill frontmatter, for recommendations.

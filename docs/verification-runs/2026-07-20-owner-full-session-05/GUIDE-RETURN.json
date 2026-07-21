@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "status": "CLOSED_SESSION_RETURNED",
+  "launchId": "e974b805-fac5-4648-a9e2-b66348effa47",
+  "sessionId": "2026-07-20-01",
+  "prompt": "docs/guide/prompts/first-session.md",
+  "close": "docs/sessions/2026-07-20-01/close.md",
+  "closeSha256": "e0021045336910874b56022031e697e601ffd9a6eb8986a88517b07e932ac088",
+  "closeCommit": "f8b651128d3a81a98be5c0e71dae346c2b7ce8d6",
+  "archive": "docs/guide/runs/e974b805-fac5-4648-a9e2-b66348effa47",
+  "producer": {
+    "model": "gpt-5.6-sol",
+    "effort": "medium",
+    "threadId": "019f81fe-1bfe-7720-a801-aa66e6bdeb6b",
+    "turns": 10
+  },
+  "reviewer": {
+    "model": "gpt-5.6-terra",
+    "effort": "medium",
+    "threadId": "019f81ff-910f-79e2-b772-07e7fd34a902",
+    "turns": 11
+  },
+  "ownerAcknowledgements": 7,
+  "returnedAt": "2026-07-21T00:33:40.160Z"
+}

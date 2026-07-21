@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "id": "2026-07-20-01",
+  "createdAt": "2026-07-21T00:06:01.993Z",
+  "phases": [
+    {
+      "name": "brief",
+      "description": "What we are doing, why, and the limits"
+    },
+    {
+      "name": "orient",
+      "description": "Read and record the actual ground before planning"
+    },
+    {
+      "name": "plan",
+      "description": "Set out the work in checkable steps"
+    },
+    {
+      "name": "produce",
+      "description": "Create the session's real output"
+    },
+    {
+      "name": "live",
+      "description": "Exercise the real output and record what happened"
+    },
+    {
+      "name": "summary",
+      "description": "Verify and record what was completed"
+    }
+  ],
+  "currentPhaseIndex": 6,
+  "advances": [
+    {
+      "phase": "brief",
+      "receipt": "RECEIPT: Review read — ff9d9347-c30e-488d-8e7e-910fecbe4e17",
+      "reviewId": "ff9d9347-c30e-488d-8e7e-910fecbe4e17",
+      "advancedAt": "2026-07-21T00:08:15.913Z"
+    },
+    {
+      "phase": "orient",
+      "receipt": "RECEIPT: Review read — cf34e51e-c949-4b25-8bad-cc157546aa16",
+      "reviewId": "cf34e51e-c949-4b25-8bad-cc157546aa16",
+      "advancedAt": "2026-07-21T00:14:17.163Z"
+    },
+    {
+      "phase": "plan",
+      "receipt": "RECEIPT: Review read — 539757c4-57d1-463e-a849-e8644921aa1e",
+      "reviewId": "539757c4-57d1-463e-a849-e8644921aa1e",
+      "advancedAt": "2026-07-21T00:17:29.959Z"
+    },
+    {
+      "phase": "produce",
+      "receipt": "RECEIPT: Review read — 4cfa4749-7643-4f10-b6e6-4ad614335c9b",
+      "reviewId": "4cfa4749-7643-4f10-b6e6-4ad614335c9b",
+      "advancedAt": "2026-07-21T00:23:37.204Z"
+    },
+    {
+      "phase": "live",
+      "receipt": "RECEIPT: Review read — 3da2d6e6-9c52-479e-bda8-8290439f4610",
+      "reviewId": "3da2d6e6-9c52-479e-bda8-8290439f4610",
+      "advancedAt": "2026-07-21T00:28:03.078Z"
+    },
+    {
+      "phase": "summary",
+      "receipt": "RECEIPT: Review read — 680d1440-487d-4e5a-bfa7-b6f05d58f8ee",
+      "reviewId": "680d1440-487d-4e5a-bfa7-b6f05d58f8ee",
+      "advancedAt": "2026-07-21T00:31:37.827Z"
+    }
+  ],
+  "kind": "produce",
+  "launchMode": "independent",
+  "dependencies": []
+}

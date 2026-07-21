@@ -14,17 +14,20 @@ truth for the exact submission requirements.
 
 ## Owner handoff order
 
-These are the remaining actions in the order that avoids rework:
+These are the submission actions in the order that avoids rework:
 
-1. Record one fresh complete source run from the repository root with
+1. **Completed:** Record one fresh complete source run from the repository root with
    `npm run demo:session`. Capture silently at full quality. If it fails, stop the
-   recording and preserve the failure; do not continue as if it passed.
+   recording and preserve the failure; do not continue as if it passed. The passing
+   run and live `REVISE` recovery are preserved in the
+   [owner-visible result](verification-runs/2026-07-20-owner-full-session-05/RESULT.md).
 2. After a successful pushed close and Guide return, record the separate
    one-minute mechanical refusal/open fixture from the root README.
 3. Build the final video from those real captures using
    [VIDEO-SCRIPT.md](VIDEO-SCRIPT.md): English voiceover, no music, under 3:00.
-4. Let Codex record the successful human rehearsal in this repository, rerun final
-   checks, and push the exact intended submission commit.
+4. **Completed here:** Let Codex record the successful human rehearsal in this
+   repository and rerun final checks. Push the resulting evidence commit before
+   freezing the exact intended submission commit.
 5. Make GitHub public and verify the clone/README path while signed out. If the
    repository instead stays private, share it with both required judge addresses.
 6. Upload the final video publicly to YouTube and verify it while signed out.
@@ -32,8 +35,9 @@ These are the remaining actions in the order that avoids rework:
    and tag the exact commit, save the dated submission receipt, and submit before
    the buffer expires.
 
-Koda currently has no live Producer, Reviewer, or Guide role process. GitHub is
-still `PRIVATE`; neither visibility nor submission state has been changed by Codex.
+The completed demo's Producer and Reviewer are closed. Guide is safely between
+sessions and may remain open for project conversation. GitHub is still `PRIVATE`;
+neither visibility nor submission state has been changed by Codex.
 
 ## Repository and runnable product
 
@@ -81,7 +85,9 @@ still `PRIVATE`; neither visibility nor submission state has been changed by Cod
 - [x] A fresh Terra/medium task independently reviewed the complete integrated
   Producer-role preflight under its precommitted contract and returned
   [APPROVE](quality-runs/2026-07-20-integrated-role-preflight-18/REVIEW.md).
-- [ ] Kristian performs one final fresh-checkout demo rehearsal before recording.
+- [x] Kristian performed the final fresh owner-visible demo rehearsal. It completed
+  all six phases, recovered an unplanned Orient `REVISE`, recorded seven owner
+  acknowledgements, pushed immutable close, and returned the archive to Guide.
 
 ## Submission form
 
