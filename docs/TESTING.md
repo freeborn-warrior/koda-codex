@@ -2351,5 +2351,9 @@ The first staged diff check found 149 trailing-space lines where Node's type str
   repetitions and the complete suite then passed **252/252** under concurrent
   load. This was a test-timing correction, not a relaxed product condition: the
   test now makes the required pre-completion observation explicit.
+- **Clean post-fix proof:** After commit `781a2a0` was pushed, the durable full
+  suite passed **252/252** from that exact commit. The complete named result is
+  preserved in
+  [the post-fix transcript](test-results/2026-07-20-build-week-picture-lock-postfix-pushed.md).
 - **Evidence:** [picture-lock result](verification-runs/2026-07-20-build-week-picture-lock-06/RESULT.md)
   and [timed video script](VIDEO-SCRIPT.md).
