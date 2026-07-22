@@ -1,0 +1,27 @@
+{
+  "sections": [
+    {
+      "kicker": "quick start",
+      "pages": [
+        { "file": "docs/QUICKSTART.md", "slug": "quick-start", "title": "Quick Start" }
+      ]
+    },
+    {
+      "kicker": "manual",
+      "pages": [
+        { "file": "docs/README.md", "slug": "overview", "title": "Overview" },
+        { "file": "docs/PROCESS.md", "slug": "process", "title": "Process" },
+        { "file": "docs/COMMAND-MANUAL.md", "slug": "command-manual", "title": "Command Manual" },
+        { "file": "docs/DEMO.md", "slug": "demo", "title": "Demo" },
+        { "file": "docs/FULL-RELAY-RUN.md", "slug": "full-relay-run", "title": "Full Relay Run" }
+      ]
+    },
+    {
+      "kicker": "evidence",
+      "pages": [
+        { "file": "docs/TESTING.md", "slug": "testing", "title": "Testing Ledger" },
+        { "file": "docs/SECURITY.md", "slug": "security", "title": "Security Boundary" }
+      ]
+    }
+  ]
+}

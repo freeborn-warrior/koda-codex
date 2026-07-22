@@ -1,0 +1,23 @@
+# Tells prylar.xyz to rebuild when this repository's docs change.
+# Requires a repository secret PRYLAR_SITE_PAT: a fine-grained personal
+# access token scoped to the prylar-site repository with
+# "Contents: read and write" permission.
+name: Notify prylar-site of docs changes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger site rebuild
+        run: |
+          curl -sS --fail -X POST \
+            -H "Authorization: Bearer ${{ secrets.PRYLAR_SITE_PAT }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/freeborn-warrior/prylar-site/dispatches \
+            -d '{"event_type":"docs-updated"}'
